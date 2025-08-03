@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./famepropertiesng_repo/famepropertiesng  # where package.json is located
+        working-directory: .  # where package.json is located
 
       - name: Build the project
         run: npm run build
