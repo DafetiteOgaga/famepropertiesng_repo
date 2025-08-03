@@ -20,10 +20,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./famepropertiesng_repo/famepropertiesng  # where package.json is located
+        working-directory: ./famepropertiesng  # where package.json is located
 
       - name: Build the project
         run: npm run build
+        working-directory: ./famepropertiesng
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
