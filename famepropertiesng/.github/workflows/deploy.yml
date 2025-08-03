@@ -30,4 +30,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.ACCESS_TOKEN }} #make sure that you have created a personal access token with repo scope and added it to your repository secrets using the name ACCESS_TOKEN
-          publish_dir: ./build
+          publish_dir: ./famepropertiesng/build # directory must match working directory used in the build step
