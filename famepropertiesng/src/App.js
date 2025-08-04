@@ -1,5 +1,9 @@
 import './App.css';
 import './css/style.css';
+import './css/responsive.css';
+import './css/animation.css';
+import './css/reduced-motion.css'
+// import './css/test.css'
 import { Index } from './components';
 import { Cart } from './components/cart';
 import { Checkout } from './components/checkout';
