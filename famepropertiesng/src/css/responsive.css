@@ -1878,6 +1878,9 @@
 	.d-lg-block {
 		display: block !important;
 	}
+	/* .d-lg-flex {
+		display: flex !important;
+	} */
 	.d-lg-table {
 		display: table !important;
 	}
