@@ -12,31 +12,17 @@ const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
 const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
 function Index() {
 	return (
-		<>
-			{/* Topbar */}
-			{/* <TopBar /> */}
-
+		<div style={{marginTop: '3%'}}>
 			{/* Navbar */}
 			<Navbar />
-
 			{/* Carousel */}
 			<Carousel getImage={getImage} />
-
-			{/* Feature */}
-			<Features />
-
 			{/* Categories */}
 			<Categories getImage={getImage} />
-
 			{/* Products */}
 			<Products getImage={getImage} />
-
-			{/* Offer */}
-			{/* <Offer getImage={getImage} /> */}
-
 			{/* Footer */}
 			<Footer getImage={getImage}/>
-
 			{/* <!-- Back to Top --> */}
 			<a href="##" className="btn btn-primary back-to-top"><i className="fa fa-angle-double-up"></i></a>
 
@@ -46,7 +32,8 @@ function Index() {
 
 			{/* <!-- Template Javascript --> */}
 			{/* <script src="js/main.js"></script> */}
-		</>
+			{/* </div> */}
+		</div>
 	)
 }
 export { Index }
