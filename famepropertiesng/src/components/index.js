@@ -14,7 +14,7 @@ function Index() {
 	return (
 		<>
 			{/* Topbar */}
-			<TopBar />
+			{/* <TopBar /> */}
 
 			{/* Navbar */}
 			<Navbar />
