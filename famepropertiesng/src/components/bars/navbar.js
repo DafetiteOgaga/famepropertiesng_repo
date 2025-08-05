@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 
 const dropdownOptionsArr = [
 	'Dresses',
@@ -23,17 +24,35 @@ function Navbar() {
 	return (
 		<div className="container-fluid bg-dark mb-30">
 			<div className="row px-xl-5">
-				<div className="col-lg-3 d-none d-lg-block">
-					<a className="btn d-flex align-items-center justify-content-between bg-primary w-100 navbar-anchor"
+				<div className="col-lg-3 d-none d-lg-flex">
+					<span className="text-decoration-none"
+					style={{
+						display: 'flex',
+						alignItems: 'end',
+						width: '11.3%',
+						paddingRight: '1%',
+						cursor: 'pointer',
+						}}>
+						<img src={famousPropertiesNGLogo} alt="famouspropertiesng" style={{width: '100%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
+						{/* <div
+						style={{marginLeft: 5}}>
+							<span className="text-uppercase text-primary bg-dark px-2">famousproperties</span>
+							<span className="text-uppercase text-dark bg-primary px-2 ml-n1">NG</span>
+						</div> */}
+					</span>
+					<span className="btn d-flex align-items-center justify-content-between bg-primary w-50 navbar-anchor"
 					onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-					href="##">
+					style={{
+						border: '1px solid #3d464d',
+						cursor: 'pointer',
+					}}>
 						<h6 className="text-dark m-0">
 							<i className="fa fa-bars mr-2"></i>
 							Categories
 						</h6>
 						<i className={`fa fa-angle-${isDropdownOpen?'up':'down'} text-dark`}></i>
-					</a>
-					<nav className="position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light navbar-navnav" id="navbar-vertical">
+					</span>
+					<nav className="position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light navbar-navnav pos-left-right" id="navbar-vertical">
 						<div className="navbar-nav w-100">
 							{isDropdownOpen && dropdownOptionsArr.map((option, index) => {
 								return (
@@ -98,11 +117,21 @@ function Navbar() {
 								</div> */}
 								{/* <a href="contact.html" className="nav-item nav-link">Contact</a> */}
 							</div>
-							<div className="navbar-nav ml-auto py-0 d-none d-lg-block">
-								<a href="##" className="btn px-0">
+							<div className="navbar-nav ml-auto py-0 d-none d-lg-flex">
+								<div className="col-lg-2"
+								style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+									<button className="dropdown-item" type="button">Sign in/Sign up/Account settings</button>
+									<div className="d-inline-flex align-items-center h-100">
+										<a className="text-body mr-3" href="##">About</a>
+										<a className="text-body mr-3" href="##">Contact</a>
+										<a className="text-body mr-3" href="##">Help</a>
+										<a className="text-body mr-3" href="##">FAQs</a>
+									</div>
+								</div>
+								{/* <a href="##" className="btn px-0">
 									<i className="fas fa-heart text-primary"></i>
 									<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
-								</a>
+								</a> */}
 								<a href="##" className="btn px-0 ml-3">
 									<i className="fas fa-shopping-cart text-primary"></i>
 									<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>

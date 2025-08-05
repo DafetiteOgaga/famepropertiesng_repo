@@ -2,6 +2,7 @@ import './App.css';
 import './css/style.css';
 import './css/responsive.css';
 import './css/animation.css';
+// import './css/animations.css';
 import './css/reduced-motion.css'
 // import './css/test.css'
 import { Index } from './components';
