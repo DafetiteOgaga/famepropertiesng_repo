@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/famepropertiesng_repo/static/css/main.cb034f66.css",
-    "main.js": "/famepropertiesng_repo/static/js/main.a9e504b9.js",
+    "main.css": "/famepropertiesng_repo/static/css/main.725f399a.css",
+    "main.js": "/famepropertiesng_repo/static/js/main.62cbfa20.js",
     "static/js/453.f8829f31.chunk.js": "/famepropertiesng_repo/static/js/453.f8829f31.chunk.js",
     "static/media/carousel-1.jpg": "/famepropertiesng_repo/static/media/carousel-1.60602d436fd1c214c746.jpg",
     "static/media/product-7.jpg": "/famepropertiesng_repo/static/media/product-7.4b68f0a4c166ccfeb349.jpg",
@@ -18,12 +18,12 @@
     "static/media/product-3.jpg": "/famepropertiesng_repo/static/media/product-3.98525da20389b7550fc5.jpg",
     "static/media/offer-2.jpg": "/famepropertiesng_repo/static/media/offer-2.cbe6dfd75d3e42d31265.jpg",
     "index.html": "/famepropertiesng_repo/index.html",
-    "main.cb034f66.css.map": "/famepropertiesng_repo/static/css/main.cb034f66.css.map",
-    "main.a9e504b9.js.map": "/famepropertiesng_repo/static/js/main.a9e504b9.js.map",
+    "main.725f399a.css.map": "/famepropertiesng_repo/static/css/main.725f399a.css.map",
+    "main.62cbfa20.js.map": "/famepropertiesng_repo/static/js/main.62cbfa20.js.map",
     "453.f8829f31.chunk.js.map": "/famepropertiesng_repo/static/js/453.f8829f31.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.cb034f66.css",
-    "static/js/main.a9e504b9.js"
+    "static/css/main.725f399a.css",
+    "static/js/main.62cbfa20.js"
   ]
 }
