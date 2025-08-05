@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 
@@ -20,9 +20,28 @@ const dressesArr = [
 	"baby's dresses"
 ]
 function Navbar() {
+	const [showNavbar, setShowNavbar] = useState(true);
+	const [lastScrollY, setLastScrollY] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+	// handles display and hiding of the navbars
+	useEffect(() => {
+		const handleScroll = () => {
+			const currentScrollY = window.scrollY;
+		
+			if (currentScrollY > lastScrollY) {
+				setShowNavbar(false); // hide when scrolling down
+			} else {
+				setShowNavbar(true); // show when scrolling up
+			}
+			setLastScrollY(currentScrollY);
+		};
+	
+		window.addEventListener('scroll', handleScroll);
+	
+		return () => window.removeEventListener('scroll', handleScroll);
+	}, [lastScrollY]);
 	return (
-		<div className="container-fluid bg-dark mb-30">
+		<div className={`container-fluid container-fluid-nav bg-dark ${!showNavbar ? 'hidden' : ''}`}>
 			<div className="row px-xl-5">
 				<div className="col-lg-3 d-none d-lg-flex">
 					<span className="text-decoration-none"
