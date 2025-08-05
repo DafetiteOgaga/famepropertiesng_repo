@@ -6,6 +6,7 @@ import './css/animation.css';
 import './css/reduced-motion.css'
 // import './css/test.css'
 import { Index } from './components';
+import { Navbar } from './components/bars/navbar';
 import { Cart } from './components/cart';
 import { Checkout } from './components/checkout';
 import { Contact } from './components/contact';
@@ -16,6 +17,7 @@ function App() {
   return (
     <>
       <body>
+        {/* <Navbar /> */}
         <Index />
         {/* <Cart /> */}
         {/* <Checkout /> */}
