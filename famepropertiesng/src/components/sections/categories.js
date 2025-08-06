@@ -16,9 +16,9 @@ const productArr = [
 ]
 function Categories({getImage}) {
 	return (
-		<div className="container-fluid pt-5">
-			<h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4"><span className="bg-secondary pr-3">Categories</span></h2>
-			<div className="row px-xl-5 pb-3">
+		<div className="pt-5">
+			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3">Categories</span></h2>
+			<div className="row pb-3">
 				{productArr.map((product, index) => {
 					return (
 						<div key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1">
