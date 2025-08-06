@@ -48,7 +48,7 @@ function Header() {
 					</span>
 					{/* <span className="btn d-flex align-items-center justify-content-between bg-primary w-50 navbar-anchor"
 					onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-					style={
+					style={{
 						border: '1px solid #3d464d',
 						cursor: 'pointer',
 					}}>
@@ -56,7 +56,7 @@ function Header() {
 							<i className="fa fa-bars mr-2"></i>
 							Categories
 						</h6>
-						<i className={`fa a-angle-${isDropdownOpen?'up':'down'} text-dark`}></i>
+						<i className={`fa fa-angle-${isDropdownOpen?'up':'down'} text-dark`}></i>
 					</span> */}
 					
 				</div>
