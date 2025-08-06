@@ -29,7 +29,7 @@ function Products({getImage}) {
 			<div className="row">
 				{productImagesArr.map((productImage, index) => {
 					const randomNumber = Math.floor(Math.random() * 6);
-					// console.log({randomNumber})
+					// console.log({randoNumber})
 					return (
 						<div key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1">
 							<div className="product-item bg-light mb-4"
