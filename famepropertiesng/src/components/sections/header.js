@@ -10,7 +10,6 @@ const dressesArr = [
 function Header() {
 	const [showNavbar, setShowNavbar] = useState(true);
 	const [lastScrollY, setLastScrollY] = useState(0);
-	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 	// handles display and hiding of the navbars
 	useEffect(() => {
 		const handleScroll = () => {
