@@ -1,0 +1,9 @@
+.dafetite {
+	height: 40px;
+	width: 90px;
+	transition: all 0.3s ease-in-out;
+}
+.dafetite:hover, .dafetite:active {
+	width: 110px;
+	height: 41px;
+}
