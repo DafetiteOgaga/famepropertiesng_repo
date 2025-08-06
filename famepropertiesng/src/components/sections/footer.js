@@ -1,13 +1,14 @@
-
+import { DafetiteFooter } from "../../hooks/dafetiteFooter/dafetiteFooter";
 
 function Footer({getImage}) {
 	return (
-		<div className="container-fluid bg-dark text-secondary mt-5 pt-5">
-			<div className="row px-xl-5 pt-5">
-				<div className="col-lg-6 col-md-12 mb-5 pr-3 pr-xl-5">
-					<h5 className="text-secondary text-uppercase mb-4">Get In Touch</h5>
-					<p className="mb-4">No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor. Rebum tempor no vero est magna amet no</p>
-					<p className="mb-2"><i className="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, New York, USA</p>
+		<div className="bg-dark text-secondary mt-5 pt-3">
+			<div className="row px-xl-5 pt-5"
+			style={{margin: 0}}>
+				<div className="col-lg-6 col-md-12 mb-2 pr-3 pr-xl-5">
+					<h5 className="text-secondary text-uppercase mb-4">famouspropertiesng</h5>
+					{/* <p className="mb-4">No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor. Rebum tempor no vero est magna amet no</p> */}
+					<p className="mb-2"><i className="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, Lagos, Nigeria</p>
 					<p className="mb-2"><i className="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
 					<p className="mb-0"><i className="fa fa-phone-alt text-primary mr-3"></i>+012 345 67890</p>
 				</div>
@@ -35,9 +36,9 @@ function Footer({getImage}) {
 								<a className="text-secondary" href="##"><i className="fa fa-angle-right mr-2"></i>Contact Us</a>
 							</div>
 						</div> */}
-						<div className="col-md-12 mb-5">
-							<h5 className="text-secondary text-uppercase mb-4">Be the first to hear of our new product</h5>
-							<p>Duo stet tempor ipsum sit amet magna ipsum tempor est</p>
+						<div className="col-md-12 mb-2">
+							<h5 className="text-secondary text-uppercase mb-0">Subscribe to our mailing list</h5>
+							<p>Don't miss out! Be one of the first 50 to get notified when new products arrive.</p>
 							<form action="">
 								<div className="input-group">
 									<input type="text" className="form-control" placeholder="Your Email Address"/>
@@ -57,12 +58,10 @@ function Footer({getImage}) {
 					</div>
 				</div>
 			</div>
-			<div className="row border-top mx-xl-5 py-4 footer-div">
+			<div className="row border-top mx-xl-5 py-2 footer-div">
 				<div className="col-md-6 px-xl-0">
 					<p className="mb-md-0 text-center text-md-left text-secondary">
-						&copy; <a className="text-primary" href="##">Domain</a>. All Rights Reserved. Designed
-						by
-						<a className="text-primary" href="https://htmlcodex.com">HTML Codex</a>
+						<DafetiteFooter />
 					</p>
 				</div>
 				{/* <div className="col-md-6 px-xl-0 text-center text-md-right">

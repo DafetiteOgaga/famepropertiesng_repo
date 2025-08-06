@@ -32,37 +32,19 @@
 	}
 }
 
-@media (max-width: 575.98px) {
-	.table-responsive-sm {
+@media (max-width: 1199.98px) {
+	.table-responsive-xl {
 		display: block;
 		width: 100%;
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
 	}
-	.table-responsive-sm > .table-bordered {
+	.table-responsive-xl > .table-bordered {
 		border: 0;
 	}
 
-	.navbar-expand-sm > .container,
-	.navbar-expand-sm > .container-fluid, .navbar-expand-sm > .container-sm, .navbar-expand-sm > .container-md, .navbar-expand-sm > .container-lg, .navbar-expand-sm > .container-xl {
-		padding-right: 0;
-		padding-left: 0;
-	}
-}
-
-@media (max-width: 767.98px) {
-	.table-responsive-md {
-		display: block;
-		width: 100%;
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-	}
-	.table-responsive-md > .table-bordered {
-		border: 0;
-	}
-
-	.navbar-expand-md > .container,
-	.navbar-expand-md > .container-fluid, .navbar-expand-md > .container-sm, .navbar-expand-md > .container-md, .navbar-expand-md > .container-lg, .navbar-expand-md > .container-xl {
+	.navbar-expand-xl > .container,
+	.navbar-expand-xl > .container-fluid, .navbar-expand-xl > .container-sm, .navbar-expand-xl > .container-md, .navbar-expand-xl > .container-lg, .navbar-expand-xl > .container-xl {
 		padding-right: 0;
 		padding-left: 0;
 	}
@@ -90,19 +72,37 @@
 	}
 }
 
-@media (max-width: 1199.98px) {
-	.table-responsive-xl {
+@media (max-width: 767.98px) {
+	.table-responsive-md {
 		display: block;
 		width: 100%;
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
 	}
-	.table-responsive-xl > .table-bordered {
+	.table-responsive-md > .table-bordered {
 		border: 0;
 	}
 
-	.navbar-expand-xl > .container,
-	.navbar-expand-xl > .container-fluid, .navbar-expand-xl > .container-sm, .navbar-expand-xl > .container-md, .navbar-expand-xl > .container-lg, .navbar-expand-xl > .container-xl {
+	.navbar-expand-md > .container,
+	.navbar-expand-md > .container-fluid, .navbar-expand-md > .container-sm, .navbar-expand-md > .container-md, .navbar-expand-md > .container-lg, .navbar-expand-md > .container-xl {
+		padding-right: 0;
+		padding-left: 0;
+	}
+}
+
+@media (max-width: 575.98px) {
+	.table-responsive-sm {
+		display: block;
+		width: 100%;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+	.table-responsive-sm > .table-bordered {
+		border: 0;
+	}
+
+	.navbar-expand-sm > .container,
+	.navbar-expand-sm > .container-fluid, .navbar-expand-sm > .container-sm, .navbar-expand-sm > .container-md, .navbar-expand-sm > .container-lg, .navbar-expand-sm > .container-xl {
 		padding-right: 0;
 		padding-left: 0;
 	}

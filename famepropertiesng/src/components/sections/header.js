@@ -2,24 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 
-const dropdownOptionsArr = [
-	'Dresses',
-	'Shirts',
-	'Jeans',
-	'Swimwear',
-	'Sleepwear',
-	'Sportswear',
-	'Jumpsuits',
-	'Blazers',
-	'Jackets',
-	'Shoes'
-]
 const dressesArr = [
 	"men's dresses",
 	"women's dresses",
 	"baby's dresses"
 ]
-function Navbar() {
+function Header() {
 	const [showNavbar, setShowNavbar] = useState(true);
 	const [lastScrollY, setLastScrollY] = useState(0);
 	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -41,8 +29,8 @@ function Navbar() {
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, [lastScrollY]);
 	return (
-		<div className={`container-fluid container-fluid-nav bg-dark ${!showNavbar ? 'hidden' : ''}`}>
-			<div className="row px-xl-5">
+		<div className={`container-fluid px-xl-5 container-fluid-nav bg-dark ${!showNavbar ? 'hidden' : ''}`}>
+			<div className="row">
 				<div className="col-lg-3 d-none d-lg-flex">
 					<span className="text-decoration-none"
 					style={{
@@ -53,13 +41,13 @@ function Navbar() {
 						cursor: 'pointer',
 						}}>
 						<img src={famousPropertiesNGLogo} alt="famouspropertiesng" style={{width: '100%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
-						{/* <div
-						style={{marginLeft: 5}}>
-							<span className="text-uppercase text-primary bg-dark px-2">famousproperties</span>
-							<span className="text-uppercase text-dark bg-primary px-2 ml-n1">NG</span>
-						</div> */}
+						<div
+						style={{alignSelf: 'center'}}>
+							<span className="text-uppercase text-primary bg-dark px-2 bold-text">famousproperties</span>
+							<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
+						</div>
 					</span>
-					<span className="btn d-flex align-items-center justify-content-between bg-primary w-50 navbar-anchor"
+					{/* <span className="btn d-flex align-items-center justify-content-between bg-primary w-50 navbar-anchor"
 					onClick={() => setIsDropdownOpen(!isDropdownOpen)}
 					style={{
 						border: '1px solid #3d464d',
@@ -70,48 +58,8 @@ function Navbar() {
 							Categories
 						</h6>
 						<i className={`fa fa-angle-${isDropdownOpen?'up':'down'} text-dark`}></i>
-					</span>
-					<nav className="position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light navbar-navnav pos-left-right" id="navbar-vertical">
-						<div className="navbar-nav w-100">
-							{isDropdownOpen && dropdownOptionsArr.map((option, index) => {
-								return (
-									<>
-										{/* {
-										option.toLowerCase() === 'dresses' ?
-										<>
-											<Link to="" className="nav-link dropdown-toggle">{option} <i className="fa fa-angle-right float-right mt-1"></i></Link>
-											<div className="dropdown-menu position-absolute rounded-0 border-0 m-0">
-												{dressesArr.map((dressOption, dressIndex) => {
-													return (
-														<Link key={`${index}and${dressIndex}`} to="" className="dropdown-item">{dressOption}</Link>
-													)
-												})}
-											</div>
-										</>
-										: */}
-										<Link key={index} to="" className="nav-item nav-link">{option}</Link>
-										{/* } */}
-									</>
-								)})}
-							{/* <div className="nav-item dropdown dropright">
-								<a href="##" className="nav-link dropdown-toggle" data-toggle="dropdown">Dresses <i className="fa fa-angle-right float-right mt-1"></i></a>
-								<div className="dropdown-menu position-absolute rounded-0 border-0 m-0">
-									<a href="##" className="dropdown-item">Men's Dresses</a>
-									<a href="##" className="dropdown-item">Women's Dresses</a>
-									<a href="##" className="dropdown-item">Baby's Dresses</a>
-								</div>
-							</div> */}
-							{/* <a href="##" className="nav-item nav-link">Shirts</a>
-							<a href="##" className="nav-item nav-link">Jeans</a>
-							<a href="##" className="nav-item nav-link">Swimwear</a>
-							<a href="##" className="nav-item nav-link">Sleepwear</a>
-							<a href="##" className="nav-item nav-link">Sportswear</a>
-							<a href="##" className="nav-item nav-link">Jumpsuits</a>
-							<a href="##" className="nav-item nav-link">Blazers</a>
-							<a href="##" className="nav-item nav-link">Jackets</a>
-							<a href="##" className="nav-item nav-link">Shoes</a> */}
-						</div>
-					</nav>
+					</span> */}
+					
 				</div>
 				<div className="col-lg-9">
 					<nav className="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
@@ -152,7 +100,7 @@ function Navbar() {
 									<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
 								</a> */}
 								<a href="##" className="btn px-0 ml-3">
-									<i className="fas fa-shopping-cart text-primary"></i>
+									<i className="fas fa-shopping-cart fa-lg text-success"></i>
 									<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
 								</a>
 							</div>
@@ -163,4 +111,4 @@ function Navbar() {
 		</div>
 	)
 }
-export { Navbar };
+export { Header };

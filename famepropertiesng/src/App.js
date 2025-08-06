@@ -6,7 +6,7 @@ import './css/animation.css';
 import './css/reduced-motion.css'
 // import './css/test.css'
 import { Index } from './components';
-import { Navbar } from './components/bars/navbar';
+import { Navbar } from './components/sections/header';
 import { Cart } from './components/cart';
 import { Checkout } from './components/checkout';
 import { Contact } from './components/contact';
