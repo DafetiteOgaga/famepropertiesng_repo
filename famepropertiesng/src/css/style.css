@@ -6335,15 +6335,16 @@ a.text-dark:hover, a.text-dark:focus {
   top: 0px;
   /* left: 1000px; */
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, 0);
   z-index: 1001;
   opacity: 1;
   pointer-events: auto;
-  transition: opacity 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   /* margin-bottom: 60%; */
 }
 
 .container-fluid-nav.hidden {
+  transform: translate(-50%, -100%);
   opacity: 0;
   pointer-events: none;
 }
