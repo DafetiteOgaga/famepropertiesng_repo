@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/famepropertiesng_repo/static/css/main.66838c59.css",
-    "main.js": "/famepropertiesng_repo/static/js/main.665d68e2.js",
+    "main.css": "/famepropertiesng_repo/static/css/main.a9963295.css",
+    "main.js": "/famepropertiesng_repo/static/js/main.5b1e7506.js",
     "static/js/453.f8829f31.chunk.js": "/famepropertiesng_repo/static/js/453.f8829f31.chunk.js",
     "static/media/carousel-1.jpg": "/famepropertiesng_repo/static/media/carousel-1.60602d436fd1c214c746.jpg",
     "static/media/product-7.jpg": "/famepropertiesng_repo/static/media/product-7.4b68f0a4c166ccfeb349.jpg",
@@ -17,13 +17,14 @@
     "static/media/product-5.jpg": "/famepropertiesng_repo/static/media/product-5.d17a272d2186ca8165e4.jpg",
     "static/media/product-3.jpg": "/famepropertiesng_repo/static/media/product-3.98525da20389b7550fc5.jpg",
     "static/media/offer-2.jpg": "/famepropertiesng_repo/static/media/offer-2.cbe6dfd75d3e42d31265.jpg",
+    "static/media/dafelogoWhiteTransparent.png": "/famepropertiesng_repo/static/media/dafelogoWhiteTransparent.9e22063262c522af2111.png",
     "index.html": "/famepropertiesng_repo/index.html",
-    "main.66838c59.css.map": "/famepropertiesng_repo/static/css/main.66838c59.css.map",
-    "main.665d68e2.js.map": "/famepropertiesng_repo/static/js/main.665d68e2.js.map",
+    "main.a9963295.css.map": "/famepropertiesng_repo/static/css/main.a9963295.css.map",
+    "main.5b1e7506.js.map": "/famepropertiesng_repo/static/js/main.5b1e7506.js.map",
     "453.f8829f31.chunk.js.map": "/famepropertiesng_repo/static/js/453.f8829f31.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.66838c59.css",
-    "static/js/main.665d68e2.js"
+    "static/css/main.a9963295.css",
+    "static/js/main.5b1e7506.js"
   ]
 }
