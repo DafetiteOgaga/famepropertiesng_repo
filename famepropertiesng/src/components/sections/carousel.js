@@ -80,7 +80,7 @@ function Carousel({getImage}) {
 	useEffect(() => {
 		const carouselInterval = setInterval(() => {
 			setCarouselSelector(prev => (prev + 1) % carouselSelectorArr.length);
-		}, 5000); // Change slide every 5 seconds
+		}, 5000); //  Change slide every 5 seconds
 
 		const productInterval = setInterval(() => {
 			setProductSelector(prev => (prev + 1) % productSelectorArr.length);
@@ -88,7 +88,7 @@ function Carousel({getImage}) {
 
 		const featureInterval = setInterval(() => {
 			setFeatureSelector(prev => (prev + 1) % featureSelectorArr.length);
-		}, 5000); // Change slide every 5 seconds
+		}, 5000); //  Change slide every 5 seconds
 
 		return () => {
 			clearInterval(carouselInterval);
