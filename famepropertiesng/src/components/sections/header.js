@@ -112,10 +112,10 @@ function Header() {
 									<i className="fas fa-heart text-primary"></i>
 									<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
 								</a> */}
-								<a href="##" className="btn px-0 ml-3">
+								<Link to={"cart"} className="btn px-0 ml-3">
 									<i className="fas fa-shopping-cart fa-lg text-success"></i>
 									<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
-								</a>
+								</Link>
 							</div>
 						</div>
 					</nav>

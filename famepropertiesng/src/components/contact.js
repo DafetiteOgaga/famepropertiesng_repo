@@ -1,22 +1,12 @@
 import { useLocation, Link } from 'react-router-dom';
+import { Breadcrumb } from './sections/breadcrumb';
 
 function Contact() {
 	const location = useLocation().pathname.split("/").pop();
 	console.log("Current Location:", location);
 	return (
 		<>
-			{/* Breadcrumb Start */}
-			<div className="container-fluid">
-				<div className="row px-xl-5">
-					<div className="col-12">
-						<nav className="breadcrumb bg-light mb-30"
-						style={{borderRadius: '8px'}}>
-							<Link to={"/"} className="breadcrumb-item text-dark">Home</Link>
-							<span className="breadcrumb-item active">Contact</span>
-						</nav>
-					</div>
-				</div>
-			</div>
+			<Breadcrumb page={'Contact'} />
 
 			{/* <!-- Contact Start --> */}
 			<div className="container-fluid">
@@ -57,13 +47,22 @@ function Contact() {
 						</div>
 					</div>
 					<div className="col-lg-5 mb-5">
-						<div className="bg-light p-30 mb-30"
-						style={{borderRadius: '8px'}}>
+						<div className="bg-light mb-30"
+						style={{
+							borderRadius: '8px',
+							padding: 5
+							}}>
 							<iframe
 							className="contact-iframe-frame"
 							title="Google Map"
-							src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3001156.4288297426!2d-78.01371936852176!3d42.72876761954724!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4ccc4bf0f123a5a9%3A0xddcfc6c1de189567!2sNew%20York%2C%20USA!5e0!3m2!1sen!2sbd!4v1603794290143!5m2!1sen!2sbd"
-							frameBorder="0" allowFullScreen="" aria-hidden="false" tabIndex="0"></iframe>
+							src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.775954257609!2d3.236202274623938!3d6.549947222856214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b85035bd522d1%3A0x511bd0254602b720!2sIsheri%20Rd%2C%20Lagos!5e0!3m2!1sen!2sng!4v1754568154818!5m2!1sen!2sng"
+							width="600"
+							height="450"
+							style={{border: 0,}}
+							allowfullscreen=""
+							loading="lazy"
+							referrerpolicy="no-referrer-when-downgrade">
+							</iframe>
 						</div>
 						<div className="bg-light p-30 mb-3"
 						style={{borderRadius: '8px'}}>
@@ -74,7 +73,6 @@ function Contact() {
 					</div>
 				</div>
 			</div>
-			{/* <!-- Contact End --> */}
 		</>
 	)
 }

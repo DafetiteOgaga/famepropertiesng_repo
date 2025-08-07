@@ -1132,8 +1132,8 @@ pre code {
 
 .table .thead-dark th {
   color: #fff;
-  background-color: #343a40;
-  border-color: #454d55;
+  background-color: #475569;
+  border-color: #475569;
 }
 
 .table .thead-light th {
@@ -1629,10 +1629,10 @@ fieldset:disabled a.btn {
 }
 
 .btn-primary:focus, .btn-primary.focus {
-  color: #E2E8F0 !important;
+  /* color: #E2E8F0 !important; */
   background-color: transparent;
   border-color: #212529;
-  box-shadow: 0 0 0 0.2rem rgba(222, 185, 50, 0.5);
+  box-shadow: 0 0 0 0.2rem #2125292d;
 }
 
 .btn-primary.disabled, .btn-primary:disabled {
@@ -1645,12 +1645,12 @@ fieldset:disabled a.btn {
 .show > .btn-primary.dropdown-toggle {
   color: #212529;
   background-color: #E2E8F0;
-  border-color: #f2be00;
+  border-color: #21252963;
 }
 
 .btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
 .show > .btn-primary.dropdown-toggle:focus {
-  box-shadow: 0 0 0 0.2rem rgba(222, 185, 50, 0.5);
+  box-shadow: 0 0 0 0.2rem #2125291c;
 }
 
 .btn-secondary {
@@ -1802,9 +1802,9 @@ fieldset:disabled a.btn {
 }
 
 .btn-danger {
-  color: #fff;
-  background-color: #dc3545;
-  border-color: #dc3545;
+  color: #dc3545;
+  background-color: transparent;
+  /* border-color: #dc3545; */
 }
 
 .btn-danger:hover {
@@ -1817,7 +1817,7 @@ fieldset:disabled a.btn {
   color: #fff;
   background-color: #c82333;
   border-color: #bd2130;
-  box-shadow: 0 0 0 0.2rem rgba(225, 83, 97, 0.5);
+  box-shadow: 0 0 0 0.2rem #bd213144;
 }
 
 .btn-danger.disabled, .btn-danger:disabled {
@@ -1835,7 +1835,7 @@ fieldset:disabled a.btn {
 
 .btn-danger:not(:disabled):not(.disabled):active:focus, .btn-danger:not(:disabled):not(.disabled).active:focus,
 .show > .btn-danger.dropdown-toggle:focus {
-  box-shadow: 0 0 0 0.2rem rgba(225, 83, 97, 0.5);
+  box-shadow: 0 0 0 0.2rem #bd213154;
 }
 
 .btn-light {
@@ -2199,7 +2199,7 @@ fieldset:disabled a.btn {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
   line-height: 1.5;
-  border-radius: 0;
+  border-radius: 3px;
 }
 
 .btn-block {
@@ -2704,7 +2704,7 @@ input[type="button"].btn-block {
 .custom-control-input:checked ~ .custom-control-label::before {
   color: #fff;
   border-color: #E2E8F0;
-  background-color: #E2E8F0;
+  background-color: #475569;
 }
 
 .custom-control-input:focus ~ .custom-control-label::before {
