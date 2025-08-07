@@ -43,7 +43,7 @@ function Footer({getImage}) {
 								<div className="input-group">
 									<input type="text" className="form-control" placeholder="Your Email Address"/>
 									<div className="input-group-append">
-										<button className="btn btn-primary">Sign Up</button>
+										<button className="footerbtn btn btn-primary">Sign Up</button>
 									</div>
 								</div>
 							</form>
