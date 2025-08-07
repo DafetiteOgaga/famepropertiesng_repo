@@ -12,19 +12,21 @@ import { Checkout } from './components/checkout';
 import { Contact } from './components/contact';
 import { Detail } from './components/detail';
 import { Shop } from './components/shop';
+import { AppRoutes } from './routes/route';
 
 function App() {
   return (
     <>
-      <body>
+      <AppRoutes />
+      {/* <body> */}
         {/* <Navbar /> */}
-        <Index />
+        {/* <Index /> */}
         {/* <Cart /> */}
         {/* <Checkout /> */}
         {/* <Contact /> */}
         {/* <Detail /> */}
         {/* <Shop /> */}
-      </body>
+      {/* </body> */}
     </>
   );
 }
