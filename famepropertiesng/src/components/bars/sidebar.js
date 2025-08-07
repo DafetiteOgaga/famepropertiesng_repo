@@ -25,7 +25,8 @@ const categoriesOptionsArr = [
 function Sidebar() {
 	return (
 		<div style={{position: 'sticky', top: '5%'}}>
-			<h3 className="text-uppercase pr-1">Categories</h3>
+			<h3 className="text-uppercase pr-1"
+			style={{color: '#475569'}}>Categories</h3>
 			<nav className="navbar navbar-light p-0" id="navbar-vertical">
 				<div className="navbar-nav w-100">
 					{categoriesOptionsArr.map((option, index) => {
