@@ -9,13 +9,15 @@ import { Offer } from './sections/offer';
 import { Footer } from './sections/footer';
 import { Sidebar } from './bars/sidebar';
 import { useIsMobile } from '../hooks/ismobile';
+import { Outlet } from 'react-router-dom';
+import { Home } from './home';
 
 const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
 const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
 function Index() {
 	const isMobile = useIsMobile();
 	return (
-		<div>
+		<>
 			<div className='container-fluid px-xl-5'
 			// styling dynamically for mobile and desktop - to be resolved later ##########
 			style={!isMobile?{
@@ -33,20 +35,11 @@ function Index() {
 					<Sidebar />
 				</div>}
 				<div>
+					<Outlet />
 					{/* Carousel */}
-					<Carousel getImage={getImage} />
-					{/* Categories */}
-					{/* <Categories getImage={getImage} /> */}
+					{/* <Carousel getImage={getImage} /> */}
 					{/* Products */}
-					<Products getImage={getImage} />
-					
-					{/* <!-- Contact Javascript File --> */}
-					{/* <script src="mail/jqBootstrapValidation.min.js"></script>
-					<script src="mail/contact.js"></script> */}
-
-					{/* <!-- Template Javascript --> */}
-					{/* <script src="js/main.js"></script> */}
-					{/* </div> */}
+					{/* <Products getImage={getImage} /> */}
 				</div>
 			</div>
 			{/* Footer */}
@@ -54,7 +47,7 @@ function Index() {
 			{/* <!-- Back to Top --> */}
 			<a href="##" className="btn btn-primary back-to-top"><i className="fa fa-angle-double-up"></i></a>
 
-		</div>
+		</>
 	)
 }
 export { Index }

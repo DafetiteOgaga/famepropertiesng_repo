@@ -97,7 +97,7 @@ function Carousel({getImage}) {
 		}
 	}, [])
 	return (
-		<div className="mb-3">
+		<div className="container-fluid mb-3">
 			<div className="row">
 				<div className="col-lg-8 px-xl-4">
 					<div id="header-carousel" className="carousel slide carousel-fade mb-30 mb-lg-0">

@@ -3,7 +3,7 @@ import { DafetiteFooter } from "../../hooks/dafetiteFooter/dafetiteFooter";
 function Footer({getImage}) {
 	return (
 		<div className="bg-dark text-secondary mt-5 pt-3">
-			<div className="row px-xl-5 pt-5"
+			<div className="row px-xl-5"
 			style={{margin: 0}}>
 				<div className="col-lg-6 col-md-12 mb-2 pr-3 pr-xl-5">
 					<h5 className="text-secondary text-uppercase mb-4">famouspropertiesng</h5>

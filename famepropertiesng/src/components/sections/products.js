@@ -24,8 +24,9 @@ const productStar = "fa fa-star"
 function Products({getImage}) {
 	// console.log('product component rendered')
 	return (
-		<div className="pb-3">
-			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3">Products</span></h2>
+		<div className="container-fluid pb-3">
+			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3"
+			style={{color: '#475569'}}>Products</span></h2>
 			<div className="row">
 				{productImagesArr.map((productImage, index) => {
 					const randomNumber = Math.floor(Math.random() * 6);
