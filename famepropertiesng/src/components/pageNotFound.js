@@ -2,7 +2,7 @@ import { useLocation, Link } from 'react-router-dom';
 
 function PageNotFound() {
 	const location = useLocation().pathname.split("/").pop();
-	console.log("Current Location:", location);
+	// console.log("Current Location:", location);
 	return (
 		<>
 			{/* Breadcrumb Start */}
