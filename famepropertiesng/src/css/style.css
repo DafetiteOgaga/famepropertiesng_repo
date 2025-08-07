@@ -1625,14 +1625,53 @@ fieldset:disabled a.btn {
 .btn-primary:hover {
   /* color: #E2E8F0 !important; */
   background-color: transparent;
-  border-color: #475569;
+  border-color: #E2E8F0;
 }
 
 .btn-primary:focus, .btn-primary.focus {
   /* color: #E2E8F0 !important; */
   background-color: transparent;
-  border-color: #212529;
+  border-color: #E2E8F0;
   box-shadow: 0 0 0 0.2rem #2125292d;
+}
+
+.back-to-top.btn-primary:hover {
+  color: #E2E8F0 !important;
+  border-color: #E2E8F0;
+  background-color: #475569;
+}
+
+.back-to-top.btn-primary:focus, .back-to-top.btn-primary.focus {
+  color: #E2E8F0 !important;
+  border-color: #E2E8F0;
+  background-color: #212529;
+  box-shadow: 0 0 0 0.2rem #E2E8F0;
+}
+
+.productbtn.btn-primary:hover {
+  color: #E2E8F0 !important;
+  border-color: #E2E8F0;
+  background-color: transparent;
+}
+
+.productbtn.btn-primary:focus, .back-to-top.btn-primary.focus {
+  color: #E2E8F0 !important;
+  border-color: #E2E8F0;
+  background-color: transparent;
+  box-shadow: 0 0 0 0.2rem #E2E8F0;
+}
+
+.footerbtn.btn-primary:hover {
+  color: #E2E8F0 !important;
+  border-color: #E2E8F0;
+  background-color: transparent;
+}
+
+.footerbtn.btn-primary:focus, .back-to-top.btn-primary.focus {
+  color: #E2E8F0 !important;
+  border-color: #E2E8F0;
+  background-color: transparent;
+  box-shadow: 0 0 0 0.2rem #E2E8F0;
 }
 
 .btn-primary.disabled, .btn-primary:disabled {

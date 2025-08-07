@@ -139,7 +139,7 @@ function Carousel({getImage}) {
 							<div className="offer-text">
 								<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}>{productItem.discount}</h6>
 								<h3 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}>{productItem.paragraph}</h3>
-								<span className="btn btn-primary">{productItem.anchor}</span>
+								<span className="productbtn btn btn-primary">{productItem.anchor}</span>
 							</div>
 						</div>
 					)

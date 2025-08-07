@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useScrollDetection } from '../../hooks/scrollDetection';
 import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 
 const headerMenuArr = [
@@ -22,44 +23,9 @@ const dressesArr = [
 	"baby's dresses"
 ]
 function Header() {
-	const [showNavbar, setShowNavbar] = useState(true);
-	const [lastScrollY, setLastScrollY] = useState(0);
-	// handles display and hiding of the navbars
-	useEffect(() => {
-		const handleScroll = () => {
-			const currentScrollY = window.scrollY;
-		
-			if (currentScrollY > lastScrollY) {
-				setShowNavbar(false); // hide when scrolling down
-			} else {
-				setShowNavbar(true); // show when scrolling up
-			}
-			setLastScrollY(currentScrollY);
-		};
-	
-		window.addEventListener('scroll', handleScroll);
-	
-		return () => window.removeEventListener('scroll', handleScroll);
-	}, [lastScrollY]);
+	const { scrollingDown } = useScrollDetection();
 	return (
-		<div className={`container-fluid px-xl-5 container-fluid-nav bg-dark ${!showNavbar ? 'hidden' : ''}`}>
-			{/* <div className="row"> */}
-				{/* <div className="col-lg-3 d-none d-lg-flex"> */}
-					{/* <span className="text-decoration-none"
-					style={{
-						display: 'flex',
-						width: '11.3%',
-						paddingRight: '1%',
-						cursor: 'pointer',
-						}}>
-						<img src={famousPropertiesNGLogo} alt="famouspropertiesng" style={{width: '100%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
-						<div
-						style={{alignSelf: 'center'}}>
-							<span className="text-uppercase text-primary bg-dark px-2 bold-text">famousproperties</span>
-							<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
-						</div>
-					</span> */}
-				{/* </div> */}
+		<div className={`container-fluid px-xl-5 container-fluid-nav bg-dark ${!scrollingDown ? 'hidden' : ''}`}>
 				<div className="">
 					<nav className="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
 						<a href="##" className="text-decoration-none d-block d-lg-none">
@@ -86,11 +52,6 @@ function Header() {
 									<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
 								</div>
 							</Link>
-							{/* <div className="navbar-nav py-0">
-								<a href="index.html" className="nav-item nav-link active">Home</a>
-								<a href="shop.html" className="nav-item nav-link">Shop</a>
-								<a href="detail.html" className="nav-item nav-link">Shop Detail</a>
-							</div> */}
 							<div className="navbar-nav ml-auto py-0 d-none d-lg-flex">
 								<div className="col-lg-2"
 								style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
@@ -102,10 +63,6 @@ function Header() {
 												style={{textWrap: 'nowrap'}}>{menu.menu}</Link>
 											)
 										})}
-										{/* <a className="text-body mr-3" href="##">About</a>
-										<a className="text-body mr-3" href="##">Contact</a>
-										<a className="text-body mr-3" href="##">Help</a>
-										<a className="text-body mr-3" href="##">FAQs</a> */}
 									</div>
 								</div>
 								{/* <a href="##" className="btn px-0">

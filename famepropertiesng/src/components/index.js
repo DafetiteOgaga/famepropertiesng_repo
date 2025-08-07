@@ -11,14 +11,18 @@ import { Sidebar } from './bars/sidebar';
 import { useIsMobile } from '../hooks/ismobile';
 import { Outlet } from 'react-router-dom';
 import { Home } from './home';
+import { useScrollDetection } from '../hooks/scrollDetection';
 
 const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
 const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
 function Index() {
+	const { lastScrollY } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
 	const isMobile = useIsMobile();
+	// console.log('lastScrollY:', lastScrollY);
 	return (
 		<>
 			<div className='container-fluid px-xl-5'
+			id='top-page'
 			// styling dynamically for mobile and desktop - to be resolved later ##########
 			style={!isMobile?{
 				display: 'grid',
@@ -45,7 +49,13 @@ function Index() {
 			{/* Footer */}
 			<Footer getImage={getImage}/>
 			{/* <!-- Back to Top --> */}
-			<a href="##" className="btn btn-primary back-to-top"><i className="fa fa-angle-double-up"></i></a>
+			<button className="back-to-top btn btn-primary"
+			style={{display: lastScrollY > 100 ? 'block' : 'none'}}
+			onClick={() => {
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+				}}>
+				<i className="fa fa-angle-double-up"></i>
+			</button>
 
 		</>
 	)

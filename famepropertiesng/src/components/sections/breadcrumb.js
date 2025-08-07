@@ -2,16 +2,16 @@ import { Link } from 'react-router-dom';
 
 function Breadcrumb({page}) {
 	const checkPage = page.includes("/")
-	console.log({page, checkPage});
+	// console.log({page, checkPage});
 	let otherPages
 	let breadcrumb = page
 	if (checkPage) {
 		const pages = page.split("/")
 		breadcrumb = pages.pop()
 		otherPages = pages.map((item, index) => {
-			console.log({item, index});
+			// console.log({item, index});
 			const itemPath = pages.filter(Boolean).slice(0, index+1).join("/").toLowerCase()
-			console.log("page path:", itemPath);
+			// console.log("page path:", itemPath);
 			return (
 				<span className="breadcrumb-item"><Link key={index} to={`/${itemPath}`} className="text-dark">{item}</Link></span>
 			)
