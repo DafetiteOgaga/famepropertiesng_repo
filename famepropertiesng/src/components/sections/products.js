@@ -73,7 +73,7 @@ function Products({getImage = getProductImage}) {
 								<div className="text-center py-4">
 									<p className="h6 text-decoration-none text-truncate">Product Name Goes Here</p>
 									<div className="d-flex align-items-center justify-content-center mt-2">
-										<h5>$123.00</h5><h6 className="text-muted ml-2"><del>$123.00</del></h6>
+										<h5>₦123.00</h5><h6 className="text-muted ml-2"><del>₦123.00</del></h6>
 									</div>
 									<div className="d-flex align-items-center justify-content-center mb-1">
 										{Array.from({length: 5}, (_, starIndex) => {
