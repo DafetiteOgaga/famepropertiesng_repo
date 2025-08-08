@@ -5,7 +5,9 @@ import { Home } from '../components/home';
 import { Index } from '../components';
 import { Cart } from '../components/cart';
 import { Checkout } from '../components/checkout';
+import { Detail } from '../components/detail';
 import { PageNotFound } from '../components/pageNotFound';
+import { Products } from '../components/sections/products';
 
 function AppRoutes() {
 	return (
@@ -15,6 +17,10 @@ function AppRoutes() {
 				<Route index element={<Home />} />
 				
 				{/* Other routes from Outlet in Index */}
+				{/* products */}
+				<Route path="products/:productname" element={<Products />} />
+				{/* detail */}
+				<Route path="detail" element={<Detail />} />
 				{/* cart */}
 				<Route path="cart" element={<Cart />} />
 				{/* checkout */}
