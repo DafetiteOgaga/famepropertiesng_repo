@@ -5,7 +5,6 @@ function Checkout() {
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
 
-			{/* <!-- Checkout Start --> */}
 			<div className="container-fluid">
 				<div className="row px-xl-5">
 					<div className="col-lg-8">
