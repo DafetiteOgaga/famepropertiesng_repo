@@ -19,6 +19,8 @@ function AppRoutes() {
 				{/* Other routes from Outlet in Index */}
 				{/* products */}
 				<Route path="products/:productname" element={<Products />} />
+				{/* products/detail */}
+				<Route path="products/:productname/detail" element={<Detail />} />
 				{/* detail */}
 				<Route path="detail" element={<Detail />} />
 				{/* cart */}
