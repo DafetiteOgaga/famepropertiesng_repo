@@ -121,7 +121,7 @@ function Cart() {
 								return (
 									<tr key={index}>
 										<td className="align-middle"><img src={getImage(item.image)} alt={item.image} className="cart-image-img"/> {item.name}</td>
-										<td className="align-middle">N{item.price}</td>
+										<td className="align-middle">₦{item.price}</td>
 										<td className="align-middle">
 											<div className="input-group quantity mx-auto cart-td-table">
 												<div className="input-group-btn">
@@ -143,7 +143,7 @@ function Cart() {
 												</div>
 											</div>
 										</td>
-										<td className="align-middle">N{item.total}</td>
+										<td className="align-middle">₦{item.total}</td>
 										<td className="align-middle">
 											<button
 											onClick={() => handleRemoveItem(item.id)}
@@ -177,17 +177,17 @@ function Cart() {
 						<div className="border-bottom pb-2">
 							<div className="d-flex justify-content-between mb-3">
 								<h6>Subtotal</h6>
-								<h6>$150</h6>
+								<h6>₦150</h6>
 							</div>
 							<div className="d-flex justify-content-between">
 								<h6 className="font-weight-medium">Shipping</h6>
-								<h6 className="font-weight-medium">$10</h6>
+								<h6 className="font-weight-medium">₦10</h6>
 							</div>
 						</div>
 						<div className="pt-2">
 							<div className="d-flex justify-content-between mt-2">
 								<h5>Total</h5>
-								<h5>$160</h5>
+								<h5>₦160</h5>
 							</div>
 							<Link to={"checkout"} className="btn btn-block btn-primary font-weight-bold my-3 py-3">Proceed To Checkout</Link>
 						</div>
