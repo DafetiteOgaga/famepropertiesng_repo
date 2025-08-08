@@ -30,8 +30,10 @@ function Sidebar() {
 			<nav className="navbar navbar-light p-0" id="navbar-vertical">
 				<div className="navbar-nav w-100">
 					{categoriesOptionsArr.map((option, index) => {
+						let optionPath = option.includes('/')?(option.split('/').join('-').toLowerCase()):option.toLowerCase();
+						optionPath = optionPath.includes(" ")?(optionPath.split(" ").join('-').toLowerCase()):optionPath;
 						return (
-							<Link key={index} to="" className="nav-item nav-link">{option}</Link>
+							<Link key={index} to={`products/${optionPath}`} className="nav-item nav-link">{option}</Link>
 						)})}
 				</div>
 			</nav>
