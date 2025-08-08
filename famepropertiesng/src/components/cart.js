@@ -103,13 +103,11 @@ function Cart() {
 											first?
 											{
 												borderTopLeftRadius: 8,
-												// borderBottomLeftRadius: 8,
 											}
 										:
 											last?
 											{
 												borderTopRightRadius: 8,
-												// borderBottomRightRadius: 8,
 											}
 										:{}}>{head}</th>
 									)
