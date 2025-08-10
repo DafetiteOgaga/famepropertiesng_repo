@@ -215,25 +215,26 @@ function MenuItems({mTop, isMenuOpen}) {
 										height: '3.7rem',
 										}}>{menu.menu}</button> */}
 									{/* : */}
-									<Link to={menu.link} className="dropdown-item mr-3"
+									<Link to={menu.link} className="dropdown-item slideInRight mr-3"
 									style={{
 										alignContent: 'center',
 										animationDelay: `${index * 0.1}s`,
 										textWrap: 'nowrap',
 										// fontWeight: 'bold',
+										fontSize: '0.8rem',
 										color: '#E2E8F0',
 										textAlign: 'center',
-										padding: '0 1rem',
+										padding: '0rem 1rem',
 										marginLeft: 0,
 										marginRight: 0,
 										marginTop: menu.menu.toLowerCase() === "contact" ? '23rem' : '',
-										marginBottom: lastItem ? '1rem' : '',
+										marginBottom: lastItem ? '3.8rem' : '',
 										border: '2px outset buttonborder',
 										borderTopLeftRadius: 0,
 										borderTopRightRadius: 0,
-										borderBottomLeftRadius: 10,
-										borderBottomRightRadius: 10,
-										height: '3.7rem',
+										borderBottomLeftRadius: 9,
+										borderBottomRightRadius: 9,
+										height: '3.3rem',
 										}}>
 										{menu.menu}
 									</Link>
