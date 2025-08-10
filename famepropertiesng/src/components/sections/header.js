@@ -228,9 +228,11 @@ function MenuItems({mTop, isMenuOpen}) {
 										marginRight: 0,
 										marginTop: menu.menu.toLowerCase() === "contact" ? '23rem' : '',
 										marginBottom: lastItem ? '1rem' : '',
-										border: '3px outset buttonborder',
+										border: '2px outset buttonborder',
 										borderTopLeftRadius: 0,
 										borderTopRightRadius: 0,
+										borderBottomLeftRadius: 10,
+										borderBottomRightRadius: 10,
 										height: '3.7rem',
 										}}>
 										{menu.menu}
