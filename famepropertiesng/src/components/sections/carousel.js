@@ -119,7 +119,8 @@ function Carousel({getImage}) {
 											<div className="p-3 carousel-div1-inner">
 												<h1 className={`display-4 text-white mb-3 ${isActive?'fadeInDown':''}`}>{carouselItem.heading}</h1>
 												<p className={`mx-md-5 px-5 ${isActive?'bounceIn':''}`}>{carouselItem.paragraph}</p>
-												<span className={`btn btn-outline-light py-2 px-4 mt-3 ${isActive?'fadeInUp':''}`}>{carouselItem.anchor}</span>
+												{/* button */}
+												{/* <span className={`btn btn-outline-light py-2 px-4 mt-3 ${isActive?'fadeInUp':''}`}>{carouselItem.anchor}</span> */}
 											</div>
 										</div>
 									</div>
@@ -139,7 +140,8 @@ function Carousel({getImage}) {
 							<div className="offer-text">
 								<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}>{productItem.discount}</h6>
 								<h3 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}>{productItem.paragraph}</h3>
-								<span className="productbtn btn btn-primary">{productItem.anchor}</span>
+								{/* button */}
+								{/* <span className="productbtn btn btn-primary">{productItem.anchor}</span> */}
 							</div>
 						</div>
 					)
@@ -152,7 +154,7 @@ function Carousel({getImage}) {
 						<div key={index} className="product-offer mb-30 carousel-div2"
 						style={{display: isActive?'block':'none'}}>
 							<img className="img-fluid" alt=""
-							src={getImage("offer-1.jpg")}/>
+							src={getImage("story-bg-1.jpg")}/>
 							<div className="d-flex align-items-center bg-light mb-4 feature-div justify-content-center"
 							style={{flexDirection: 'column'}}>
 								<span className={`${featureItem.heading} fa-7x ${isActive?evenIndex?'fadeInLeftIcon':'fadeInRightIcon':''} text-primary m-0 mr-3`}> </span>
