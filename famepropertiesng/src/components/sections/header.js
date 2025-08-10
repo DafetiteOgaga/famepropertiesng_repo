@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useScrollDetection } from '../../hooks/scrollDetection';
 import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 import { useDeviceType } from '../../hooks/deviceType';
+import { Sidebar } from '../bars/sidebar';
 
 const headerMenuArr = [
 	{
@@ -16,6 +17,12 @@ const headerMenuArr = [
 	{
 		menu: "Sign up",
 		link: ""
+	},
+	{
+		menu: "Categories",
+		link: "",
+		angleD: "fas fa-angle-down",
+		angleL: "fas fa-angle-left",
 	},
 	{
 		menu: "Account Settings",
@@ -126,7 +133,7 @@ function Header({mTop}) {
 					type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
 						<span
 						// className={`fas ${!isMenuOpen?'fa-bars':'fa-times'}`}
-						className="navbar-toggler-icon"></span>
+						className={`${!isMenuOpen?'fa fa-bars':'fa fa-times'}`}></span>
 					</button>
 				</>
 				:
@@ -142,6 +149,10 @@ function Header({mTop}) {
 
 function MenuItems({mTop, isMenuOpen}) {
 	const deviceType = useDeviceType()
+	const [itemClicked, setItemClicked] = useState(false);
+	const handleMenuItemClick = () => {
+		setItemClicked(prev => !prev);
+	}
 	return (
 		<>
 			{(deviceType.width>=992) ?
@@ -192,6 +203,11 @@ function MenuItems({mTop, isMenuOpen}) {
 				alignItems: 'center',
 				// backgroundColor: 'rgba(0, 0, 0, 0.82)',
 				}}>
+				{itemClicked && <span
+				style={{
+					position: 'relative',
+					top: '-1rem',
+				}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} /></span>}
 				<div className="h-100 pt-0"
 				style={{
 					backgroundColor: 'rgba(0, 0, 0, 0.62)',
@@ -224,9 +240,21 @@ function MenuItems({mTop, isMenuOpen}) {
 										height: '3.7rem',
 										}}>{menu.menu}</button> */}
 									{/* : */}
-									<Link to={menu.link} className="dropdown-item slideInRight mr-3"
+									<Link to={menu.menu.toLowerCase()!=='categories'&&menu.link}
+									onClick={(e) => {
+										if (menu.menu.toLowerCase() === 'categories') {
+											e.stopPropagation();
+											handleMenuItemClick();
+										}
+									}}
+									// onClick={handleMenuItemClick}
+									className={`dropdown-item slideInRight mr-3`}
 									style={{
-										alignContent: 'center',
+										// alignContent: 'center',
+										// opacity: 0,
+										display: 'flex',
+										justifyContent: 'center',
+										alignItems: 'center',
 										animationDelay: `${index * 0.1}s`,
 										textWrap: 'nowrap',
 										// fontWeight: 'bold',
@@ -237,15 +265,18 @@ function MenuItems({mTop, isMenuOpen}) {
 										marginLeft: 0,
 										marginRight: 0,
 										marginTop: menu.menu.toLowerCase() === "contact" ? '25rem' : '',
-										marginBottom: lastItem ? '100%' : '',
+										marginBottom: lastItem ? '40%' : '',
 										border: '2px outset buttonborder',
 										borderTopLeftRadius: 0,
 										borderTopRightRadius: 0,
 										borderBottomLeftRadius: 9,
 										borderBottomRightRadius: 9,
 										height: '3.3rem',
+										// opacity: 0,
 										}}>
-										{menu.menu}
+											<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
+											style={{marginRight: 8, fontSize: '1rem'}} />
+											{menu.menu}
 									</Link>
 									{/* } */}
 							</Fragment>
