@@ -6410,3 +6410,7 @@ a.text-dark:hover, a.text-dark:focus {
   opacity: 0;
   pointer-events: none;
 }
+
+.icon-force-white {
+  color: #fff !important;
+}
