@@ -171,7 +171,7 @@ function ProductAdvert({productSelector, getImage}) {
 							height: 110,
 							width: 170,
 							left: isVerySmallMobile?'45%':'55%',
-							bottom: '-6%',
+							bottom: '-7%',
 							borderTopRightRadius: 0,
 							borderBottomLeftRadius: 0,
 						}:{}
