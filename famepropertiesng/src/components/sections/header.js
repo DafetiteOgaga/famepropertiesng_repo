@@ -183,7 +183,7 @@ function MenuItems({mTop, isMenuOpen}) {
 				alignItems: 'center',
 				// backgroundColor: 'rgba(0, 0, 0, 0.82)',
 				}}>
-				<div className="h-100 pt-5"
+				<div className="h-100 pt-0"
 				style={{
 					backgroundColor: 'rgba(0, 0, 0, 0.62)',
 					marginRight: '-1rem',
@@ -220,14 +220,14 @@ function MenuItems({mTop, isMenuOpen}) {
 										alignContent: 'center',
 										animationDelay: `${index * 0.1}s`,
 										textWrap: 'nowrap',
-										fontWeight: 'bold',
+										// fontWeight: 'bold',
 										color: '#E2E8F0',
 										textAlign: 'center',
-										padding: '0 2rem',
+										padding: '0 1rem',
 										marginLeft: 0,
 										marginRight: 0,
-										marginTop: menu.menu.toLowerCase() === "contact" ? '20rem' : '',
-										marginBottom: lastItem ? '5rem' : '',
+										marginTop: menu.menu.toLowerCase() === "contact" ? '23rem' : '',
+										marginBottom: lastItem ? '1rem' : '',
 										border: '3px outset buttonborder',
 										borderTopLeftRadius: 0,
 										borderTopRightRadius: 0,
