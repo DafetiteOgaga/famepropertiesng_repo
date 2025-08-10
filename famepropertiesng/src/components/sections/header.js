@@ -92,8 +92,9 @@ function Header({mTop}) {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [isMenuOpen]);
-	console.log({isMenuOpen})
-	console.log('shouldRender:', shouldRender)
+	const removeLabelName = deviceType.width<400
+	// console.log({isMenuOpen})
+	// console.log('shouldRender:', shouldRender)
 	return (
 		<>
 			<nav className={`container-fluid container-fluid-nav navbar bg-dark navbar-expand-lg navbar-dark py-3 py-lg-0 px-xl-5 ${isMenuOpen?'':!scrollingDown ? 'hidden' : ''}`}
@@ -104,7 +105,15 @@ function Header({mTop}) {
 				{(deviceType.width<992) ?
 				<>
 					<span
-					// style={{display: 'flex', alignItems: 'center', flexDirection: 'row'}}
+					style={removeLabelName ?
+						{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+							width: '100%'}
+						:
+						{}
+					}
 					>
 						<Brand />
 						<CartLink propStyle={"ml-3"} />
@@ -249,6 +258,8 @@ function MenuItems({mTop, isMenuOpen}) {
 	)
 }
 function Brand() {
+	const deviceType = useDeviceType()
+	const removeLabelName = deviceType.width<400
 	return (
 		<Link to={"/"}
 		className="text-decoration-none"
@@ -259,18 +270,21 @@ function Brand() {
 			cursor: 'pointer',
 			}}>
 			<img src={famousPropertiesNGLogo} alt="famouspropertiesng"
-			style={{width: '13%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
+			style={{width: removeLabelName?'40%':'13%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
+			{!removeLabelName &&
 			<span
 			style={{alignSelf: 'center'}}>
 				<span className="text-uppercase text-primary bg-dark px-2 bold-text">famousproperties</span>
 				<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
-			</span>
+			</span>}
 		</Link>
 	)
 }
 function CartLink({propStyle}) {
+	const deviceType = useDeviceType()
+	const removeLabelName = deviceType.width<400
 	return (
-		<Link to={"cart"} className={`btn px-0 ml-0 ${propStyle}`}>
+		<Link to={"cart"} className={`btn px-0 ml-0 ${propStyle} ${removeLabelName?'pr-3':''}`}>
 			<span className="fas fa-shopping-cart fa-lg text-success"></span>
 			<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
 		</Link>
