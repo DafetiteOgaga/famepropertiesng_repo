@@ -1,4 +1,6 @@
 import { DafetiteFooter } from "../../hooks/dafetiteFooter/dafetiteFooter";
+import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
+import { Link } from 'react-router-dom';
 
 function Footer({getImage}) {
 	return (
@@ -6,7 +8,22 @@ function Footer({getImage}) {
 			<div className="row px-xl-5"
 			style={{margin: 0}}>
 				<div className="col-lg-6 col-md-12 mb-2 pr-3 pr-xl-5">
-					<h5 className="text-secondary text-uppercase mb-4">famouspropertiesng</h5>
+					<Link to={"/"}
+					className="text-decoration-none pb-3"
+					style={{
+						display: 'flex',
+						// width: '11.3%',
+						// paddingRight: '1%',
+						cursor: 'pointer',
+						}}>
+						<img src={famousPropertiesNGLogo} alt="famouspropertiesng"
+						style={{width: '5%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
+						<div
+						style={{alignSelf: 'center'}}>
+							<span className="text-uppercase text-primary bg-dark px-2 bold-text">famousproperties</span>
+							<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
+						</div>
+					</Link>
 					{/* <p className="mb-4">No dolore ipsum accusam no lorem. Invidunt sed clita kasd clita et et dolor sed dolor. Rebum tempor no vero est magna amet no</p> */}
 					<p className="mb-2"><i className="fa fa-map-marker-alt text-primary mr-3"></i>123 Street, Lagos, Nigeria</p>
 					<p className="mb-2"><i className="fa fa-envelope text-primary mr-3"></i>info@example.com</p>
@@ -47,12 +64,14 @@ function Footer({getImage}) {
 									</div>
 								</div>
 							</form>
-							<h6 className="text-secondary text-uppercase mt-4 mb-3">Follow Us</h6>
-							<div className="d-flex">
-								<a className="btn btn-primary btn-square mr-2" href="##"><i className="fab fa-twitter"></i></a>
-								<a className="btn btn-primary btn-square mr-2" href="##"><i className="fab fa-facebook-f"></i></a>
-								<a className="btn btn-primary btn-square mr-2" href="##"><i className="fab fa-linkedin-in"></i></a>
-								<a className="btn btn-primary btn-square" href="##"><i className="fab fa-instagram"></i></a>
+							<div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+								<h6 className="text-secondary text-uppercase mt-4 mb-3 pr-3">Follow Us</h6>
+								<div className="d-flex">
+									<Link to={''} className="btn btn-primary btn-square mr-2"><span className="fab fa-twitter"></span></Link>
+									<Link to={''} className="btn btn-primary btn-square mr-2"><span className="fab fa-facebook-f"></span></Link>
+									<Link to={''} className="btn btn-primary btn-square mr-2"><span className="fab fa-linkedin-in"></span></Link>
+									<Link to={''} className="btn btn-primary btn-square"><span className="fab fa-instagram"></span></Link>
+								</div>
 							</div>
 						</div>
 					</div>
