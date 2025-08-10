@@ -22,18 +22,40 @@ const categoriesOptionsArr = [
 	'Decor/Wall Art',
 	'Bags/Luggage'
 ]
-function Sidebar() {
+function Sidebar({mobileStyle = null}) {
 	return (
-		<div style={{position: 'sticky', top: '5%'}}>
+		<div
+		className='slideInRight'
+		style={{
+			position: 'sticky',
+			top: '5%',
+			backgroundColor: mobileStyle?mobileStyle:'',
+			padding: mobileStyle?'1.2rem 1rem':'',
+			overflowY: 'auto',
+			maxHeight: '80vh',
+			borderTopLeftRadius: mobileStyle?'0.8rem':'',
+			borderBottomLeftRadius: mobileStyle?'0.8rem':'',
+			// backgroundColor: '#000',
+			}}>
+			{!mobileStyle &&
 			<h3 className="text-uppercase pr-1"
-			style={{color: '#475569'}}>Categories</h3>
+			style={{
+				color: '#475569',
+				}}>Categories</h3>}
 			<nav className="navbar navbar-light p-0" id="navbar-vertical">
 				<div className="navbar-nav w-100">
 					{categoriesOptionsArr.map((option, index) => {
 						let optionPath = option.includes('/')?(option.split('/').join('-').toLowerCase()):option.toLowerCase();
 						optionPath = optionPath.includes(" ")?(optionPath.split(" ").join('-').toLowerCase()):optionPath;
 						return (
-							<Link key={index} to={`products/${optionPath}`} className="nav-item nav-link">{option}</Link>
+							<Link key={index} to={`products/${optionPath}`}
+							className="nav-item nav-link slideInRight"
+							style={{
+								animationDelay: `${index * 0.01}s`,
+								color: mobileStyle?'rgb(226, 232, 240)':'',
+								textAlign: mobileStyle?'center':'',
+								padding: mobileStyle?'0.8rem 0':'',
+							}}>{option}</Link>
 						)})}
 				</div>
 			</nav>
