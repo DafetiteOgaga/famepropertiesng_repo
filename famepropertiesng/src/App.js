@@ -5,28 +5,14 @@ import './css/animation.css';
 // import './css/animations.css';
 import './css/reduced-motion.css'
 // import './css/test.css'
-import { Index } from './components';
-import { Navbar } from './components/sections/header';
-import { Cart } from './components/cart';
-import { Checkout } from './components/checkout';
-import { Contact } from './components/contact';
-import { Detail } from './components/detail';
-import { Shop } from './components/shop';
+// import { useLogMediaSize } from './hooks/mediaSize';
 import { AppRoutes } from './routes/route';
 
 function App() {
+  // useLogMediaSize();
   return (
     <>
       <AppRoutes />
-      {/* <body> */}
-        {/* <Navbar /> */}
-        {/* <Index /> */}
-        {/* <Cart /> */}
-        {/* <Checkout /> */}
-        {/* <Contact /> */}
-        {/* <Detail /> */}
-        {/* <Shop /> */}
-      {/* </body> */}
     </>
   );
 }
