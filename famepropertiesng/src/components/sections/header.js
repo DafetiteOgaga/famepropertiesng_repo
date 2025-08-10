@@ -170,6 +170,7 @@ function MenuItems({mTop, isMenuOpen}) {
 							if (menu.menu.toLowerCase() === "sign in" || menu.menu.toLowerCase() === "sign out" || menu.menu.toLowerCase() === "sign up") {
 								button = true;
 							}
+							if (menu.menu.toLowerCase() === "categories") return null;
 							return (
 								<>
 									{button ?
