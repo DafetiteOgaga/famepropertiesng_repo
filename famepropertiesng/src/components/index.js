@@ -18,8 +18,7 @@ const getImage = (name) => (images(`./${name}`)) // to get a specific image by n
 function Index() {
 	const { lastScrollY } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
 	const deviceType = useDeviceType();
-	// mobile, smallTablet, tablet, laptop, desktop
-	// console.log('deviceType (index comp):', deviceType);
+	const mTop = deviceType.laptop ? '12':deviceType.desktop ?'6':'22';
 	return (
 		<>
 			<div className='container-fluid px-xl-5'
@@ -32,12 +31,10 @@ function Index() {
 				}
 				:
 				{},
-				marginTop: deviceType.laptop? '12%':
-							deviceType.desktop?'6%':
-							'22%'
+				marginTop: `${mTop}%`
 			}}>
 				{/* Header */}
-				<Header />
+				<Header mTop={mTop}/>
 				{/* // styling dynamically for mobile and desktop - to be resolved later ########## */}
 				{(deviceType.width>=992) &&
 					<div>

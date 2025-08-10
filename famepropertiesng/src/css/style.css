@@ -2447,7 +2447,7 @@ input[type="button"].btn-block {
 .dropdown-item:hover, .dropdown-item:focus {
   color: #16181b;
   text-decoration: none;
-  background-color: #6C757D;
+  background-color: #475569;
 }
 
 .dropdown-item.active, .dropdown-item:active {
@@ -5776,6 +5776,26 @@ button.bg-dark:focus {
 .py-5 {
   padding-top: 3rem !important;
 }
+.pt-6,
+.py-6 {
+  padding-top: 3.5rem !important;
+}
+.pt-7,
+.py-7 {
+  padding-top: 4rem !important;
+}
+.pt-8,
+.py-8 {
+  padding-top: 4.5rem !important;
+}
+.pt-9,
+.py-9 {
+  padding-top: 5rem !important;
+}
+.pt-10,
+.py-10 {
+  padding-top: 6rem !important;
+}
 
 .pr-5,
 .px-5 {
@@ -6378,7 +6398,7 @@ a.text-dark:hover, a.text-dark:focus {
   /* left: 1000px; */
   left: 50%;
   transform: translate(-50%, 0);
-  z-index: 1001;
+  z-index: 50;
   opacity: 1;
   pointer-events: auto;
   transition: transform 0.3s ease, opacity 0.3s ease;
