@@ -155,6 +155,8 @@ function Carousel({getImage}) {
 function ProductAdvert({productSelector, getImage}) {
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
+	const isSmallMobile = deviceType.width <= 400
+	const isVerySmallMobile = deviceType.width <= 390
 	return (
 		<>
 			{productSelectorArr.map((productItem, index) => {
@@ -168,7 +170,7 @@ function ProductAdvert({productSelector, getImage}) {
 							position: 'absolute',
 							height: 110,
 							width: 170,
-							left: '45%',
+							left: isVerySmallMobile?'45%':'55%',
 							bottom: '-6%',
 							borderTopRightRadius: 0,
 							borderBottomLeftRadius: 0,
@@ -179,8 +181,10 @@ function ProductAdvert({productSelector, getImage}) {
 							// 'carousel-1.jpg'
 							)}/>
 						<div className="offer-text">
-							<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}>{productItem.discount}</h6>
-							<h3 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}>{productItem.paragraph}</h3>
+							<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}
+							style={{fontSize: isVerySmallMobile?'1rem':isSmallMobile?'1.1rem':''}}>{productItem.discount}</h6>
+							<h3 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}
+							style={{fontSize: isVerySmallMobile?'1rem':isSmallMobile?'1.1rem':''}}>{productItem.paragraph}</h3>
 							{/* button */}
 							{/* <span className="productbtn btn btn-primary">{productItem.anchor}</span> */}
 						</div>
