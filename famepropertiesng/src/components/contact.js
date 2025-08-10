@@ -1,15 +1,20 @@
 import { useLocation, Link } from 'react-router-dom';
 import { Breadcrumb } from './sections/breadcrumb';
+import { useDeviceType } from '../hooks/deviceType';
 
 function Contact() {
 	const location = useLocation().pathname.split("/").pop();
-	console.log("Current Location:", location);
+	const deviceType = useDeviceType().width <= 576;
+	// console.log("Current Location:", location);
 	return (
 		<>
 			<Breadcrumb page={'Contact'} />
 
 			{/* <!-- Contact Start --> */}
-			<div className="container-fluid">
+			<div className="container-fluid"style={{
+				paddingLeft: deviceType ? 0 : '',
+				paddingRight: deviceType ? 0 : '',
+			}}>
 				<h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4"><span className="bg-secondary pr-3"
 				style={{color: '#475569'}}>Contact Us</span></h2>
 				<div className="row px-xl-5">
