@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { useDeviceType } from '../../hooks/deviceType';
 
 const productImagesArr = [
 	"product-1.jpg",
@@ -43,6 +44,7 @@ const images = require.context('../../images/img', false, /\.(png|jpe?g|svg)$/);
 const getProductImage = (name) => (images(`./${name}`))
 function Products({getImage = getProductImage}) {
 	const parameters = useParams();
+	const deviceType = useDeviceType();
 	// console.log('parameters:', parameters);
 	// console.log('product component rendered')
 	return (
@@ -54,7 +56,12 @@ function Products({getImage = getProductImage}) {
 					const randomNumber = Math.floor(Math.random() * 6);
 					// console.log({randomNumber})
 					return (
-						<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1">
+						<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
+						style={deviceType.width<=576 ?
+							{
+								paddingLeft: 0,
+								paddingRight: 0,
+							}:{}}>
 							<div className="product-item bg-light mb-4"
 							style={{borderRadius: '10px'}}>
 								<div className="product-img position-relative overflow-hidden">
