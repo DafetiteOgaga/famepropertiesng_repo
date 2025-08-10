@@ -31,30 +31,18 @@ function Header() {
 				<>
 					<nav className={`container-fluid container-fluid-nav navbar bg-dark navbar-expand-lg navbar-dark py-3 py-lg-0 px-xl-5 ${!scrollingDown ? 'hidden' : ''}`}
 					style={{height: '8%',}}>
-						<a href="##" className="text-decoration-none d-block d-lg-none">
-							<span className="h1 text-uppercase text-dark bg-light px-2">Multi</span>
-							<span className="h1 text-uppercase text-light bg-primary px-2 ml-n1">Shop</span>
-						</a>
-						<button type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-							<span className="navbar-toggler-icon"></span>
-						</button>
+						<span
+						style={{flexDirection: 'row', display: 'flex'}}>
+							<span className="d-block d-lg-none">
+								<Brand />
+							</span>
+							
+							<button type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+								<span className="navbar-toggler-icon"></span>
+							</button>
+						</span>
 						<div className="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-							<Link to={"/"}
-							className="text-decoration-none"
-							style={{
-								display: 'flex',
-								// width: '11.3%',
-								// paddingRight: '1%',
-								cursor: 'pointer',
-								}}>
-								<img src={famousPropertiesNGLogo} alt="famouspropertiesng"
-								style={{width: '13%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
-								<div
-								style={{alignSelf: 'center'}}>
-									<span className="text-uppercase text-primary bg-dark px-2 bold-text">famousproperties</span>
-									<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
-								</div>
-							</Link>
+							<Brand />
 							<div className="navbar-nav ml-auto py-0 d-none d-lg-flex">
 								<div className="col-lg-2"
 								style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
@@ -83,6 +71,27 @@ function Header() {
 			// 	{/* </div> */}
 			// {/* </div> */}
 		// </div>
+	)
+}
+
+function Brand() {
+	return (
+		<Link to={"/"}
+		className="text-decoration-none"
+		style={{
+			display: 'flex',
+			// width: '11.3%',
+			// paddingRight: '1%',
+			cursor: 'pointer',
+			}}>
+			<img src={famousPropertiesNGLogo} alt="famouspropertiesng"
+			style={{width: '13%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
+			<div
+			style={{alignSelf: 'center'}}>
+				<span className="text-uppercase text-primary bg-dark px-2 bold-text">famousproperties</span>
+				<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
+			</div>
+		</Link>
 	)
 }
 export { Header };

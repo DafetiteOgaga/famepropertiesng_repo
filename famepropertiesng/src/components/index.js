@@ -24,14 +24,18 @@ function Index() {
 		<>
 			<div className='container-fluid px-xl-5'
 			id='top-page'
-			// styling dynamically for mobile and desktop - to be resolved later ##########
-			style={(deviceType.width>=992) ? {
+			style={{
+				...(deviceType.width>=992) ?
+				{
 					display: 'grid',
 					gridTemplateColumns: '1fr 11fr',
-					marginTop: deviceType.laptop?'12%':'6%',
 				}
 				:
-				{}}>
+				{},
+				marginTop: deviceType.laptop? '12%':
+							deviceType.desktop?'6%':
+							'22%'
+			}}>
 				{/* Header */}
 				<Header />
 				{/* // styling dynamically for mobile and desktop - to be resolved later ########## */}
