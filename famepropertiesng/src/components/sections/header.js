@@ -25,9 +25,12 @@ const dressesArr = [
 function Header() {
 	const { scrollingDown } = useScrollDetection();
 	return (
-		<div className={`container-fluid px-xl-5 container-fluid-nav bg-dark ${!scrollingDown ? 'hidden' : ''}`}>
-				<div className="">
-					<nav className="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
+		// <div className={`container-fluid px-xl-5 container-fluid-nav bg-dark ${!scrollingDown ? 'hidden' : ''}`}
+		// style={{height: '8%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+				// {/* <div className=""> */}
+				<>
+					<nav className={`container-fluid container-fluid-nav navbar bg-dark navbar-expand-lg navbar-dark py-3 py-lg-0 px-xl-5 ${!scrollingDown ? 'hidden' : ''}`}
+					style={{height: '8%',}}>
 						<a href="##" className="text-decoration-none d-block d-lg-none">
 							<span className="h1 text-uppercase text-dark bg-light px-2">Multi</span>
 							<span className="h1 text-uppercase text-light bg-primary px-2 ml-n1">Shop</span>
@@ -76,9 +79,10 @@ function Header() {
 							</div>
 						</div>
 					</nav>
-				</div>
-			{/* </div> */}
-		</div>
+				</>
+			// 	{/* </div> */}
+			// {/* </div> */}
+		// </div>
 	)
 }
 export { Header };
