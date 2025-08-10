@@ -1,11 +1,16 @@
 import { Breadcrumb } from "./sections/breadcrumb"
+import { useDeviceType } from "../hooks/deviceType"
 
 function Checkout() {
+	const deviceType = useDeviceType().width <= 576;
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
 
-			<div className="container-fluid">
+			<div className="container-fluid"style={{
+				paddingLeft: deviceType ? 0 : '',
+				paddingRight: deviceType ? 0 : '',
+			}}>
 				<div className="row px-xl-5">
 					<div className="col-lg-8">
 						<h5 className="section-title position-relative text-uppercase mb-3">
