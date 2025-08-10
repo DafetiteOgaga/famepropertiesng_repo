@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useDeviceType } from "../../hooks/deviceType";
 
 const carouselSelectorArr = [
 	{
@@ -74,6 +75,8 @@ const featureSelectorArr = [
 	},
 ];
 function Carousel({getImage}) {
+	const deviceType = useDeviceType();
+	const isMobile = deviceType.width <= 576
 	const [carouselSelector, setCarouselSelector] = useState(0);
 	const [productSelector, setProductSelector] = useState(0);
 	const [featureSelector, setFeatureSelector] = useState(0);
@@ -88,7 +91,7 @@ function Carousel({getImage}) {
 
 		const featureInterval = setInterval(() => {
 			setFeatureSelector(prev => (prev + 1) % featureSelectorArr.length);
-		}, 5000); // Change slide every 5 seconds
+		}, 3500); // Change slide every 5 seconds
 
 		return () => {
 			clearInterval(carouselInterval);
@@ -96,12 +99,14 @@ function Carousel({getImage}) {
 			clearInterval(featureInterval);
 		}
 	}, [])
+	// console.log({deviceType})
+	// console.log('isMobile:', isMobile);
 	return (
 		<div className="container-fluid mb-3">
 			<div className="row">
 				<div className="col-lg-8 px-xl-4"
 				style={{padding: 0}}>
-					<div id="header-carousel" className="carousel slide carousel-fade mb-30 mb-lg-0">
+					<div id="header-carousel" className={`carousel slide carousel-fade ${isMobile?'mb-0':'mb-30'} mb-lg-0`}>
 						<ol className="carousel-indicators">
 							{carouselSelectorArr.map((caroSelector, index) => {
 								const isActive = carouselSelectorArr[carouselSelector].index===index
@@ -115,7 +120,10 @@ function Carousel({getImage}) {
 								const isActive = carouselSelectorArr[carouselSelector].index===carouselItem.index
 								return (
 									<div key={index} className={`carousel-item position-relative ${isActive?'active carousel-item-next':'carousel-item-prev'} carousel-div1`}>
-										<img className="position-absolute w-100 h-100 carousel-div1-image" alt={carouselItem.image} src={getImage(carouselItem.image)}/>
+										<img className="position-absolute w-100 h-100 carousel-div1-image" alt={carouselItem.image} src={getImage(
+											carouselItem.image
+											// 'carousel-1.jpg'
+											)}/>
 										<div className="carousel-caption d-flex flex-column align-items-center justify-content-center">
 											<div className="p-3 carousel-div1-inner">
 												<h1 className={`display-4 text-white mb-3 ${isActive?'fadeInDown':''}`}>{carouselItem.heading}</h1>
@@ -124,50 +132,114 @@ function Carousel({getImage}) {
 												{/* <span className={`btn btn-outline-light py-2 px-4 mt-3 ${isActive?'fadeInUp':''}`}>{carouselItem.anchor}</span> */}
 											</div>
 										</div>
+										{isMobile &&
+										<div className="">
+											<ProductAdvert productSelector={productSelector} getImage={getImage} />
+											<FeatureAdvert featureSelector={featureSelector} getImage={getImage} />
+										</div>}
 									</div>
 								)
 							})}
 						</div>
 					</div>
 				</div>
+				{!isMobile &&
 				<div className="col-lg-4">
-				{productSelectorArr.map((productItem, index) => {
-					const isActive = productSelectorArr[productSelector].index===productItem.index
-					const evenIndex = index % 2 === 0;
-					return (
-						<div key={index} className="product-offer mb-30 carousel-div2"
-						style={{display: isActive?'block':'none'}}>
-							<img className="img-fluid" alt="" src={getImage(productItem.image)}/>
-							<div className="offer-text">
-								<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}>{productItem.discount}</h6>
-								<h3 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}>{productItem.paragraph}</h3>
-								{/* button */}
-								{/* <span className="productbtn btn btn-primary">{productItem.anchor}</span> */}
-							</div>
-						</div>
-					)
-				})}
-
-				{featureSelectorArr.map((featureItem, index) => {
-					const isActive = featureSelectorArr[featureSelector].index===featureItem.index
-					const evenIndex = index % 2 === 0;
-					return (
-						<div key={index} className="product-offer mb-30 carousel-div2"
-						style={{display: isActive?'block':'none'}}>
-							<img className="img-fluid" alt=""
-							src={getImage("story-bg-1.jpg")}/>
-							<div className="d-flex align-items-center bg-light mb-4 feature-div justify-content-center"
-							style={{flexDirection: 'column'}}>
-								<span className={`${featureItem.heading} fa-7x ${isActive?evenIndex?'fadeInLeftIcon':'fadeInRightIcon':''} text-primary m-0 mr-3`}> </span>
-								<h5 className={`font-weight-semi-bold m-0 ${isActive?'bounceInDown':''}`}
-								style={{zIndex: 1, color: '#F8F6F2'}}>{featureItem.paragraph}</h5>
-							</div>
-						</div>
-					)
-				})}
-				</div>
+					<ProductAdvert productSelector={productSelector} getImage={getImage} />
+					<FeatureAdvert featureSelector={featureSelector} getImage={getImage} />
+				</div>}
 			</div>
 		</div>
+	)
+}
+function ProductAdvert({productSelector, getImage}) {
+	const deviceType = useDeviceType();
+	const isMobile = deviceType.width <= 576
+	return (
+		<>
+			{productSelectorArr.map((productItem, index) => {
+				const isActive = productSelectorArr[productSelector].index===productItem.index
+				const evenIndex = index % 2 === 0;
+				return (
+					<div key={index} className="product-offer mb-30 carousel-div2"
+					style={{
+						...{display: isActive?'block':'none'},
+						...isMobile?{
+							position: 'absolute',
+							height: 110,
+							width: 170,
+							left: '45%',
+							bottom: '-6%',
+							borderTopRightRadius: 0,
+							borderBottomLeftRadius: 0,
+						}:{}
+						}}>
+						<img className="img-fluid" alt="" src={getImage(
+							productItem.image
+							// 'carousel-1.jpg'
+							)}/>
+						<div className="offer-text">
+							<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}>{productItem.discount}</h6>
+							<h3 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}>{productItem.paragraph}</h3>
+							{/* button */}
+							{/* <span className="productbtn btn btn-primary">{productItem.anchor}</span> */}
+						</div>
+					</div>
+				)
+			})}
+		</>
+	)
+}
+function FeatureAdvert({featureSelector, getImage}) {
+	const deviceType = useDeviceType();
+	const isMobile = deviceType.width <= 576
+	return (
+		<>
+			{featureSelectorArr.map((featureItem, index) => {
+				const isActive = featureSelectorArr[featureSelector].index===featureItem.index
+				const evenIndex = index % 2 === 0;
+				return (
+					<div key={index} className="product-offer mb-30 carousel-div2"
+					style={{
+						...{display: isActive?'block':'none'},
+						...isMobile?{
+							position: 'absolute',
+							height: 70,
+							width: 120,
+							left: '-3%',
+							top: '0%',
+							borderTopRightRadius: 0,
+							borderBottomLeftRadius: 0,
+							// backgroundColor: 'rgba(0, 0, 0, 0)',
+						}:{}
+						}}>
+					{/* style={{display: isActive?'block':'none'}}> */}
+						{!isMobile &&
+						<img className="img-fluid" alt=""
+						src={getImage("story-bg-1.jpg")}/>}
+						<div className={`d-flex align-items-center ${!isMobile && 'bg-light'} mb-4 feature-div justify-content-center`}
+						style={{
+							// position: isMobile?'absolute':'',
+							flexDirection: 'column',
+							}}>
+							<span className={`${featureItem.heading} fa-7x ${isActive?evenIndex?'fadeInLeftIcon':'fadeInRightIcon':''} text-white ${isMobile?'mb-1 ml-3':'m-0'} mr-3`}
+							style={{
+								fontSize: '2rem',
+								marginTop: '-1.5rem',
+								// color: isMobile?'whitesmoke':''
+							}}> </span>
+							<h5 className={`font-weight-semi-bold m-0 ${isActive?'bounceInDown':''}`}
+							style={{
+								zIndex: 1,
+								color: '#F8F6F2',
+								fontSize: isMobile?'0.7rem':'',
+								textWrap: 'nowrap',
+								}}>{featureItem.paragraph}</h5>
+						</div>
+					</div>
+				)
+			})}
+		</>
 	)
 }
 export { Carousel };
