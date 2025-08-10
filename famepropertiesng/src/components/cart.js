@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Breadcrumb } from "./sections/breadcrumb";
 import { Link } from 'react-router-dom';
+import { useDeviceType } from "../hooks/deviceType";
 
 const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
 const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
@@ -9,7 +10,7 @@ const tableHeadArr = [
 	"Products",
 	"Price",
 	"Quantity",
-	"Total",
+	// "Total",
 	"Remove"
 ]
 const cartItemsArray = [
@@ -50,6 +51,7 @@ const cartItemsArray = [
 	},
 ]
 function Cart() {
+	const deviceType = useDeviceType().width <= 576;
 	const [cartItemsArr, setCartItemsArr] = useState(cartItemsArray); // initialItems from props or data
 	const [newQuantity, setNewQuantity] = useState(() => {
 		const initialQuantities = {};
@@ -88,7 +90,10 @@ function Cart() {
 		<Breadcrumb page={'Shopping Cart'} />
 
 		{/* <!-- Cart Start --> */}
-		<div className="container-fluid">
+		<div className="container-fluid"style={{
+			paddingLeft: deviceType ? 0 : '',
+			paddingRight: deviceType ? 0 : '',
+		}}>
 			<div className="row px-xl-5">
 				<div className="col-lg-8 table-responsive mb-5">
 					<table className="table table-light table-borderless table-hover text-center mb-0">
@@ -141,7 +146,7 @@ function Cart() {
 												</div>
 											</div>
 										</td>
-										<td className="align-middle">₦{item.total}</td>
+										{/* <td className="align-middle">₦{item.total}</td> */}
 										<td className="align-middle">
 											<button
 											onClick={() => handleRemoveItem(item.id)}
