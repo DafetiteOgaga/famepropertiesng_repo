@@ -1,6 +1,7 @@
 import { Fragment, useState } from "react";
 import { Breadcrumb } from "./sections/breadcrumb";
 import { Link } from 'react-router-dom';
+import { useDeviceType } from "../hooks/deviceType";
 
 const productImagesArr = [
 	"product-1.jpg",
@@ -52,6 +53,7 @@ const productStar = "fa fa-star"
 const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
 const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
 function Detail() {
+	const deviceType = useDeviceType().width <= 576;
 	const [selectedTab, setSelectecTab] = useState('description');
 	const [isNext, setIsNext] = useState(0)
 	const [quantity, setQuantity] = useState(1);
@@ -77,7 +79,10 @@ function Detail() {
 			<Breadcrumb page={'Product'} />
 
 			{/* <!-- Shop Detail Start --> */}
-			<div className="container-fluid pb-5">
+			<div className="container-fluid pb-5"style={{
+				paddingLeft: deviceType ? 0 : '',
+				paddingRight: deviceType ? 0 : '',
+			}}>
 				<div className="row px-xl-5">
 					<div className="col-lg-5 mb-30">
 						<div  className="carousel slide">
@@ -97,9 +102,12 @@ function Detail() {
 						</div>
 					</div>
 
-					<div className="col-lg-7 h-auto mb-30">
-						<div className="h-100 bg-light p-30"
-						style={{borderRadius: '10px'}}>
+					<div className={`col-lg-7 h-auto mb-30`}>
+						<div className={`h-100 bg-light ${deviceType?'':'p-30'}`}
+						style={{
+							borderRadius: '10px',
+							padding: deviceType ? '15px 10px' : '',
+						}}>
 							<h3
 							style={{color: '#475569'}}>Product Name Goes Here</h3>
 							<div className="d-flex mb-3">
@@ -226,8 +234,11 @@ function Detail() {
 				</div>
 				<div className="row px-xl-5">
 					<div className="col">
-						<div className="bg-light p-30"
-						style={{borderRadius: '10px'}}>
+						<div className={`bg-light ${!deviceType && 'p-30'}`}
+						style={{
+							borderRadius: '10px',
+							padding: deviceType ? '15px 10px' : '',
+							}}>
 							<div className="nav nav-tabs mb-4">
 								{tabPane.map((tab, index) => {
 									// console.log({tab})
@@ -239,6 +250,7 @@ function Detail() {
 										style={{
 											cursor: 'pointer',
 											textTransform: 'capitalize',
+											padding: deviceType ? '5px 8px' : '',
 										}}
 										className={`nav-item nav-link text-dark ${isActive?'active':''}`}>{tab.title}</span>
 									)
