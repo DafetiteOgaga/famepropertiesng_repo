@@ -48,7 +48,11 @@ function Header({mTop}) {
 	// const [isVisible, setIsVisible] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
 	const renderdelay = () => {setTimeout(() => setShouldRender(false), 200)}
-	const menuWrapperRef = useRef(null);
+	const overlayRef = useRef(null); // not exactly in use
+	const menuRef = useRef(null);
+	const menuIconRef = useRef(null);
+	const categoryMenuRef = useRef(null);
+	// const menuWrapperRef = useRef(null);
 	let { scrollingDown } = useScrollDetection();
 	// const [scrollUp, setScrollUp] = useState(scrollingDown)
 	const deviceType = useDeviceType()
@@ -63,42 +67,57 @@ function Header({mTop}) {
 		});
 	}
 	useEffect(() => {
+		// console.log("is Menu Opened:", isMenuOpen);
 		if (isMenuOpen) {
 			document.body.style.overflow = "hidden";
-			// setScrollUp(false); // Prevent scrolling when menu is open
 		} else {
 			document.body.style.overflow = "";
-			// setScrollUp(scrollingDown); // Allow scrolling when menu is closed
 		}
+
+		const handleClickToCloseMenu = (e) => {
+			// console.log("Clicked:", e.target);
+			// if you clicked on the menu itself or any of its children, do nothing
+			if (menuRef.current && menuRef.current.contains(e.target)) return;
+			if (categoryMenuRef.current && categoryMenuRef.current.contains(e.target)) return;
+
+			// if you clicked inside overlayRef (background area), close the menu
+			// else {
+			// 	console.log("Clicked anywhere else, closing menu");
+			// 	setIsMenuOpen(false);
+			// 	renderdelay(); // your animation cleanup
+			// }
+
+			if (!menuIconRef.current.contains(e.target)) {
+				// console.log("Clicked on overlay, closing menu");
+				setIsMenuOpen(false);
+				renderdelay(); // your animation cleanup
+			}
+
+			// if (
+			// 	// menuWrapperRef.current &&
+			// 	event.target === menuWrapperRef.current ||
+			// 	!menuWrapperRef.current.contains(event.target)
+			// ) {
+			// 	setIsMenuOpen(false);
+			// 	renderdelay();
+			// }
+		};
+		if (isMenuOpen) {
+			document.addEventListener('mousedown', handleClickToCloseMenu);
+		} else {
+			document.removeEventListener('mousedown', handleClickToCloseMenu);
+		}
+		return () => {
+			document.removeEventListener('mousedown', handleClickToCloseMenu);
+		};
 	}, [isMenuOpen]);
 	useEffect(() => {
 		if (isMenuOpen) {
 			setIsMenuOpen(false);
-			// setIsVisible(false);
 			renderdelay();
 		}
 	}, [currentPage])
 
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (
-				menuWrapperRef.current &&
-				!menuWrapperRef.current.contains(event.target)
-			) {
-				setIsMenuOpen(false);
-				// setIsVisible(false);
-				renderdelay();
-			}
-		};
-		if (isMenuOpen) {
-			document.addEventListener('mousedown', handleClickOutside);
-		} else {
-			document.removeEventListener('mousedown', handleClickOutside);
-		}
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, [isMenuOpen]);
 	const removeLabelName = deviceType.width<400
 	// console.log({isMenuOpen})
 	// console.log('shouldRender:', shouldRender)
@@ -130,6 +149,7 @@ function Header({mTop}) {
 						e.stopPropagation();
 						menuHandler();
 					}}
+					ref={menuIconRef}
 					type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
 						<span
 						// className={`fas ${!isMenuOpen?'fa-bars':'fa-times'}`}
@@ -142,17 +162,25 @@ function Header({mTop}) {
 					<MenuItems />
 				</div>}
 			</nav>
-			{shouldRender && <MenuItems currentPage={currentPage} mTop={mTop} isMenuOpen={isMenuOpen} />}
+			{shouldRender && <MenuItems
+								currentPage={currentPage}
+								mTop={mTop}
+								isMenuOpen={isMenuOpen}
+								// menuWrapperRef={menuWrapperRef}
+								overlayRef={overlayRef}
+								menuRef={menuRef}
+								categoryMenuRef={categoryMenuRef} />}
 		</>
 	)
 }
 
-function MenuItems({mTop, isMenuOpen}) {
+function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
 	const deviceType = useDeviceType()
 	const [itemClicked, setItemClicked] = useState(false);
 	const handleMenuItemClick = () => {
 		setItemClicked(prev => !prev);
 	}
+	// console.log({overlayRef, menuRef})
 	return (
 		<>
 			{(deviceType.width>=992) ?
@@ -196,8 +224,10 @@ function MenuItems({mTop, isMenuOpen}) {
 			height: '100vh',
 			width: '100vw',
 			overflowY: 'auto',
+			// cursor: 'pointer',
 		}}>
 			<div className={`col-lg-2 ${isMenuOpen?'slideInRight':'slideOutRight'}`}
+			ref={overlayRef}
 			style={{
 				display: 'flex',
 				justifyContent: 'flex-end',
@@ -208,78 +238,55 @@ function MenuItems({mTop, isMenuOpen}) {
 				style={{
 					position: 'relative',
 					top: '-1rem',
-				}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} /></span>}
+				}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
 				<div className="h-100 pt-0"
+				ref={menuRef}
 				style={{
 					backgroundColor: 'rgba(0, 0, 0, 0.62)',
 					marginRight: '-1rem',
 				}}>
 					{headerMenuArr.map((menu, index) => {
 						const lastItem = index === headerMenuArr.length - 1;
-						let button = false
+						// let button = false
 						// if (menu.menu.toLowerCase() === "sign in" || menu.menu.toLowerCase() === "sign out" || menu.menu.toLowerCase() === "sign up") {
 						// 	button = true;
 						// }
 						return (
 							<Fragment key={index}>
-								{/* {button ? */}
-									{/* <button className="dropdown-item slideInRight" type="button"
-									style={{
-										animationDelay: `${index * 0.1}s`,
-										textWrap: 'nowrap',
-										fontWeight: 'bold',
-										color: '#E2E8F0',
-										textAlign: 'center',
-										padding: '0 2rem',
-										marginLeft: 0,
-										marginRight: 0,
-										marginTop: menu.menu.toLowerCase() === "contact" ? '25rem' : '',
-										marginBottom: lastItem ? '5rem' : '',
-										border: '4px outset buttonborder',
-										borderTopLeftRadius: 0,
-										borderTopRightRadius: 0,
-										height: '3.7rem',
-										}}>{menu.menu}</button> */}
-									{/* : */}
-									<Link to={menu.menu.toLowerCase()!=='categories'&&menu.link}
-									onClick={(e) => {
-										if (menu.menu.toLowerCase() === 'categories') {
-											e.stopPropagation();
-											handleMenuItemClick();
-										}
-									}}
-									// onClick={handleMenuItemClick}
-									className={`dropdown-item slideInRight mr-3`}
-									style={{
-										// alignContent: 'center',
-										// opacity: 0,
-										display: 'flex',
-										justifyContent: 'center',
-										alignItems: 'center',
-										animationDelay: `${index * 0.1}s`,
-										textWrap: 'nowrap',
-										// fontWeight: 'bold',
-										fontSize: '0.8rem',
-										color: '#E2E8F0',
-										textAlign: 'center',
-										padding: '0rem 1rem',
-										marginLeft: 0,
-										marginRight: 0,
-										marginTop: menu.menu.toLowerCase() === "contact" ? '25rem' : '',
-										marginBottom: lastItem ? '40%' : '',
-										border: '2px outset buttonborder',
-										borderTopLeftRadius: 0,
-										borderTopRightRadius: 0,
-										borderBottomLeftRadius: 9,
-										borderBottomRightRadius: 9,
-										height: '3.3rem',
-										// opacity: 0,
-										}}>
-											<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
-											style={{marginRight: 8, fontSize: '1rem'}} />
-											{menu.menu}
-									</Link>
-									{/* } */}
+								<Link to={menu.menu.toLowerCase()!=='categories'&&menu.link}
+								onClick={(e) => {
+									if (menu.menu.toLowerCase() === 'categories') {
+										e.stopPropagation();
+										handleMenuItemClick();
+									}
+								}}
+								// onClick={handleMenuItemClick}
+								className={`dropdown-item slideInRight mr-3`}
+								style={{
+									display: 'flex',
+									justifyContent: 'center',
+									alignItems: 'center',
+									animationDelay: `${index * 0.1}s`,
+									textWrap: 'nowrap',
+									fontSize: '0.8rem',
+									color: '#E2E8F0',
+									textAlign: 'center',
+									padding: '0rem 1rem',
+									marginLeft: 0,
+									marginRight: 0,
+									marginTop: menu.menu.toLowerCase() === "contact" ? '25rem' : '',
+									marginBottom: lastItem ? '40%' : '',
+									border: '2px outset buttonborder',
+									borderTopLeftRadius: 0,
+									borderTopRightRadius: 0,
+									borderBottomLeftRadius: 9,
+									borderBottomRightRadius: 9,
+									height: '3.3rem',
+									}}>
+										<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
+										style={{marginRight: 8, fontSize: '1rem'}} />
+										{menu.menu}
+								</Link>
 							</Fragment>
 						)
 					})}
