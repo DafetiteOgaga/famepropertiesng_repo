@@ -244,6 +244,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 				style={{
 					backgroundColor: 'rgba(0, 0, 0, 0.62)',
 					marginRight: '-1rem',
+					borderBottomLeftRadius: 20,
 				}}>
 					{headerMenuArr.map((menu, index) => {
 						const lastItem = index === headerMenuArr.length - 1;
