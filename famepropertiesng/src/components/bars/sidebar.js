@@ -32,6 +32,7 @@ function Sidebar({mobileStyle = null}) {
 			backgroundColor: mobileStyle?mobileStyle:'',
 			padding: mobileStyle?'1.2rem 1rem':'',
 			overflowY: 'auto',
+			overflowX: 'hidden',
 			maxHeight: '80vh',
 			borderTopLeftRadius: mobileStyle?'0.8rem':'',
 			borderBottomLeftRadius: mobileStyle?'0.8rem':'',
