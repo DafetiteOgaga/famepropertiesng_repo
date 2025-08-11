@@ -22,9 +22,10 @@ const categoriesOptionsArr = [
 	'Decor/Wall Art',
 	'Bags/Luggage'
 ]
-function Sidebar({mobileStyle = null}) {
+function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 	return (
 		<div
+		ref={categoryMenuRef}
 		className='slideInRight'
 		style={{
 			position: 'sticky',
