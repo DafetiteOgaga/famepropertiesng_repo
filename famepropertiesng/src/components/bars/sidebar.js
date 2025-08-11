@@ -34,7 +34,7 @@ function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 			padding: mobileStyle?'1.2rem 1rem':'',
 			overflowY: 'auto',
 			overflowX: 'hidden',
-			maxHeight: '70vh',
+			maxHeight: mobileStyle?'70vh':'',
 			borderTopLeftRadius: mobileStyle?'0.8rem':'',
 			borderBottomLeftRadius: mobileStyle?'0.8rem':'',
 			// backgroundColor: '#000',
