@@ -70,13 +70,13 @@ function Checkout() {
 								{/* <div className="col-md-12 form-group">
 									<div className="custom-control custom-checkbox">
 										<input type="checkbox" className="custom-control-input" id="newaccount"/>
-										<label className="custom-control-label" for="newaccount">Create an account</label>
+										<label className="custom-control-label" htmlFor="newaccount">Create an account</label>
 									</div>
 								</div>
 								<div className="col-md-12">
 									<div className="custom-control custom-checkbox">
 										<input type="checkbox" className="custom-control-input" id="shipto"/>
-										<label className="custom-control-label" for="shipto"  data-toggle="collapse" data-target="#shipping-address">Ship to different address</label>
+										<label className="custom-control-label" htmlFor="shipto"  data-toggle="collapse" data-target="#shipping-address">Ship to different address</label>
 									</div>
 								</div> */}
 							</div>
@@ -190,19 +190,19 @@ function Checkout() {
 								{/* <div className="form-group">
 									<div className="custom-control custom-radio">
 										<input type="radio" className="custom-control-input" name="payment" id="paypal"/>
-										<label className="custom-control-label" for="paypal">Paypal</label>
+										<label className="custom-control-label" htmlFor="paypal">Paypal</label>
 									</div>
 								</div> */}
 								<div className="form-group mb-4">
 									<div className="custom-control custom-radio">
 										<input type="radio" className="custom-control-input" name="payment" id="banktransfer"/>
-										<label className="custom-control-label" for="banktransfer">Bank Transfer</label>
+										<label className="custom-control-label" htmlFor="banktransfer">Bank Transfer</label>
 									</div>
 								</div>
 								<div className="form-group">
 									<div className="custom-control custom-radio">
 										<input type="radio" className="custom-control-input" name="payment" id="directcheck"/>
-										<label className="custom-control-label" for="directcheck">Pay on Delivery</label>
+										<label className="custom-control-label" htmlFor="directcheck">Pay on Delivery</label>
 									</div>
 								</div>
 								<button className="btn btn-block btn-primary font-weight-bold py-3">Place Order</button>
