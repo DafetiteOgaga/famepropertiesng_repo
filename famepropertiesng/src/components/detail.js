@@ -80,7 +80,7 @@ function Detail() {
 	}
 	const image = productImagesArr[isNext]
 	const randomNumber = Math.floor(Math.random() * 6);
-	console.log({selectedTab})
+	// console.log({selectedTab})
 	return (
 		<>
 			<Breadcrumb page={'Product'} />
@@ -148,23 +148,23 @@ function Detail() {
 								<form>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="size-1" name="size"/>
-										<label className="custom-control-label" for="size-1">XS</label>
+										<label className="custom-control-label" htmlFor="size-1">XS</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="size-2" name="size"/>
-										<label className="custom-control-label" for="size-2">S</label>
+										<label className="custom-control-label" htmlFor="size-2">S</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="size-3" name="size"/>
-										<label className="custom-control-label" for="size-3">M</label>
+										<label className="custom-control-label" htmlFor="size-3">M</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="size-4" name="size"/>
-										<label className="custom-control-label" for="size-4">L</label>
+										<label className="custom-control-label" htmlFor="size-4">L</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="size-5" name="size"/>
-										<label className="custom-control-label" for="size-5">XL</label>
+										<label className="custom-control-label" htmlFor="size-5">XL</label>
 									</div>
 								</form>
 							</div> */}
@@ -173,23 +173,23 @@ function Detail() {
 								<form>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="color-1" name="color"/>
-										<label className="custom-control-label" for="color-1">Black</label>
+										<label className="custom-control-label" htmlFor="color-1">Black</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="color-2" name="color"/>
-										<label className="custom-control-label" for="color-2">White</label>
+										<label className="custom-control-label" htmlFor="color-2">White</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="color-3" name="color"/>
-										<label className="custom-control-label" for="color-3">Red</label>
+										<label className="custom-control-label" htmlFor="color-3">Red</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="color-4" name="color"/>
-										<label className="custom-control-label" for="color-4">Blue</label>
+										<label className="custom-control-label" htmlFor="color-4">Blue</label>
 									</div>
 									<div className="custom-control custom-radio custom-control-inline">
 										<input type="radio" className="custom-control-input" id="color-5" name="color"/>
-										<label className="custom-control-label" for="color-5">Green</label>
+										<label className="custom-control-label" htmlFor="color-5">Green</label>
 									</div>
 								</form>
 							</div> */}
@@ -254,7 +254,7 @@ function Detail() {
 								{tabPane.map((tab, index) => {
 									// console.log({tab})
 									const isActive = tab.title.toLowerCase() === selectedTab;
-									console.log({isActive})
+									// console.log({isActive})
 									return (
 										<span key={index}
 										onClick={() => setSelectecTab(tab.title.toLowerCase())}
@@ -272,7 +272,7 @@ function Detail() {
 							</div>
 							<div className="">
 								{tabPane.map((comp, index) => {
-									console.log("comp.title.toLowerCase() === selectedTab:", comp.title.toLowerCase() === selectedTab)
+									// console.log("comp.title.toLowerCase() === selectedTab:", comp.title.toLowerCase() === selectedTab)
 									return (
 									<Fragment key={index}>
 										{comp.title.toLowerCase() === selectedTab && <comp.component />}
@@ -374,15 +374,15 @@ function ProductReview() {
 					</div>
 					<form>
 						<div className="form-group">
-							<label for="message">Your Review *</label>
+							<label htmlFor="message">Your Review *</label>
 							<textarea id="message" cols="30" rows="5" className="form-control"></textarea>
 						</div>
 						<div className="form-group">
-							<label for="name">Your Name *</label>
+							<label htmlFor="name">Your Name *</label>
 							<input type="text" className="form-control" id="name"/>
 						</div>
 						<div className="form-group">
-							<label for="email">Your Email *</label>
+							<label htmlFor="email">Your Email *</label>
 							<input type="email" className="form-control" id="email"/>
 						</div>
 						<div className="form-group mb-0">
