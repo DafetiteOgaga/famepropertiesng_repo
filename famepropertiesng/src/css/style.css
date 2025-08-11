@@ -6415,6 +6415,12 @@ a.text-dark:hover, a.text-dark:focus {
   color: #fff !important;
 }
 
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* 'auto' or 'thin' */
+  scrollbar-color: #475569 transparent; /* thumb color | track color */
+}
+
 /* For Chrome, Edge, Safari */
 /* Target the scrollbar */
 ::-webkit-scrollbar {
@@ -6439,8 +6445,3 @@ a.text-dark:hover, a.text-dark:focus {
   background: #94a3b8;
 }
 
-/* For Firefox */
-* {
-  scrollbar-width: thin; /* 'auto' or 'thin' */
-  scrollbar-color: #475569 transparent; /* thumb color | track color */
-}

@@ -87,11 +87,11 @@ function Carousel({getImage}) {
 
 		const productInterval = setInterval(() => {
 			setProductSelector(prev => (prev + 1) % productSelectorArr.length);
-		}, 4000); // Change slide every 5 seconds
+		}, 4000); // Change slide every 4 seconds
 
 		const featureInterval = setInterval(() => {
 			setFeatureSelector(prev => (prev + 1) % featureSelectorArr.length);
-		}, 3500); // Change slide every 5 seconds
+		}, 3500); // Change slide every 3.5 seconds
 
 		return () => {
 			clearInterval(carouselInterval);

@@ -51,6 +51,7 @@ const cartItemsArray = [
 	},
 ]
 function Cart() {
+	// const [cartInput, setCartInput] = useState('');
 	const deviceType = useDeviceType().width <= 576;
 	const [cartItemsArr, setCartItemsArr] = useState(cartItemsArray); // initialItems from props or data
 	const [newQuantity, setNewQuantity] = useState(() => {
@@ -60,7 +61,16 @@ function Cart() {
 		});
 		return initialQuantities;
 	});
-	
+	const handleInputChange = (e, id) => {
+		e.preventDefault();
+		const { value } = e.target;
+		// setCartInput(value);
+		setNewQuantity(prev => {
+			const updated = { ...prev };
+			updated[id] = value ? parseInt(value, 10) : 0; // Ensure it's a number
+			return updated;
+		});
+	}
 	const handleNewQuantity = (id, mode) => {
 		console.log({id, mode});
 		setNewQuantity(prev => {
@@ -136,8 +146,8 @@ function Cart() {
 												<input
 												type="text"
 												className="form-control form-control-sm bg-secondary border-0 text-center"
-												value={newQuantity[item.id]||1}
-												readOnly/>
+												onChange={(e)=>handleInputChange(e, item.id)}
+												value={newQuantity[item.id]}/>
 												<div className="input-group-btn">
 													<button className="btn btn-sm btn-primary btn-plus"
 													onClick={()=>handleNewQuantity(item.id, '+')}>
