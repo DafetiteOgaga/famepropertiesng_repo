@@ -72,7 +72,7 @@ function Cart() {
 		});
 	}
 	const handleNewQuantity = (id, mode) => {
-		console.log({id, mode});
+		// console.log({id, mode});
 		setNewQuantity(prev => {
 			const updated = { ...prev };
 			if (mode === '+') {
@@ -94,7 +94,7 @@ function Cart() {
 			return updated;
 		});
 	};
-	console.log({newQuantity});
+	// console.log({newQuantity});
 	return (
 		<>
 		<Breadcrumb page={'Shopping Cart'} />
