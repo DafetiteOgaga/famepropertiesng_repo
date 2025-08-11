@@ -53,6 +53,7 @@ const productStar = "fa fa-star"
 const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
 const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
 function Detail() {
+	// const [qInput, setQInput] = useState('');
 	const deviceType = useDeviceType().width <= 576;
 	const [selectedTab, setSelectecTab] = useState('description');
 	const [isNext, setIsNext] = useState(0)
@@ -63,6 +64,12 @@ function Detail() {
 		} else if (mode === '-') {
 			setIsNext(prev => prev > 1?(prev - 1): 0)
 		}
+	}
+	const handleQInputChange = (e) => {
+		e.preventDefault();
+		const value = e.target.value;
+		// setQInput(value);
+		setQuantity(value ? parseInt(value, 10) : 0) // Ensure it's a number
 	}
 	const handleQuantityChange = (mode) => {
 		if (mode === '+') {
@@ -194,7 +201,11 @@ function Detail() {
 											<span className="fa fa-minus"></span>
 										</button>
 									</div>
-									<input type="text" className="form-control bg-secondary border-0 text-center" value={quantity}/>
+									<input
+									type="text"
+									className="form-control bg-secondary border-0 text-center"
+									onChange={(e)=>handleQInputChange(e)}
+									value={quantity}/>
 									<div className="input-group-btn">
 										<button className="btn btn-primary btn-plus"
 										onClick={()=>handleQuantityChange('+')}>
