@@ -15,7 +15,14 @@ function Breadcrumb({page}) {
 			const itemPath = pages.filter(Boolean).slice(0, index+1).join("/").toLowerCase()
 			// console.log("page path:", itemPath);
 			return (
-				<span className="breadcrumb-item"><Link key={index} to={`/${itemPath}`} className="text-dark">{item}</Link></span>
+				<span key={index}
+				className="breadcrumb-item">
+					<Link
+					to={`/${itemPath}`}
+					className="text-dark">
+						{item}
+					</Link>
+				</span>
 			)
 		})
 	}
