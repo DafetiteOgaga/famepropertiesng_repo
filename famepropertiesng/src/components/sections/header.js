@@ -200,13 +200,13 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							}
 							if (menu.menu.toLowerCase() === "categories") return null;
 							return (
-								<>
+								<Fragment key={index}>
 									{button ?
 										<button className="dropdown-item" type="button">{menu.menu}</button>
 										:
-										<Link to={menu.link} key={index} className="text-body mr-3"
+										<Link to={menu.link} className="text-body mr-3"
 										style={{textWrap: 'nowrap'}}>{menu.menu}</Link>}
-								</>
+								</Fragment>
 							)
 						})}
 					</div>
