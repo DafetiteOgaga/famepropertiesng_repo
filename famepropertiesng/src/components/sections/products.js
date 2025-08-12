@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from '../../hooks/deviceType';
+import { getBaseUrl } from '../../hooks/baseImgUrl';
 
 const productImagesArr = [
 	"product-1.jpg",
@@ -40,9 +41,10 @@ const productsActionArr = [
 	}
 ]
 const productStar = "fa fa-star"
-const images = require.context('../../images/img', false, /\.(png|jpe?g|svg)$/);
-const getProductImage = (name) => (images(`./${name}`))
-function Products({getImage = getProductImage}) {
+// const images = require.context('../../images/img', false, /\.(png|jpe?g|svg)$/);
+// const getProductImage = (name) => (images(`./${name}`))
+const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
+function Products() {
 	const parameters = useParams();
 	const deviceType = useDeviceType();
 	// console.log('parameters:', parameters);
