@@ -26,7 +26,7 @@ function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 	return (
 		<div
 		ref={categoryMenuRef}
-		className='slideInRight'
+		className={`${mobileStyle?'':'pt-3 bg-light p-2'} slideInRight`}
 		style={{
 			position: 'sticky',
 			top: '5%',
@@ -34,17 +34,32 @@ function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 			padding: mobileStyle?'1.2rem 1rem':'',
 			overflowY: 'auto',
 			overflowX: 'hidden',
-			maxHeight: '70vh',
-			borderTopLeftRadius: mobileStyle?'0.8rem':'',
-			borderBottomLeftRadius: mobileStyle?'0.8rem':'',
+			maxHeight: mobileStyle?'70vh':'',
+			borderTopLeftRadius: '0.8rem',
+			borderBottomLeftRadius: '0.8rem',
+			borderTopRightRadius: mobileStyle?'':'0.8rem',
+			borderBottomRightRadius: mobileStyle?'':'0.8rem',
 			// backgroundColor: '#000',
 			}}>
 			{!mobileStyle &&
-			<h3 className="text-uppercase pr-1"
+			// <h3 className="text-uppercase pr-1"
+			// style={{
+			// 	color: '#475569',
+			// 	}}>Categories</h3>
+			<h5 className={`${mobileStyle?'pr-1':'position-relative mb-0'} text-uppercase`}
 			style={{
 				color: '#475569',
-				}}>Categories</h3>}
-			<nav className="navbar navbar-light p-0" id="navbar-vertical">
+				textDecoration: 'underline',
+				textDecorationColor: '#475569',
+				textDecorationThickness: '1px',
+				}}>Categories
+				{/* <span
+				style={{fontWeight: 'lighter'}}>-----</span> */}
+				</h5>
+				}
+			<nav className={`navbar navbar-light p-0`} id="navbar-vertical"
+			// style={{borderRadius: mobileStyle?'':'0.8rem',}}
+			>
 				<div className="navbar-nav w-100">
 					{categoriesOptionsArr.map((option, index) => {
 						let optionPath = option.includes('/')?(option.split('/').join('-').toLowerCase()):option.toLowerCase();

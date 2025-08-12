@@ -228,7 +228,7 @@ function FeatureAdvert({featureSelector, getImage}) {
 							}}>
 							<span className={`${featureItem.heading} fa-7x ${isActive?evenIndex?'fadeInLeftIcon':'fadeInRightIcon':''} text-white ${isMobile?'mb-1 ml-3':'m-0'} mr-3`}
 							style={{
-								fontSize: '2rem',
+								fontSize: isMobile?'2rem':'',
 								marginTop: '-1.5rem',
 								// color: isMobile?'whitesmoke':''
 							}}> </span>
