@@ -14,9 +14,6 @@ import { Home } from './home';
 import { useScrollDetection } from '../hooks/scrollDetection';
 import { getBaseUrl } from '../hooks/baseImgUrl';
 
-// const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
-// const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
-// const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 function Index() {
 	const { lastScrollY } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
 	const deviceType = useDeviceType();
