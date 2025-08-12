@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDeviceType } from "../../hooks/deviceType";
-import { getBaseUrl } from "../../hooks/baseImgUrl";
+import { getImage } from "../../hooks/baseImgUrl";
 import { ProductAdvert } from "./carouselSections/productAdvert";
 import { FeatureAdvert } from "./carouselSections/featureAdvert";
 
@@ -78,7 +78,6 @@ const featureSelectorArr = [
 	},
 ];
 
-const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 function Carousel() {
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
@@ -154,7 +153,7 @@ function CarouselAdverts({carouselSelector, productSelector, featureSelector}) {
 						return (
 							<div key={index} className={`carousel-item position-relative ${isActive?'active carousel-item-next':'carousel-item-prev'} carousel-div1`}>
 								<img className="position-absolute w-100 h-100 carousel-div1-image" alt={carouselItem.image} src={getImage(
-									carouselItem.image
+									carouselItem.image, 'img'
 									// 'carousel-1.jpg'
 									)}/>
 								<div className="carousel-caption d-flex flex-column align-items-center justify-content-center">

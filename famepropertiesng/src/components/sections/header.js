@@ -4,7 +4,7 @@ import { useScrollDetection } from '../../hooks/scrollDetection';
 // import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 import { useDeviceType } from '../../hooks/deviceType';
 import { Sidebar } from '../bars/sidebar';
-import { getBaseUrl } from '../../hooks/baseImgUrl';
+import { getImage } from '../../hooks/baseImgUrl';
 
 const headerMenuArr = [
 	{
@@ -43,7 +43,6 @@ const dressesArr = [
 	"women's dresses",
 	"baby's dresses"
 ]
-const getImage = (fileName) => getBaseUrl(fileName);
 function Header({mTop}) {
 	// console.log({mTop})
 	const [isMenuOpen, setIsMenuOpen] = useState(false);

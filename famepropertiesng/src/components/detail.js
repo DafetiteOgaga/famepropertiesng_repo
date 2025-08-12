@@ -2,7 +2,7 @@ import { Fragment, useState } from "react";
 import { Breadcrumb } from "./sections/breadcrumb";
 import { Link } from 'react-router-dom';
 import { useDeviceType } from "../hooks/deviceType";
-import { getBaseUrl } from "../hooks/baseImgUrl";
+import { getImage } from "../hooks/baseImgUrl";
 
 const productImagesArr = [
 	"product-1.jpg",
@@ -51,9 +51,6 @@ const tabPane = [
 	},
 ]
 const productStar = "fa fa-star"
-// const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
-// const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
-const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 function Detail() {
 	// const [qInput, setQInput] = useState('');
 	const deviceType = useDeviceType().width <= 576;
@@ -97,7 +94,7 @@ function Detail() {
 						<div  className="carousel slide">
 							<div className="carousel-inner bg-light">
 								<div className="carousel-item active">
-									<img className="w-100 h-100" src={getImage(image)} alt={image}/>
+									<img className="w-100 h-100" src={getImage(image, 'img')} alt={image}/>
 								</div>
 							</div>
 							<span className="carousel-control-prev"
@@ -347,7 +344,7 @@ function ProductReview() {
 				<div className="col-md-6">
 					<h4 className="mb-4">1 review for "Product Name"</h4>
 					<div className="media mb-4">
-						<img src={getImage("user.jpg")} alt="" className="img-fluid mr-3 mt-1 detail-div-div2"/>
+						<img src={getImage("user.jpg", 'img')} alt="" className="img-fluid mr-3 mt-1 detail-div-div2"/>
 						<div className="media-body">
 							<h6>John Doe<small> - <i>01 Jan 2045</i></small></h6>
 							<div className="text-primary mb-2">

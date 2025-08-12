@@ -3,13 +3,12 @@ import { DafetiteFooter } from "../../hooks/dafetiteFooter/dafetiteFooter";
 import { Link } from 'react-router-dom';
 import { useDeviceType } from "../../hooks/deviceType";
 import { Fragment } from "react";
-import { getBaseUrl } from "../../hooks/baseImgUrl";
+import { getImage } from "../../hooks/baseImgUrl";
 
 const switchFooter = [
 	<FooterBrand />,
 	<MailingList />
 ]
-const getImage = (fileName) => getBaseUrl(fileName);
 function Footer() {
 	const deviceType = useDeviceType();
 	const footerItems = deviceType.width > 768 ? switchFooter : [...switchFooter].reverse();
