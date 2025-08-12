@@ -1,20 +1,22 @@
 import React  from 'react';
-import { TopBar } from './bars/topbar';
+// import { TopBar } from './bars/topbar';
 import { Header } from './sections/header';
 import { Carousel } from './sections/carousel';
-import { Features } from './sections/features';
-import { Categories } from './sections/categories';
+// import { Features } from './sections/features';
+// import { Categories } from './sections/categories';
 import { Products } from './sections/products';
-import { Offer } from './sections/offer';
+// import { Offer } from './sections/offer';
 import { Footer } from './sections/footer';
 import { Sidebar } from './bars/sidebar';
 import { useDeviceType } from '../hooks/deviceType';
 import { Outlet } from 'react-router-dom';
 import { Home } from './home';
 import { useScrollDetection } from '../hooks/scrollDetection';
+import { getBaseUrl } from '../hooks/baseImgUrl';
 
-const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
-const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
+// const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
+// const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
+// const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 function Index() {
 	const { lastScrollY } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
 	const deviceType = useDeviceType();
@@ -43,14 +45,10 @@ function Index() {
 					</div>}
 				<div>
 					<Outlet />
-					{/* Carousel */}
-					{/* <Carousel getImage={getImage} /> */}
-					{/* Products */}
-					{/* <Products getImage={getImage} /> */}
 				</div>
 			</div>
 			{/* Footer */}
-			<Footer getImage={getImage}/>
+			<Footer />
 			{/* <!-- Back to Top --> */}
 			<button className="back-to-top btn btn-primary"
 			style={{display: lastScrollY > 100 ? 'block' : 'none'}}

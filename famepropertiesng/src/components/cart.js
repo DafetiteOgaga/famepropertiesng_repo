@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Breadcrumb } from "./sections/breadcrumb";
 import { Link } from 'react-router-dom';
 import { useDeviceType } from "../hooks/deviceType";
+import { getBaseUrl } from "../hooks/baseImgUrl";
 
-const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
-const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
-
+// const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
+// const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
+const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 const tableHeadArr = [
 	"Products",
 	"Price",

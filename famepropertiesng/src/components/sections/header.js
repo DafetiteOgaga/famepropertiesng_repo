@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useScrollDetection } from '../../hooks/scrollDetection';
-import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
+// import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 import { useDeviceType } from '../../hooks/deviceType';
 import { Sidebar } from '../bars/sidebar';
+import { getBaseUrl } from '../../hooks/baseImgUrl';
 
 const headerMenuArr = [
 	{
@@ -42,6 +43,7 @@ const dressesArr = [
 	"women's dresses",
 	"baby's dresses"
 ]
+const getImage = (fileName) => getBaseUrl(fileName);
 function Header({mTop}) {
 	// console.log({mTop})
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -309,7 +311,7 @@ function Brand() {
 			// paddingRight: '1%',
 			cursor: 'pointer',
 			}}>
-			<img src={famousPropertiesNGLogo} alt="famouspropertiesng"
+			<img src={getImage('famouspropertiesngTransparent.png')} alt="famouspropertiesng"
 			style={{width: removeLabelName?'40%':'13%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
 			{!removeLabelName &&
 			<span

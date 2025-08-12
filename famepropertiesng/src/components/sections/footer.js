@@ -1,14 +1,16 @@
 import { DafetiteFooter } from "../../hooks/dafetiteFooter/dafetiteFooter";
-import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
+// import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 import { Link } from 'react-router-dom';
 import { useDeviceType } from "../../hooks/deviceType";
 import { Fragment } from "react";
+import { getBaseUrl } from "../../hooks/baseImgUrl";
 
 const switchFooter = [
 	<FooterBrand />,
 	<MailingList />
 ]
-function Footer({getImage}) {
+const getImage = (fileName) => getBaseUrl(fileName);
+function Footer() {
 	const deviceType = useDeviceType();
 	const footerItems = deviceType.width > 768 ? switchFooter : [...switchFooter].reverse();
 
@@ -49,7 +51,7 @@ function FooterBrand() {
 				display: 'flex',
 				cursor: 'pointer',
 				}}>
-				<img src={famousPropertiesNGLogo} alt="famouspropertiesng"
+				<img src={getImage('famouspropertiesngTransparent.png')} alt="famouspropertiesng"
 				style={{width: '5%', backgroundColor: '#f5f5f5', borderRadius: '5%'}} />
 				<div
 				style={{alignSelf: 'center'}}>
