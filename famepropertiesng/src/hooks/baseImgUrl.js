@@ -1,6 +1,11 @@
-
+const images = require.context('../images/', true, /\.(png|jpe?g|svg)$/);
 
 function getBaseUrl(image) {
-	return `https://raw.githubusercontent.com/DafetiteOgaga/famepropertiesng_assets/refs/heads/main/images/${image}`
+	
+	// const finalUrl = `https://raw.githubusercontent.com/DafetiteOgaga/famepropertiesng_assets/refs/heads/main/images/${image}`
+	const finalUrl = images(`./${image}`);
+	// console.log({finalUrl});
+	return finalUrl;
 }
-export { getBaseUrl };
+const getImage = (fileName, img=null) => getBaseUrl(`${img?img+'/':''}${fileName}`);
+export { getImage };
