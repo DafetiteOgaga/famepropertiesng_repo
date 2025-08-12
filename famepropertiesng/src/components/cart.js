@@ -2,11 +2,8 @@ import { useState } from "react";
 import { Breadcrumb } from "./sections/breadcrumb";
 import { Link } from 'react-router-dom';
 import { useDeviceType } from "../hooks/deviceType";
-import { getBaseUrl } from "../hooks/baseImgUrl";
+import { getImage } from "../hooks/baseImgUrl";
 
-// const images = require.context('../images/img', false, /\.(png|jpe?g|svg)$/);
-// const getImage = (name) => (images(`./${name}`)) // to get a specific image by name
-const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 const tableHeadArr = [
 	"Products",
 	"Price",
@@ -134,7 +131,7 @@ function Cart() {
 							{cartItemsArr.map((item, index) => {
 								return (
 									<tr key={index}>
-										<td className="align-middle"><img src={getImage(item.image)} alt={item.image} className="cart-image-img"/> {item.name}</td>
+										<td className="align-middle"><img src={getImage(item.image, 'img')} alt={item.image} className="cart-image-img"/> {item.name}</td>
 										<td className="align-middle">₦{item.price}</td>
 										<td className="align-middle">
 											<div className="input-group quantity mx-auto cart-td-table">
