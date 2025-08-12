@@ -1,8 +1,6 @@
-import { getBaseUrl } from "../../../hooks/baseImgUrl";
+import { getImage } from "../../../hooks/baseImgUrl";
 import { useDeviceType } from "../../../hooks/deviceType";
 
-
-const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 function FeatureAdvert({featureSelector, featureSelectorArr}) {
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
@@ -30,7 +28,7 @@ function FeatureAdvert({featureSelector, featureSelectorArr}) {
 							}}>
 							{!isMobile &&
 							<img className="img-fluid" alt=""
-							src={getImage("story-bg-1.jpg")}/>}
+							src={getImage("story-bg-1.jpg", 'img')}/>}
 							<div className={`d-flex align-items-center mb-4 feature-div justify-content-center`}
 							style={{
 								// position: isMobile?'absolute':'',
