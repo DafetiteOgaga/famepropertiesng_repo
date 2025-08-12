@@ -1,9 +1,8 @@
-import { getBaseUrl } from "../../../hooks/baseImgUrl";
+import { getImage } from "../../../hooks/baseImgUrl";
 import { useDeviceType } from "../../../hooks/deviceType";
 
-const getImage = (fileName) => getBaseUrl(`img/${fileName}`);
 function ProductAdvert({productSelector, productSelectorArr}) {
-	console.log({productSelector, productSelectorArr})
+	// console.log({productSelector, productSelectorArr})
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
 	const isSmallMobile = deviceType.width <= 400
@@ -30,7 +29,7 @@ function ProductAdvert({productSelector, productSelectorArr}) {
 						}:{}
 						}}>
 						<img className="img-fluid" alt="" src={getImage(
-							productItem.image
+							productItem.image, 'img'
 							// 'carousel-1.jpg'
 							)}/>
 						<div className="offer-text">
