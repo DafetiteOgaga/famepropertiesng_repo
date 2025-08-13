@@ -166,7 +166,11 @@ function CarouselAdverts({carouselSelector, productSelector, featureSelector}) {
 								</div>
 								{isMobile &&
 								<div className="">
-									<ProductAndFeatureAdverts productSelector={productSelector} featureSelector={featureSelector} />
+									<ProductAndFeatureAdverts
+										productSelector={productSelector}
+										productSelectorArr={productSelectorArr}
+										featureSelector={featureSelector}
+										featureSelectorArr={featureSelectorArr} />
 								</div>}
 							</div>
 						)
