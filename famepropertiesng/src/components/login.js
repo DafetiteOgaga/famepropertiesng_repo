@@ -66,9 +66,9 @@ function LogIn() {
 						onChange={onChangeHandler}
 						value={formData.email}
 						className="form-control"
-						type="text"
+						type="email"
 						placeholder="example@email.com"
-						style={{}}
+						style={{borderRadius: '5px'}}
 						required/>
 					</div>
 					<div className="form-group"
@@ -84,7 +84,7 @@ function LogIn() {
 						className="form-control"
 						type="password"
 						placeholder="Password"
-						style={{}}
+						style={{borderRadius: '5px'}}
 						required/>
 					</div>
 					<div className="form-group"
