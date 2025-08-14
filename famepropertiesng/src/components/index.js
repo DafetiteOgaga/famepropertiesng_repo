@@ -20,7 +20,7 @@ function Index() {
 	const mTop = deviceType.laptop ? '12':deviceType.desktop ?'6':'22';
 	return (
 		<>
-			<div className='container-fluid px-xl-5'
+			<main className='container-fluid px-xl-5'
 			id='top-page'
 			style={{
 				...(deviceType.width>=992) ?
@@ -43,7 +43,7 @@ function Index() {
 				<div>
 					<Outlet />
 				</div>
-			</div>
+			</main>
 			{/* Footer */}
 			<Footer />
 			{/* <!-- Back to Top --> */}
