@@ -6482,8 +6482,12 @@ a.text-dark:hover, a.text-dark:focus {
   border: 1px solid #858585 !important;
   border-radius: 8px !important;
   background-color: rgba(0, 0, 0, 0.7) !important;
-  color: white !important;
+  color: #F8F6F2 !important;
 }
 .Toastify__toast--success {
-  --toastify-icon-color-success: #495057;
+  --toastify-icon-color-success: #F8F6F2;
+  --toastify-color-progress-success: #F8F6F2;
+  /* --toastify-color-progress-error: #e91e63;
+  --toastify-color-progress-warning: #ffc107;
+  --toastify-color-progress-info: #2196f3; */
 }
