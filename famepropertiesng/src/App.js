@@ -7,12 +7,27 @@ import './css/reduced-motion.css'
 // import './css/test.css'
 // import { useLogMediaSize } from './hooks/mediaSize';
 import { AppRoutes } from './routes/route';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useDeviceType } from './hooks/deviceType';
 
 function App() {
-  // useLogMediaSize();
+  const deviceType = useDeviceType().width <= 576;
   return (
     <>
       <AppRoutes />
+      <ToastContainer
+      toastClassName="custom_toast"
+      position={deviceType?"top-center":"top-right"}
+      autoClose={3000} // 3 seconds (you can increase if needed)
+      hideProgressBar={false}
+      newestOnTop={true}
+      closeOnClick
+      // rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      />
     </>
   );
 }

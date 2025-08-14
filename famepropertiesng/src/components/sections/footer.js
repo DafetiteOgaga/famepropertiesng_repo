@@ -1,6 +1,6 @@
 import { DafetiteFooter } from "../../hooks/dafetiteFooter/dafetiteFooter";
 // import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useDeviceType } from "../../hooks/deviceType";
 import { Fragment } from "react";
 import { getImage } from "../../hooks/baseImgUrl";
@@ -10,11 +10,16 @@ const switchFooter = [
 	<MailingList />
 ]
 function Footer() {
+	const location = useLocation().pathname.split('/').pop();
+	// console.log("Current Location:", location);
+	const logIn = location.toLowerCase() === 'login' || location.toLowerCase() === 'signup';
+	// console.log({logIn});
 	const deviceType = useDeviceType();
 	const footerItems = deviceType.width > 768 ? switchFooter : [...switchFooter].reverse();
 
 	return (
-		<div className="bg-dark text-secondary mt-5 pt-3">
+		<div className={`bg-dark text-secondary mt-5 pt-${logIn?'0':'3'}`}>
+			{!logIn &&
 			<div className="row px-xl-5"
 			style={{margin: 0}}>
 				{footerItems.map((comp, index) => {
@@ -25,7 +30,7 @@ function Footer() {
 					)
 				})}
 				
-			</div>
+			</div>}
 			<div className="row border-top mx-xl-5 py-2 footer-div"
 			style={{margin: 0}}>
 				<div className="col-md-6 px-xl-0">
