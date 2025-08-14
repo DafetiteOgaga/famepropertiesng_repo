@@ -31,7 +31,7 @@ function LogIn() {
 			toast.error('Error! Login Failed. Invalid form data');
 			return;
 		}
-		console.log('Form submitted:', formData);
+		// console.log('Form submitted:', formData);
 		createSession.setItem('fpng-status', formData.email, 1000*60);
 		// Here you can handle the login logic, e.g., API call
 		// Reset form after submission
