@@ -182,11 +182,11 @@ function Header({mTop}) {
 }
 
 function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
-	console.log('menu items2')
+	// console.log('menu items2')
 	const deviceType = useDeviceType()
 	const navigate = useNavigate();
 	let status = createSession.getItem('fpng-status');
-	console.log('fpng-status:', status)
+	// console.log('fpng-status:', status)
 	status = status??null;
 	const [itemClicked, setItemClicked] = useState(false);
 	const handleMenuItemClick = () => {
@@ -210,12 +210,12 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							let statusLink = null;
 							if (menu.menu.toLowerCase() === "auth") {
 								button = true;
-								console.log({status})
+								// console.log({status})
 								statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
 								status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-								console.log({status})
+								// console.log({status})
 								
-								console.log({statusLink})
+								// console.log({statusLink})
 							}
 							if (menu.menu.toLowerCase() === "categories") return null;
 							return (
@@ -284,21 +284,21 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 						if (status.toLowerCase() === "auth") {
 							status = temp;
 							// button = true;
-							console.log({status})
+							// console.log({status})
 							statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
 							status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-							console.log({status})
+							// console.log({status})
 							
-							console.log({statusLink})
+							// console.log({statusLink})
 						}
-						console.log(status)
+						// console.log(status)
 						return (
 							<Fragment key={index}>
 								<Link to={menu?.menu?.toLowerCase()!=='categories'&&statusLink}
 								onClick={(e) => {
-									console.log("Clicked on:", status);
+									// console.log("Clicked on:", status);
 									if (menu?.menu?.toLowerCase() === 'categories') {
-										console.log("Clicked on Categories");
+										// console.log("Clicked on Categories");
 										e.stopPropagation();
 										handleMenuItemClick();
 									}
