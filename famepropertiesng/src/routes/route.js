@@ -8,6 +8,8 @@ import { Checkout } from '../components/checkout';
 import { Detail } from '../components/detail';
 import { PageNotFound } from '../components/pageNotFound';
 import { Products } from '../components/sections/products';
+import { LogIn } from '../components/login';
+import { SignUp } from '../components/signUp';
 
 function AppRoutes() {
 	return (
@@ -25,6 +27,10 @@ function AppRoutes() {
 				<Route path="detail" element={<Detail />} />
 				{/* cart */}
 				<Route path="cart" element={<Cart />} />
+				{/* log in */}
+				<Route path="login" element={<LogIn />} />
+				{/* sign up */}
+				<Route path="signup" element={<SignUp />} />
 				{/* checkout */}
 				<Route path="cart/checkout" element={<Checkout />} />
 				{/* contact us */}
