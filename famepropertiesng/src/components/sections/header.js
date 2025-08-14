@@ -1,23 +1,29 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useScrollDetection } from '../../hooks/scrollDetection';
 // import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 import { useDeviceType } from '../../hooks/deviceType';
 import { Sidebar } from '../bars/sidebar';
 import { getImage } from '../../hooks/baseImgUrl';
+import { createSession } from '../../hooks/setupLocalStorage';
 
 const headerMenuArr = [
 	{
-		menu: "Sign in"
-		, link: ""
-	},
-	{
-		menu: "Sign out",
-		link: ""
-	},
-	{
-		menu: "Sign up",
-		link: ""
+		menu: "auth",
+		authItems: {
+			login: {
+				menu: "Login",
+				link: "/login"
+			},
+			logout: {
+				menu: "Logout",
+				link: ""
+			},
+			signup: {
+				menu: "Sign Up",
+				link: "/signup"
+			},
+		},
 	},
 	{
 		menu: "Categories",
@@ -176,7 +182,12 @@ function Header({mTop}) {
 }
 
 function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
+	console.log('menu items2')
 	const deviceType = useDeviceType()
+	const navigate = useNavigate();
+	let status = createSession.getItem('fpng-status');
+	console.log('fpng-status:', status)
+	status = status??null;
 	const [itemClicked, setItemClicked] = useState(false);
 	const handleMenuItemClick = () => {
 		setItemClicked(prev => !prev);
@@ -196,14 +207,32 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 					<div className="d-inline-flex align-items-center h-100">
 						{headerMenuArr.map((menu, index) => {
 							let button = false
-							if (menu.menu.toLowerCase() === "sign in" || menu.menu.toLowerCase() === "sign out" || menu.menu.toLowerCase() === "sign up") {
+							let statusLink = null;
+							if (menu.menu.toLowerCase() === "auth") {
 								button = true;
+								console.log({status})
+								statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
+								status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
+								console.log({status})
+								
+								console.log({statusLink})
 							}
 							if (menu.menu.toLowerCase() === "categories") return null;
 							return (
 								<Fragment key={index}>
 									{button ?
-										<button className="dropdown-item" type="button">{menu.menu}</button>
+										<button
+										style={{
+											// paddingRight: '1rem',
+											color: '#F8F6F2',
+											border: '1px solid rgba(248, 246, 242, 0.23)',
+											borderRadius: '3px',
+										}}
+										onClick={()=>navigate(statusLink)}
+										className="dropdown-item"
+										type="button">
+											{status}
+										</button>
 										:
 										<Link to={menu.link} className="text-body mr-3"
 										style={{textWrap: 'nowrap'}}>{menu.menu}</Link>}
@@ -249,15 +278,27 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 				}}>
 					{headerMenuArr.map((menu, index) => {
 						const lastItem = index === headerMenuArr.length - 1;
-						// let button = false
-						// if (menu.menu.toLowerCase() === "sign in" || menu.menu.toLowerCase() === "sign out" || menu.menu.toLowerCase() === "sign up") {
-						// 	button = true;
-						// }
+						let statusLink = menu.link;
+						const temp = status
+						status = menu?.menu;
+						if (status.toLowerCase() === "auth") {
+							status = temp;
+							// button = true;
+							console.log({status})
+							statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
+							status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
+							console.log({status})
+							
+							console.log({statusLink})
+						}
+						console.log(status)
 						return (
 							<Fragment key={index}>
-								<Link to={menu.menu.toLowerCase()!=='categories'&&menu.link}
+								<Link to={menu?.menu?.toLowerCase()!=='categories'&&statusLink}
 								onClick={(e) => {
-									if (menu.menu.toLowerCase() === 'categories') {
+									console.log("Clicked on:", status);
+									if (menu?.menu?.toLowerCase() === 'categories') {
+										console.log("Clicked on Categories");
 										e.stopPropagation();
 										handleMenuItemClick();
 									}
@@ -276,7 +317,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 									padding: '0rem 1rem',
 									marginLeft: 0,
 									marginRight: 0,
-									marginTop: menu.menu.toLowerCase() === "contact" ? '18rem' : '',
+									marginTop: menu?.menu?.toLowerCase() === "contact" ? '21rem' : '',
 									marginBottom: lastItem ? '60%' : '',
 									border: '2px outset buttonborder',
 									borderTopLeftRadius: 0,
@@ -287,7 +328,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 									}}>
 										<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
 										style={{marginRight: 8, fontSize: '1rem'}} />
-										{menu.menu}
+										{status}
 								</Link>
 							</Fragment>
 						)
