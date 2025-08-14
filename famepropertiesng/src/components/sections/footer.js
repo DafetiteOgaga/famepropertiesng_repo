@@ -11,9 +11,9 @@ const switchFooter = [
 ]
 function Footer() {
 	const location = useLocation().pathname.split('/').pop();
-	console.log("Current Location:", location);
+	// console.log("Current Location:", location);
 	const logIn = location.toLowerCase() === 'login' || location.toLowerCase() === 'signup';
-	console.log({logIn});
+	// console.log({logIn});
 	const deviceType = useDeviceType();
 	const footerItems = deviceType.width > 768 ? switchFooter : [...switchFooter].reverse();
 
