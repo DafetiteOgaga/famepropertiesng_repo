@@ -60,7 +60,7 @@ function LogIn() {
 						marginLeft: marginX,
 						marginRight: marginX,
 						}}>
-						<label>Email</label>
+						<label>Email<span>*</span></label>
 						<input
 						name="email"
 						onChange={onChangeHandler}
@@ -76,14 +76,14 @@ function LogIn() {
 						marginLeft: marginX,
 						marginRight: marginX,
 						}}>
-						<label>Password</label>
+						<label>Password<span>*</span></label>
 						<input
 						name="password"
 						onChange={onChangeHandler}
 						value={formData.password}
 						className="form-control"
 						type="password"
-						placeholder="Password"
+						placeholder="password"
 						style={{borderRadius: '5px'}}
 						required/>
 					</div>
