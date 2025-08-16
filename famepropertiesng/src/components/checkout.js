@@ -19,35 +19,61 @@ function Checkout() {
 								Billing Address
 							</span>
 						</h5>
-						<div className="bg-light p-30 mb-5">
+						<div className="bg-light p-30 mb-5"
+						style={{borderRadius: '10px'}}>
 							<div className="row">
 								<div className="col-md-6 form-group">
 									<label>First Name</label>
-									<input className="form-control" type="text" placeholder="John"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="John"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>Last Name</label>
-									<input className="form-control" type="text" placeholder="Doe"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Doe"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>E-mail</label>
-									<input className="form-control" type="text" placeholder="example@email.com"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="example@email.com"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>Mobile No</label>
-									<input className="form-control" type="text" placeholder="+123 456 789"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="+234 444 333 2222"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>Address Line 1</label>
-									<input className="form-control" type="text" placeholder="123 Street"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="123 Street"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>Address Line 2</label>
-									<input className="form-control" type="text" placeholder="123 Street"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="123 Street"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>Country</label>
-									<select className="custom-select">
+									<select className="custom-select"
+									style={{borderRadius: '5px'}}>
 										<option selected>Nigeria</option>
 										<option>Ghana</option>
 										<option>Cameroon</option>
@@ -57,15 +83,27 @@ function Checkout() {
 								
 								<div className="col-md-6 form-group">
 									<label>State</label>
-									<input className="form-control" type="text" placeholder="New York"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Lagos"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>City</label>
-									<input className="form-control" type="text" placeholder="New York"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Lagos"/>
 								</div>
 								<div className="col-md-6 form-group">
 									<label>ZIP Code</label>
-									<input className="form-control" type="text" placeholder="123"/>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="123"/>
 								</div>
 								{/* <div className="col-md-12 form-group">
 									<div className="custom-control custom-checkbox">
@@ -81,7 +119,7 @@ function Checkout() {
 								</div> */}
 							</div>
 						</div>
-						<div className="collapse mb-5" id="shipping-address">
+						{/* <div className="collapse mb-5" id="shipping-address">
 							<h5 className="section-title position-relative text-uppercase mb-3">
 								<span className="bg-secondary pr-3"
 								style={{color: '#475569'}}>
@@ -137,7 +175,7 @@ function Checkout() {
 									</div>
 								</div>
 							</div>
-						</div>
+						</div> */}
 					</div>
 					<div className="col-lg-4">
 						<h5 className="section-title position-relative text-uppercase mb-3">
@@ -146,7 +184,8 @@ function Checkout() {
 								Order Total
 							</span>
 						</h5>
-						<div className="bg-light p-30 mb-5">
+						<div className="bg-light p-30 mb-5"
+						style={{borderRadius: '10px'}}>
 							<div className="border-bottom">
 								<h6 className="mb-3">Products</h6>
 								<div className="d-flex justify-content-between">
@@ -186,7 +225,8 @@ function Checkout() {
 									Payment
 								</span>
 							</h5>
-							<div className="bg-light p-30">
+							<div className="bg-light p-30"
+							style={{borderRadius: '10px'}}>
 								{/* <div className="form-group">
 									<div className="custom-control custom-radio">
 										<input type="radio" className="custom-control-input" name="payment" id="paypal"/>
