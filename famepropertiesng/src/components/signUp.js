@@ -32,25 +32,48 @@ function SignUp() {
 						style={{borderRadius: '10px'}}>
 							<div className="row">
 								<div className="col-md-6 form-group">
-									<label>First Name</label>
+									<label>First Name<span>*</span></label>
 									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="John"/>
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="John"/>
+								</div>
+								
+								<div className="col-md-6 form-group">
+									<label>Last Name<span>*</span></label>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Doe"/>
 								</div>
 								<div className="col-md-6 form-group">
-									<label>Last Name</label>
+									<label>Middle Name</label>
 									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="Doe"/>
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Dolly"/>
 								</div>
 								<div className="col-md-6 form-group">
-									<label>E-mail</label>
+									<label>Username<span>*</span></label>
 									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="example@email.com"/>
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Dols"/>
 								</div>
+								
 								<div className="col-md-6 form-group">
-									<label>Mobile No</label>
+									<label>Address<span>*</span></label>
 									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="+234 806 000 1111"/>
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="No.3, 123 crescent, Addo, Ajah"/>
 								</div>
+								
 								{/* <div className="col-md-6 form-group">
 									<label>Address Line 1</label>
 									<input
@@ -61,8 +84,27 @@ function SignUp() {
 									<input
 									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="123 Street"/>
 								</div> */}
+								
+								{/* ¹²³€½½¾{[]}\¸`~¸~`¨þø→↓←ŧ¶eł@æßðđŋħˀĸł´^ ̣·─µn”“¢»« */}
 								<div className="col-md-6 form-group">
-									<label>Country</label>
+									<label>City</label>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Ajah"/>
+								</div>
+								<div className="col-md-6 form-group">
+									<label>State<span>*</span></label>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="text"
+									placeholder="Lagos"/>
+								</div>
+								<div
+								className="col-md-6 form-group">
+									<label>Country<span>*</span></label>
 									<select
 									style={{borderRadius: '5px'}}
 									className="custom-select">
@@ -72,16 +114,42 @@ function SignUp() {
 										<option>Algeria</option>
 									</select>
 								</div>
-								
 								<div className="col-md-6 form-group">
-									<label>State</label>
+									<label>Email<span>*</span></label>
 									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="Lagos"/>
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="email"
+									placeholder="example@email.com"/>
 								</div>
 								<div className="col-md-6 form-group">
-									<label>City</label>
+									<label>Mobile No<span>*</span></label>
 									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="Ajah"/>
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="tel"
+									inputmode="numeric"   // <!-- brings up number keypad on mobile -->
+									// pattern="[0-9]{7,11}" <!-- only numbers, length 7 to 11 -->
+									minlength="7"
+									maxlength="14"
+									pattern="[0-9]{7,14}" // allows only numbers and between 7 and 14 characters
+									placeholder="+234 806 000 1111"/>
+								</div>
+								<div className="col-md-6 form-group">
+									<label>Password<span>*</span></label>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="password"
+									placeholder="password"/>
+								</div>
+								<div className="col-md-6 form-group">
+									<label>Password Confirmation<span>*</span></label>
+									<input
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									type="password"
+									placeholder="password confirmation"/>
 								</div>
 								{/* <div className="col-md-6 form-group">
 									<label>ZIP Code</label>
@@ -107,6 +175,10 @@ function SignUp() {
 							className="btn btn-block btn-auth font-weight-bold py-3">
 								Sign Up
 							</button>
+							{/* <span
+							style={{
+								fontSize: '0.7rem',
+							}}>Labels marked with * must be filled</span> */}
 							<p className="pt-3"
 							style={{
 								display: 'flex',
