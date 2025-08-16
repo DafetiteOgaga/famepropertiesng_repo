@@ -24,24 +24,44 @@ function Contact() {
 							<div id="success"></div>
 							<form name="sentMessage" id="contactForm" noValidate="novalidate">
 								<div className="control-group">
-									<input type="text" className="form-control" id="name" placeholder="Your Name"
-										required="required" data-validation-required-message="Please enter your name" />
+									<input type="text"
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									id="name"
+									placeholder="Your Name"
+									required="required"
+									data-validation-required-message="Please enter your name" />
 									<p className="help-block text-danger"></p>
 								</div>
 								<div className="control-group">
-									<input type="email" className="form-control" id="email" placeholder="Your Email"
-										required="required" data-validation-required-message="Please enter your email" />
+									<input type="email"
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									id="email"
+									placeholder="Your Email"
+									required="required"
+									data-validation-required-message="Please enter your email" />
 									<p className="help-block text-danger"></p>
 								</div>
 								<div className="control-group">
-									<input type="text" className="form-control" id="subject" placeholder="Subject"
-										required="required" data-validation-required-message="Please enter a subject" />
+									<input type="text"
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									id="subje
+									t" placeholder="Subject"
+									required="required"
+									data-validation-required-message="Please enter a subject" />
 									<p className="help-block text-danger"></p>
 								</div>
 								<div className="control-group">
-									<textarea className="form-control" rows="8" id="message" placeholder="Message"
-										required="required"
-										data-validation-required-message="Please enter your message"></textarea>
+									<textarea
+									style={{borderRadius: '5px'}}
+									className="form-control"
+									rows="8"
+									id="message"
+									placeholder="Message"
+									required="required"
+									data-validation-required-message="Please enter your message"></textarea>
 									<p className="help-block text-danger"></p>
 								</div>
 								<div>
@@ -63,7 +83,10 @@ function Contact() {
 							src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.775954257609!2d3.236202274623938!3d6.549947222856214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b85035bd522d1%3A0x511bd0254602b720!2sIsheri%20Rd%2C%20Lagos!5e0!3m2!1sen!2sng!4v1754568154818!5m2!1sen!2sng"
 							width="600"
 							height="450"
-							style={{border: 0,}}
+							style={{
+								border: 0,
+								borderRadius: '5px'
+							}}
 							allowFullScreen=""
 							loading="lazy"
 							referrerPolicy="no-referrer-when-downgrade">
