@@ -1,6 +1,7 @@
 import { Breadcrumb } from "./sections/breadcrumb"
 import { useDeviceType } from "../hooks/deviceType"
 import { Link } from 'react-router-dom';
+import { GoogleAuthButtonAndSetup } from "../hooks/allAuth/googleAuthButtonAndSetup";
 
 function SignUp() {
 	const deviceType = useDeviceType().width <= 576;
@@ -194,9 +195,18 @@ function SignUp() {
 									Log in
 								</Link>
 							</p>
+							{/* <div
+							style={{
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								marginTop: '1rem',
+							}}>
+								<GoogleAuthButtonAndSetup />
+							</div> */}
 						</div>
 						
-						<div className="collapse mb-5" id="shipping-address">
+						{/* <div className="collapse mb-5" id="shipping-address">
 							<h5 className="section-title position-relative text-uppercase mb-3">
 								<span className="bg-secondary pr-3"
 								style={{color: '#475569'}}>
@@ -252,8 +262,11 @@ function SignUp() {
 									</div>
 								</div>
 							</div>
-						</div>
+							
+						</div> */}
+						
 					</div>
+					
 					{/* <div className="col-lg-4">
 						<h5 className="section-title position-relative text-uppercase mb-3">
 							<span className="bg-secondary pr-3"
