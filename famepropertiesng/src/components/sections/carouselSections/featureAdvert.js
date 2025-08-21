@@ -1,15 +1,17 @@
 import { getImage } from "../../../hooks/baseImgUrl";
 import { useDeviceType } from "../../../hooks/deviceType";
 
-function FeatureAdvert({featureSelector, featureSelectorArr}) {
+function FeatureAdvert({featureSelector, featuresArr}) {
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
+	// console.log("feature component")
+	// console.log({featureSelector, featuresArr})
 	return (
 		<>
-			{featureSelectorArr?
+			{featuresArr?
 				<>
-				{featureSelectorArr.map((featureItem, index) => {
-					const isActive = featureSelectorArr[featureSelector].index===featureItem.index
+				{featuresArr.map((featureItem, index) => {
+					const isActive = featuresArr[featureSelector].id===featureItem.id
 					const evenIndex = index % 2 === 0;
 					return (
 						<div key={index} className="product-offer mb-30 carousel-div2"
@@ -23,6 +25,7 @@ function FeatureAdvert({featureSelector, featureSelectorArr}) {
 								top: '0%',
 								borderTopRightRadius: 0,
 								borderBottomLeftRadius: 0,
+								zIndex: 1,
 								// backgroundColor: 'rgba(0, 0, 0, 0)',
 							}:{}
 							}}>
@@ -43,9 +46,10 @@ function FeatureAdvert({featureSelector, featureSelectorArr}) {
 								<h5 className={`font-weight-semi-bold m-0 ${isActive?'bounceInDown':''}`}
 								style={{
 									zIndex: 1,
-									color: '#F8F6F2',
+									color: '#fff',
 									fontSize: isMobile?'0.7rem':'',
-									textWrap: 'nowrap',
+									textAlign: 'center',
+									textWrap: featureItem.paragraph.length<=15?'nowrap':'wrap',
 									}}>{featureItem.paragraph}</h5>
 							</div>
 						</div>
