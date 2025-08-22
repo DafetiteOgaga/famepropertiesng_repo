@@ -26,7 +26,7 @@ function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 	return (
 		<div
 		ref={categoryMenuRef}
-		className={`${mobileStyle?'':'pt-3 bg-light p-2'} slideInRight`}
+		className={`${mobileStyle?'slideInRight':'pt-3 bg-light p-2'}`}
 		style={{
 			position: 'sticky',
 			top: '5%',
@@ -66,7 +66,7 @@ function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 						optionPath = optionPath.includes(" ")?(optionPath.split(" ").join('-').toLowerCase()):optionPath;
 						return (
 							<Link key={index} to={`products/${optionPath}`}
-							className="nav-item nav-link slideInRight"
+							className={`nav-item nav-link ${mobileStyle?'slideInRight':''}`}
 							style={{
 								animationDelay: `${index * 0.01}s`,
 								color: mobileStyle?'rgb(226, 232, 240)':'',
