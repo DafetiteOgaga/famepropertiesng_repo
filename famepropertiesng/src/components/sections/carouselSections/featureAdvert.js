@@ -1,4 +1,5 @@
 import { getImage } from "../../../hooks/baseImgUrl";
+import { titleCase } from "../../../hooks/changeCase";
 import { useDeviceType } from "../../../hooks/deviceType";
 
 function FeatureAdvert({featureSelector, featuresArr}) {
@@ -50,7 +51,7 @@ function FeatureAdvert({featureSelector, featuresArr}) {
 									fontSize: isMobile?'0.7rem':'',
 									textAlign: 'center',
 									textWrap: featureItem.paragraph.length<=15?'nowrap':'wrap',
-									}}>{featureItem.paragraph}</h5>
+									}}>{titleCase(featureItem.paragraph)}</h5>
 							</div>
 						</div>
 					)
