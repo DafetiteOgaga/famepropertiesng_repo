@@ -5,7 +5,9 @@ import { getImage } from "../../hooks/baseImgUrl";
 import { ProductAdvert } from "./carouselSections/productAdvert";
 import { FeatureAdvert } from "./carouselSections/featureAdvert";
 import { titleCase } from "../../hooks/changeCase";
+import { getBaseURL } from "../../hooks/fetchAPIs";
 
+const baseURL = getBaseURL();
 // const carouselSelectorArr = [
 // 	{
 // 		index: 0,
@@ -89,7 +91,7 @@ function Carousel() {
 	const [productSelector, setProductSelector] = useState(0);
 	const [featureSelector, setFeatureSelector] = useState(0);
 	useEffect(() => {
-		console.log("Setting up intervals for carousel and adverts...");
+		// console.log("Setting up intervals for carousel and adverts...");
 		const carouselInterval = setInterval(() => {
 			// console.log("Changing carousel slide1",
 			// 	carouselsArr.length
@@ -129,11 +131,11 @@ function Carousel() {
 	}, [carouselsArr.length, productsArr.length, featuresArr.length])
 	const fetchServerData = async () => {
 		try {
-			console.log("fetching ...".repeat(10));
+			// console.log("fetching ...".repeat(10));
 			const [carouselsRes, productsRes, featuresRes] = await Promise.all([
-				fetch("http://127.0.0.1:8000/carousels/"),
-				fetch("http://127.0.0.1:8000/products-adverts/"),
-				fetch("http://127.0.0.1:8000/features-adverts/"),
+				fetch(`${baseURL}/carousels/`),
+				fetch(`${baseURL}/products-adverts/`),
+				fetch(`${baseURL}/features-adverts/`),
 			]);
 			if (!carouselsRes.ok || !productsRes.ok || !featuresRes.ok) {
 				throw new Error("Network response was not ok");
@@ -151,7 +153,7 @@ function Carousel() {
 		}
 	}
 	useEffect(() => {
-		console.log("Fetching server data...");
+		// console.log("Fetching server data...");
 		fetchServerData();
 	}, []);
 	// console.log("Carousel Data:", carouselsArr, carouselsArr.length);
@@ -211,7 +213,13 @@ function CarouselAdverts({carouselsArr, carouselSelector, productSelector, featu
 			<div id="header-carousel" className={`carousel slide carousel-fade ${isMobile?'mb-0':'mb-30'} mb-lg-0`}>
 				<ol className="carousel-indicators">
 					{carouselsArr.map((caroSelector, index) => {
-						const isActive = carouselsArr[carouselSelector].id===(index+1)
+						// console.log('carouselsArr:', carouselsArr);
+						// console.log('carouselSelector:', carouselSelector);
+						// console.log(
+						// 	'\ncarouselsArr[carouselSelector].id:', carouselsArr[carouselSelector].id,
+						// 	'index+1:', (index),
+						// )
+						const isActive = carouselSelector===(index)
 						return (
 							<li key={index} className={isActive?'active':''}>{caroSelector.index}</li>
 						)
