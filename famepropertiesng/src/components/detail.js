@@ -4,7 +4,9 @@ import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from "../hooks/deviceType";
 import { getImage } from "../hooks/baseImgUrl";
 import { digitSeparator, titleCase } from "../hooks/changeCase";
+import { getBaseURL } from "../hooks/fetchAPIs";
 
+const baseURL = getBaseURL();
 const productImagesArr = [
 	"product-1.jpg",
 	"product-2.jpg",
@@ -63,7 +65,7 @@ function Detail() {
 	const [quantity, setQuantity] = useState(1);
 	const fetchServerData = async () => {
 		try {
-			const prodRes = await (fetch(`http://127.0.0.1:8000/products/${id}/`));
+			const prodRes = await (fetch(`${baseURL}/products/${id}/`));
 			if (!prodRes.ok) {
 				throw new Error("Network response was not ok");
 			}
