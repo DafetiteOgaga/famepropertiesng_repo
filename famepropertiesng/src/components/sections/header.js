@@ -195,7 +195,100 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 	// console.log({overlayRef, menuRef})
 	return (
 		<>
-			{(deviceType.width>=992) ?
+			{(deviceType.width<992) ?
+			<div className={`${isMenuOpen?'slideInRight':'slideOutRight'}`}
+			style={{
+				position: 'fixed',
+				top: `${30-mTop}%`,
+				left: 0,
+				backgroundColor: 'rgba(0, 0, 0, 0.51)',
+				zIndex: 20,
+				height: '100vh',
+				width: '100vw',
+				overflowY: 'auto',
+				// cursor: 'pointer',
+			}}>
+				<div className={`col-lg-2 ${isMenuOpen?'slideInRight':'slideOutRight'}`}
+				ref={overlayRef}
+				style={{
+					display: 'flex',
+					justifyContent: 'flex-end',
+					alignItems: 'center',
+					// backgroundColor: 'rgba(0, 0, 0, 0.82)',
+					}}>
+					{itemClicked && <span
+					style={{
+						position: 'relative',
+						top: '-1rem',
+					}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
+					<div className="h-100 pt-0"
+					ref={menuRef}
+					style={{
+						backgroundColor: 'rgba(0, 0, 0, 0.62)',
+						marginRight: '-1rem',
+						borderBottomLeftRadius: 20,
+					}}>
+						{headerMenuArr.map((menu, index) => {
+							const lastItem = index === headerMenuArr.length - 1;
+							let statusLink = menu.link;
+							const temp = status
+							status = menu?.menu;
+							if (status.toLowerCase() === "auth") {
+								status = temp;
+								// button = true;
+								// console.log({status})
+								statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
+								status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
+								// console.log({status})
+								
+								// console.log({statusLink})
+							}
+							// console.log(status)
+							return (
+								<Fragment key={index}>
+									<Link to={menu?.menu?.toLowerCase()!=='categories'&&statusLink}
+									onClick={(e) => {
+										// console.log("Clicked on:", status);
+										if (menu?.menu?.toLowerCase() === 'categories') {
+											// console.log("Clicked on Categories");
+											e.stopPropagation();
+											handleMenuItemClick();
+										}
+									}}
+									// onClick={handleMenuItemClick}
+									className={`dropdown-item slideInRight mr-3`}
+									style={{
+										display: 'flex',
+										justifyContent: 'center',
+										alignItems: 'center',
+										animationDelay: `${index * 0.1}s`,
+										textWrap: 'nowrap',
+										fontSize: '0.8rem',
+										color: '#E2E8F0',
+										textAlign: 'center',
+										padding: '0rem 1rem',
+										marginLeft: 0,
+										marginRight: 0,
+										marginTop: menu?.menu?.toLowerCase() === "contact" ? '21rem' : '',
+										marginBottom: lastItem ? '60%' : '',
+										border: '2px outset buttonborder',
+										borderTopLeftRadius: 0,
+										borderTopRightRadius: 0,
+										borderBottomLeftRadius: 9,
+										borderBottomRightRadius: 9,
+										height: '3.3rem',
+										}}>
+											<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
+											style={{marginRight: 8, fontSize: '1rem'}} />
+											{status}
+									</Link>
+								</Fragment>
+							)
+						})}
+					</div>
+				</div>
+			</div>
+			:
 			<div className="navbar-nav ml-auto py-0 d-lg-flex">
 				<div className="col-lg-2 pr-0"
 				style={{
@@ -242,100 +335,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 					</div>
 				</div>
 				<CartLink />
-			</div>
-		:
-		<div className={`${isMenuOpen?'slideInRight':'slideOutRight'}`}
-		style={{
-			position: 'fixed',
-			top: `${30-mTop}%`,
-			left: 0,
-			backgroundColor: 'rgba(0, 0, 0, 0.51)',
-			zIndex: 20,
-			height: '100vh',
-			width: '100vw',
-			overflowY: 'auto',
-			// cursor: 'pointer',
-		}}>
-			<div className={`col-lg-2 ${isMenuOpen?'slideInRight':'slideOutRight'}`}
-			ref={overlayRef}
-			style={{
-				display: 'flex',
-				justifyContent: 'flex-end',
-				alignItems: 'center',
-				// backgroundColor: 'rgba(0, 0, 0, 0.82)',
-				}}>
-				{itemClicked && <span
-				style={{
-					position: 'relative',
-					top: '-1rem',
-				}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
-				<div className="h-100 pt-0"
-				ref={menuRef}
-				style={{
-					backgroundColor: 'rgba(0, 0, 0, 0.62)',
-					marginRight: '-1rem',
-					borderBottomLeftRadius: 20,
-				}}>
-					{headerMenuArr.map((menu, index) => {
-						const lastItem = index === headerMenuArr.length - 1;
-						let statusLink = menu.link;
-						const temp = status
-						status = menu?.menu;
-						if (status.toLowerCase() === "auth") {
-							status = temp;
-							// button = true;
-							// console.log({status})
-							statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
-							status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-							// console.log({status})
-							
-							// console.log({statusLink})
-						}
-						// console.log(status)
-						return (
-							<Fragment key={index}>
-								<Link to={menu?.menu?.toLowerCase()!=='categories'&&statusLink}
-								onClick={(e) => {
-									// console.log("Clicked on:", status);
-									if (menu?.menu?.toLowerCase() === 'categories') {
-										// console.log("Clicked on Categories");
-										e.stopPropagation();
-										handleMenuItemClick();
-									}
-								}}
-								// onClick={handleMenuItemClick}
-								className={`dropdown-item slideInRight mr-3`}
-								style={{
-									display: 'flex',
-									justifyContent: 'center',
-									alignItems: 'center',
-									animationDelay: `${index * 0.1}s`,
-									textWrap: 'nowrap',
-									fontSize: '0.8rem',
-									color: '#E2E8F0',
-									textAlign: 'center',
-									padding: '0rem 1rem',
-									marginLeft: 0,
-									marginRight: 0,
-									marginTop: menu?.menu?.toLowerCase() === "contact" ? '21rem' : '',
-									marginBottom: lastItem ? '60%' : '',
-									border: '2px outset buttonborder',
-									borderTopLeftRadius: 0,
-									borderTopRightRadius: 0,
-									borderBottomLeftRadius: 9,
-									borderBottomRightRadius: 9,
-									height: '3.3rem',
-									}}>
-										<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
-										style={{marginRight: 8, fontSize: '1rem'}} />
-										{status}
-								</Link>
-							</Fragment>
-						)
-					})}
-				</div>
-			</div>
-		</div>}
+			</div>}
 		</>
 	)
 }

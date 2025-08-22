@@ -1,9 +1,12 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Breadcrumb } from "./sections/breadcrumb";
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from "../hooks/deviceType";
 import { getImage } from "../hooks/baseImgUrl";
+import { digitSeparator, titleCase } from "../hooks/changeCase";
+import { getBaseURL } from "../hooks/fetchAPIs";
 
+const baseURL = getBaseURL();
 const productImagesArr = [
 	"product-1.jpg",
 	"product-2.jpg",
@@ -52,11 +55,33 @@ const tabPane = [
 ]
 const productStar = "fa fa-star"
 function Detail() {
+	const [productItem, setProductItem] = useState(null);
+	const id = useParams().id;
+	console.log('id:', id);
 	// const [qInput, setQInput] = useState('');
 	const deviceType = useDeviceType().width <= 576;
 	const [selectedTab, setSelectecTab] = useState('description');
 	const [isNext, setIsNext] = useState(0)
 	const [quantity, setQuantity] = useState(1);
+	const fetchServerData = async () => {
+		try {
+			const prodRes = await (fetch(`${baseURL}/products/${id}/`));
+			if (!prodRes.ok) {
+				throw new Error("Network response was not ok");
+			}
+			const prodData = await prodRes.json();
+			setProductItem(prodData);
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
+	}
+	useEffect(() => {
+		console.log("Fetching server data...");
+		fetchServerData();
+		// console.log("productItem:", productItem);
+	}, []);
+	if (productItem) console.log("productItem:", productItem);
+
 	const handleImageTransition = (mode) => {
 		if (mode === '+') {
 			setIsNext(prev => prev < (productImagesArr.length-1) ? prev + 1 : productImagesArr.length - 1)
@@ -89,12 +114,18 @@ function Detail() {
 				paddingLeft: deviceType ? 0 : '',
 				paddingRight: deviceType ? 0 : '',
 			}}>
-				<div className="row px-xl-5">
+				{productItem ?
+				<>
+					<div className="row px-xl-5">
 					<div className="col-lg-5 mb-30">
 						<div  className="carousel slide">
 							<div className="carousel-inner bg-light">
 								<div className="carousel-item active">
-									<img className="w-100 h-100" src={getImage(image, 'img')} alt={image}/>
+									{/* preferrable make this load when when ready while the main page is already loaded to have something to render */}
+									<img className="w-100 h-100" src={
+										// getImage(image, 'img')
+										productItem.image_url
+										} alt={image}/>
 								</div>
 							</div>
 							<span className="carousel-control-prev"
@@ -115,7 +146,7 @@ function Detail() {
 							padding: deviceType ? '15px 10px' : '',
 						}}>
 							<h3
-							style={{color: '#475569'}}>Product Name Goes Here</h3>
+							style={{color: '#475569'}}>{titleCase(productItem.name)}</h3>
 							<div className="d-flex mb-3">
 								<div className="text-primary mr-2">
 									{Array.from({length: 5}, (_, starIndex) => {
@@ -135,13 +166,13 @@ function Detail() {
 									<small className="fas fa-star-half-alt"></small>
 									<small className="far fa-star"></small> */}
 								</div>
-								<small className="pt-1">(99 Reviews)</small>
+								<small className="pt-1">({productItem.noOfReviewers} Reviews)</small>
 							</div>
 							<h3 className="font-weight-semi-bold mb-4"
-							style={{color: '#475569'}}>₦150.00</h3>
-							<p className="mb-4">Volup erat ipsum diam elitr rebum et dolor. Est nonumy elitr erat diam stet sit
-								clita ea. Sanc ipsum et, labore clita lorem magna duo dolor no sea
-								Nonumy</p>
+							style={{color: '#475569'}}>₦{digitSeparator(productItem.discountPrice)}<p className="text-muted"
+							style={{fontSize: 14}}><del>₦{digitSeparator(productItem.marketPrice)}</del></p></h3>
+							
+							<p className="mb-4">{productItem.description}</p>
 							{/* <div className="d-flex mb-3">
 								<strong className="text-dark mr-3">Sizes:</strong>
 								<form>
@@ -241,57 +272,58 @@ function Detail() {
 							</div>
 						</div>
 					</div>
-				</div>
-				<div className="row px-xl-5">
-					<div className="col">
-						<div className={`bg-light ${!deviceType && 'p-30'}`}
-						style={{
-							borderRadius: '10px',
-							padding: deviceType ? '15px 10px' : '',
-							}}>
-							<div className="nav nav-tabs mb-4">
-								{tabPane.map((tab, index) => {
-									// console.log({tab})
-									const isActive = tab.title.toLowerCase() === selectedTab;
-									// console.log({isActive})
-									return (
-										<span key={index}
-										onClick={() => setSelectecTab(tab.title.toLowerCase())}
-										style={{
-											cursor: 'pointer',
-											textTransform: 'capitalize',
-											padding: deviceType ? '5px 8px' : '',
-										}}
-										className={`nav-item nav-link text-dark ${isActive?'active':''}`}>{tab.title}</span>
-									)
-								})}
-								{/* <span className="nav-item nav-link text-dark active">Description</span>
-								<span className="nav-item nav-link text-dark">Information</span>
-								<span className="nav-item nav-link text-dark">Reviews (0)</span> */}
-							</div>
-							<div className="">
-								{tabPane.map((comp, index) => {
-									// console.log("comp.title.toLowerCase() === selectedTab:", comp.title.toLowerCase() === selectedTab)
-									return (
-									<Fragment key={index}>
-										{comp.title.toLowerCase() === selectedTab && <comp.component />}
-									</Fragment>
-								)})}
+					</div>
+					<div className="row px-xl-5">
+						<div className="col">
+							<div className={`bg-light ${!deviceType && 'p-30'}`}
+							style={{
+								borderRadius: '10px',
+								padding: deviceType ? '15px 10px' : '',
+								}}>
+								<div className="nav nav-tabs mb-4">
+									{tabPane.map((tab, index) => {
+										// console.log({tab})
+										const isActive = tab.title.toLowerCase() === selectedTab;
+										// console.log({isActive})
+										return (
+											<span key={index}
+											onClick={() => setSelectecTab(tab.title.toLowerCase())}
+											style={{
+												cursor: 'pointer',
+												textTransform: 'capitalize',
+												padding: deviceType ? '5px 8px' : '',
+											}}
+											className={`nav-item nav-link text-dark ${isActive?'active':''}`}>{tab.title}</span>
+										)
+									})}
+									{/* <span className="nav-item nav-link text-dark active">Description</span>
+									<span className="nav-item nav-link text-dark">Information</span>
+									<span className="nav-item nav-link text-dark">Reviews (0)</span> */}
+								</div>
+								<div className="">
+									{tabPane.map((comp, index) => {
+										// console.log("comp.title.toLowerCase() === selectedTab:", comp.title.toLowerCase() === selectedTab)
+										return (
+										<Fragment key={index}>
+											{comp.title.toLowerCase() === selectedTab && <comp.component productItem={productItem} />}
+										</Fragment>
+									)})}
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
+				</>
+				: undefined}
 			</div>
 		</>
 	)
 }
 
-function ProductDescription() {
+function ProductDescription({productItem=null}) {
 	return (
 		<div className="tab-pane show active" id="tab-pane-1">
 			<h4 className="mb-3">Product Description</h4>
-			<p>Eos no lorem eirmod diam diam, eos elitr et gubergren diam sea. Consetetur vero aliquyam invidunt duo dolores et duo sit. Vero diam ea vero et dolore rebum, dolor rebum eirmod consetetur invidunt sed sed et, lorem duo et eos elitr, sadipscing kasd ipsum rebum diam. Dolore diam stet rebum sed tempor kasd eirmod. Takimata kasd ipsum accusam sadipscing, eos dolores sit no ut diam consetetur duo justo est, sit sanctus diam tempor aliquyam eirmod nonumy rebum dolor accusam, ipsum kasd eos consetetur at sit rebum, diam kasd invidunt tempor lorem, ipsum lorem elitr sanctus eirmod takimata dolor ea invidunt.</p>
-			<p>Dolore magna est eirmod sanctus dolor, amet diam et eirmod et ipsum. Amet dolore tempor consetetur sed lorem dolor sit lorem tempor. Gubergren amet amet labore sadipscing clita clita diam clita. Sea amet et sed ipsum lorem elitr et, amet et labore voluptua sit rebum. Ea erat sed et diam takimata sed justo. Magna takimata justo et amet magna et.</p>
+			<p>{!productItem?'No description supplied.':productItem.fullDescription}</p>
 		</div>
 	)
 }

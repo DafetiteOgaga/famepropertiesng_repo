@@ -10,6 +10,7 @@ import { PageNotFound } from '../components/pageNotFound';
 import { Products } from '../components/sections/products';
 import { LogIn } from '../components/login';
 import { SignUp } from '../components/signUp';
+import { AdminPage } from '../components/addProduct';
 
 function AppRoutes() {
 	return (
@@ -24,7 +25,9 @@ function AppRoutes() {
 				{/* products/detail */}
 				<Route path="products/:productname/detail" element={<Detail />} />
 				{/* detail */}
-				<Route path="detail" element={<Detail />} />
+				<Route path="detail/:id" element={<Detail />} />
+				{/* AddProduct */}
+				<Route path="admin-page" element={<AdminPage />} />
 				{/* cart */}
 				<Route path="cart" element={<Cart />} />
 				{/* log in */}

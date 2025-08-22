@@ -4,6 +4,7 @@ import { useDeviceType } from "../hooks/deviceType"
 import { createSession } from "../hooks/setupLocalStorage";
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { GoogleAuthButtonAndSetup } from "../hooks/allAuth/googleAuthButtonAndSetup";
 
 const initialFormData = {
 	email: '',
@@ -42,7 +43,8 @@ function LogIn() {
 	return (
 		<>
 			<form onSubmit={onSubmitHandler}
-			className=""style={{
+			className=""
+			style={{
 				display: 'flex',
 				flexDirection: 'column',
 				justifyContent: 'center',
@@ -113,6 +115,7 @@ function LogIn() {
 						</Link>
 					</p>
 				</div>
+				{/* <GoogleAuthButtonAndSetup /> */}
 			</form>
 		</>
 	)
