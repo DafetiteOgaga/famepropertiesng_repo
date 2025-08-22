@@ -28,6 +28,12 @@ function App() {
       draggable
       pauseOnHover
       />
+      {/*
+      frizbe
+      everrt
+      kiqqa
+      jenttle
+       */}
     </>
   );
 }
