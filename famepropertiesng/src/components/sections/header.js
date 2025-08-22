@@ -36,6 +36,10 @@ const headerMenuArr = [
 		link: "/settings"
 	},
 	{
+		menu: "Admin Page",
+		link: "/admin-page",
+	},
+	{
 		menu: "Contact",
 		link: "/contact"
 	},
