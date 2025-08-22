@@ -3,21 +3,23 @@ import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from '../../hooks/deviceType';
 import { getImage } from '../../hooks/baseImgUrl';
 import { digitSeparator, titleCase } from '../../hooks/changeCase';
+import { getBaseURL } from '../../hooks/fetchAPIs';
 
-const produc8tImagesArr = [
-	"product-1.jpg",
-	"product-2.jpg",
-	"product-3.jpg",
-	"product-4.jpg",
-	"product-5.jpg",
-	"product-6.jpg",
-	"product-7.jpg",
-	"product-8.jpg",
-	"product-3.jpg",
-	"product-4.jpg",
-	"product-5.jpg",
-	"product-6.jpg",
-]
+const baseURL = getBaseURL();
+// const produc8tImagesArr = [
+// 	"product-1.jpg",
+// 	"product-2.jpg",
+// 	"product-3.jpg",
+// 	"product-4.jpg",
+// 	"product-5.jpg",
+// 	"product-6.jpg",
+// 	"product-7.jpg",
+// 	"product-8.jpg",
+// 	"product-3.jpg",
+// 	"product-4.jpg",
+// 	"product-5.jpg",
+// 	"product-6.jpg",
+// ]
 const productsActionArr = [
 	{
 		icon: "fa fa-shopping-cart",
@@ -50,7 +52,7 @@ function Products() {
 	// console.log('parameters:', parameters);
 	const fetchServerData = async () => {
 		try {
-			const prodRes = await (fetch("http://127.0.0.1:8000/products/"));
+			const prodRes = await (fetch(`${baseURL}/products/`));
 			if (!prodRes.ok) {
 				throw new Error("Network response was not ok");
 			}
@@ -61,12 +63,12 @@ function Products() {
 		}
 	}
 	useEffect(() => {
-		console.log("Fetching server data...");
+		// console.log("Fetching server data...");
 		fetchServerData();
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
 	// if (productItemArr.length) console.log("productItemArr:", productItemArr, productItemArr.length);
-	if (productItemArr.length) console.log("last item:", productItemArr[productItemArr.length-1]);
+	// if (productItemArr.length) console.log("last item:", productItemArr[productItemArr.length-1]);
 	// console.log('product component rendered')
 	return (
 		<div className="container-fluid pb-3">
