@@ -11,7 +11,7 @@ const getBaseURL = (api=false) => {
 		return 'http://127.0.0.1:8000';
 	}
 	console.log('Running in production mode');
-	return 'https://dafetiteapiendpoint.pythonanywhere.com';
+	return 'https://dafetitetemp.pythonanywhere.com/';
 };
 
 function useImageKitAPIs() {
