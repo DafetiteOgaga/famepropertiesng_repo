@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { IKContext, IKUpload, IKImage } from "imagekitio-react";
+import { getBaseURL, useImageKitAPIs } from "../fetchAPIs";
 
+const baseURL = getBaseURL();
+// console.log("Base URL:", baseURL);
 const carouselInputObj = {
   heading: "",
   paragraph: "",
@@ -27,6 +30,17 @@ const productsObj = {
 }
 
 function UploadImageItem({type}) {
+  // const [baseAPIURL, setbaseAPIURL] = useState(null)
+  // let apiData
+  // const HandleAPI = () => {
+  //   const { data:apiData } = useImageKitAPIs();
+  // }
+  // if (!apiData) HandleAPI()
+  // useEffect(() => {
+  //   if (!apiData) HandleAPI()
+  // }, [apiData])
+  const baseAPIURL = useImageKitAPIs()?.data;
+  // console.log("Base API URL 11111:", baseAPIURL);
   const [selectedImage, setSelectedImage] = useState(null);
   const [productPreview, setProductPreview] = useState([]);
   // const [imageCategory, setImageCategory] = useState(type);
@@ -42,7 +56,7 @@ function UploadImageItem({type}) {
 
   const fetchServerData = async () => {
 		try {
-			const serverUrls = await (fetch(`http://127.0.0.1:8000/${type}s/`));
+			const serverUrls = await (fetch(`${baseURL}/${type}s/`));
 			if (!serverUrls.ok) {
 				throw new Error("Network response was not ok");
 			}
@@ -53,13 +67,13 @@ function UploadImageItem({type}) {
 		}
 	}
 	useEffect(() => {
-		console.log("Fetching server data...");
+		// console.log("Fetching server data...");
 		fetchServerData();
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
   const handleUploadSuccess = async (res) => {
     try {
-      console.log("Uploaded:", res);
+      // console.log("Uploaded:", res);
       let bodyDataUsed
       if (type === 'carousel') {
         bodyDataUsed = {
@@ -103,7 +117,7 @@ function UploadImageItem({type}) {
       // setImageID(res.fileId); // Save the fileId for potential deletion later
 
       // Send to Django server
-      const response = await fetch(`http://127.0.0.1:8000/${type}s/`, {
+      const response = await fetch(`${baseURL}/${type}s/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(bodyDataUsed),
@@ -112,7 +126,7 @@ function UploadImageItem({type}) {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      console.log("Response from Django:", data);
+      // console.log("Response from Django:", data);
       setItemInputs(
         type==='carousel'?carouselInputObj:
         type==='products-advert'?productAdvertInputsObj:
@@ -128,9 +142,9 @@ function UploadImageItem({type}) {
 
   const authenticator = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/imagekit-auth/");
+      const response = await fetch(`${baseURL}/imagekit-auth/`);
       const data = await response.json();
-      console.log("Authentication data:", data);
+      // console.log("Authentication data:", data);
       return data;
     } catch (error) {
       throw new Error(`Authentication failed: ${error.message}`);
@@ -152,7 +166,7 @@ function UploadImageItem({type}) {
     console.log("Type:", type);
     // console.log("Deleting image with ID:", imageID);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/delete-${type}s/`, {
+      const response = await fetch(`${baseURL}/delete-${type}s/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fileId: selectedImage.fileId }), // must have been saved earlier
@@ -172,7 +186,7 @@ function UploadImageItem({type}) {
     console.log("Type:", type);
     // console.log("Deleting image with ID:", imageID);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/sold-${type}s/${selectedImage.id}/`, {
+      const response = await fetch(`${baseURL}/sold-${type}s/${selectedImage.id}/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fileId: selectedImage.id }), // must have been saved earlier
@@ -189,7 +203,7 @@ function UploadImageItem({type}) {
 
   const productAdvertsType = type === 'products-advert';
   const productType = type === 'product';
-  console.log("selectedImage:", selectedImage);
+  // console.log("selectedImage:", selectedImage);
   // console.log({type})
   // const input1 = itemsInputs.heading||itemsInputs.discount;
   // const input2 = itemsInputs.paragraph;
@@ -293,9 +307,8 @@ function UploadImageItem({type}) {
         </>}
 
       <IKContext
-        publicKey="public_GnQGT/nh7GovJpILoIEnK8VCzzc="
-        urlEndpoint="https://ik.imagekit.io/dafetite001/"
-        // authenticationEndpoint="http://127.0.0.1:8000/imagekit-auth/"
+        publicKey={baseAPIURL?.IMAGEKIT_PUBLIC_KEY}
+        urlEndpoint={baseAPIURL?.IMAGEKIT_URL_ENDPOINT}
         authenticator={authenticator}
       >
         {type !== "features-advert" ?
@@ -323,12 +336,12 @@ function UploadImageItem({type}) {
       {/* preview image */}
       {/* {imageUrl && <IKImage src={imageUrl} alt="Uploaded" width="200" />} */}
       {imageUrl && (
-        <div className="mt-4">
-          <p className="font-medium">Preview:</p>
+        <div className="mt-1">
+          <p className="font-medium mb-0">Upload Success:</p>
           <IKImage
             src={imageUrl}
             alt="Uploaded"
-            urlEndpoint="https://ik.imagekit.io/dafetite001"
+            urlEndpoint={baseAPIURL?.IMAGEKIT_URL_ENDPOINT}
             transformation={[
               { width: 100, height: 100, crop: "fill" },
               { quality: 80 },
@@ -339,7 +352,7 @@ function UploadImageItem({type}) {
       )}
       {(productPreview&&type!=='features-advert') && (
         <div className="mt-4">
-          <p className="font-medium">Preview:</p>
+          <p className="font-medium mb-0">Uploaded Images:</p>
           {productPreview.map((image, index) => {
             // console.log("Image URL:", image);
             return (
@@ -357,7 +370,6 @@ function UploadImageItem({type}) {
                     fileUrl: image.image_url,
                     id: image.id,
                   })}
-                  // urlEndpoint="https://ik.imagekit.io/dafetite001"
                   style={{
                     width: 100,
                     height: 100,
@@ -370,6 +382,7 @@ function UploadImageItem({type}) {
       )}
       {selectedImage?.fileUrl &&
         <div>
+          <p className="font-medium mb-0 mt-3">Selected Image:</p>
           <img
             className="rounded"
             src={selectedImage.fileUrl}
