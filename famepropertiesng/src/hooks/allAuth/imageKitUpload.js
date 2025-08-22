@@ -151,7 +151,7 @@ function UploadImageItem({type}) {
     }
   };
   const inputHandler = (e) => {
-    console.log('typing ...')
+    // console.log('typing ...')
     e.preventDefault();
     const { name, value } = e.target;
     setItemInputs((prev) => ({
