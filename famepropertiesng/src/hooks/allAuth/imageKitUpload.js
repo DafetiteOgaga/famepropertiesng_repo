@@ -162,8 +162,8 @@ function UploadImageItem({type}) {
   // console.log("Inputs:", itemsInputs);
 
   const handleDeleteImage = async () => {
-    console.log("Selected image ID:", selectedImage);
-    console.log("Type:", type);
+    // console.log("Selected image ID:", selectedImage);
+    // console.log("Type:", type);
     // console.log("Deleting image with ID:", imageID);
     try {
       const response = await fetch(`${baseURL}/delete-${type}s/`, {
@@ -182,8 +182,8 @@ function UploadImageItem({type}) {
   };
 
   const handleSoldDesignation = async () => {
-    console.log("Selected image ID:", selectedImage);
-    console.log("Type:", type);
+    // console.log("Selected image ID:", selectedImage);
+    // console.log("Type:", type);
     // console.log("Deleting image with ID:", imageID);
     try {
       const response = await fetch(`${baseURL}/sold-${type}s/${selectedImage.id}/`, {
