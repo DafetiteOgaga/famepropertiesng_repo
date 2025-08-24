@@ -43,6 +43,7 @@ function UploadImageItem({type}) {
   // console.log("Base API URL 11111:", baseAPIURL);
   const [selectedImage, setSelectedImage] = useState(null);
   const [productPreview, setProductPreview] = useState([]);
+  const [reloadSection, setReloadSection] = useState(null);
   // const [imageCategory, setImageCategory] = useState(type);
   const [itemsInputs, setItemInputs] = useState(
     type==='carousel'?carouselInputObj:
@@ -54,9 +55,14 @@ function UploadImageItem({type}) {
   // const [imageID, setImageID] = useState("");
   // const [imageName, setImageName] = useState("");
 
-  const fetchServerData = async () => {
+  const fetchServerData = async (section=null) => {
 		try {
-			const serverUrls = await (fetch(`${baseURL}/${type}s/`));
+      let serverUrls
+      if (section) {
+        serverUrls = await (fetch(`${baseURL}/${section}s/`));
+      } else {
+        serverUrls = await (fetch(`${baseURL}/${type}s/`));
+      }
 			if (!serverUrls.ok) {
 				throw new Error("Network response was not ok");
 			}
@@ -68,9 +74,14 @@ function UploadImageItem({type}) {
 	}
 	useEffect(() => {
 		// console.log("Fetching server data...");
-		fetchServerData();
+		if (reloadSection) {
+      fetchServerData(reloadSection);
+      setReloadSection(null); // reset after fetching
+    } else {
+      fetchServerData();
+    }
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
-	}, []);
+	}, [reloadSection]);
   const handleUploadSuccess = async (res) => {
     try {
       // console.log("Uploaded:", res);
@@ -133,6 +144,7 @@ function UploadImageItem({type}) {
         type==='features-advert'?featureInputObj:
         type==='product'&&productsObj
       ); // Reset inputs after successful upload
+      setReloadSection(type); // trigger re-fetch
     } catch (error) {
       console.error("Error uploading image to Django:", error);
       // Optionally, you can handle the error state here
@@ -176,6 +188,7 @@ function UploadImageItem({type}) {
       }
       console.log("Image deleted successfully!");
       setSelectedImage(null); // clear preview
+      setReloadSection(type); // trigger re-fetch
     } catch (error) {
       console.error("Error deleting image:", error);
     }
@@ -196,6 +209,10 @@ function UploadImageItem({type}) {
       }
       console.log("Item designated successfully!");
       setSelectedImage(null); // clear preview
+
+      // handle notifications here
+
+
     } catch (error) {
       console.error("Error designating item as sold:", error);
     }
