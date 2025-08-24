@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { IKContext, IKUpload, IKImage } from "imagekitio-react";
 import { getBaseURL, useImageKitAPIs } from "../fetchAPIs";
+import { toast } from 'react-toastify';
 
 const baseURL = getBaseURL();
 // console.log("Base URL:", baseURL);
@@ -64,10 +65,13 @@ function UploadImageItem({type}) {
         serverUrls = await (fetch(`${baseURL}/${type}s/`));
       }
 			if (!serverUrls.ok) {
-				throw new Error("Network response was not ok");
+        const errorText = "Network response was not ok"
+        toast.error(errorText);
+				throw new Error(errorText);
 			}
 			const serverData = await serverUrls.json();
 			setProductPreview(serverData);
+      console.log("Server Data fetched successfully");
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
@@ -82,6 +86,7 @@ function UploadImageItem({type}) {
     }
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, [reloadSection]);
+
   const handleUploadSuccess = async (res) => {
     try {
       // console.log("Uploaded:", res);
@@ -134,7 +139,9 @@ function UploadImageItem({type}) {
         body: JSON.stringify(bodyDataUsed),
       })
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        const errorText = "Network response was not ok"
+        toast.error(errorText);
+				throw new Error(errorText);
       }
       const data = await response.json();
       // console.log("Response from Django:", data);
@@ -144,6 +151,9 @@ function UploadImageItem({type}) {
         type==='features-advert'?featureInputObj:
         type==='product'&&productsObj
       ); // Reset inputs after successful upload
+      const successText = `${type} file uploaded to image-cloud and data to server successfully!`
+      console.log(successText);
+      toast.success(successText);
       setReloadSection(type); // trigger re-fetch
     } catch (error) {
       console.error("Error uploading image to Django:", error);
@@ -155,7 +165,13 @@ function UploadImageItem({type}) {
   const authenticator = async () => {
     try {
       const response = await fetch(`${baseURL}/imagekit-auth/`);
+      if (!response.ok) {
+        const errorText = "Failed to authenticate with ImageKit"
+        toast.error(errorText);
+        throw new Error(errorText);
+      }
       const data = await response.json();
+      console.log("Authentication data received");
       // console.log("Authentication data:", data);
       return data;
     } catch (error) {
@@ -184,11 +200,15 @@ function UploadImageItem({type}) {
         body: JSON.stringify({ fileId: selectedImage.fileId }), // must have been saved earlier
       });
       if (!response.ok) {
-        throw new Error("Failed to delete image");
+        const errorText = "Failed to delete image"
+        toast.error(errorText);
+        throw new Error(errorText);
       }
-      console.log("Image deleted successfully!");
+      const successText = `${type} file deleted successfully!`
+      console.log(successText);
       setSelectedImage(null); // clear preview
       setReloadSection(type); // trigger re-fetch
+      toast.success(successText);
     } catch (error) {
       console.error("Error deleting image:", error);
     }
@@ -205,12 +225,16 @@ function UploadImageItem({type}) {
         body: JSON.stringify({ fileId: selectedImage.id }), // must have been saved earlier
       });
       if (!response.ok) {
-        throw new Error("Failed to designate item as sold");
+        const errorText = "Failed to designate item as sold"
+        toast.error(errorText);
+        throw new Error(errorText);
       }
-      console.log("Item designated successfully!");
+      const successText = `${type} item designated as sold successfully!`
+      console.log(successText);
       setSelectedImage(null); // clear preview
 
       // handle notifications here
+      toast.success(successText);
 
 
     } catch (error) {
