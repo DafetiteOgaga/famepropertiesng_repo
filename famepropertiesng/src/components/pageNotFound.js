@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { UploadImageItem } from '../hooks/allAuth/imageKitUpload';
 import { IKContext, IKUpload, IKImage } from "imagekitio-react";
+import { ImageCropAndCompress } from '../hooks/fileResizer/ImageCropAndCompress';
 
 function PageNotFound() {
 	// const location = useLocation().pathname.split("/").pop();

@@ -11,6 +11,7 @@ import { Products } from '../components/sections/products';
 import { LogIn } from '../components/login';
 import { SignUp } from '../components/signUp';
 import { AdminPage } from '../components/addProduct';
+import { ProcessImage } from '../components/downloadAndCrop';
 
 function AppRoutes() {
 	return (
@@ -28,6 +29,8 @@ function AppRoutes() {
 				<Route path="detail/:id" element={<Detail />} />
 				{/* AddProduct */}
 				<Route path="admin-page" element={<AdminPage />} />
+				{/* process image page */}
+				<Route path="process-image" element={<ProcessImage />} />
 				{/* cart */}
 				<Route path="cart" element={<Cart />} />
 				{/* log in */}
