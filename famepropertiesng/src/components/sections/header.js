@@ -5,7 +5,8 @@ import { useScrollDetection } from '../../hooks/scrollDetection';
 import { useDeviceType } from '../../hooks/deviceType';
 import { Sidebar } from '../bars/sidebar';
 import { getImage } from '../../hooks/baseImgUrl';
-import { createSession } from '../../hooks/setupLocalStorage';
+import { createLocal } from '../../hooks/setupLocalStorage';
+import { useAuth } from '../../hooks/allAuth/authContext';
 
 const headerMenuArr = [
 	{
@@ -17,7 +18,7 @@ const headerMenuArr = [
 			},
 			logout: {
 				menu: "Logout",
-				link: ""
+				link: "logout"
 			},
 			signup: {
 				menu: "Sign Up",
@@ -140,6 +141,7 @@ function Header({mTop}) {
 				flexWrap: 'nowrap',
 				}}>
 				{(deviceType.width<992) ?
+				// mobile
 				<>
 					<span
 					style={removeLabelName ?
@@ -168,6 +170,7 @@ function Header({mTop}) {
 					</button>
 				</>
 				:
+				// desktop
 				<div className="navbar-collapse justify-content-between" id="navbarCollapse">
 					<Brand />
 					<MenuItems />
@@ -186,160 +189,191 @@ function Header({mTop}) {
 }
 
 function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
+	const { accessToken, updateToken } = useAuth();
+	console.log({accessToken})
 	// console.log('menu items2')
 	const deviceType = useDeviceType()
 	const navigate = useNavigate();
-	let status = createSession.getItem('fpng-status');
+	let status = accessToken
+	// createLocal.getItem('fpng-access');
 	// console.log('fpng-status:', status)
 	status = status??null;
 	const [itemClicked, setItemClicked] = useState(false);
 	const handleMenuItemClick = () => {
 		setItemClicked(prev => !prev);
 	}
+	const handleLogout = (statusLink) => {
+		// console.log('onclick event', statusLink)
+		if (statusLink.toLowerCase()==='logout') {
+			// console.log('logout click')
+			createLocal.removeItem('fpng-access')
+			updateToken(null);
+			navigate('/')
+		} else {
+			// console.log('navigate click')
+			navigate(statusLink)
+		}
+	}
 	// console.log({overlayRef, menuRef})
 	return (
 		<>
 			{(deviceType.width<992) ?
-			<div className={`${isMenuOpen?'slideInRight':'slideOutRight'}`}
-			style={{
-				position: 'fixed',
-				top: `${30-mTop}%`,
-				left: 0,
-				backgroundColor: 'rgba(0, 0, 0, 0.51)',
-				zIndex: 20,
-				height: '100vh',
-				width: '100vw',
-				overflowY: 'auto',
-				// cursor: 'pointer',
-			}}>
-				<div className={`col-lg-2 ${isMenuOpen?'slideInRight':'slideOutRight'}`}
-				ref={overlayRef}
+				// mobile
+				<div className={`${isMenuOpen?'slideInRight':'slideOutRight'}`}
 				style={{
-					display: 'flex',
-					justifyContent: 'flex-end',
-					alignItems: 'center',
-					// backgroundColor: 'rgba(0, 0, 0, 0.82)',
-					}}>
-					{itemClicked && <span
+					position: 'fixed',
+					top: `${30-mTop}%`,
+					left: 0,
+					backgroundColor: 'rgba(0, 0, 0, 0.51)',
+					zIndex: 20,
+					height: '100vh',
+					width: '100vw',
+					overflowY: 'auto',
+					// cursor: 'pointer',
+				}}>
+					<div className={`col-lg-2 ${isMenuOpen?'slideInRight':'slideOutRight'}`}
+					ref={overlayRef}
 					style={{
-						position: 'relative',
-						top: '-1rem',
-					}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
-					<div className="h-100 pt-0"
-					ref={menuRef}
-					style={{
-						backgroundColor: 'rgba(0, 0, 0, 0.62)',
-						marginRight: '-1rem',
-						borderBottomLeftRadius: 20,
-					}}>
-						{headerMenuArr.map((menu, index) => {
-							const lastItem = index === headerMenuArr.length - 1;
-							let statusLink = menu.link;
-							const temp = status
-							status = menu?.menu;
-							if (status.toLowerCase() === "auth") {
-								status = temp;
-								// button = true;
-								// console.log({status})
-								statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
-								status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-								// console.log({status})
-								
-								// console.log({statusLink})
-							}
-							// console.log(status)
-							return (
-								<Fragment key={index}>
-									<Link to={menu?.menu?.toLowerCase()!=='categories'&&statusLink}
-									onClick={(e) => {
-										// console.log("Clicked on:", status);
-										if (menu?.menu?.toLowerCase() === 'categories') {
-											// console.log("Clicked on Categories");
-											e.stopPropagation();
-											handleMenuItemClick();
-										}
-									}}
-									// onClick={handleMenuItemClick}
-									className={`dropdown-item slideInRight mr-3`}
-									style={{
-										display: 'flex',
-										justifyContent: 'center',
-										alignItems: 'center',
-										animationDelay: `${index * 0.1}s`,
-										textWrap: 'nowrap',
-										fontSize: '0.8rem',
-										color: '#E2E8F0',
-										textAlign: 'center',
-										padding: '0rem 1rem',
-										marginLeft: 0,
-										marginRight: 0,
-										marginTop: menu?.menu?.toLowerCase() === "contact" ? '21rem' : '',
-										marginBottom: lastItem ? '60%' : '',
-										border: '2px outset buttonborder',
-										borderTopLeftRadius: 0,
-										borderTopRightRadius: 0,
-										borderBottomLeftRadius: 9,
-										borderBottomRightRadius: 9,
-										height: '3.3rem',
-										}}>
-											<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
-											style={{marginRight: 8, fontSize: '1rem'}} />
-											{status}
-									</Link>
-								</Fragment>
-							)
-						})}
-					</div>
-				</div>
-			</div>
-			:
-			<div className="navbar-nav ml-auto py-0 d-lg-flex">
-				<div className="col-lg-2 pr-0"
-				style={{
-					display: 'flex',
-					justifyContent: 'center',
-					alignItems: 'center',
-					// paddingRight: 'auto',
-					}}>
-					<div className="d-inline-flex align-items-center h-100">
-						{headerMenuArr.map((menu, index) => {
-							let button = false
-							let statusLink = null;
-							if (menu.menu.toLowerCase() === "auth") {
-								button = true;
-								// console.log({status})
-								statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
-								status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-								// console.log({status})
-								
-								// console.log({statusLink})
-							}
-							if (menu.menu.toLowerCase() === "categories") return null;
-							return (
-								<Fragment key={index}>
-									{button ?
-										<button
-										style={{
-											// paddingRight: '1rem',
-											color: '#F8F6F2',
-											border: '1px solid rgba(248, 246, 242, 0.23)',
-											borderRadius: '3px',
+						display: 'flex',
+						justifyContent: 'flex-end',
+						alignItems: 'center',
+						// backgroundColor: 'rgba(0, 0, 0, 0.82)',
+						}}>
+						{itemClicked && <span
+						style={{
+							position: 'relative',
+							top: '-1rem',
+						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
+						<div className="h-100 pt-0"
+						ref={menuRef}
+						style={{
+							backgroundColor: 'rgba(0, 0, 0, 0.62)',
+							marginRight: '-1rem',
+							borderBottomLeftRadius: 20,
+						}}>
+							{headerMenuArr.map((menu, index) => {
+								const lastItem = index === headerMenuArr.length - 1;
+								let statusLink = menu.link;
+								const temp = status
+								status = menu?.menu;
+								if (status.toLowerCase() === "auth") {
+									status = temp;
+									// button = true;
+									// console.log({status})
+									statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
+									status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
+									// console.log({status}, {statusLink})
+									
+									// console.log({statusLink})
+								}
+								// console.log('menu?.menu?.toLowerCase():', menu?.menu?.toLowerCase() ,menu?.authItems)
+								return (
+									<Fragment key={index}>
+										<Link to={(menu?.menu?.toLowerCase()!=='categories'&&statusLink.split('/').pop()!=='logout')&&statusLink}
+										onClick={(e) => {
+											const logout = statusLink?.split('/')?.pop()?.toLowerCase()
+											// console.log("Clicked on:", status);
+											if (menu?.menu?.toLowerCase() === 'categories') {
+												// console.log("Clicked on Categories");
+												e.stopPropagation();
+												handleMenuItemClick();
+											}
+											else if (logout === 'logout') {
+												// console.log("Clicked on auth");
+												// console.log({statusLink})
+												e.stopPropagation();
+												handleLogout(logout)
+											}
 										}}
-										onClick={()=>navigate(statusLink)}
-										className="dropdown-item"
-										type="button">
-											{status}
-										</button>
-										:
-										<Link to={menu.link} className="text-body mr-3"
-										style={{textWrap: 'nowrap'}}>{menu.menu}</Link>}
-								</Fragment>
-							)
-						})}
+										// onClick={handleMenuItemClick}
+										className={`dropdown-item slideInRight mr-3`}
+										style={{
+											display: 'flex',
+											justifyContent: 'center',
+											alignItems: 'center',
+											animationDelay: `${index * 0.1}s`,
+											textWrap: 'nowrap',
+											fontSize: '0.8rem',
+											color: '#E2E8F0',
+											textAlign: 'center',
+											padding: '0rem 1rem',
+											marginLeft: 0,
+											marginRight: 0,
+											marginTop: menu?.menu?.toLowerCase() === "contact" ? '21rem' : '',
+											marginBottom: lastItem ? '60%' : '',
+											border: '2px outset buttonborder',
+											borderTopLeftRadius: 0,
+											borderTopRightRadius: 0,
+											borderBottomLeftRadius: 9,
+											borderBottomRightRadius: 9,
+											height: '3.3rem',
+											}}>
+												<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
+												style={{marginRight: 8, fontSize: '1rem'}} />
+													{status}
+										</Link>
+									</Fragment>
+								)
+							})}
+						</div>
 					</div>
 				</div>
-				<CartLink />
-			</div>}
+				:
+				// desktop
+				<div className="navbar-nav ml-auto py-0 d-lg-flex">
+					<div className="col-lg-2 pr-0"
+					style={{
+						display: 'flex',
+						justifyContent: 'center',
+						alignItems: 'center',
+						// paddingRight: 'auto',
+						}}>
+						<div className="d-inline-flex align-items-center h-100">
+							{headerMenuArr.map((menu, index) => {
+								let button = false
+								let statusLink = null;
+								// let logout = menu.authItems?.logout?.menu?.toLowerCase()==='logout'
+								// console.log('auth-logout:', !!logout, `${menu.menu}`, `${(logout)?logout:''}`)
+								if (menu.menu.toLowerCase() === "auth") {
+									button = true;
+									// console.log('login:', !!menu.authItems.login)
+									// console.log('logout:', !!menu.authItems.logout)
+									// if (menu.authItems.logout) logout = true
+									// console.log({logout})
+									// console.log({status})
+									statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
+									status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
+									// console.log({status})
+									
+									// console.log({statusLink})
+								}
+								if (menu.menu.toLowerCase() === "categories") return null;
+								// console.log({logout}, `${menu.menu}`)
+								return (
+									<Fragment key={index}>
+										{button ?
+											<button
+											style={{
+												// paddingRight: '1rem',
+												color: '#F8F6F2',
+												border: '1px solid rgba(248, 246, 242, 0.23)',
+												borderRadius: '3px',
+											}}
+											onClick={()=>handleLogout(statusLink.split('/').pop())}
+											className="dropdown-item"
+											type="button">
+												{status}
+											</button>
+											:
+											<Link to={menu.link} className="text-body mr-3"
+											style={{textWrap: 'nowrap'}}>{menu.menu}</Link>}
+									</Fragment>
+								)
+							})}
+						</div>
+					</div>
+					<CartLink />
+				</div>}
 		</>
 	)
 }
