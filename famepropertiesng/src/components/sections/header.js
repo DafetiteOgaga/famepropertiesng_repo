@@ -7,6 +7,7 @@ import { Sidebar } from '../bars/sidebar';
 import { getImage } from '../../hooks/baseImgUrl';
 import { createLocal } from '../../hooks/setupLocalStorage';
 import { useAuth } from '../../hooks/allAuth/authContext';
+import { titleCase } from '../../hooks/changeCase';
 
 const headerMenuArr = [
 	{
@@ -208,6 +209,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 			// console.log('logout click')
 			createLocal.removeItem('fpng-access')
 			updateToken(null);
+			updateUserInfo(null);
 			navigate('/')
 		} else {
 			// console.log('navigate click')
@@ -251,70 +253,97 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							marginRight: '-1rem',
 							borderBottomLeftRadius: 20,
 						}}>
-							{headerMenuArr.map((menu, index) => {
-								const lastItem = index === headerMenuArr.length - 1;
-								let statusLink = menu.link;
-								const temp = status
-								status = menu?.menu;
-								if (status.toLowerCase() === "auth") {
-									status = temp;
-									// button = true;
-									// console.log({status})
-									statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
-									status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-									// console.log({status}, {statusLink})
-									
-									// console.log({statusLink})
-								}
-								// console.log('menu?.menu?.toLowerCase():', menu?.menu?.toLowerCase() ,menu?.authItems)
-								return (
-									<Fragment key={index}>
-										<Link to={(menu?.menu?.toLowerCase()!=='categories'&&statusLink.split('/').pop()!=='logout')&&statusLink}
-										onClick={(e) => {
-											const logout = statusLink?.split('/')?.pop()?.toLowerCase()
-											// console.log("Clicked on:", status);
-											if (menu?.menu?.toLowerCase() === 'categories') {
-												// console.log("Clicked on Categories");
-												e.stopPropagation();
-												handleMenuItemClick();
-											}
-											else if (logout === 'logout') {
-												// console.log("Clicked on auth");
-												// console.log({statusLink})
-												e.stopPropagation();
-												handleLogout(logout)
-											}
-										}}
-										// onClick={handleMenuItemClick}
-										className={`dropdown-item slideInRight mr-3`}
-										style={{
-											display: 'flex',
-											justifyContent: 'center',
-											alignItems: 'center',
-											animationDelay: `${index * 0.1}s`,
-											textWrap: 'nowrap',
-											fontSize: '0.8rem',
-											color: '#E2E8F0',
-											textAlign: 'center',
-											padding: '0rem 1rem',
-											marginLeft: 0,
-											marginRight: 0,
-											marginTop: menu?.menu?.toLowerCase() === "contact" ? '21rem' : '',
-											marginBottom: lastItem ? '60%' : '',
-											border: '2px outset buttonborder',
-											borderTopLeftRadius: 0,
-											borderTopRightRadius: 0,
-											borderBottomLeftRadius: 9,
-											borderBottomRightRadius: 9,
-											height: '3.3rem',
-											}}>
-												<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
-												style={{marginRight: 8, fontSize: '1rem'}} />
-													{status}
-										</Link>
-									</Fragment>
-								)
-							})}
+							{userInfo &&
+							<Link to={"/settings"}
+							className={`dropdown-item slideInRight mr-3`}
+							style={{
+								display: 'flex',
+								justifyContent: 'center',
+								alignItems: 'center',
+								animationDelay: `${0.1}s`,
+								textWrap: 'nowrap',
+								fontSize: '0.8rem',
+								color: '#E2E8F0',
+								textAlign: 'center',
+								padding: '0rem 1rem',
+								marginLeft: 0,
+								marginRight: 0,
+								marginTop: '',
+								marginBottom: '',
+								border: '2px outset buttonborder',
+								borderTopLeftRadius: 0,
+								borderTopRightRadius: 0,
+								borderBottomLeftRadius: 9,
+								borderBottomRightRadius: 9,
+								height: '3.3rem',
+								}}
+								>{
+									titleCase('welcome ' + userInfo.first_name)}
+								</Link>}
+								{headerMenuArr.map((menu, index) => {
+									const lastItem = index === headerMenuArr.length - 1;
+									let statusLink = menu.link;
+									const temp = status
+									status = menu?.menu;
+									if (status.toLowerCase() === "auth") {
+										status = temp;
+										// button = true;
+										// console.log({status})
+										statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
+										status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
+										// console.log({status}, {statusLink})
+										
+										// console.log({statusLink})
+									}
+									// console.log('menu?.menu?.toLowerCase():', menu?.menu?.toLowerCase() ,menu?.authItems)
+									return (
+										<Fragment key={index}>
+											<Link to={(menu?.menu?.toLowerCase()!=='categories'&&statusLink.split('/').pop()!=='logout')&&statusLink}
+											onClick={(e) => {
+												const logout = statusLink?.split('/')?.pop()?.toLowerCase()
+												// console.log("Clicked on:", status);
+												if (menu?.menu?.toLowerCase() === 'categories') {
+													// console.log("Clicked on Categories");
+													e.stopPropagation();
+													handleMenuItemClick();
+												}
+												else if (logout === 'logout') {
+													// console.log("Clicked on auth");
+													// console.log({statusLink})
+													e.stopPropagation();
+													handleLogout(logout)
+												}
+											}}
+											// onClick={handleMenuItemClick}
+											className={`dropdown-item slideInRight mr-3`}
+											style={{
+												display: 'flex',
+												justifyContent: 'center',
+												alignItems: 'center',
+												animationDelay: `${index * 0.1}s`,
+												textWrap: 'nowrap',
+												fontSize: '0.8rem',
+												color: '#E2E8F0',
+												textAlign: 'center',
+												padding: '0rem 1rem',
+												marginLeft: 0,
+												marginRight: 0,
+												marginTop: menu?.menu?.toLowerCase() === "contact" ? '21rem' : '',
+												marginBottom: lastItem ? '60%' : '',
+												border: '2px outset buttonborder',
+												borderTopLeftRadius: 0,
+												borderTopRightRadius: 0,
+												borderBottomLeftRadius: 9,
+												borderBottomRightRadius: 9,
+												height: '3.3rem',
+												}}>
+													<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
+													style={{marginRight: 8, fontSize: '1rem'}} />
+														{status}
+											</Link>
+										</Fragment>
+									)
+								})}
 						</div>
 					</div>
 				</div>
@@ -328,6 +357,19 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 						alignItems: 'center',
 						// paddingRight: 'auto',
 						}}>
+						{userInfo &&
+						<Link to={"/settings"}
+						// className='mb-0'
+						style={{
+							textWrap: 'nowrap',
+							color: '#F8F6F2',
+							// fontSize: '0.9rem',
+							fontStyle: 'italic',
+							fontWeight: 'bold',
+							// alignSelf: 'center',
+							}}>
+								{titleCase('welcome ' + userInfo.first_name)}
+						</Link>}
 						<div className="d-inline-flex align-items-center h-100">
 							{headerMenuArr.map((menu, index) => {
 								let button = false
