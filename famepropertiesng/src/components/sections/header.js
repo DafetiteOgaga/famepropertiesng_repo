@@ -189,8 +189,8 @@ function Header({mTop}) {
 }
 
 function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
-	const { accessToken, updateToken } = useAuth();
-	console.log({accessToken})
+	const { accessToken, updateToken, userInfo, updateUserInfo } = useAuth();
+	console.log({accessToken}, {userInfo})
 	// console.log('menu items2')
 	const deviceType = useDeviceType()
 	const navigate = useNavigate();

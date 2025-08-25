@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 
 const getBaseURL = (api=false) => {
-	const host = window.location.hostname;
 	if (api) {
 		return 'https://dafetiteapiendpoint.pythonanywhere.com';
 	}
+
+	const host = window.location.hostname;
 	if (host === 'localhost' || host === '127.0.0.1') {
 		console.log('Running in development mode');
 		// /dafetite_brevo_api_key/dafetite_brevo_api
