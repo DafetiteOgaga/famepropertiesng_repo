@@ -8,6 +8,7 @@ function ProductAdvert({productSelector, productsArr}) {
 	const isMobile = deviceType.width <= 576
 	const isSmallMobile = deviceType.width <= 400
 	const isVerySmallMobile = deviceType.width <= 390
+	// const isVeryVerySmallMobile = deviceType.width <= 375
 	// console.log({productsArr})
 	return (
 		<>
@@ -25,7 +26,8 @@ function ProductAdvert({productSelector, productsArr}) {
 						...{display: isActive?'block':'none'},
 						...isMobile?{
 							position: 'absolute',
-							top: isVerySmallMobile?'40%':'70%',
+							// top: isVeryVerySmallMobile?'70%':(isVerySmallMobile?'40%':'70%'),
+							top: '70%',
 							maxHeight: 300,
 							height: 150,
 							width: 170,

@@ -75,5 +75,5 @@ function createStorage(storage) {
 	}
 
 // Create two versions
-// export const createLocal = createStorage(localStorage);
-export const createSession = createStorage(sessionStorage);
+export const createLocal = createStorage(localStorage);
+// export const createSession = createStorage(sessionStorage);
