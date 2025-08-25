@@ -22,14 +22,6 @@ function ProcessImage() {
 	};
 	// const location = useLocation().pathname.split("/").pop();
 	// const [products, setProducts] = useState([]);
-
-	// useEffect(() => {
-	// 	fetch("http://127.0.0.1:8000/products/") // Django API endpoint
-	// 	.then(res => res.json())
-	// 	.then(data => setProducts(data));
-	// }, []);
-	// console.log("Current Location:", location);
-	// console.log("Returned File:", returnedFile);
 	return (
 		<>
 			{/* Breadcrumb Start */}
