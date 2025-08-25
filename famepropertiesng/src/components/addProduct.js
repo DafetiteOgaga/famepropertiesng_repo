@@ -5,15 +5,6 @@ import { UploadImageItem } from '../hooks/allAuth/imageKitUpload';
 import { IKContext, IKUpload, IKImage } from "imagekitio-react";
 
 function AdminPage() {
-	// const location = useLocation().pathname.split("/").pop();
-	// const [products, setProducts] = useState([]);
-
-	// useEffect(() => {
-	// 	fetch("http://127.0.0.1:8000/products/") // Django API endpoint
-	// 	.then(res => res.json())
-	// 	.then(data => setProducts(data));
-	// }, []);
-	// console.log("Current Location:", location);
 	return (
 		<>
 			{/* Breadcrumb Start */}
