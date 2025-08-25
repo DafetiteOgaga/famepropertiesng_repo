@@ -7,14 +7,20 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
 	// ✅ Store access token in state (in-memory only)
 	const [accessToken, setAccessToken] = useState(null);
+	const [userInfo, setUserInfo] = useState(null);
 
 	// 3. Function to update token
 	const updateToken = (newToken) => {
 		setAccessToken(newToken);  // Replace the old token with the new one
 	};
 
+	// 3. Function to update user information
+	const updateUserInfo = (uInfo) => {
+		setUserInfo(uInfo);
+	};
+
 	return (
-		<AuthContext.Provider value={{ accessToken, updateToken }}>
+		<AuthContext.Provider value={{ accessToken, updateToken, userInfo, updateUserInfo }}>
 			{children}
 		</AuthContext.Provider>
 	);
