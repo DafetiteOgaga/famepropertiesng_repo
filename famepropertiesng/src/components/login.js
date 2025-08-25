@@ -8,7 +8,10 @@ import { useAuthFetch } from "../hooks/authFetch";
 import { GoogleAuthButtonAndSetup } from "../hooks/allAuth/googleAuthButtonAndSetup";
 import { titleCase } from "../hooks/changeCase";
 import { useAuth } from "../hooks/allAuth/authContext";
+import { getBaseURL } from "../hooks/fetchAPIs";
 
+const baseURL = getBaseURL();
+console.log({baseURL})
 const initialFormData = {
 	email: '',
 	password: '',
@@ -26,6 +29,7 @@ const inputArr = [
 
 function LogIn() {
 	const authFetch = useAuthFetch()
+	const [showPassword, setShowPassword] = useState(false);
 	// const { accessToken, updateToken } = useAuth();
 	const navigate = useNavigate();
 	const [isError, setIsError] = useState(null);
@@ -52,7 +56,7 @@ function LogIn() {
 		}
 
 		try {
-			const response = await authFetch("http://127.0.0.1:8000/api/token/", {
+			const response = await authFetch(`${baseURL}/api/token/`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: {
@@ -132,15 +136,30 @@ function LogIn() {
 								marginRight: marginX,
 								}}>
 								<label>{titleCase(input.name)}<span>*</span></label>
-								<input
-								name={input.name}
-								onChange={onChangeHandler}
-								value={formData[input.name]}
-								className="form-control"
-								type={input.name}
-								placeholder={input.placeholder}
-								style={{borderRadius: '5px'}}
-								required/>
+								<div style={{ position: "relative", width: "100%" }}>
+									<input
+									name={input.name}
+									onChange={onChangeHandler}
+									value={formData[input.name]}
+									className="form-control"
+									type={input.name==='password'?(showPassword?'text':input.name):input.name}
+									placeholder={input.placeholder}
+									style={{borderRadius: '5px'}}
+									required/>
+									{input.name === "password" && (
+										<i
+										className={`far ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
+										onClick={() => setShowPassword((prev) => !prev)} // toggle state
+										style={{
+											position: "absolute",
+											top: "50%",
+											right: "10px",
+											transform: "translateY(-50%)",
+											cursor: "pointer",
+										}}
+										/>
+									)}
+								</div>
 							</div>
 						)
 					})}
@@ -188,30 +207,53 @@ function LogIn() {
 						</button>
 						
 					</div>
-					<p
-					style={{
-						color: '#475569',
-					}}>Don't have an account?
-						<Link
-						to="/signup"
+					{<>
+						<p
+						className="mb-1"
 						style={{
-							paddingLeft: '0.5rem',
 							color: '#475569',
+							textAlign: 'center',
+						}}>Don't have an account?
+							<Link
+							to="/signup"
+							style={{
+								paddingLeft: '0.5rem',
+								color: '#475569',
+								fontStyle: 'italic',
+								textDecoration: 'underline',
+							}}>
+								Create one
+							</Link>
+						</p>
+						<p
+						style={{
+							color: '#475569',
+							textAlign: 'center',
+							fontSize: '0.9rem',
+							fontStyle: 'italic',
+						}}>Forgot Password?
+							<Link
+							// to="/signup"
+							style={{
+								paddingLeft: '0.5rem',
+								color: '#475569',
+								textDecoration: 'underline',
+							}}>
+								Reset
+							</Link>
+						</p>
+						{isError &&
+						<p
+						style={{
+							color: '#BC4B51',
+							textAlign: 'center',
+							fontWeight: "bold",
+							fontStyle: 'italic',
+							fontSize: '0.9rem',
 						}}>
-							Create one
-						</Link>
-					</p>
-					{isError &&
-					<p
-					style={{
-						color: '#BC4B51',
-						textAlign: 'center',
-						fontWeight: "bold",
-						fontStyle: 'italic',
-						fontSize: '0.9rem',
-					}}>
-						{isError}
-					</p>}
+							{isError}
+						</p>}
+					</>}
 				</div>
 				{/* <GoogleAuthButtonAndSetup /> */}
 			</form>
