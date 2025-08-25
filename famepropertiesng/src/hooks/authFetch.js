@@ -1,10 +1,13 @@
 import { createLocal } from "./setupLocalStorage";
 import { useAuth } from "./allAuth/authContext";
+import { getBaseURL } from "./fetchAPIs";
 // import { useNavigate } from 'react-router-dom';
 
-async function refreshToken({updateToken}) {
+const baseURL = getBaseURL();
+
+async function refreshToken({updateToken, updateUserInfo}) {
 	// const refresh = createLocal.getItem("fpng-refresh");
-	const response = await fetch("http://127.0.0.1:8000/api/token/refresh/", {
+	const response = await fetch(`${baseURL}/api/token/refresh/`, {
 		method: "POST",
 		credentials: "include", // Include cookies in the request
 	});
@@ -13,8 +16,9 @@ async function refreshToken({updateToken}) {
 
 	if (response.ok) {
 		createLocal.setItem("fpng-access", data.access); // update access token
-		console.log("set new access token in memory");
+		// console.log("set new access token in memory");
 		updateToken(data.access); // update context
+		updateUserInfo(data.user); // update context
 		return data.access;
 	} else {
 	  	// refresh expired too → user must log in again
@@ -26,10 +30,8 @@ async function refreshToken({updateToken}) {
 }
 
 function useAuthFetch() {
-	const { accessToken, updateToken } = useAuth(); // ✅ hook is called inside another hook
+	const { accessToken, updateToken, userInfo, updateUserInfo } = useAuth(); // ✅ hook is called inside another hook
 	async function fetchWithAuth(url, options={}) {
-		// const navigate = useNavigate();
-		// console.log("Using useAuthFetch with accessToken:", accessToken);
 		let access = accessToken
 		// createLocal.getItem("fpng-access");
 
@@ -67,11 +69,9 @@ function useAuthFetch() {
 
 		if (response.status === 401) {
 			// Token expired → get a new one
-			access = await refreshToken({updateToken});
+			access = await refreshToken({updateToken, updateUserInfo});
 
 			if (access) {
-				console.log("Token refreshed to:", access);
-				console.log("new accessToken:", accessToken);
 				options.headers["Authorization"] = `Bearer ${access}`;
 				response = await fetch(url, options); // retry
 			} else {
@@ -92,6 +92,7 @@ function useAuthFetch() {
 		const data = await response.json()
 		// console.log("Got new access token from response:", data);
 		updateToken(data.access); // update context
+		updateUserInfo(data.user); // update context
 		return data;
 	}
 	return fetchWithAuth; // ✅ return the function
