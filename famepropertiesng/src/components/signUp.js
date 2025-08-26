@@ -1,10 +1,125 @@
+import { useEffect, useState } from "react";
+import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
+import 'react-country-state-city/dist/react-country-state-city.css';
 import { Breadcrumb } from "./sections/breadcrumb"
 import { useDeviceType } from "../hooks/deviceType"
 import { Link } from 'react-router-dom';
 import { GoogleAuthButtonAndSetup } from "../hooks/allAuth/googleAuthButtonAndSetup";
+import { titleCase } from "../hooks/changeCase";
+
+const inputArr = [
+	{
+		name: 'first_name',
+		placeholder: 'John',
+		type: 'text',
+		important: true,
+	},
+	{
+		name: 'last_name',
+		placeholder: 'Doe',
+		type: 'text',
+		important: true,
+	},
+	{
+		name: 'middle_name',
+		placeholder: 'Dolly',
+		type: 'text',
+		important: false,
+	},
+	{
+		name: 'username',
+		placeholder: 'Dols',
+		type: 'text',
+		important: true,
+	},
+	{
+		name: 'country',
+		important: true,
+	},
+	{
+		name: 'state',
+		important: true,
+	},
+	{
+		name: 'city',
+		important: true,
+	},
+	{
+		name: 'address',
+		placeholder: 'No.3, 123 crescent, Addo, Ajah',
+		type: 'text',
+		important: true,
+	},
+	{
+		name: 'nearest bus stop',
+		placeholder: 'addo roundabout, opposite uba bank',
+		type: 'text',
+		important: true,
+	},
+	{
+		name: 'email',
+		placeholder: 'example@email.com',
+		type: 'email',
+		important: true,
+	},
+	{
+		name: 'mobile_no',
+		placeholder: '806 000 1111',
+		type: 'tel',
+		important: true,
+		phoneProps: {
+			inputmode: 'numeric',   // <!-- brings up number keypad on mobile -->
+			minlength: '7',
+			maxlength: '10',
+			pattern: '[0-9]{7,10}', // allows only numbers and between 7 and 14 characters
+		}
+	},
+	{
+		name: 'password',
+		placeholder: 'password',
+		type: 'password',
+		important: true,
+	},
+	{
+		name: 'password_confirmation',
+		placeholder: 'password confirmation',
+		type: 'password',
+		important: true,
+	},
+]
 
 function SignUp() {
+	const [country, setCountry] = useState(null); // whole country object
+	const [state, setState] = useState(null);     // whole state object
+	const [city, setCity] = useState(null);       // whole city object
+
+	// useEffect(() => {
+	// 	if (country) {
+	// 		console.log("Country changed:", country);
+	// 		setState(null);       // reset state
+	// 		setCity(null);         // reset city
+	// 	}
+	// }, [country])
+	// useEffect(() => {
+	// 	if (state) {
+	// 		console.log("State changed:", state);
+	// 		setCity(null);         // reset city
+	// 	}
+	// }, [state])
+	// // ✅ Modified
+	// const handleCountryChange = (val) => {
+	// 	setCountry(val);     // update country
+	// 	setState("");       // reset state
+	// 	setCity("");         // reset city
+	// };
+	
+	// // ✅ Modified
+	// const handleStateChange = (val) => {
+	// 	setState(val);      // update state
+	// 	setCity("");         // reset city
+	// };
 	const deviceType = useDeviceType().width <= 576;
+	console.log({country, state, city})
 	return (
 		<>
 			{/* <Breadcrumb page={'Sign Up'} /> */}
@@ -32,7 +147,63 @@ function SignUp() {
 						<div className="bg-light p-30 mb-5"
 						style={{borderRadius: '10px'}}>
 							<div className="row">
-								<div className="col-md-6 form-group">
+								{inputArr.map((input, index) => {
+									const phone = input.name==='mobile_no' && country;
+									// console.log(input.name, '-', {phone})
+									return (
+										<div key={index}
+										className="col-md-6 form-group">
+											<label>{titleCase(input.name)}<span>{`${input.important?'*':''}`}</span></label>
+											{input.name==='country' ?
+													<CountrySelect
+													value={country}
+													onChange={(val) => setCountry(val)}
+													placeHolder="Select Country"
+													/>
+													:
+													input.name==='state' ?
+														<StateSelect
+														// country={country}
+														key={country?.id || "no-country"} // to reset when country changes
+														countryid={country?.id}
+														value={state}
+														onChange={(val) => setState(val)}
+														placeHolder="Select State"
+														/>
+														:
+														input.name==='city' ?
+															<CitySelect
+															// country={country}
+															// state={state}
+															key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
+															countryid={country?.id}
+															stateid={state?.id}
+															value={city}
+															onChange={(val) => setCity(val)}
+															placeHolder="Select City"
+															/>
+															:
+															<div
+															style={{
+																display: 'flex',
+																flexDirection: 'row',
+																alignItems: 'baseline',
+															}}>
+																{phone && <p
+																style={{
+																	marginRight: '0.5rem',
+																}}>+{country.phone_code}</p>}
+																<input
+																	style={{borderRadius: '5px'}}
+																	className="form-control"
+																	type={input.type}
+																	{...input.phoneProps}
+																	placeholder={input.placeholder}/>
+															</div>}
+										</div>
+									)
+								})}
+								{/* <div className="col-md-6 form-group">
 									<label>First Name<span>*</span></label>
 									<input
 									style={{borderRadius: '5px'}}
@@ -40,7 +211,6 @@ function SignUp() {
 									type="text"
 									placeholder="John"/>
 								</div>
-								
 								<div className="col-md-6 form-group">
 									<label>Last Name<span>*</span></label>
 									<input
@@ -65,7 +235,6 @@ function SignUp() {
 									type="text"
 									placeholder="Dols"/>
 								</div>
-								
 								<div className="col-md-6 form-group">
 									<label>Address<span>*</span></label>
 									<input
@@ -74,19 +243,6 @@ function SignUp() {
 									type="text"
 									placeholder="No.3, 123 crescent, Addo, Ajah"/>
 								</div>
-								
-								{/* <div className="col-md-6 form-group">
-									<label>Address Line 1</label>
-									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="123 Street"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>Address Line 2</label>
-									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="123 Street"/>
-								</div> */}
-								
-								{/* ¹²³€½½¾{[]}\¸`~¸~`¨þø→↓←ŧ¶eł@æßðđŋħˀĸł´^ ̣·─µn”“¢»« */}
 								<div className="col-md-6 form-group">
 									<label>City</label>
 									<input
@@ -151,25 +307,6 @@ function SignUp() {
 									className="form-control"
 									type="password"
 									placeholder="password confirmation"/>
-								</div>
-								{/* <div className="col-md-6 form-group">
-									<label>ZIP Code</label>
-									<input
-									style={{borderRadius: '5px'}} className="form-control" type="text" placeholder="123"/>
-								</div> */}
-								{/* <div className="col-md-12 form-group">
-									<div className="custom-control custom-checkbox">
-										<input
-										style={{borderRadius: '5px'}} type="checkbox" className="custom-control-input" id="newaccount"/>
-										<label className="custom-control-label" htmlFor="newaccount">Create an account</label>
-									</div>
-								</div>
-								<div className="col-md-12">
-									<div className="custom-control custom-checkbox">
-										<input
-										style={{borderRadius: '5px'}} type="checkbox" className="custom-control-input" id="shipto"/>
-										<label className="custom-control-label" htmlFor="shipto"  data-toggle="collapse" data-target="#shipping-address">Ship to different address</label>
-									</div>
 								</div> */}
 							</div>
 							<button
