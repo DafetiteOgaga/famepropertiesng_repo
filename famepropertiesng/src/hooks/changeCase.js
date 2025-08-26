@@ -4,7 +4,7 @@ function titleCase(str) {
 	if (typeof str!=='string'||str==='') return
 	return str
 		.toLowerCase()
-		.split(' ')
+		.split(/[\s_]+/) // split by space OR underscore
 		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
 		.join(' ');
 }
