@@ -5,7 +5,8 @@ import { useScrollDetection } from '../../hooks/scrollDetection';
 import { useDeviceType } from '../../hooks/deviceType';
 import { Sidebar } from '../bars/sidebar';
 import { getImage } from '../../hooks/baseImgUrl';
-import { createLocal } from '../../hooks/setupLocalStorage';
+// import { createLocal } from '../../hooks/setupLocalStorage';
+import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { useAuth } from '../../hooks/allAuth/authContext';
 import { titleCase } from '../../hooks/changeCase';
 
@@ -190,13 +191,45 @@ function Header({mTop}) {
 }
 
 function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
-	const { accessToken, updateToken, userInfo, updateUserInfo } = useAuth();
+	const { createLocal } = useCreateStorage();
+	// const rotNumber = createLocal.getItem('fpng-rot');
+	// const storedChars = createLocal.getItem('fpng-rchars');
+	
+	// const {
+	// 	// accessToken, updateToken,
+	// 	// userInfo, updateUserInfo,
+	// 	rotNumber, setRotNumber,
+	// 	RotCipher, encrypt, decrypt
+	// } = useAuth();
+	
+
+	// ##############################
+	// const stringg = createLocal.getItem('fpng-product-str');
+	// const arr = createLocal.getItem('fpng-product-arr');
+	// const objj = createLocal.getItem('fpng-product-obj');
+	// console.log({stringg, arr, objj})
+	// ##############################
+	const accessToken = createLocal.getItem('fpng-acc');
+	const userInfo = createLocal.getItem('fpng-user');
+	const refreshToken = createLocal.getItem('fpng-ref');
+	// let accessToken = localStorage.getItem('fpng-acc');
+	// let userInfo = localStorage.getItem('fpng-user');
+	// let refreshToken = localStorage.getItem('fpng-ref')
+	// accessToken = accessToken ? JSON.parse(accessToken) : null;
+	// userInfo = userInfo ? JSON.parse(userInfo) : null;
+	// console.log('userInfo:', (userInfo.value))
+	// userInfo = userInfo? JSON.parse(userInfo.value): null;
+	// userInfo = userInfo ? JSON.parse(userInfo) : null;
+	// refreshToken = refreshToken ? JSON.parse(refreshToken) : null;
 	console.log({accessToken}, {userInfo})
+	console.log({refreshToken},
+		// {rotNumber}, {storedChars}
+	)
+	// console.log('arr has escape char?', typeof(userInfo)==='string'?userInfo?.includes('\\:'):false)
 	// console.log('menu items2')
 	const deviceType = useDeviceType()
 	const navigate = useNavigate();
 	let status = accessToken
-	// createLocal.getItem('fpng-access');
 	// console.log('fpng-status:', status)
 	status = status??null;
 	const [itemClicked, setItemClicked] = useState(false);
@@ -206,10 +239,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 	const handleLogout = (statusLink) => {
 		// console.log('onclick event', statusLink)
 		if (statusLink.toLowerCase()==='logout') {
-			// console.log('logout click')
-			createLocal.removeItem('fpng-access')
-			updateToken(null);
-			updateUserInfo(null);
+			// console.log('logout process initiated')
+			createLocal.removeAllItems();
 			navigate('/')
 		} else {
 			// console.log('navigate click')
