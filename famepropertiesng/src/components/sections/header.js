@@ -56,6 +56,7 @@ const dressesArr = [
 	"women's dresses",
 	"baby's dresses"
 ]
+
 function Header({mTop}) {
 	// console.log({mTop})
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -285,32 +286,63 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							borderBottomLeftRadius: 20,
 						}}>
 							{userInfo &&
-							<Link to={"/settings"}
-							className={`dropdown-item slideInRight mr-3`}
-							style={{
-								display: 'flex',
-								justifyContent: 'center',
-								alignItems: 'center',
-								animationDelay: `${0.1}s`,
-								textWrap: 'nowrap',
-								fontSize: '0.8rem',
-								color: '#E2E8F0',
-								textAlign: 'center',
-								padding: '0rem 1rem',
-								marginLeft: 0,
-								marginRight: 0,
-								marginTop: '',
-								marginBottom: '',
-								border: '2px outset buttonborder',
-								borderTopLeftRadius: 0,
-								borderTopRightRadius: 0,
-								borderBottomLeftRadius: 9,
-								borderBottomRightRadius: 9,
-								height: '3.3rem',
-								}}
-								>{
-									titleCase('welcome ' + userInfo.first_name)}
-								</Link>}
+							<>
+								<Link to={"/settings"}
+								className={`dropdown-item slideInRight mr-3`}
+								style={{
+									display: 'flex',
+									justifyContent: 'center',
+									alignItems: 'center',
+									flexDirection: 'column',
+									animationDelay: `${0.1}s`,
+									textWrap: 'nowrap',
+									fontSize: '0.8rem',
+									color: '#E2E8F0',
+									textAlign: 'center',
+									padding: '3.5rem 0.8rem 2.7rem 0.8rem',
+									// paddingTop: '1rem',
+									// paddingBottom: '2rem',
+									marginLeft: 0,
+									marginRight: 0,
+									marginTop: '',
+									marginBottom: '',
+									border: '2px outset buttonborder',
+									borderTopLeftRadius: 0,
+									borderTopRightRadius: 0,
+									borderBottomLeftRadius: 9,
+									borderBottomRightRadius: 9,
+									height: '3.3rem',
+									fontWeight: 'bold',
+									}}>
+										{userInfo.image_url ?
+										<div style={{
+											marginBottom: '0.3rem',
+										}}>
+											<img
+											src={userInfo.image_url}
+											alt={userInfo.first_name}
+											style={{
+												width: '3rem',
+												height: '3rem',
+												objectFit: 'cover',
+												borderRadius: '50%',
+												marginRight: '0.5rem',
+												padding: 2,
+												border: '1px solid #F8F6F2',
+												// textDecoration: 'none',
+											}}
+											/>
+										</div>
+										:<span
+										className="fas fa-user-circle mr-2"
+										style={{
+											fontSize: '2rem',
+											// textDecoration: 'none',
+										}}
+										/>}
+										{titleCase(userInfo.first_name)}
+									</Link>
+							</>}
 								{headerMenuArr.map((menu, index) => {
 									const lastItem = index === headerMenuArr.length - 1;
 									let statusLink = menu.link;
@@ -397,9 +429,33 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							// fontSize: '0.9rem',
 							fontStyle: 'italic',
 							fontWeight: 'bold',
-							// alignSelf: 'center',
+							display: 'flex',
+							alignItems: 'center',
+							textDecoration: 'none',
 							}}>
-								{titleCase('welcome ' + userInfo.first_name)}
+								{userInfo.image_url ?
+								<img
+								src={userInfo.image_url}
+								alt={userInfo.first_name}
+								style={{
+									width: '2.4rem',
+									height: '2.4rem',
+									objectFit: 'cover',
+									borderRadius: '50%',
+									marginRight: '0.5rem',
+									padding: 1,
+									border: '1px solid #F8F6F2',
+									// textDecoration: 'none',
+								}}
+								/>
+								:<span
+								className="fas fa-user-circle mr-2"
+								style={{
+									fontSize: '2.3rem',
+									// textDecoration: 'none',
+								}}
+								/>}
+								{titleCase(userInfo.first_name)}
 						</Link>}
 						<div className="d-inline-flex align-items-center h-100">
 							{headerMenuArr.map((menu, index) => {
