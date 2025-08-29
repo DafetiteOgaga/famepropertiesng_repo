@@ -5,6 +5,7 @@ import { getImage } from '../../hooks/baseImgUrl';
 import { digitSeparator, titleCase } from '../../hooks/changeCase';
 import { getBaseURL } from '../../hooks/fetchAPIs';
 import { useCreateStorage } from '../../hooks/setupLocalStorage';
+import { BouncingDots } from '../../spinners/spinner';
 
 const baseURL = getBaseURL();
 // const produc8tImagesArr = [
@@ -51,6 +52,7 @@ function Products() {
 	const [productItemArr, setProductItemArr] = useState([]);
 	const parameters = useParams();
 	const deviceType = useDeviceType();
+	const isMobile = deviceType.width<=576
 	// console.log('parameters:', parameters);
 	const fetchServerData = async () => {
 		try {
@@ -86,7 +88,7 @@ function Products() {
 						// console.log({randomNumber})
 						return (
 							<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
-							style={deviceType.width<=576 ?
+							style={isMobile ?
 								{
 									paddingLeft: 0,
 									paddingRight: 0,
@@ -98,7 +100,7 @@ function Products() {
 											// getImage(productObjItem, 'img')
 											productObjItem.image_url
 											}/>
-										
+
 										{/* SOLD Overlay */}
 										{productObjItem.sold && (
 											<div
@@ -178,8 +180,26 @@ function Products() {
 						</nav>
 					</div>
 				</div>
-			:
-			undefined}
+				:
+				(isMobile?
+					((Array.from({length: 2})).map((_, index) => {
+					return (
+						<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
+						style={{paddingLeft: 0,
+								paddingRight: 0,}}>
+								{(Array.from({length: 4}).map((_, innerIndex) => {
+									return (
+											<div key={innerIndex} className={`product-item bg-light mb-4`}
+											style={{borderRadius: '10px'}}>
+												<BouncingDots size={"lg"} color={"#475569"} p={"10"} />
+											</div>
+								)}))}
+						</div>
+					)
+					}))
+				:
+				<BouncingDots size={"lg"} color={"#475569"} p={"12"} />)
+			}
 		</div>
 	)
 }

@@ -1,15 +1,17 @@
 import { getImage } from "../../../hooks/baseImgUrl";
 import { titleCase } from "../../../hooks/changeCase";
 import { useDeviceType } from "../../../hooks/deviceType";
+import { BouncingDots } from "../../../spinners/spinner";
 
 function FeatureAdvert({featureSelector, featuresArr}) {
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
+	const isLoading = !featuresArr.length;
 	// console.log("feature component")
 	// console.log({featureSelector, featuresArr})
 	return (
 		<>
-			{featuresArr?
+			{!isLoading &&
 				<>
 				{featuresArr.map((featureItem, index) => {
 					const isActive = featuresArr[featureSelector].id===featureItem.id
@@ -56,8 +58,9 @@ function FeatureAdvert({featureSelector, featuresArr}) {
 						</div>
 					)
 				})}
-			</>
-			:undefined}
+				</>
+			}
+			{isLoading && <BouncingDots size={!isMobile&&"sm"} color={!isMobile&&"#475569"} p={!isMobile&&"6"} />}  {/* shows dots only if loading */}
 		</>
 	)
 }

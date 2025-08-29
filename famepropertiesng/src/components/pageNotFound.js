@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { TestSpinners } from '../spinners/spinner';
 
 function PageNotFound() {
 	// const location = useLocation().pathname.split("/").pop();
@@ -40,6 +41,7 @@ function PageNotFound() {
 				className="text-uppercase"
 				style={{color: '#475569',}}>Page Not Found</h2>
 			</div>
+			{/* <TestSpinners /> */}
 		</>
 	)
 }

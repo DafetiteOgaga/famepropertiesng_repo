@@ -12,6 +12,7 @@ import { getBaseURL } from "../hooks/fetchAPIs";
 import { IKContext, IKUpload, IKImage } from "imagekitio-react";
 import { useImageKitAPIs } from "../hooks/fetchAPIs";
 import { ImageCropAndCompress } from "../hooks/fileResizer/ImageCropAndCompress";
+import { BouncingDots } from "../spinners/spinner";
 
 const baseURL = getBaseURL();
 
@@ -127,6 +128,8 @@ const initialFormData = {
 }
 
 function SignUp() {
+	const [loading, setLoading] = useState(false);
+	const [isError, setIsError] = useState(null);
 	// const emailRef = useRef();
 	const handleDoneRef = useRef();
 	const baseAPIURL = useImageKitAPIs()?.data;
@@ -155,6 +158,7 @@ function SignUp() {
 	// 	}}
 	const [formData, setFormData] = useState(initialFormData);
 	const [isEmailValid, setIsEmailValid] = useState(null);
+	const [isEmailLoading, setIsEmailLoading] = useState(false);
 
 	// const testText = "Hello World! 123";
 	// const encrypcipher = RotCipher(testText, encrypt);
@@ -207,6 +211,7 @@ function SignUp() {
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		let { name, value } = e.target
+		if (name === 'email') setIsEmailLoading(true)
 		// if (name !== 'mobile_no') {
 		// 	value = value.trim().toLowerCase();
 		// }
@@ -237,7 +242,7 @@ function SignUp() {
 				...imageDetails,
 			}))
 			// setSelectedProfilePhoto(imageDetails);
-			console.log('Image details added to formData:', imageDetails);
+			// console.log('Image details added to formData:', imageDetails);
 			setUploadedImage(null);
 		}
 	}, [country, state, city, uploadedImage])
@@ -293,7 +298,7 @@ function SignUp() {
 				key==='password'
 			)?value:value.trim().toLowerCase();
 		})
-		console.log('Form submitted:', cleanedData);
+		// console.log('Form submitted:', cleanedData);
 		// toast.success('Registration Successful!');
 		try {
 			const response = await fetch(`${baseURL}/users/`, {
@@ -305,12 +310,13 @@ function SignUp() {
 			if (!response.ok) {
 				// Handle non-2xx HTTP responses
 				const errorData = await response.json();
+				setIsError(errorData?.error)
 				console.warn('Registration Error:', errorData);
 				toast.error(errorData?.error || 'Registration Error!');
 				return;
 			}
 			const data = await response.json();
-			console.log('Response data from server',data)
+			// console.log('Response data from server',data)
 			toast.success('Registration Successful!');
 			// setFormData(initialFormData);
 			// navigate('/welcome')
@@ -319,6 +325,8 @@ function SignUp() {
 			console.error("Error during login:", error);
 			toast.error('Error! Login Failed. Please try again.');
 			return null;
+		} finally {
+			setLoading(false);
 		}
 	}
 
@@ -331,7 +339,7 @@ function SignUp() {
 				throw new Error(errorText);
 			}
 			const data = await response.json();
-			console.log("Authentication data received");
+			// console.log("Authentication data received");
 			// console.log("Authentication data:", data);
 			return data;
 		} catch (error) {
@@ -353,6 +361,7 @@ function SignUp() {
 
 	const handleSubmitOkayFromChild = (e) => {
 		e.preventDefault();
+		setLoading(true);
 		if (handleDoneRef.current&&imagePreview) {
 			handleDoneRef.current.handleDone(); // parent directly triggers child’s function
 			// handleUpload(e); // then upload
@@ -368,8 +377,8 @@ function SignUp() {
 	const handleUpload = async (e=null) => {
 		if (e) e.preventDefault();
 
-		console.log('Starting upload process...');
-		console.log({selectedFile})
+		// console.log('Starting upload process...');
+		// console.log({selectedFile})
 		// return
 
 		// if (!selectedFile) {
@@ -388,8 +397,8 @@ function SignUp() {
 				// const authResponse = await fetch(`${baseAPIURL}/imagekit-auth/`);
 				const authData = await authenticator();
 				if (!authData) throw new Error("Failed to get ImageKit auth data");
-				console.log("Auth data for upload:", authData);
-				console.log({baseAPIURL})
+				// console.log("Auth data for upload:", authData);
+				// console.log({baseAPIURL})
 			
 				// if (authData&&baseAPIURL) {
 				imageFormData.append("publicKey", baseAPIURL?.IMAGEKIT_PUBLIC_KEY);
@@ -399,10 +408,10 @@ function SignUp() {
 				// }
 				// return
 			
-				for (let [key, value] of imageFormData.entries()) {
-					console.log(key, ":", value);
-				}
-				console.log("Uploading image to ImageKit...");
+				// for (let [key, value] of imageFormData.entries()) {
+				// 	console.log(key, ":", value);
+				// }
+				// console.log("Uploading image to ImageKit...");
 
 				// return
 
@@ -425,7 +434,7 @@ function SignUp() {
 				}
 				const result = await uploadResponse.json();
 				setUploadedImage(result); // save response
-				console.log("Upload success:", result);
+				// console.log("Upload success:", result);
 				onSubmitHandler(); // submit form after successful upload
 			} catch (err) {
 				toast.error('Upload failed. Please try again.');
@@ -445,16 +454,17 @@ function SignUp() {
 	// 	}
 	// }, [passwordErrorMessage]);
 
-	console.log({country, state, city})
-	console.log({formData})
-	console.log('passwordErrorMessage', !!passwordErrorMessage, passwordErrorMessage)
-	console.log({selectedFile})
-	console.log({imagePreview})
+	// console.log({country, state, city})
+	// console.log({formData})
+	// console.log('passwordErrorMessage', !!passwordErrorMessage, passwordErrorMessage)
+	// console.log({selectedFile})
+	// console.log({imagePreview})
 	// console.log('handleDoneRef.current', handleDoneRef.current)
 
 	useEffect(() => {
 		if (!formData.email) {
 			setIsEmailValid(null)
+			setIsEmailLoading(false)
 			return; // don't run if empty
 		}
 
@@ -462,7 +472,7 @@ function SignUp() {
 		const timer = setTimeout(() => {
 			// Make server request here
 			checkEmailUniqueness(formData.email);
-		}, 1000); // waits 1s after last keystroke
+		}, 2000); // waits 1s after last keystroke
 
 		// cleanup old timer if user types again quickly
 		return () => clearTimeout(timer);
@@ -470,19 +480,30 @@ function SignUp() {
 
 	const checkEmailUniqueness = async (email) => {
 		try {
+			// setIsEmailLoading(true)
 			const response = await fetch(`${baseURL}/check-email/${email}/`);
 			const data = await response.json();
-			console.log("Server says:", data);
+			// console.log("Server says:", data);
 			setIsEmailValid(data)
 			return data
 		} catch (error) {
 			setIsEmailValid(null)
 			// toast.error('Error checking email. Please try again.');
 			console.error("Error checking email:", error);
+		} finally {
+			setIsEmailLoading(false)
 		}
 	};
-	console.log({isEmailValid})
-	console.log("not 'green", isEmailValid?.color!=='green')
+	useEffect(() => {
+		if (isError) {
+			const delay = setTimeout(() => {
+				setIsError(null)
+			}, 3000);
+			return ()=>clearTimeout(delay)
+		}
+	}, [isError])
+	// console.log({isEmailValid})
+	// console.log("not 'green", isEmailValid?.color!=='green')
 	return (
 		<>
 			<form onSubmit={handleSubmitOkayFromChild}
@@ -617,12 +638,24 @@ function SignUp() {
 														display: 'inline-block',
 														transform: 'skewX(-17deg)',
 													}}>{isEmailValid?.message}</span>}
+													{(input.type==='email'&&isEmailLoading)&&
+													<span
+													style={{
+														// color: isEmailValid.color,
+														// fontSize: '0.75rem',
+														display: 'inline-block',
+														marginLeft: '0.5rem',
+														// paddingTop: '0.7rem',
+														// transform: 'skewX(-17deg)',
+													}}>
+														<BouncingDots size="vm" color="#475569" p="0" />
+													</span>
+													}
 												</>}
 									</div>
 								)
 							})}
 							<div
-							
 							>
 								<div
 								className="col-md-6 form-group">
@@ -699,10 +732,10 @@ function SignUp() {
 						</div>
 						<button
 						type="submit"
-						className="btn btn-block btn-auth font-weight-bold py-3"
-						disabled={!isFieldsValid()||isEmailValid?.color!=='green'}
+						className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
+						disabled={!isFieldsValid()||isEmailValid?.color!=='green'||loading}
 						>
-							Sign Up
+							{!loading?'Sign Up':<BouncingDots size="sm" color="#fff" p="1" />}
 						</button>
 						{/* <span
 						style={{
@@ -723,6 +756,17 @@ function SignUp() {
 								Log in
 							</Link>
 						</p>
+						{isError &&
+						<p
+						style={{
+							color: '#BC4B51',
+							textAlign: 'center',
+							fontWeight: "bold",
+							fontStyle: 'italic',
+							fontSize: '0.9rem',
+						}}>
+							{isError}
+						</p>}
 						{/* <div
 						style={{
 							display: 'flex',

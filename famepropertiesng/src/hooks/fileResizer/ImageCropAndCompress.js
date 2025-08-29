@@ -63,7 +63,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 
 	// handle file input
 	const handleFileChange = (e) => {
-		console.log("File input changed:", e.target.files);
+		// console.log("File input changed:", e.target.files);
 		if (e.target.files && e.target.files.length > 0) {
 			const file = e.target.files[0];
 			const reader = new FileReader();
@@ -85,7 +85,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
   	// crop + compress in one click
 	const handleDone = async () => {
 		try {
-			console.log("Cropping and compressing...");
+			// console.log("Cropping and compressing...");
 			// Step 1: crop only after user confirms crop
 			const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels);
 
