@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useDeviceType } from "../../hooks/deviceType";
 import { getImage } from "../../hooks/baseImgUrl";
@@ -6,6 +6,7 @@ import { ProductAdvert } from "./carouselSections/productAdvert";
 import { FeatureAdvert } from "./carouselSections/featureAdvert";
 import { titleCase } from "../../hooks/changeCase";
 import { getBaseURL } from "../../hooks/fetchAPIs";
+import { BouncingDots } from "../../spinners/spinner";
 
 const baseURL = getBaseURL();
 // const carouselSelectorArr = [
@@ -82,6 +83,7 @@ const baseURL = getBaseURL();
 // ];
 
 function Carousel() {
+	// const [loading, setLoading] = useState(true);
 	const [carouselsArr, setCarouselsArr] = useState([]);
 	const [productsArr, setProductsArr] = useState([]);
 	const [featuresArr, setFeaturesArr] = useState([]);
@@ -162,31 +164,42 @@ function Carousel() {
 	// console.log('isMobile:', isMobile);
 	// console.log("in carousel: ", {productsArr})
 	// console.log("in carousel: ", {featuresArr})
+	// console.log("Loading state:", loading);
+	// console.log("Products length:", !!productsArr.length);
+	// console.log("Features length:", !!featuresArr.length);
+	const isLoading = (!productsArr.length || !featuresArr.length || !carouselsArr.length);
+	// console.log("Is Loading:", isLoading);
+	// const zero = 0
+	// console.log("Zero check:", !!zero);
+	// useEffect(() => {
+	// 	// console.log("Updating loading state...");
+	// 	if (isLoading) setLoading(isLoading);
+	// 	else setLoading(false);
+	// }, isLoading);
+	// console.log("Final Loading state:", loading);
 	return (
 		<>
-			{(productsArr&&featuresArr) ?
-				<div className="container-fluid mb-3">
-					<div className="row">
-						<CarouselAdverts
-						carouselsArr={carouselsArr}
-						carouselSelector={carouselSelector}
-						productSelector={productSelector}
-						featureSelector={featureSelector}
-						productsArr={productsArr}
-						featuresArr={featuresArr} />
+			<div className="container-fluid mb-3">
+				<div className="row">
+					<CarouselAdverts
+					carouselsArr={carouselsArr}
+					carouselSelector={carouselSelector}
+					productSelector={productSelector}
+					featureSelector={featureSelector}
+					productsArr={productsArr}
+					featuresArr={featuresArr} />
 
-						{!isMobile &&
-						<div className="col-lg-4">
-							<ProductAndFeatureAdverts
-								productSelector={productSelector}
-								productsArr={productsArr}
-								featureSelector={featureSelector}
-								featuresArr={featuresArr} />
-						</div>}
-					</div>
+					{!isMobile &&
+					<div className="col-lg-4">
+						<ProductAndFeatureAdverts
+							productSelector={productSelector}
+							productsArr={productsArr}
+							featureSelector={featureSelector}
+							featuresArr={featuresArr} />
+					</div>}
 				</div>
-			:
-			undefined}
+			</div>
+			{isLoading && <BouncingDots size={isMobile?"md":"xl"} color="#475569" p={isMobile?"10":"12"} />}  {/* shows dots only if loading */}
 		</>
 	)
 }
@@ -205,9 +218,12 @@ function ProductAndFeatureAdverts({productSelector, productsArr, featureSelector
 function CarouselAdverts({carouselsArr, carouselSelector, productSelector, featureSelector, productsArr, featuresArr}) {
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
+	// const isLoading = (!productsArr.length || !featuresArr.length || !carouselsArr.length);
+	// console.log("Is Loading:", isLoading);
 	// console.log({productsArr, featuresArr})
 	// console.log("Carousel Selector:", carouselsArr[carouselSelector].image_url);
 	return (
+		// <>
 		<div className="col-lg-8 px-xl-4"
 		style={{padding: 0}}>
 			<div id="header-carousel" className={`carousel slide carousel-fade ${isMobile?'mb-0':'mb-30'} mb-lg-0`}>
@@ -268,6 +284,8 @@ function CarouselAdverts({carouselsArr, carouselSelector, productSelector, featu
 				</div>
 			</div>
 		</div>
+		// {isLoading && <BouncingDots size="lg" color="#475569" />}  shows dots only if loading
+		// </>
 	)
 }
 export { Carousel };
