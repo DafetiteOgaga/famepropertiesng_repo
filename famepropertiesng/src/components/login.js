@@ -11,7 +11,7 @@ import { useAuth } from "../hooks/allAuth/authContext";
 import { getBaseURL } from "../hooks/fetchAPIs";
 
 const baseURL = getBaseURL();
-console.log({baseURL})
+// console.log({baseURL})
 const initialFormData = {
 	email: '',
 	password: '',
@@ -20,10 +20,12 @@ const inputArr = [
 	{
 		name: 'email',
 		placeholder: 'example@email.com',
+		autoComplete: "email"
 	},
 	{
 		name: 'password',
 		placeholder: 'password',
+		autoComplete: "current-password"
 	}
 ]
 
@@ -46,10 +48,20 @@ function LogIn() {
 			[name]: value
 		}))
 	}
+	const isNotRotKey = !localStorage.getItem("fpng-rot")
+	// console.log({isNotRotKey})
+
+	// Check if all required fields are filled
+	const isFieldsValid = () => {
+		const requiredFields = ['email', 'password'];
+		return requiredFields.every((field) => formData[field].trim() !== "");
+	};
+
+	// const isNotFormValid = formData.email.trim() === '' && formData.password.trim() === '';
 	const onSubmitHandler = async (e) => {
 		e.preventDefault();
 		// console.log('Submitting form with data:');
-		if (formData.email.trim()==="" || formData.password.trim()==="") {
+		if (!isFieldsValid()) {
 			console.warn('Form is invalid');
 			toast.error('Error! Login Failed. Invalid form data');
 			return;
@@ -77,7 +89,7 @@ function LogIn() {
 			if (data?.access) {
 				// Store tokens
 				// createLocal.setItem('fpng-status', formData.email, 1000*60);
-				createLocal.setItem('fpng-access', data.access);
+				// createLocal.setItem('fpng-access', data.access);
 				// updateToken(data.access);
 				// createLocal.setItem('fpng-refresh', data.refresh);
 				// localStorage.setItem("access", data.access);
@@ -202,7 +214,9 @@ function LogIn() {
 						}}>
 						{/* <label>Password</label> */}
 						<button
-						className="btn btn-block btn-auth font-weight-bold py-3">
+						className="btn btn-block btn-auth font-weight-bold py-3"
+						disabled={isNotRotKey||!isFieldsValid()}
+						>
 							Log In
 						</button>
 						

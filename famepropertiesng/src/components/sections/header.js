@@ -5,7 +5,8 @@ import { useScrollDetection } from '../../hooks/scrollDetection';
 import { useDeviceType } from '../../hooks/deviceType';
 import { Sidebar } from '../bars/sidebar';
 import { getImage } from '../../hooks/baseImgUrl';
-import { createLocal } from '../../hooks/setupLocalStorage';
+// import { createLocal } from '../../hooks/setupLocalStorage';
+import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { useAuth } from '../../hooks/allAuth/authContext';
 import { titleCase } from '../../hooks/changeCase';
 
@@ -55,6 +56,7 @@ const dressesArr = [
 	"women's dresses",
 	"baby's dresses"
 ]
+
 function Header({mTop}) {
 	// console.log({mTop})
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -190,13 +192,45 @@ function Header({mTop}) {
 }
 
 function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
-	const { accessToken, updateToken, userInfo, updateUserInfo } = useAuth();
+	const { createLocal } = useCreateStorage();
+	// const rotNumber = createLocal.getItem('fpng-rot');
+	// const storedChars = createLocal.getItem('fpng-rchars');
+	
+	// const {
+	// 	// accessToken, updateToken,
+	// 	// userInfo, updateUserInfo,
+	// 	rotNumber, setRotNumber,
+	// 	RotCipher, encrypt, decrypt
+	// } = useAuth();
+	
+
+	// ##############################
+	// const stringg = createLocal.getItem('fpng-product-str');
+	// const arr = createLocal.getItem('fpng-product-arr');
+	// const objj = createLocal.getItem('fpng-product-obj');
+	// console.log({stringg, arr, objj})
+	// ##############################
+	const accessToken = createLocal.getItem('fpng-acc');
+	const userInfo = createLocal.getItem('fpng-user');
+	const refreshToken = createLocal.getItem('fpng-ref');
+	// let accessToken = localStorage.getItem('fpng-acc');
+	// let userInfo = localStorage.getItem('fpng-user');
+	// let refreshToken = localStorage.getItem('fpng-ref')
+	// accessToken = accessToken ? JSON.parse(accessToken) : null;
+	// userInfo = userInfo ? JSON.parse(userInfo) : null;
+	// console.log('userInfo:', (userInfo.value))
+	// userInfo = userInfo? JSON.parse(userInfo.value): null;
+	// userInfo = userInfo ? JSON.parse(userInfo) : null;
+	// refreshToken = refreshToken ? JSON.parse(refreshToken) : null;
 	console.log({accessToken}, {userInfo})
+	console.log({refreshToken},
+		// {rotNumber}, {storedChars}
+	)
+	// console.log('arr has escape char?', typeof(userInfo)==='string'?userInfo?.includes('\\:'):false)
 	// console.log('menu items2')
 	const deviceType = useDeviceType()
 	const navigate = useNavigate();
 	let status = accessToken
-	// createLocal.getItem('fpng-access');
 	// console.log('fpng-status:', status)
 	status = status??null;
 	const [itemClicked, setItemClicked] = useState(false);
@@ -206,10 +240,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 	const handleLogout = (statusLink) => {
 		// console.log('onclick event', statusLink)
 		if (statusLink.toLowerCase()==='logout') {
-			// console.log('logout click')
-			createLocal.removeItem('fpng-access')
-			updateToken(null);
-			updateUserInfo(null);
+			// console.log('logout process initiated')
+			createLocal.removeAllItems();
 			navigate('/')
 		} else {
 			// console.log('navigate click')
@@ -254,32 +286,63 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							borderBottomLeftRadius: 20,
 						}}>
 							{userInfo &&
-							<Link to={"/settings"}
-							className={`dropdown-item slideInRight mr-3`}
-							style={{
-								display: 'flex',
-								justifyContent: 'center',
-								alignItems: 'center',
-								animationDelay: `${0.1}s`,
-								textWrap: 'nowrap',
-								fontSize: '0.8rem',
-								color: '#E2E8F0',
-								textAlign: 'center',
-								padding: '0rem 1rem',
-								marginLeft: 0,
-								marginRight: 0,
-								marginTop: '',
-								marginBottom: '',
-								border: '2px outset buttonborder',
-								borderTopLeftRadius: 0,
-								borderTopRightRadius: 0,
-								borderBottomLeftRadius: 9,
-								borderBottomRightRadius: 9,
-								height: '3.3rem',
-								}}
-								>{
-									titleCase('welcome ' + userInfo.first_name)}
-								</Link>}
+							<>
+								<Link to={"/settings"}
+								className={`dropdown-item slideInRight mr-3`}
+								style={{
+									display: 'flex',
+									justifyContent: 'center',
+									alignItems: 'center',
+									flexDirection: 'column',
+									animationDelay: `${0.1}s`,
+									textWrap: 'nowrap',
+									fontSize: '0.8rem',
+									color: '#E2E8F0',
+									textAlign: 'center',
+									padding: '3.5rem 0.8rem 2.7rem 0.8rem',
+									// paddingTop: '1rem',
+									// paddingBottom: '2rem',
+									marginLeft: 0,
+									marginRight: 0,
+									marginTop: '',
+									marginBottom: '',
+									border: '2px outset buttonborder',
+									borderTopLeftRadius: 0,
+									borderTopRightRadius: 0,
+									borderBottomLeftRadius: 9,
+									borderBottomRightRadius: 9,
+									height: '3.3rem',
+									fontWeight: 'bold',
+									}}>
+										{userInfo.image_url ?
+										<div style={{
+											marginBottom: '0.3rem',
+										}}>
+											<img
+											src={userInfo.image_url}
+											alt={userInfo.first_name}
+											style={{
+												width: '3rem',
+												height: '3rem',
+												objectFit: 'cover',
+												borderRadius: '50%',
+												marginRight: '0.5rem',
+												padding: 2,
+												border: '1px solid #F8F6F2',
+												// textDecoration: 'none',
+											}}
+											/>
+										</div>
+										:<span
+										className="fas fa-user-circle mr-2"
+										style={{
+											fontSize: '2rem',
+											// textDecoration: 'none',
+										}}
+										/>}
+										{titleCase(userInfo.first_name)}
+									</Link>
+							</>}
 								{headerMenuArr.map((menu, index) => {
 									const lastItem = index === headerMenuArr.length - 1;
 									let statusLink = menu.link;
@@ -366,9 +429,33 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							// fontSize: '0.9rem',
 							fontStyle: 'italic',
 							fontWeight: 'bold',
-							// alignSelf: 'center',
+							display: 'flex',
+							alignItems: 'center',
+							textDecoration: 'none',
 							}}>
-								{titleCase('welcome ' + userInfo.first_name)}
+								{userInfo.image_url ?
+								<img
+								src={userInfo.image_url}
+								alt={userInfo.first_name}
+								style={{
+									width: '2.4rem',
+									height: '2.4rem',
+									objectFit: 'cover',
+									borderRadius: '50%',
+									marginRight: '0.5rem',
+									padding: 1,
+									border: '1px solid #F8F6F2',
+									// textDecoration: 'none',
+								}}
+								/>
+								:<span
+								className="fas fa-user-circle mr-2"
+								style={{
+									fontSize: '2.3rem',
+									// textDecoration: 'none',
+								}}
+								/>}
+								{titleCase(userInfo.first_name)}
 						</Link>}
 						<div className="d-inline-flex align-items-center h-100">
 							{headerMenuArr.map((menu, index) => {

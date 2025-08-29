@@ -1,19 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
-import { UploadImageItem } from '../hooks/allAuth/imageKitUpload';
-import { IKContext, IKUpload, IKImage } from "imagekitio-react";
-import { ImageCropAndCompress } from '../hooks/fileResizer/ImageCropAndCompress';
+import { Link } from 'react-router-dom';
 
 function PageNotFound() {
 	// const location = useLocation().pathname.split("/").pop();
 	// const [products, setProducts] = useState([]);
-
-	// useEffect(() => {
-	// 	fetch("http://127.0.0.1:8000/products/") // Django API endpoint
-	// 	.then(res => res.json())
-	// 	.then(data => setProducts(data));
-	// }, []);
-	// console.log("Current Location:", location);
 	return (
 		<>
 			{/* Breadcrumb Start */}

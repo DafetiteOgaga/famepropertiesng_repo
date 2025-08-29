@@ -12,6 +12,7 @@ import { LogIn } from '../components/login';
 import { SignUp } from '../components/signUp';
 import { AdminPage } from '../components/addProduct';
 import { ProcessImage } from '../components/downloadAndCrop';
+import { Welcome } from '../components/welcome';
 
 function AppRoutes() {
 	return (
@@ -33,6 +34,8 @@ function AppRoutes() {
 				<Route path="process-image" element={<ProcessImage />} />
 				{/* cart */}
 				<Route path="cart" element={<Cart />} />
+				{/* welcome */}
+				<Route path="welcome" element={<Welcome />} />
 				{/* log in */}
 				<Route path="login" element={<LogIn />} />
 				{/* sign up */}

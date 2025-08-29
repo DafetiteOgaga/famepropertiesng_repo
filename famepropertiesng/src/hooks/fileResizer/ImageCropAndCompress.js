@@ -1,6 +1,4 @@
-// File: ImageCropAndCompress.js
-
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, forwardRef, useImperativeHandle } from "react";
 import Cropper from "react-easy-crop";
 import imageCompression from "browser-image-compression";
 
@@ -35,19 +33,23 @@ const getCroppedImg = (imageSrc, cropPixels) => {
 	});
 };
 
-function ImageCropAndCompress({ onComplete, type }) {
+const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, ref) => {
 	const [imageSrc, setImageSrc] = useState(null);
 	const [crop, setCrop] = useState({ x: 0, y: 0 });
 	const [zoom, setZoom] = useState(1);
 	const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 	const [finalImageUrl, setFinalImageUrl] = useState(null);
 	const [finalFile, setFinalFile] = useState(null);
+	// console.log({type})
 
 	let targetHeight // target height
 	let targetWidth // target width
 	if (type === "product") {
 		targetHeight = 500;
 		targetWidth = 500;
+	} else if (type === "profilePhoto") {
+		targetHeight = 200;
+		targetWidth = 200;
 	} else {
 		targetHeight = 430;
 		targetWidth = 1000;
@@ -61,7 +63,7 @@ function ImageCropAndCompress({ onComplete, type }) {
 
 	// handle file input
 	const handleFileChange = (e) => {
-		// console.log("File input changed:", e.target.files);
+		console.log("File input changed:", e.target.files);
 		if (e.target.files && e.target.files.length > 0) {
 			const file = e.target.files[0];
 			const reader = new FileReader();
@@ -70,9 +72,20 @@ function ImageCropAndCompress({ onComplete, type }) {
 		}
 	};
 
+	// Expose handleDone to parent via ref
+	useImperativeHandle(ref, () => ({
+		handleDone,
+	}));
+	
+	// watch imageSrc separately
+	useEffect(() => {
+		isImagePreview(!!imageSrc);  // true if imageSrc exists, false otherwise
+	}, [imageSrc]);
+
   	// crop + compress in one click
 	const handleDone = async () => {
 		try {
+			console.log("Cropping and compressing...");
 			// Step 1: crop only after user confirms crop
 			const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels);
 
@@ -122,11 +135,27 @@ function ImageCropAndCompress({ onComplete, type }) {
 
 	// console.log({imageSrc})
 	return (
-		<div>
-			<input type="file" accept="image/*" onChange={handleFileChange} />
+		<>
+			<input
+			className="mb-2"
+			type="file"
+			accept="image/*"
+			onChange={handleFileChange} />
 
 			{imageSrc && (
-				<div className="relative w-[500px] h-[250px] bg-black">
+				<div
+				style={{
+					position: "relative",   // required
+					width: "200px",         // set a width
+					height: "200px",        // set a height
+					background: "#333",     // optional: dark background
+					borderRadius: "5px",   // optional: rounded edges
+					overflow: "hidden",     // keeps crop area inside
+					// position: "relative",
+					// width: "100%",        // responsive width
+					// height: "13vh",       // takes half viewport height
+				}}
+				>
 					<Cropper
 						image={imageSrc}
 						crop={crop}
@@ -135,11 +164,15 @@ function ImageCropAndCompress({ onComplete, type }) {
 						onCropChange={setCrop}
 						onZoomChange={setZoom}
 						onCropComplete={handleCropComplete}
+						cropShape={type==='profilePhoto'?'round':'rect'} // circle for profile photos
+						showGrid={true}  // optional: hide grid lines
+						minZoom={1}      // optional: minimum zoom level
+						maxZoom={3}      // optional: maximum zoom level
 					/>
 				</div>
 			)}
 
-			{imageSrc && (
+			{(imageSrc&&type!=='profilePhoto') && (
 				<button
 				onClick={handleDone}
 				className="mt-3 px-4 py-2 rounded-lg"
@@ -153,11 +186,36 @@ function ImageCropAndCompress({ onComplete, type }) {
 				</button>
 			)}
 
-			{finalImageUrl && (
-				<div className="mt-3">
-					<p>Final Preview:</p>
-					<img src={finalImageUrl} alt="Final" className="border rounded" />
+			{(finalImageUrl&&!imageSrc) && (
+			<div
+			style={{
+				// position: "relative",   // required
+				// width: "200px",         // set a width
+				// height: "200px",        // set a height
+				// background: "#333",     // optional: dark background
+				borderRadius: "5px",   // optional: rounded edges
+				// overflow: "hidden",     // keeps crop area inside
+				// position: "relative",
+				// width: "100%",        // responsive width
+				// height: "13vh",       // takes half viewport height
+			}}
+			>
+					{type!=='profilePhoto'&&<p>Final Preview:</p>}
+					<img src={finalImageUrl}
+					alt="Final"
+					style={{
+						width: "200px",         // set a width
+						height: "200px",        // set a height
+						// background: "#333",     // optional: dark background
+						borderRadius: "50%",   // optional: rounded edges
+						padding: type==='profilePhoto'?'2px':'0', // padding for profile photos
+						border: type==='profilePhoto'?'1px solid #666':'none',
+						// overflow: "hidden",     // keeps crop area inside
+					}}
+					className=""
+					/>
 
+					{type!=='profilePhoto'&&
 					<button
 					onClick={handleDownload}
 					className="px-4 py-2 rounded-lg"
@@ -167,11 +225,11 @@ function ImageCropAndCompress({ onComplete, type }) {
 					}}
 					>
 						Download Final Image
-					</button>
+					</button>}
 				</div>
 			)}
-		</div>
+		</>
 	);
-}
+});
 
 export { ImageCropAndCompress }

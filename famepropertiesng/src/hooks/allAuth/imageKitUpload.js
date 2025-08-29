@@ -31,15 +31,6 @@ const productsObj = {
 }
 
 function UploadImageItem({type}) {
-  // const [baseAPIURL, setbaseAPIURL] = useState(null)
-  // let apiData
-  // const HandleAPI = () => {
-  //   const { data:apiData } = useImageKitAPIs();
-  // }
-  // if (!apiData) HandleAPI()
-  // useEffect(() => {
-  //   if (!apiData) HandleAPI()
-  // }, [apiData])
   const baseAPIURL = useImageKitAPIs()?.data;
   // console.log("Base API URL 11111:", baseAPIURL);
   const [selectedImage, setSelectedImage] = useState(null);

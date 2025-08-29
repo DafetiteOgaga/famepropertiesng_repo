@@ -4,6 +4,7 @@ import { useDeviceType } from '../../hooks/deviceType';
 import { getImage } from '../../hooks/baseImgUrl';
 import { digitSeparator, titleCase } from '../../hooks/changeCase';
 import { getBaseURL } from '../../hooks/fetchAPIs';
+import { useCreateStorage } from '../../hooks/setupLocalStorage';
 
 const baseURL = getBaseURL();
 // const produc8tImagesArr = [
@@ -46,6 +47,7 @@ const productsActionArr = [
 ]
 const productStar = "fa fa-star"
 function Products() {
+	const { createLocal } = useCreateStorage();
 	const [productItemArr, setProductItemArr] = useState([]);
 	const parameters = useParams();
 	const deviceType = useDeviceType();
@@ -70,6 +72,9 @@ function Products() {
 	// if (productItemArr.length) console.log("productItemArr:", productItemArr, productItemArr.length);
 	// if (productItemArr.length) console.log("last item:", productItemArr[productItemArr.length-1]);
 	// console.log('product component rendered')
+	// createLocal.setItem('fpng-product-str', 'products');
+	// createLocal.setItem('fpng-product-arr', ['one', 'two', 'three']);
+	// createLocal.setItem('fpng-product-obj', {name: 'Product One', price: 1000});
 	return (
 		<div className="container-fluid pb-3">
 			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3"
