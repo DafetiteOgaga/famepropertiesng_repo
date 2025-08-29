@@ -315,8 +315,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 									fontWeight: 'bold',
 									}}>
 										{
-										// userInfo.image_url
-										false
+										userInfo.image_url
+										// false
 										?
 										<div style={{
 											marginBottom: '0.3rem',
@@ -325,8 +325,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 											src={userInfo.image_url}
 											alt={userInfo.first_name}
 											style={{
-												width: '4rem',
-												height: '4rem',
+												width: '3.2rem',
+												height: '3.2rem',
 												objectFit: 'cover',
 												borderRadius: '50%',
 												marginRight: '0.5rem',
