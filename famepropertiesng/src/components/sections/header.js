@@ -299,7 +299,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 									fontSize: '0.8rem',
 									color: '#E2E8F0',
 									textAlign: 'center',
-									padding: '3.5rem 0.8rem 2.7rem 0.8rem',
+									padding: '3.5rem 0.8rem 3.3rem 0.8rem',
 									// paddingTop: '1rem',
 									// paddingBottom: '2rem',
 									marginLeft: 0,
@@ -314,7 +314,10 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 									height: '3.3rem',
 									fontWeight: 'bold',
 									}}>
-										{userInfo.image_url ?
+										{
+										// userInfo.image_url
+										false
+										?
 										<div style={{
 											marginBottom: '0.3rem',
 										}}>
@@ -322,8 +325,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 											src={userInfo.image_url}
 											alt={userInfo.first_name}
 											style={{
-												width: '3rem',
-												height: '3rem',
+												width: '4rem',
+												height: '4rem',
 												objectFit: 'cover',
 												borderRadius: '50%',
 												marginRight: '0.5rem',
@@ -336,11 +339,15 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 										:<span
 										className="fas fa-user-circle mr-2"
 										style={{
-											fontSize: '2rem',
+											fontSize: '3.6rem',
+											marginBottom: '0.5rem',
 											// textDecoration: 'none',
 										}}
 										/>}
-										{titleCase(userInfo.first_name)}
+										<span
+										style={{
+											fontSize: '1.3rem',
+										}}>{titleCase(userInfo.first_name)}</span>
 									</Link>
 							</>}
 								{headerMenuArr.map((menu, index) => {
