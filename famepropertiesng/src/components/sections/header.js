@@ -193,41 +193,13 @@ function Header({mTop}) {
 
 function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
 	const { createLocal } = useCreateStorage();
-	// const rotNumber = createLocal.getItem('fpng-rot');
-	// const storedChars = createLocal.getItem('fpng-rchars');
-	
-	// const {
-	// 	// accessToken, updateToken,
-	// 	// userInfo, updateUserInfo,
-	// 	rotNumber, setRotNumber,
-	// 	RotCipher, encrypt, decrypt
-	// } = useAuth();
-	
 
-	// ##############################
-	// const stringg = createLocal.getItem('fpng-product-str');
-	// const arr = createLocal.getItem('fpng-product-arr');
-	// const objj = createLocal.getItem('fpng-product-obj');
-	// console.log({stringg, arr, objj})
-	// ##############################
 	const accessToken = createLocal.getItem('fpng-acc');
 	const userInfo = createLocal.getItem('fpng-user');
 	const refreshToken = createLocal.getItem('fpng-ref');
-	// let accessToken = localStorage.getItem('fpng-acc');
-	// let userInfo = localStorage.getItem('fpng-user');
-	// let refreshToken = localStorage.getItem('fpng-ref')
-	// accessToken = accessToken ? JSON.parse(accessToken) : null;
-	// userInfo = userInfo ? JSON.parse(userInfo) : null;
-	// console.log('userInfo:', (userInfo.value))
-	// userInfo = userInfo? JSON.parse(userInfo.value): null;
-	// userInfo = userInfo ? JSON.parse(userInfo) : null;
-	// refreshToken = refreshToken ? JSON.parse(refreshToken) : null;
-	console.log({accessToken}, {userInfo})
-	console.log({refreshToken},
-		// {rotNumber}, {storedChars}
-	)
-	// console.log('arr has escape char?', typeof(userInfo)==='string'?userInfo?.includes('\\:'):false)
-	// console.log('menu items2')
+	// console.log({accessToken}, {userInfo})
+	// console.log({refreshToken})
+
 	const deviceType = useDeviceType()
 	const navigate = useNavigate();
 	let status = accessToken
