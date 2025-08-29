@@ -9,6 +9,7 @@ import { GoogleAuthButtonAndSetup } from "../hooks/allAuth/googleAuthButtonAndSe
 import { titleCase } from "../hooks/changeCase";
 import { useAuth } from "../hooks/allAuth/authContext";
 import { getBaseURL } from "../hooks/fetchAPIs";
+import { BouncingDots } from "../spinners/spinner";
 
 const baseURL = getBaseURL();
 // console.log({baseURL})
@@ -30,6 +31,7 @@ const inputArr = [
 ]
 
 function LogIn() {
+	const [loading, setLoading] = useState(false);
 	const authFetch = useAuthFetch()
 	const [showPassword, setShowPassword] = useState(false);
 	// const { accessToken, updateToken } = useAuth();
@@ -60,6 +62,7 @@ function LogIn() {
 	// const isNotFormValid = formData.email.trim() === '' && formData.password.trim() === '';
 	const onSubmitHandler = async (e) => {
 		e.preventDefault();
+		setLoading(true);
 		// console.log('Submitting form with data:');
 		if (!isFieldsValid()) {
 			console.warn('Form is invalid');
@@ -108,11 +111,9 @@ function LogIn() {
 			console.error("Error during login:", error);
 			toast.error('Error! Login Failed. Please try again.');
 			return null;
+		} finally {
+			setLoading(false);
 		}
-		// console.log('Form submitted:', formData);
-		// createLocal.setItem('fpng-status', formData.email, 1000*60);
-		// Here you can handle the login logic, e.g., API call
-		// Reset form after submission
 	}
 	useEffect(() => {
 		if (isError) {
@@ -214,10 +215,10 @@ function LogIn() {
 						}}>
 						{/* <label>Password</label> */}
 						<button
-						className="btn btn-block btn-auth font-weight-bold py-3"
-						disabled={isNotRotKey||!isFieldsValid()}
+						className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
+						disabled={isNotRotKey||!isFieldsValid()||loading}
 						>
-							Log In
+							{!loading?'Log In':<BouncingDots size="sm" color="#fff" p="1" />}
 						</button>
 						
 					</div>
