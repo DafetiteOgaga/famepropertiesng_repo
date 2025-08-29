@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/famepropertiesng_repo/static/css/main.10826574.css",
-    "main.js": "/famepropertiesng_repo/static/js/main.784a3718.js",
+    "main.js": "/famepropertiesng_repo/static/js/main.4e91dbb4.js",
     "static/js/453.7031f8d3.chunk.js": "/famepropertiesng_repo/static/js/453.7031f8d3.chunk.js",
     "static/media/TwemojiMozilla.ttf": "/famepropertiesng_repo/static/media/TwemojiMozilla.c993f93bd40b647e0b38.ttf",
     "static/media/story-bg-1.jpg": "/famepropertiesng_repo/static/media/story-bg-1.776a6053d253f4ff1f77.jpg",
@@ -22,11 +22,11 @@
     "static/media/dafelogoWhiteTransparent.png": "/famepropertiesng_repo/static/media/dafelogoWhiteTransparent.9e22063262c522af2111.png",
     "index.html": "/famepropertiesng_repo/index.html",
     "main.10826574.css.map": "/famepropertiesng_repo/static/css/main.10826574.css.map",
-    "main.784a3718.js.map": "/famepropertiesng_repo/static/js/main.784a3718.js.map",
+    "main.4e91dbb4.js.map": "/famepropertiesng_repo/static/js/main.4e91dbb4.js.map",
     "453.7031f8d3.chunk.js.map": "/famepropertiesng_repo/static/js/453.7031f8d3.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.10826574.css",
-    "static/js/main.784a3718.js"
+    "static/js/main.4e91dbb4.js"
   ]
 }
