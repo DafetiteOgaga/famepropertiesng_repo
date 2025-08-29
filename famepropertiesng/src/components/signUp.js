@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
 import 'react-country-state-city/dist/react-country-state-city.css';
 import { Breadcrumb } from "./sections/breadcrumb"
@@ -9,6 +9,9 @@ import { titleCase } from "../hooks/changeCase";
 import { useAuth } from "../hooks/allAuth/authContext";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../hooks/fetchAPIs";
+import { IKContext, IKUpload, IKImage } from "imagekitio-react";
+import { useImageKitAPIs } from "../hooks/fetchAPIs";
+import { ImageCropAndCompress } from "../hooks/fileResizer/ImageCropAndCompress";
 
 const baseURL = getBaseURL();
 
@@ -115,6 +118,7 @@ const initialFormData = {
 	mobile_no: '',
 	email: '',
 	password: '',
+	password_confirmation: '',
 	country: '',
 	state: '',
 	stateCode: '',
@@ -123,6 +127,9 @@ const initialFormData = {
 }
 
 function SignUp() {
+	// const emailRef = useRef();
+	const handleDoneRef = useRef();
+	const baseAPIURL = useImageKitAPIs()?.data;
 	const navigate = useNavigate();
 	const { accessToken, updateToken, userInfo, updateUserInfo, RotCipher, encrypt, decrypt, } = useAuth();
 	const [showPassword, setShowPassword] = useState(false);
@@ -131,6 +138,14 @@ function SignUp() {
 	const [state, setState] = useState('');     // whole state object
 	const [city, setCity] = useState('');       // whole city object
 	const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
+	const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(false);
+	const [selectedFile, setSelectedFile] = useState(null); // local file
+	const [previewURL, setPreviewURL] = useState(null);     // local preview
+	const [uploadedImage, setUploadedImage] = useState(null); // imagekit response like {image_url, fileId}
+	const [returnedFile, setReturnedFile] = useState(null);
+	// const [animate, setAnimate] = useState(false);
+	// const [getHandleDoneFromChild, setGetHandleDoneFromChild] = useState(null);
+	const [imagePreview, setImagePreview] = useState(false);
 	// const initWithLocation = {
 	// 	...initialFormData,
 	// 	...{
@@ -139,18 +154,17 @@ function SignUp() {
 	// 		city: city?.name||'',
 	// 	}}
 	const [formData, setFormData] = useState(initialFormData);
+	const [isEmailValid, setIsEmailValid] = useState(null);
 
-	const testText = "Hello World! 123";
-	const encrypcipher = RotCipher(testText, encrypt);
-	const decryptcipher = RotCipher(encrypcipher, decrypt);
-	console.log({testText})
-	console.log({encrypcipher})
-	console.log({decryptcipher})
-	console.log(`Are they equal?`, testText === decryptcipher)
+	// const testText = "Hello World! 123";
+	// const encrypcipher = RotCipher(testText, encrypt);
+	// const decryptcipher = RotCipher(encrypcipher, decrypt);
+	// console.log({testText})
+	// console.log({encrypcipher})
+	// console.log({decryptcipher})
+	// console.log(`Are they equal?`, testText === decryptcipher)
 
-	const passwordsConform = formData.password&&
-								formData.password_confirmation&&
-								(formData.password === formData.password_confirmation);
+	// const passwordsConform = !passwordErrorMessage;
 	useEffect(() => {
 		if (formData.password_confirmation) {
 			if (formData.password !== formData.password_confirmation) {
@@ -182,13 +196,13 @@ function SignUp() {
 				setPasswordErrorMessage('Password must not contain your last name')
 			} else if (formData.password.toLowerCase().includes('password')) {
 				setPasswordErrorMessage('Password must not contain the word "password"')
-			} else if (passwordsConform) {
+			} else {
 				setPasswordErrorMessage(null)
 			}
 		}
 	}, [formData.password, formData.password_confirmation,
 		formData.username, formData.first_name,
-		formData.last_name, passwordsConform])
+		formData.last_name])
 
 	const onChangeHandler = (e) => {
 		e.preventDefault();
@@ -213,7 +227,20 @@ function SignUp() {
 			phoneCode: country?.phone_code||'',
 			city: city?.name||'',
 		}))
-	}, [country, state, city])
+		if (uploadedImage) {
+			const imageDetails = {
+				image_url: uploadedImage.url,
+				fileId: uploadedImage.fileId,
+			}
+			setFormData(prev => ({
+				...prev,
+				...imageDetails,
+			}))
+			// setSelectedProfilePhoto(imageDetails);
+			console.log('Image details added to formData:', imageDetails);
+			setUploadedImage(null);
+		}
+	}, [country, state, city, uploadedImage])
 	const deviceType = useDeviceType().width <= 576;
 	const getInputType = (input) => {
 		if (input.type !== "password") return input.type;
@@ -235,6 +262,7 @@ function SignUp() {
 			'mobile_no',
 			'email',
 			'password',
+			'password_confirmation',
 			'country',
 			'state',
 			'stateCode',
@@ -242,11 +270,11 @@ function SignUp() {
 			'city',
 		];
 		const isFieldValid = requiredFields.every((field) => formData[field].trim() !== "");
-		return isFieldValid && passwordsConform
+		return isFieldValid && !passwordErrorMessage
 	};
 
-	const onSubmitHandler = async (e) => {
-		e.preventDefault();
+	const onSubmitHandler = async () => {
+		// e.preventDefault();
 		// console.log('Submitting form with data:');
 		if (!isFieldsValid()) {
 			console.warn('Form is invalid');
@@ -258,74 +286,206 @@ function SignUp() {
 			// if (key==='stateCode') return; // skip stateCode from submission
 			if (key==='password_confirmation') return; // skip password_confirmation from submission
 			cleanedData[key] = (
+				key==='fileId'||
+				key==='image_url'||
 				key==='stateCode'||
 				key==='phoneCode'||
 				key==='password'
 			)?value:value.trim().toLowerCase();
 		})
-		// try {
-		// 	const response = await fetch(`${baseURL}/api/token/`, {
-		// 		method: "POST",
-		// 		headers: { "Content-Type": "application/json" },
-		// 		body: JSON.stringify(formData),
-		// 	});
-
-		// 	if (!response.ok) {
-		// 		// Handle non-2xx HTTP responses
-		// 		const errorData = await response.json();
-		// 		console.warn('Registration Error:', errorData);
-		// 		toast.error(errorData?.error || 'Registration Error!');
-		// 		return;
-		// 	}
-		// 	const data = await response();
-		// 	// console.log({data})
-		// 	// if (data === "/login/") {
-		// 	// 	console.log("you need to sign in again")
-		// 	// 	navigate('/welcome');
-		// 	// 	return;
-		// 	// }
-		// 	// console.log("Login Response:", data);
-
-		// 	// if (data) {
-		// 		// Store tokens
-		// 		// createLocal.setItem('fpng-status', formData.email, 1000*60);
-		// 		// createLocal.setItem('fpng-access', data.access);
-		// 		// updateToken(data.access);
-		// 		// createLocal.setItem('fpng-refresh', data.refresh);
-		// 		// localStorage.setItem("access", data.access);
-		// 		// localStorage.setItem("refresh", data.refresh);
-		// 	setFormData(initialFormData);
-		// 	toast.success('Registration Successful!');
-		// 	navigate('/welcome')
-		// 	// } else {
-		// 	// 	console.warn('Registration Error:', data?.error)
-		// 	// 	// setIsError(data?.error)
-		// 	// 	toast.error(data?.error||'Registration Error!');
-		// 	// 	return;
-		// 	// }
-
-		// 	return data;
-		// } catch (error) {
-		// 	console.error("Error during login:", error);
-		// 	toast.error('Error! Login Failed. Please try again.');
-		// 	return null;
-		// }
-		// console.log('Form submitted:', formData);
-		// createLocal.setItem('fpng-status', formData.email, 1000*60);
-		// Here you can handle the login logic, e.g., API call
-		// Reset form after submission
 		console.log('Form submitted:', cleanedData);
-		toast.success('Registration Successful!');
+		// toast.success('Registration Successful!');
+		try {
+			const response = await fetch(`${baseURL}/users/`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(cleanedData),
+			});
+
+			if (!response.ok) {
+				// Handle non-2xx HTTP responses
+				const errorData = await response.json();
+				console.warn('Registration Error:', errorData);
+				toast.error(errorData?.error || 'Registration Error!');
+				return;
+			}
+			const data = await response.json();
+			console.log('Response data from server',data)
+			toast.success('Registration Successful!');
+			// setFormData(initialFormData);
+			// navigate('/welcome')
+			return data;
+		} catch (error) {
+			console.error("Error during login:", error);
+			toast.error('Error! Login Failed. Please try again.');
+			return null;
+		}
 	}
+
+	const authenticator = async () => {
+		try {
+			const response = await fetch(`${baseURL}/imagekit-auth/`);
+			if (!response.ok) {
+				const errorText = "Failed to authenticate with ImageKit"
+				toast.error(errorText);
+				throw new Error(errorText);
+			}
+			const data = await response.json();
+			console.log("Authentication data received");
+			// console.log("Authentication data:", data);
+			return data;
+		} catch (error) {
+			throw new Error(`Authentication failed: ${error.message}`);
+		}
+	};
+	// // handle file selection
+	// const handleFileChange = (e) => {
+	// 	const file = e.target.files[0];
+	// 	if (file) {
+	// 		setSelectedFile(file);
+	// 		setPreviewURL(URL.createObjectURL(file)); // create local preview
+	// 	}
+	// };
+
+	useEffect(() => {
+		if (selectedFile) handleUpload(); // auto upload on file select
+	}, [selectedFile]);
+
+	const handleSubmitOkayFromChild = (e) => {
+		e.preventDefault();
+		if (handleDoneRef.current&&imagePreview) {
+			handleDoneRef.current.handleDone(); // parent directly triggers child’s function
+			// handleUpload(e); // then upload
+		} else if (!imagePreview) {
+			handleUpload(e); // no image to process, just upload
+		} else {
+			console.warn("Child handleDone function not available");
+			toast.error("Image processing not ready. Please try again.");
+			return;
+		}
+	}
+	// handle image upload first on button click then submit form after
+	const handleUpload = async (e=null) => {
+		if (e) e.preventDefault();
+
+		console.log('Starting upload process...');
+		console.log({selectedFile})
+		// return
+
+		// if (!selectedFile) {
+		// 	toast.error("Please select a file first");
+		// 	return;
+		// }
+
+		if (selectedFile instanceof Blob || selectedFile instanceof File) {
+			try {
+				const imageFormData = new FormData();
+				imageFormData.append("file", selectedFile); // actual file
+				imageFormData.append("fileName", "profile_photo.jpg");
+				imageFormData.append("folder", "profile_photos");
+			
+				// get authentication signature from backend
+				// const authResponse = await fetch(`${baseAPIURL}/imagekit-auth/`);
+				const authData = await authenticator();
+				if (!authData) throw new Error("Failed to get ImageKit auth data");
+				console.log("Auth data for upload:", authData);
+				console.log({baseAPIURL})
+			
+				// if (authData&&baseAPIURL) {
+				imageFormData.append("publicKey", baseAPIURL?.IMAGEKIT_PUBLIC_KEY);
+				imageFormData.append("signature", authData.signature);
+				imageFormData.append("expire", authData.expire);
+				imageFormData.append("token", authData.token);
+				// }
+				// return
+			
+				for (let [key, value] of imageFormData.entries()) {
+					console.log(key, ":", value);
+				}
+				console.log("Uploading image to ImageKit...");
+
+				// return
+
+				// upload to imagekit
+				const uploadResponse = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+					method: "POST",
+					// headers: {
+					// 	Authorization: `Basic ${baseAPIURL.IMAGEKIT_PUBLIC_KEY + ":"}`,
+					// 	// Public key only, followed by ":" (empty password)
+					// },
+					body: imageFormData,
+					}
+				);
+		
+				if (!uploadResponse.ok) {
+					const errorText = "Upload failed"
+					toast.error(errorText);
+					throw new Error(errorText);
+					// return;
+				}
+				const result = await uploadResponse.json();
+				setUploadedImage(result); // save response
+				console.log("Upload success:", result);
+				onSubmitHandler(); // submit form after successful upload
+			} catch (err) {
+				toast.error('Upload failed. Please try again.');
+				console.error("Upload failed:", err);
+				return;
+			}
+		} else {
+			// return
+			onSubmitHandler(); // submit form after successful upload
+		}
+	};
+	// useEffect(() => {
+	// 	if (passwordErrorMessage) {
+	// 		setAnimate(true);
+	// 		const timer = setTimeout(() => setAnimate(false), 1000); // remove class after animation
+	// 		return () => clearTimeout(timer);
+	// 	}
+	// }, [passwordErrorMessage]);
+
 	console.log({country, state, city})
 	console.log({formData})
-	console.log(
-		'passwordErrorMessage', !!passwordErrorMessage, passwordErrorMessage,
-		'\npasswordsConform', passwordsConform,
-	)
+	console.log('passwordErrorMessage', !!passwordErrorMessage, passwordErrorMessage)
+	console.log({selectedFile})
+	console.log({imagePreview})
+	// console.log('handleDoneRef.current', handleDoneRef.current)
+
+	useEffect(() => {
+		if (!formData.email) {
+			setIsEmailValid(null)
+			return; // don't run if empty
+		}
+
+		// set a timer to detect "pause"
+		const timer = setTimeout(() => {
+			// Make server request here
+			checkEmailUniqueness(formData.email);
+		}, 1000); // waits 1s after last keystroke
+
+		// cleanup old timer if user types again quickly
+		return () => clearTimeout(timer);
+	}, [formData.email]);
+
+	const checkEmailUniqueness = async (email) => {
+		try {
+			const response = await fetch(`${baseURL}/check-email/${email}/`);
+			const data = await response.json();
+			console.log("Server says:", data);
+			setIsEmailValid(data)
+			return data
+		} catch (error) {
+			setIsEmailValid(null)
+			// toast.error('Error checking email. Please try again.');
+			console.error("Error checking email:", error);
+		}
+	};
+	console.log({isEmailValid})
+	console.log("not 'green", isEmailValid?.color!=='green')
 	return (
 		<>
-			<form onSubmit={onSubmitHandler}
+			<form onSubmit={handleSubmitOkayFromChild}
 			className="row px-xl-5"
 			style={{
 				display: 'flex',
@@ -396,6 +556,7 @@ function SignUp() {
 															marginRight: '0.5rem',
 														}}>+{country.phone_code}</p>}
 														<input
+														// ref={input.type==='email'?emailRef:null}
 														id={input.name}
 														name={input.name}
 														onChange={onChangeHandler}
@@ -436,6 +597,8 @@ function SignUp() {
 													</div>
 													{input.type==='password'&&
 													<span
+													// key={passwordErrorMessage}
+													// className={animate ? "slideOutRight" : ""}
 													style={{
 														color: '#BC4B51',
 														fontSize: '0.75rem',
@@ -443,119 +606,102 @@ function SignUp() {
 														// display: 'inline-block',
 														// transform: 'skewX(-17deg)',
 													}}>{passwordErrorMessage}</span>}
+													{(input.type==='email'&&isEmailValid?.boolValue)&&
+													<span
+													// key={passwordErrorMessage}
+													// className={animate ? "slideOutRight" : ""}
+													style={{
+														color: isEmailValid.color,
+														fontSize: '0.75rem',
+														// fontStyle: 'italic',
+														display: 'inline-block',
+														transform: 'skewX(-17deg)',
+													}}>{isEmailValid?.message}</span>}
 												</>}
 									</div>
 								)
 							})}
-							{/* <div className="col-md-6 form-group">
-								<label>First Name<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="text"
-								placeholder="John"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>Last Name<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="text"
-								placeholder="Doe"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>Middle Name</label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="text"
-								placeholder="Dolly"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>Username<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="text"
-								placeholder="Dols"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>Address<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="text"
-								placeholder="No.3, 123 crescent, Addo, Ajah"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>City</label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="text"
-								placeholder="Ajah"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>State<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="text"
-								placeholder="Lagos"/>
-							</div>
 							<div
-							className="col-md-6 form-group">
-								<label>Country<span>*</span></label>
-								<select
-								style={{borderRadius: '5px'}}
-								className="custom-select">
-									<option selected>Nigeria</option>
-									<option>Ghana</option>
-									<option>Cameroon</option>
-									<option>Algeria</option>
-								</select>
+							
+							>
+								<div
+								className="col-md-6 form-group">
+									{/* File Picker */}
+									{/* <input type="file" accept="image/*" onChange={handleFileChange} /> */}
+
+									{/* select, crop and compress file */}
+									<ImageCropAndCompress
+									onComplete={setSelectedFile}
+									type={'profilePhoto'}
+									ref={handleDoneRef}
+									isImagePreview={setImagePreview} />
+
+									{/* <div> */}
+										{/* Local Preview */}
+										{/* {previewURL && (
+											<div className="mt-2">
+												<img
+													src={previewURL}
+													alt="Local preview"
+													className="w-24 h-24 rounded object-cover"
+													style={{
+														width: '100px',
+														height: '100px',
+														borderRadius: '8px',
+														objectFit: 'cover',
+													}}
+												/>
+											</div>
+										)} */}
+
+										{/* Upload Button */}
+										{/* <button
+											onClick={handleUpload}
+											className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
+											style={{
+												backgroundColor: '#475569',
+											}}
+										>
+											Upload to ImageKit
+										</button> */}
+									{/* </div> */}
+								</div>
 							</div>
-							<div className="col-md-6 form-group">
-								<label>Email<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="email"
-								placeholder="example@email.com"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>Mobile No<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="tel"
-								inputmode="numeric"   // <!-- brings up number keypad on mobile -->
-								// pattern="[0-9]{7,11}" <!-- only numbers, length 7 to 11 -->
-								minlength="7"
-								maxlength="14"
-								pattern="[0-9]{7,14}" // allows only numbers and between 7 and 14 characters
-								placeholder="+234 806 000 1111"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>Password<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="password"
-								placeholder="password"/>
-							</div>
-							<div className="col-md-6 form-group">
-								<label>Password Confirmation<span>*</span></label>
-								<input
-								style={{borderRadius: '5px'}}
-								className="form-control"
-								type="password"
-								placeholder="password confirmation"/>
-							</div> */}
+							{/* <IKContext
+								publicKey={baseAPIURL?.IMAGEKIT_PUBLIC_KEY}
+								urlEndpoint={baseAPIURL?.IMAGEKIT_URL_ENDPOINT}
+								authenticator={authenticator}
+								>
+									<IKUpload
+									fileName={`profile_photo.jpg`}
+									folder={`profile_photos`}
+									onSuccess={handleUploadSuccess}
+									onError={(err) => console.error("Upload error:", err)}
+									className="p-2 border rounded cursor-pointer"
+									/>
+							</IKContext> */}
+							{/* {selectedProfilePhoto && (
+								<div className="mt-1">
+								<p className="font-medium mb-0">Upload Success:</p>
+								<IKImage
+									src={selectedProfilePhoto.image_url}
+									alt="Uploaded"
+									urlEndpoint={baseAPIURL?.IMAGEKIT_URL_ENDPOINT}
+									transformation={[
+									{ width: 100, height: 100, crop: "fill" },
+									{ quality: 80 },
+									{ format: "webp" }
+									]}
+								/>
+								</div>
+							)} */}
+
 						</div>
 						<button
+						type="submit"
 						className="btn btn-block btn-auth font-weight-bold py-3"
-						disabled={!isFieldsValid()}>
+						disabled={!isFieldsValid()||isEmailValid?.color!=='green'}
+						>
 							Sign Up
 						</button>
 						{/* <span
@@ -587,132 +733,7 @@ function SignUp() {
 							<GoogleAuthButtonAndSetup />
 						</div> */}
 					</div>
-					
-					{/* <div className="collapse mb-5" id="shipping-address">
-						<h5 className="section-title position-relative text-uppercase mb-3">
-							<span className="bg-secondary pr-3"
-							style={{color: '#475569'}}>
-								Shipping Address
-							</span>
-						</h5>
-						<div className="bg-light p-30">
-							<div className="row">
-								<div className="col-md-6 form-group">
-									<label>First Name</label>
-									<input className="form-control" type="text" placeholder="John"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>Last Name</label>
-									<input className="form-control" type="text" placeholder="Doe"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>E-mail</label>
-									<input className="form-control" type="text" placeholder="example@email.com"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>Mobile No</label>
-									<input className="form-control" type="text" placeholder="+123 456 789"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>Address Line 1</label>
-									<input className="form-control" type="text" placeholder="123 Street"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>Address Line 2</label>
-									<input className="form-control" type="text" placeholder="123 Street"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>Country</label>
-									<select className="custom-select">
-										<option selected>United States</option>
-										<option>Afghanistan</option>
-										<option>Albania</option>
-										<option>Algeria</option>
-									</select>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>City</label>
-									<input className="form-control" type="text" placeholder="New York"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>State</label>
-									<input className="form-control" type="text" placeholder="New York"/>
-								</div>
-								<div className="col-md-6 form-group">
-									<label>ZIP Code</label>
-									<input className="form-control" type="text" placeholder="123"/>
-								</div>
-							</div>
-						</div>
-						
-					</div> */}
-					
 				</div>
-				
-				{/* <div className="col-lg-4">
-					<h5 className="section-title position-relative text-uppercase mb-3">
-						<span className="bg-secondary pr-3"
-						style={{color: '#475569'}}>
-							Order Total
-						</span>
-					</h5>
-					<div className="bg-light p-30 mb-5">
-						<div className="border-bottom">
-							<h6 className="mb-3">Products</h6>
-							<div className="d-flex justify-content-between">
-								<p>Product Name 1</p>
-								<p>₦150</p>
-							</div>
-							<div className="d-flex justify-content-between">
-								<p>Product Name 2</p>
-								<p>₦150</p>
-							</div>
-							<div className="d-flex justify-content-between">
-								<p>Product Name 3</p>
-								<p>₦150</p>
-							</div>
-						</div>
-						<div className="border-bottom pt-3 pb-2">
-							<div className="d-flex justify-content-between mb-3">
-								<h6>Subtotal</h6>
-								<h6>₦150</h6>
-							</div>
-							<div className="d-flex justify-content-between">
-								<h6 className="font-weight-medium">Shipping</h6>
-								<h6 className="font-weight-medium">₦10</h6>
-							</div>
-						</div>
-						<div className="pt-2">
-							<div className="d-flex justify-content-between mt-2">
-								<h5>Total</h5>
-								<h5>₦160</h5>
-							</div>
-						</div>
-					</div>
-					<div className="mb-5">
-						<h5 className="section-title position-relative text-uppercase mb-3">
-							<span className="bg-secondary pr-3"
-							style={{color: '#475569'}}>
-								Payment
-							</span>
-						</h5>
-						<div className="bg-light p-30">
-							<div className="form-group mb-4">
-								<div className="custom-control custom-radio">
-									<input type="radio" className="custom-control-input" name="payment" id="banktransfer"/>
-									<label className="custom-control-label" htmlFor="banktransfer">Bank Transfer</label>
-								</div>
-							</div>
-							<div className="form-group">
-								<div className="custom-control custom-radio">
-									<input type="radio" className="custom-control-input" name="payment" id="directcheck"/>
-									<label className="custom-control-label" htmlFor="directcheck">Pay on Delivery</label>
-								</div>
-							</div>
-							<button className="btn-block btn-auth font-weight-bold py-3">Place Order</button>
-						</div>
-					</div>
-				</div> */}
 			</form>
 		</>
 	)
