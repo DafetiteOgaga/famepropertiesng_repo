@@ -339,14 +339,14 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 										:<span
 										className="fas fa-user-circle mr-2"
 										style={{
-											fontSize: '3rem',
+											fontSize: '2.8rem',
 											marginBottom: '0.5rem',
 											// textDecoration: 'none',
 										}}
 										/>}
 										<span
 										style={{
-											fontSize: '1.1rem',
+											fontSize: '1rem',
 											fontStyle: 'italic',
 										}}>{titleCase(userInfo.first_name)}</span>
 									</Link>
