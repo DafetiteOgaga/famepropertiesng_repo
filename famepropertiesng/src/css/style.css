@@ -6445,6 +6445,14 @@ a.text-dark:hover, a.text-dark:focus {
   color: #fff !important;
 }
 
+button:disabled {
+  /* color: #475569;
+  background-color: transparent;
+  border-color: #475569; */
+  cursor: not-allowed;
+  pointer-events: none;     /* ✅ completely prevents hover */
+}
+
 /* For Firefox */
 * {
   scrollbar-width: thin; /* 'auto' or 'thin' */
