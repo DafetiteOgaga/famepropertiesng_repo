@@ -6450,7 +6450,7 @@ button:disabled {
   background-color: transparent;
   border-color: #475569; */
   cursor: not-allowed;
-  pointer-events: none;     /* ✅ completely prevents hover */
+  pointer-events: none;     /* completely prevents hover */
 }
 
 /* For Firefox */
