@@ -288,7 +288,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							{userInfo &&
 							<>
 								<Link to={"/settings"}
-								className={`dropdown-item slideInRight mr-3`}
+								className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
 								style={{
 									display: 'flex',
 									justifyContent: 'center',
@@ -339,14 +339,15 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 										:<span
 										className="fas fa-user-circle mr-2"
 										style={{
-											fontSize: '3.6rem',
+											fontSize: '3rem',
 											marginBottom: '0.5rem',
 											// textDecoration: 'none',
 										}}
 										/>}
 										<span
 										style={{
-											fontSize: '1.3rem',
+											fontSize: '1.1rem',
+											fontStyle: 'italic',
 										}}>{titleCase(userInfo.first_name)}</span>
 									</Link>
 							</>}
@@ -385,7 +386,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 												}
 											}}
 											// onClick={handleMenuItemClick}
-											className={`dropdown-item slideInRight mr-3`}
+											className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
 											style={{
 												display: 'flex',
 												justifyContent: 'center',
