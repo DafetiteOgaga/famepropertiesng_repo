@@ -1652,18 +1652,15 @@ fieldset:disabled a.btn {
   border-color: #E2E8F0;
 }
 
-.btn-auth:hover {
+/* .btn-auth:hover {
   color: #475569;
   background-color: transparent;
   border-color: #475569;
-}
+} */
 
-.btn-auth:focus, .btn-auth.focus {
-  /* color: #475569;
-  background-color: transparent;
-  border-color: #475569; */
+/* .btn-auth:focus, .btn-auth.focus {
   box-shadow: 0 0 0 0.2rem #2125292d;
-}
+} */
 
 .back-to-top.btn-primary:hover {
   color: #E2E8F0 !important;
@@ -6452,6 +6449,25 @@ button:disabled {
   cursor: not-allowed;
   pointer-events: none;     /* completely prevents hover */
 }
+
+.custom-upload-btn {
+  /* background-color: #4f46e5; */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  /* font-weight: bold; */
+  transition: 0.2s ease;
+  text-wrap: nowrap;
+}
+.custom-upload-btn:hover {
+  color: #475569;
+  background-color: transparent !important;
+  /* border-color: #475569; */
+  border: 1px solid #475569;
+}
+
+/* ################################################# */
 
 /* For Firefox */
 * {
