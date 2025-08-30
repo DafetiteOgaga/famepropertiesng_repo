@@ -179,6 +179,7 @@ function Carousel() {
 	// console.log("Final Loading state:", loading);
 	return (
 		<>
+			{!isLoading &&
 			<div className="container-fluid mb-3">
 				<div className="row">
 					<CarouselAdverts
@@ -198,8 +199,8 @@ function Carousel() {
 							featuresArr={featuresArr} />
 					</div>}
 				</div>
-			</div>
-			{isLoading && <BouncingDots size={isMobile?"md":"xl"} color="#475569" p={isMobile?"10":"12"} />}  {/* shows dots only if loading */}
+			</div>}
+			{isLoading && <BouncingDots size={isMobile?"md":"xl"} color="#475569" p={isMobile?"10":"8"} />}  {/* shows dots only if loading */}
 		</>
 	)
 }

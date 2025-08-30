@@ -70,7 +70,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 		// console.log("File input changed:", e.target.files);
 		if (e.target.files && e.target.files.length > 0) {
 			const file = e.target.files[0];
-			console.log("Selected file:", file);
+			// console.log("Selected file:", file);
 			setFileName(file.name);
 			const reader = new FileReader();
 			reader.onload = () => setImageSrc(reader.result);
