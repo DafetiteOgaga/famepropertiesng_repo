@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/famepropertiesng_repo/static/css/main.41ff9889.css",
-    "main.js": "/famepropertiesng_repo/static/js/main.66ac9b2d.js",
+    "main.css": "/famepropertiesng_repo/static/css/main.64b76af8.css",
+    "main.js": "/famepropertiesng_repo/static/js/main.5c2aed4f.js",
     "static/js/900.274af4e7.chunk.js": "/famepropertiesng_repo/static/js/900.274af4e7.chunk.js",
     "static/js/453.7031f8d3.chunk.js": "/famepropertiesng_repo/static/js/453.7031f8d3.chunk.js",
     "static/media/TwemojiMozilla.ttf": "/famepropertiesng_repo/static/media/TwemojiMozilla.c993f93bd40b647e0b38.ttf",
@@ -22,12 +22,12 @@
     "static/media/offer-2.jpg": "/famepropertiesng_repo/static/media/offer-2.cbe6dfd75d3e42d31265.jpg",
     "static/media/dafelogoWhiteTransparent.png": "/famepropertiesng_repo/static/media/dafelogoWhiteTransparent.9e22063262c522af2111.png",
     "index.html": "/famepropertiesng_repo/index.html",
-    "main.41ff9889.css.map": "/famepropertiesng_repo/static/css/main.41ff9889.css.map",
-    "main.66ac9b2d.js.map": "/famepropertiesng_repo/static/js/main.66ac9b2d.js.map",
+    "main.64b76af8.css.map": "/famepropertiesng_repo/static/css/main.64b76af8.css.map",
+    "main.5c2aed4f.js.map": "/famepropertiesng_repo/static/js/main.5c2aed4f.js.map",
     "453.7031f8d3.chunk.js.map": "/famepropertiesng_repo/static/js/453.7031f8d3.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.41ff9889.css",
-    "static/js/main.66ac9b2d.js"
+    "static/css/main.64b76af8.css",
+    "static/js/main.5c2aed4f.js"
   ]
 }
