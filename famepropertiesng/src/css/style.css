@@ -6200,6 +6200,18 @@ a.text-dark:hover, a.text-dark:focus {
 .p-30 {
   padding: 30px;
 }
+.p-20 {
+  padding: 20px;
+}
+.p-15 {
+  padding: 15px;
+}
+.p-18 {
+  padding: 18px;
+}
+.p-10 {
+  padding: 10px;
+}
 
 .btn-square {
   width: 40px;
