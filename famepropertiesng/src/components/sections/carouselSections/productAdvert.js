@@ -9,12 +9,12 @@ function ProductAdvert({productSelector, productsArr}) {
 	const isMobile = deviceType.width <= 576
 	const isSmallMobile = deviceType.width <= 400
 	const isVerySmallMobile = deviceType.width <= 390
-	const isLoading = !!productsArr.length;
+	const isLoading = !productsArr.length;
 	// const isVeryVerySmallMobile = deviceType.width <= 375
 	// console.log({productsArr})
 	return (
 		<>
-			{isLoading &&
+			{!isLoading &&
 			<>
 				{productsArr.map((productItem, index) => {
 					const isActive = productsArr[productSelector].id===productItem.id
@@ -75,7 +75,7 @@ function ProductAdvert({productSelector, productsArr}) {
 					)
 				})}
 			</>}
-			{/* {isLoading && <BouncingDots size={isMobile?"md":"sm"} color={isMobile?"white":"#475569"} p={isMobile?"10":"6"} />}  shows dots only if loading */}
+			{isLoading && <BouncingDots size={!isMobile&&"sm"} color={!isMobile&&"#475569"} p={!isMobile&&"6"} />}  {/* shows dots only if loading */}
 		</>
 	)
 }
