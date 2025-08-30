@@ -7,6 +7,7 @@ function FeatureAdvert({featureSelector, featuresArr}) {
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
 	const isLoading = !featuresArr.length;
+	// console.log({isLoading})
 	// console.log("feature component")
 	// console.log({featureSelector, featuresArr})
 	return (
