@@ -529,7 +529,7 @@ function SignUp() {
 			}}>
 				<div className=""
 				style={{
-					padding: '0 2rem',
+					padding: deviceType?'0 1rem':'0 1rem',
 					width: deviceType?'':'60%',
 				}}>
 					<h5 className="text-uppercase mb-3">
@@ -538,7 +538,7 @@ function SignUp() {
 							Sign Up
 						</span>
 					</h5>
-					<div className="bg-light p-30 mb-5"
+					<div className={`bg-light ${deviceType?'p-18':'p-30'} mb-5`}
 					style={{borderRadius: '10px'}}>
 						<div className="row">
 							{inputArr.map((input, index) => {
