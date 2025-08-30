@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, forwardRef, useImperativeHandle } from "react";
 import Cropper from "react-easy-crop";
 import imageCompression from "browser-image-compression";
+import { useDeviceType } from "../deviceType";
 
 // Utility: turn crop pixels into a File via canvas
 const getCroppedImg = (imageSrc, cropPixels) => {
@@ -40,6 +41,9 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 	const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 	const [finalImageUrl, setFinalImageUrl] = useState(null);
 	const [finalFile, setFinalFile] = useState(null);
+	const [fileName, setFileName] = useState("No file chosen");
+	const deviceType = useDeviceType();
+	const isMobile = deviceType.width <= 576
 	// console.log({type})
 
 	let targetHeight // target height
@@ -66,6 +70,8 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 		// console.log("File input changed:", e.target.files);
 		if (e.target.files && e.target.files.length > 0) {
 			const file = e.target.files[0];
+			console.log("Selected file:", file);
+			setFileName(file.name);
 			const reader = new FileReader();
 			reader.onload = () => setImageSrc(reader.result);
 			reader.readAsDataURL(file);
@@ -136,10 +142,33 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 	// console.log({imageSrc})
 	return (
 		<>
+			{/* File input */}
+			<div
+			style={{
+				marginBottom: '10px',
+			}}>
+				<label
+				htmlFor="fileUpload"
+				className="custom-upload-btn bg-dark"
+				style={{
+					marginBottom: 0,
+				}}>
+					Upload Image
+				</label>
+				<span
+				className="ml-2"
+				style={{
+					fontSize: '0.9rem',
+					textWrap: 'nowrap',
+				}}>{fileName.length>15?fileName.slice(0, 15)+'... '+fileName.slice(fileName.lastIndexOf('.')):fileName}</span>
+			</div>
 			<input
-			className="mb-2"
+			id="fileUpload"
+			// className=" mb-2"
 			type="file"
-			accept="image/*"
+			accept="image/*" // accept images only
+			// accept="video/*" // accept videos only
+			style={{ display: "none" }} // hidden input
 			onChange={handleFileChange} />
 
 			{imageSrc && (
