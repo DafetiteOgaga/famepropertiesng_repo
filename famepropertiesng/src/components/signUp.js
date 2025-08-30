@@ -127,6 +127,9 @@ const initialFormData = {
 	city: '',
 }
 
+// basic format check
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function SignUp() {
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
@@ -170,6 +173,7 @@ function SignUp() {
 
 	// const passwordsConform = !passwordErrorMessage;
 	useEffect(() => {
+		// validate password field whenever it or confirmation changes
 		if (formData.password_confirmation) {
 			if (formData.password !== formData.password_confirmation) {
 				setPasswordErrorMessage('Passwords do not match')
@@ -204,14 +208,25 @@ function SignUp() {
 				setPasswordErrorMessage(null)
 			}
 		}
+
+		// validate email field whenever it changes
+		if (formData.email) {
+			if (emailRegex.test(formData.email)) {
+				setIsEmailLoading(true)
+			} else {
+				setIsEmailLoading(false)
+			}
+		}
 	}, [formData.password, formData.password_confirmation,
 		formData.username, formData.first_name,
-		formData.last_name])
+		formData.last_name, formData.email])
 
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		let { name, value } = e.target
-		if (name === 'email') setIsEmailLoading(true)
+		// if (name === 'email') {
+		// 	setIsEmailLoading(true)
+		// }
 		// if (name !== 'mobile_no') {
 		// 	value = value.trim().toLowerCase();
 		// }
@@ -462,7 +477,7 @@ function SignUp() {
 	// console.log('handleDoneRef.current', handleDoneRef.current)
 
 	useEffect(() => {
-		if (!formData.email) {
+		if (!formData.email||!emailRegex.test(formData.email)) {
 			setIsEmailValid(null)
 			setIsEmailLoading(false)
 			return; // don't run if empty
