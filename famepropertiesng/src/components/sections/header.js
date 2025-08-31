@@ -29,6 +29,10 @@ const headerMenuArr = [
 		},
 	},
 	{
+		menu: "Cart",
+		link: "cart"
+	},
+	{
 		menu: "Categories",
 		link: "",
 		angleD: "fas fa-angle-down",
@@ -248,7 +252,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 						{itemClicked && <span
 						style={{
 							position: 'relative',
-							top: '-1rem',
+							top: '-2rem',
 						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
 						<div className="h-100 pt-0"
 						ref={menuRef}
@@ -439,6 +443,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 						</Link>}
 						<div className="d-inline-flex align-items-center h-100">
 							{headerMenuArr.map((menu, index) => {
+								if (menu.menu.toLowerCase() === "cart") return null;
 								let button = false
 								let statusLink = null;
 								// let logout = menu.authItems?.logout?.menu?.toLowerCase()==='logout'
