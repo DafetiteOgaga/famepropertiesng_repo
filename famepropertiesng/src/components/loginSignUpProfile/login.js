@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
-import { Breadcrumb } from "./sections/breadcrumb"
-import { useDeviceType } from "../hooks/deviceType"
-import { createLocal } from "../hooks/setupLocalStorage";
+import { Breadcrumb } from "../sections/breadcrumb"
+import { useDeviceType } from "../../hooks/deviceType"
+import { createLocal } from "../../hooks/setupLocalStorage";
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuthFetch } from "../hooks/authFetch";
-import { GoogleAuthButtonAndSetup } from "../hooks/allAuth/googleAuthButtonAndSetup";
-import { titleCase } from "../hooks/changeCase";
-import { useAuth } from "../hooks/allAuth/authContext";
-import { getBaseURL } from "../hooks/fetchAPIs";
-import { BouncingDots } from "../spinners/spinner";
+import { useAuthFetch } from "../../hooks/authFetch";
+import { GoogleAuthButtonAndSetup } from "../../hooks/allAuth/googleAuthButtonAndSetup";
+import { titleCase } from "../../hooks/changeCase";
+import { useAuth } from "../../hooks/allAuth/authContext";
+import { getBaseURL } from "../../hooks/fetchAPIs";
+import { BouncingDots } from "../../spinners/spinner";
 
 const baseURL = getBaseURL();
 // console.log({baseURL})
@@ -59,7 +59,7 @@ function LogIn() {
 		return requiredFields.every((field) => formData[field].trim() !== "");
 	};
 
-	// const isNotFormValid = formData.email.trim() === '' && formData.password.trim() === '';
+	// handle form submission
 	const onSubmitHandler = async (e) => {
 		e.preventDefault();
 		setLoading(true);
@@ -87,16 +87,8 @@ function LogIn() {
 				navigate(data);
 				return;
 			}
-			// console.log("Login Response:", data);
 
 			if (data?.access) {
-				// Store tokens
-				// createLocal.setItem('fpng-status', formData.email, 1000*60);
-				// createLocal.setItem('fpng-access', data.access);
-				// updateToken(data.access);
-				// createLocal.setItem('fpng-refresh', data.refresh);
-				// localStorage.setItem("access", data.access);
-				// localStorage.setItem("refresh", data.refresh);
 				setFormData(initialFormData);
 				toast.success('Login Successful!');
 				navigate('/')
@@ -160,7 +152,7 @@ function LogIn() {
 									style={{borderRadius: '5px'}}
 									required/>
 									{input.name === "password" && (
-										<i
+										<span
 										className={`far ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
 										onClick={() => setShowPassword((prev) => !prev)} // toggle state
 										style={{
@@ -176,38 +168,6 @@ function LogIn() {
 							</div>
 						)
 					})}
-					{/* <div className="form-group"
-					style={{
-						marginLeft: marginX,
-						marginRight: marginX,
-						}}>
-						<label>Email<span>*</span></label>
-						<input
-						name="email"
-						onChange={onChangeHandler}
-						value={formData.email}
-						className="form-control"
-						type="email"
-						placeholder="example@email.com"
-						style={{borderRadius: '5px'}}
-						required/>
-					</div>
-					<div className="form-group"
-					style={{
-						marginLeft: marginX,
-						marginRight: marginX,
-						}}>
-						<label>Password<span>*</span></label>
-						<input
-						name="password"
-						onChange={onChangeHandler}
-						value={formData.password}
-						className="form-control"
-						type="password"
-						placeholder="password"
-						style={{borderRadius: '5px'}}
-						required/>
-					</div> */}
 					<div className="form-group"
 					style={{
 						marginLeft: marginX,
@@ -223,55 +183,76 @@ function LogIn() {
 						
 					</div>
 					{<>
-						<p
-						className="mb-1"
-						style={{
-							color: '#475569',
-							textAlign: 'center',
-						}}>Don't have an account?
-							<Link
-							to="/signup"
-							style={{
-								paddingLeft: '0.5rem',
-								color: '#475569',
-								fontStyle: 'italic',
-								textDecoration: 'underline',
-							}}>
-								Create one
-							</Link>
-						</p>
-						<p
-						style={{
-							color: '#475569',
-							textAlign: 'center',
-							fontSize: '0.9rem',
-							fontStyle: 'italic',
-						}}>Forgot Password?
-							<Link
-							// to="/signup"
-							style={{
-								paddingLeft: '0.5rem',
-								color: '#475569',
-								textDecoration: 'underline',
-							}}>
-								Reset
-							</Link>
-						</p>
-						{isError &&
-						<p
-						style={{
-							color: '#BC4B51',
-							textAlign: 'center',
-							fontWeight: "bold",
-							fontStyle: 'italic',
-							fontSize: '0.9rem',
-						}}>
-							{isError}
-						</p>}
+						<LinkToSignUp />
+						<LinkToForgotPassword />
+						{isError && <ShowErrorFromServer isError={isError} />}
 					</>}
 				</div>
 				{/* <GoogleAuthButtonAndSetup /> */}
 			</form>
+		</>
+	)
+}
+
+function LinkToSignUp() {
+	return (
+		<>
+			<p
+			className="mb-1"
+			style={{
+				color: '#475569',
+				textAlign: 'center',
+			}}>Don't have an account?
+				<Link
+				to="/signup"
+				style={{
+					paddingLeft: '0.5rem',
+					color: '#475569',
+					fontStyle: 'italic',
+					textDecoration: 'underline',
+				}}>
+					Create one
+				</Link>
+			</p>
+		</>
+	)
+}
+function LinkToForgotPassword() {
+	return (
+		<>
+			<p
+			style={{
+				color: '#475569',
+				textAlign: 'center',
+				fontSize: '0.9rem',
+				fontStyle: 'italic',
+			}}>Forgot Password?
+				<Link
+				// to="/signup"
+				style={{
+					paddingLeft: '0.5rem',
+					color: '#475569',
+					textDecoration: 'underline',
+				}}>
+					Reset
+				</Link>
+			</p>
+		</>
+	)
+}
+function ShowErrorFromServer({isError}) {
+	return (
+		<>
+			<p
+			style={{
+				color: '#BC4B51',
+				textAlign: 'center',
+				fontWeight: "bold",
+				fontStyle: 'italic',
+				fontSize: '0.9rem',
+			}}>
+				{isError}
+			</p>
 		</>
 	)
 }
