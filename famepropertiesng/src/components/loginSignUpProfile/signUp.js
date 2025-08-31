@@ -1,0 +1,568 @@
+import { useEffect, useState, useRef } from "react";
+import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
+import 'react-country-state-city/dist/react-country-state-city.css';
+import { Breadcrumb } from "../sections/breadcrumb"
+import { useDeviceType } from "../../hooks/deviceType"
+import { Link, useNavigate } from 'react-router-dom';
+import { GoogleAuthButtonAndSetup } from "../../hooks/allAuth/googleAuthButtonAndSetup";
+import { titleCase } from "../../hooks/changeCase";
+import { useAuth } from "../../hooks/allAuth/authContext";
+import { toast } from "react-toastify";
+import { getBaseURL } from "../../hooks/fetchAPIs";
+import { IKContext, IKUpload, IKImage } from "imagekitio-react";
+import { useImageKitAPIs } from "../../hooks/fetchAPIs";
+import { ImageCropAndCompress } from "../../hooks/fileResizer/ImageCropAndCompress";
+import { BouncingDots } from "../../spinners/spinner";
+import { authenticator } from "./dynamicFetchSetup";
+import {
+	inputArr, isFieldsValid, validatePassword,
+	checkEmailUniqueness, validateEmail,
+} from "./formInfo";
+
+const baseURL = getBaseURL();
+
+const initialFormData = {
+	first_name: '',
+	last_name: '',
+	// middle_name: '',
+	username: '',
+	address: '',
+	nearest_bus_stop: '',
+	mobile_no: '',
+	email: '',
+	password: '',
+	password_confirmation: '',
+	country: '',
+	state: '',
+	stateCode: '',
+	phoneCode: '',
+	city: '',
+}
+
+// basic format check
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function SignUp() {
+	const [loading, setLoading] = useState(false);
+	const [isError, setIsError] = useState(null);
+	// const emailRef = useRef();
+	const handleDoneRef = useRef();
+	const baseAPIURL = useImageKitAPIs()?.data;
+	const navigate = useNavigate();
+	const { accessToken, updateToken, userInfo, updateUserInfo, RotCipher, encrypt, decrypt, } = useAuth();
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [country, setCountry] = useState(''); // whole country object
+	const [state, setState] = useState('');     // whole state object
+	const [city, setCity] = useState('');       // whole city object
+	const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
+	const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(false);
+	const [selectedFile, setSelectedFile] = useState(null); // local file
+	const [previewURL, setPreviewURL] = useState(null);     // local preview
+	const [uploadedImage, setUploadedImage] = useState(null); // imagekit response like {image_url, fileId}
+	const [returnedFile, setReturnedFile] = useState(null);
+	// const [animate, setAnimate] = useState(false);
+	// const [getHandleDoneFromChild, setGetHandleDoneFromChild] = useState(null);
+	const [imagePreview, setImagePreview] = useState(false);
+	const [formData, setFormData] = useState(initialFormData);
+	const [isEmailValid, setIsEmailValid] = useState(null);
+	const [isEmailLoading, setIsEmailLoading] = useState(false);
+	const deviceType = useDeviceType().width <= 576;
+
+	// validate password on change
+	useEffect(() => {
+		validatePassword({formData, setPasswordErrorMessage})
+	}, [formData.password, formData.password_confirmation,
+		formData.username, formData.first_name,
+		formData.last_name,])
+
+	// validate email on change
+	useEffect(() => {
+			validateEmail({formData, setIsEmailLoading})
+	}, [formData.email])
+
+	// handle input changes
+	const onChangeHandler = (e) => {
+		e.preventDefault();
+		const { name, value } = e.target
+		setFormData(prev => ({
+			...prev,
+			[name]: value
+		}))
+	}
+
+	// updates country, state, city and image details in formData whenever they change
+	useEffect(() => {
+		setFormData(prev => ({
+			...prev,
+			country: country?.name||'',
+			state: state?.name||'',
+			stateCode: state?.state_code||'',
+			phoneCode: country?.phone_code||'',
+			city: city?.name||'',
+		}))
+		if (uploadedImage) {
+			const imageDetails = {
+				image_url: uploadedImage.url,
+				fileId: uploadedImage.fileId,
+			}
+			setFormData(prev => ({
+				...prev,
+				...imageDetails,
+			}))
+			setUploadedImage(null);
+		}
+	}, [country, state, city, uploadedImage])
+
+	// watches if type is password handles switching between text and password types
+	const getInputType = (input) => {
+		if (input.type !== "password") return input.type;
+		if (input.name === "password") return showPassword ? "text" : "password";
+		if (input.name === "password_confirmation") return showConfirmPassword ? "text" : "password";
+		return "password"; // default fallback
+	};
+
+	// check if all required fields are filled
+	const checkFields = isFieldsValid({formData, passwordErrorMessage});
+
+	// handles final form submission
+	const onSubmitHandler = async () => {
+		// e.preventDefault();
+		if (!checkFields) {
+			console.warn('Form is invalid');
+			toast.error('Error! Login Failed. Invalid form data');
+			return;
+		}
+		const cleanedData = {};
+		Object.entries(formData).forEach(([key, value]) => {
+			if (key==='password_confirmation') return; // skip password_confirmation from submission
+			cleanedData[key] = (
+				key==='fileId'||
+				key==='image_url'||
+				key==='stateCode'||
+				key==='phoneCode'||
+				key==='password'
+			)?value:value.trim().toLowerCase();
+		})
+		console.log('submitting form:', cleanedData);
+		// toast.success('Registration Successful!');
+		try {
+			const response = await fetch(`${baseURL}/users/`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(cleanedData),
+			});
+
+			if (!response.ok) {
+				// Handle non-2xx HTTP responses
+				const errorData = await response.json();
+				setIsError(errorData?.error)
+				console.warn('Registration Error:', errorData);
+				toast.error(errorData?.error || 'Registration Error!');
+				return;
+			}
+			const data = await response.json();
+			console.log('Response data from server',data)
+			toast.success('Registration Successful!');
+			// setFormData(initialFormData);
+			// navigate('/welcome')
+			return data;
+		} catch (error) {
+			console.error("Error during login:", error);
+			toast.error('Error! Login Failed. Please try again.');
+			return null;
+		} finally {
+			setLoading(false);
+		}
+	}
+
+	// auto upload when selectedFile changes (i.e when image has been processed)
+	useEffect(() => {
+		console.log("Selected file changed:", selectedFile);
+		if (selectedFile) handleUpload(); // auto upload on file select
+	}, [selectedFile]);
+
+	// auto submit form when formData has url and fileID filled (i.e when image has been uploded to cloud)
+	useEffect(() => {
+		console.log('formData.image_url or formData.fileId changed:', formData.image_url, formData.fileId);
+		if (formData.image_url&&formData.fileId) onSubmitHandler(); // auto submit on image upload
+	}, [formData.image_url, formData.fileId]);
+
+	// handle start of form submission, trigger child to process image first if any
+	const handleSubmitOkayFromChild = (e) => {
+		e.preventDefault();
+		setLoading(true);
+		if (handleDoneRef.current&&imagePreview) {
+			console.log("Triggering child handleDone function...");
+			console.log('selectedFile before child processing:', selectedFile);
+			handleDoneRef.current.handleDone(); // parent directly triggers child’s function
+			console.log('selectedFile after child processing:', selectedFile);
+			// handleUpload(e); // then upload
+		} else if (!imagePreview) {
+			handleUpload(e); // no image to process, just upload
+		} else {
+			console.warn("Child handleDone function not available");
+			toast.error("Image processing not ready. Please try again.");
+			return;
+		}
+	}
+
+	// handle image upload to cloud then finally submit form after
+	const handleUpload = async (e=null) => {
+		if (e) e.preventDefault();
+
+		// if (!selectedFile) {
+		// 	toast.error("Please select a file first");
+		// 	return;
+		// }
+
+		console.log("Uploading file:", selectedFile);
+		if (selectedFile instanceof Blob || selectedFile instanceof File) {
+			try {
+				const imageFormData = new FormData();
+				imageFormData.append("file", selectedFile); // actual file
+				imageFormData.append("fileName", "profile_photo.jpg");
+				imageFormData.append("folder", "profile_photos");
+			
+				// get authentication signature from backend
+				// const authResponse = await fetch(`${baseAPIURL}/imagekit-auth/`);
+				const authData = await authenticator();
+				if (!authData) throw new Error("Failed to get ImageKit auth data");
+				// console.log("Auth data for upload:", authData);
+				// console.log({baseAPIURL})
+			
+				// if (authData&&baseAPIURL) {
+				imageFormData.append("publicKey", baseAPIURL?.IMAGEKIT_PUBLIC_KEY);
+				imageFormData.append("signature", authData.signature);
+				imageFormData.append("expire", authData.expire);
+				imageFormData.append("token", authData.token);
+				// }
+				// return
+			
+				for (let [key, value] of imageFormData.entries()) {
+					console.log(key, ":", value);
+				}
+				console.log("Uploading image to ImageKit...");
+
+				// return
+
+				// upload to imagekit
+				const uploadResponse = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+					method: "POST",
+					// headers: {
+					// 	Authorization: `Basic ${baseAPIURL.IMAGEKIT_PUBLIC_KEY + ":"}`,
+					// 	// Public key only, followed by ":" (empty password)
+					// },
+					body: imageFormData,
+					}
+				);
+		
+				if (!uploadResponse.ok) {
+					const errorText = "Upload failed"
+					toast.error(errorText);
+					throw new Error(errorText);
+					// return;
+				}
+				const result = await uploadResponse.json();
+				console.log("Upload successful:", result);
+				setUploadedImage(result); // save response
+
+				// finally submit form
+				// onSubmitHandler(); // submit form after successful upload
+			} catch (err) {
+				toast.error('Upload failed. Please try again.');
+				console.error("Upload failed:", err);
+				return;
+			}
+		} else {
+			// just submit if no file to upload
+			onSubmitHandler(); // submit form after successful upload
+		}
+	};
+
+	// check email uniqueness with debounce
+	useEffect(() => {
+		// don't run if empty or invalid format
+		if (!formData.email||!emailRegex.test(formData.email)) {
+			setIsEmailValid(null)
+			setIsEmailLoading(false)
+			return;
+		}
+
+		// set a timer to detect "pause"
+		const timer = setTimeout(() => {
+			// Make server request here
+			checkEmailUniqueness({
+				email: formData.email,
+				setIsEmailLoading, setIsEmailValid
+			});
+		}, 2000); // waits Xs after last keystroke
+
+		// cleanup old timer if user types again quickly
+		return () => clearTimeout(timer);
+	}, [formData.email]);
+
+	// clear error message after 3s
+	useEffect(() => {
+		if (isError) {
+			const delay = setTimeout(() => {
+				setIsError(null)
+			}, 3000);
+			return ()=>clearTimeout(delay)
+		}
+	}, [isError])
+	return (
+		<>
+			<form onSubmit={handleSubmitOkayFromChild}
+			className="row px-xl-5"
+			style={{
+				display: 'flex',
+				justifyContent: 'center',
+			}}>
+				<div className=""
+				style={{
+					padding: deviceType?'0 1rem':'0 1rem',
+					width: deviceType?'':'60%',
+				}}>
+					<h5 className="text-uppercase mb-3">
+						<span className="bg-secondary pr-3"
+						style={{color: '#475569'}}>
+							Sign Up
+						</span>
+					</h5>
+					<div className={`bg-light ${deviceType?'p-18':'p-30'} mb-5`}
+					style={{borderRadius: '10px'}}>
+						<div className="row">
+							{inputArr.map((input, index) => {
+								const phone = input.name==='mobile_no' && country;
+								// console.log(input.name, '-', {phone})
+								return (
+									<div key={index}
+									className="col-md-6 form-group">
+										<label
+										htmlFor={input.name}>{titleCase(input.name)}<span>{`${input.important?'*':''}`}</span></label>
+										{input.name==='country' ?
+										<CountrySelect
+										id={input.name}
+										value={country}
+										onChange={(val) => setCountry(val)}
+										placeHolder="Select Country"
+										/>
+										:
+										input.name==='state' ?
+											<StateSelect
+											id={input.name}
+											key={country?.id || "no-country"} // to reset when country changes
+											countryid={country?.id}
+											value={state}
+											onChange={(val) => setState(val)}
+											placeHolder="Select State"
+											/>
+											:
+											input.name==='city' ?
+												<CitySelect
+												id={input.name}
+												key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
+												countryid={country?.id}
+												stateid={state?.id}
+												value={city}
+												onChange={(val) => setCity(val)}
+												placeHolder="Select City"
+												/>
+												:
+												<>
+													<div
+													style={{
+														display: 'flex',
+														flexDirection: 'row',
+														alignItems: 'baseline',
+														position: 'relative',
+														width: '100%',
+													}}>
+														{phone && <p
+														style={{
+															marginRight: '0.5rem',
+														}}>+{country.phone_code}</p>}
+														<input
+														// ref={input.type==='email'?emailRef:null}
+														id={input.name}
+														name={input.name}
+														onChange={onChangeHandler}
+														value={formData[input.name]}
+														style={{borderRadius: '5px'}}
+														className="form-control"
+														type={getInputType(input)}
+														required={input.important}
+														autoComplete={input.autoComplete}
+														{...input.phoneProps}
+														placeholder={input.placeholder}/>
+														{(input.name === "password"||input.name === "password_confirmation") && (
+															(input.name==="password" ?
+															<span
+															className={`far ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
+															onClick={() => setShowPassword((prev) => !prev)} // toggle state
+															style={{
+																position: "absolute",
+																top: "50%",
+																right: "10px",
+																transform: "translateY(-50%)",
+																cursor: "pointer",
+															}}
+															/>
+															:
+															<span
+															className={`far ${showConfirmPassword ? "fa-eye" : "fa-eye-slash"}`}
+															onClick={() => setShowConfirmPassword((prev) => !prev)} // toggle state
+															style={{
+																position: "absolute",
+																top: "50%",
+																right: "10px",
+																transform: "translateY(-50%)",
+																cursor: "pointer",
+															}}
+															/>)
+														)}
+													</div>
+
+													{/* password error messages */}
+													{input.type==='password'&&
+													<PasswordErrorMessage
+													passwordErrorMessage={passwordErrorMessage} />}
+
+													{/* email validity messages */}
+													{(input.type==='email'&&isEmailValid?.boolValue)&&
+													<EmailValidText isEmailValid={isEmailValid} />}
+
+													{/* email loading spinner */}
+													{(input.type==='email'&&isEmailLoading)&&
+													<BouncingSpinner />}
+												</>}
+									</div>
+								)
+							})}
+							<div
+							>
+								<div
+								className="col-md-6 form-group">
+									{/* File Picker */}
+									{/* <input type="file" accept="image/*" onChange={handleFileChange} /> */}
+
+									{/* select, crop and compress file */}
+									<ImageCropAndCompress
+									onComplete={setSelectedFile}
+									type={'profilePhoto'}
+									ref={handleDoneRef}
+									isImagePreview={setImagePreview} />
+
+								</div>
+							</div>
+						</div>
+
+						{/* sign up button */}
+						<button
+						type="submit"
+						className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
+						disabled={!checkFields||isEmailValid?.color!=='green'||loading}
+						>
+							{!loading?'Sign Up':<BouncingDots size="sm" color="#fff" p="1" />}
+						</button>
+
+						{/* link to login page */}
+						<LinkToLogin />
+
+						{/* show error response message */}
+						{isError && <ShowErrorFromServer isError={isError} />}
+
+
+						{/* <div
+						style={{
+							display: 'flex',
+							justifyContent: 'center',
+							alignItems: 'center',
+							marginTop: '1rem',
+						}}>
+							<GoogleAuthButtonAndSetup />
+						</div> */}
+					</div>
+				</div>
+			</form>
+		</>
+	)
+}
+
+function PasswordErrorMessage({passwordErrorMessage}) {
+	return (
+		<>
+			<span
+			style={{
+				color: '#BC4B51',
+				fontSize: '0.75rem',
+				fontStyle: 'italic',
+			}}>{passwordErrorMessage}</span>
+		</>
+	)
+}
+function EmailValidText({isEmailValid}) {
+	return (
+		<>
+			<span
+			style={{
+				color: isEmailValid.color,
+				fontSize: '0.75rem',
+				display: 'inline-block',
+				transform: 'skewX(-17deg)',
+			}}>{isEmailValid?.message}</span>
+		</>
+	)
+}
+function BouncingSpinner() {
+	return (
+		<>
+			<span
+			style={{
+				display: 'inline-block',
+				marginLeft: '0.5rem',
+			}}>
+				<BouncingDots size="vm" color="#475569" p="0" />
+			</span>
+		</>
+	)
+}
+function ShowErrorFromServer({isError}) {
+	return (
+		<>
+			<p
+			style={{
+				color: '#BC4B51',
+				textAlign: 'center',
+				fontWeight: "bold",
+				fontStyle: 'italic',
+				fontSize: '0.9rem',
+			}}>
+				{isError}
+			</p>
+		</>
+	)
+}
+function LinkToLogin() {
+	return (
+		<>
+			<p className="pt-3"
+			style={{
+				display: 'flex',
+				justifyContent: 'center',
+				color: '#475569',
+			}}>Have an account?
+				<Link
+				to="/login"
+				style={{
+					paddingLeft: '0.5rem',
+					color: '#475569',
+				}}>
+					Log in
+				</Link>
+			</p>
+		</>
+	)
+}
+export { SignUp }
