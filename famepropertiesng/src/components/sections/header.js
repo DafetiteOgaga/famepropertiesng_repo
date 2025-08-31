@@ -514,7 +514,10 @@ function CartLink({propStyle}) {
 	const removeLabelName = deviceType.width<400
 	return (
 		<Link to={"cart"} className={`btn px-0 ml-0 ${propStyle} ${removeLabelName?'pr-3':''}`}>
-			<span className="fas fa-shopping-cart fa-lg text-success"></span>
+			<span className="fas fa-shopping-cart fa-lg"
+			style={{
+				color: '#F8F6F2',
+			}}></span>
 			<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
 		</Link>
 	)
