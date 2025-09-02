@@ -11,7 +11,7 @@ function Contact() {
 			<Breadcrumb page={'Contact'} />
 
 			{/* <!-- Contact Start --> */}
-			<div className="container-fluid"style={{
+			<div className="container-fluid mt-3"style={{
 				paddingLeft: deviceType ? 0 : '',
 				paddingRight: deviceType ? 0 : '',
 			}}>
