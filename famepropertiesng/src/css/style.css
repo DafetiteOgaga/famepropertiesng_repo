@@ -1204,6 +1204,23 @@ pre code {
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
+.profile-control {
+  display: flex;
+  /* justify-content: center; */
+  /* width: 100%; */
+  /* height: calc(1.5em + 0.75rem + 2px); */
+  padding: 0.375rem 0.75rem;
+  /* font-size: 2rem; */
+  /* font-weight: bolder; */
+  line-height: 1.5;
+  color: #495057;
+  /* background-color: #fff; */
+  /* background-clip: padding-box; */
+  /* border: 1px solid #ced4da; */
+  /* border-radius: 0; */
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
 .form-control::-ms-expand {
   background-color: transparent;
   border: 0;
@@ -1644,6 +1661,18 @@ fieldset:disabled a.btn {
   background-color: transparent;
   border-color: #E2E8F0;
   box-shadow: 0 0 0 0.2rem #2125292d;
+}
+
+.btn-profile {
+  background-color: transparent;
+  color: #475569;
+  /* border-color: #475569; */
+}
+
+.btn-profile:hover {
+  color: #E2E8F0;
+  background-color: #475569;
+  border-color: #E2E8F0;
 }
 
 .btn-auth {
@@ -6477,6 +6506,18 @@ button:disabled {
   background-color: transparent !important;
   /* border-color: #475569; */
   border: 1px solid #475569;
+}
+
+.profile-name-link {
+  /* transform: skewX(0deg); */
+  font-style: italic;
+}
+
+.profile-name-link:hover .profile-name-text{
+  display: inline-block;
+  /* font-style: normal; */
+  transform: skewX(-12deg); /* fake italic */
+  transition: transform 0.3s ease-in-out;
 }
 
 /* ################################################# */
