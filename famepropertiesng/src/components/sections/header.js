@@ -263,7 +263,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 						}}>
 							{userInfo &&
 							<>
-								<Link to={"/settings"}
+								<Link to={"/profile"}
 								className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
 								style={{
 									display: 'flex',
@@ -405,13 +405,13 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 						// paddingRight: 'auto',
 						}}>
 						{userInfo &&
-						<Link to={"/settings"}
-						// className='mb-0'
+						<Link to={"/profile"}
+						className='profile-name-link'
 						style={{
 							textWrap: 'nowrap',
 							color: '#F8F6F2',
 							// fontSize: '0.9rem',
-							fontStyle: 'italic',
+							// fontStyle: 'italic',
 							fontWeight: 'bold',
 							display: 'flex',
 							alignItems: 'center',
@@ -439,7 +439,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 									// textDecoration: 'none',
 								}}
 								/>}
-								{titleCase(userInfo.first_name)}
+								<span
+								className='profile-name-text'>{titleCase(userInfo.first_name)}</span>
 						</Link>}
 						<div className="d-inline-flex align-items-center h-100">
 							{headerMenuArr.map((menu, index) => {
