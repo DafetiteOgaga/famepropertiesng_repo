@@ -6,6 +6,10 @@ import reportWebVitals from './reportWebVitals';
 import { HashRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from './hooks/allAuth/authContext';
+import Modal from 'react-modal';
+
+// Tell react-modal what is the root of your app
+Modal.setAppElement('#root');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
