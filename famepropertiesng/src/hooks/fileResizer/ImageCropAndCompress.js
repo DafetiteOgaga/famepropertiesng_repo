@@ -237,7 +237,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 				borderRadius: "10px",
 				overflow: "hidden",
 				}}>
-					{(imageSrc&&(type!=='profilePhoto')) && (
+					{(imageSrc) && (
 				<div
 				style={{
 					display: "flex",
