@@ -391,7 +391,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 														{status.toLowerCase()==='cart'&&
 														<>
 															<span style={{whiteSpace: 'pre'}}> </span>
-															<span className="fas fa-shopping-cart fa-sm mb-1"
+															<span className="fas fa-shopping-cart fa-xs mb-1"
 															style={{
 																color: '#F8F6F2',
 															}}></span>
