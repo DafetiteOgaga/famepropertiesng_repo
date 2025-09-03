@@ -492,13 +492,13 @@ function Profile() {
 								(userInfo.image_url||imgPreview)
 								// false
 								?
+
+									// image view
 									<img
 									src={imgPreview?imgPreview:userInfo.image_url}
 									alt={userInfo.first_name}
 									className={`${deviceType?'w-50 h-50':'w-30 h-30'}`}
 									style={{
-										// width: '12rem',
-										// height: '12rem',
 										objectFit: 'cover',
 										borderRadius: '50%',
 										padding: 2,
@@ -506,6 +506,8 @@ function Profile() {
 									}}
 									/>
 									:
+
+									// default icon (image placeholder) view
 									<span
 									className="fas fa-user-circle mr-2"
 									style={{
@@ -513,6 +515,9 @@ function Profile() {
 										color: '#475569',
 									}}
 									/>}
+
+									{/* image dropdown (upload, cancel and submit buttons) */}
+									{/* upload image view too */}
 									{editFields.image_url ?
 									(<>
 										<span className="d-flex flex-row align-items-center justify-content-center fadeInDownHalfProfilePic">
@@ -521,13 +526,14 @@ function Profile() {
 												className="col-md-6 mt-2"
 												style={{maxWidth: '100%'}}>
 
-													{/* select, crop and compress file */}
+													{/* select, preview, crop and compress image file */}
 													<ImageCropAndCompress
 													onComplete={setSelectedFile}
 													type={'changeProfilePhoto'}
 													ref={handleImageProcessingRef}
 													isImagePreview={setImagePreview} />
 												</div>
+												{/* cancel and submit button (for image replacement) */}
 												<EditFieldButton
 												setEditFields={setEditFields}
 												userKey={"image_url"}
@@ -545,6 +551,7 @@ function Profile() {
 										backgroundColor: '#F8F6F2',
 										borderRadius: '30%',
 										}}>
+										{/* edit button (image) */}
 										<EditFieldButton
 											setEditFields={setEditFields}
 											userKey={"image_url"}
@@ -556,16 +563,20 @@ function Profile() {
 							</div>
 							<p
 							style={{
-								fontSize: deviceType?'1.5rem':'2rem',
+								fontSize: deviceType?'1.25rem':'2rem',
 								justifyContent: 'center',
 							}}
 							className="profile-control bold-text d-flex align-items-center text-center mt-3 mb-0"
 							>
 								<span className="d-flex flex-column align-items-center justify-content-between">
 									<span className="d-flex flex-row align-items-center justify-content-between">
+
+										{/* first and last name */}
 										{titleCase(userInfo.first_name)}
 										<span className="d-flex flex-row align-items-center justify-content-between">
 											<span style={{whiteSpace: 'pre'}}>{' '}</span>
+
+												{/* last name with edit button */}
 												<span>{titleCase(userInfo.last_name||'')}</span>
 												{!editFields.last_name&&
 												<EditFieldButton
@@ -577,9 +588,13 @@ function Profile() {
 													isDisabled={Object.values(editFields)?.some?.(value=>value)||false} />}
 										</span>
 									</span>
+
+									{/* last name input and buttons */}
 									<>
 										{editFields.last_name &&
 										<span className={`d-flex ${deviceType?'flex-column':'flex-row'} align-items-center justify-content-center fadeInDownHalfUname`}>
+
+												{/* last name input field */}
 												<input
 												id={"last_name"}
 												name={"last_name"}
@@ -592,6 +607,8 @@ function Profile() {
 												className={`form-control ${deviceType?'w-100':''}`}
 												type={getInputType("last_name")}
 												/>
+
+											{/* last name cancel and submit buttons */}
 											<EditFieldButton
 											setEditFields={setEditFields}
 											userKey={"last_name"}
@@ -660,15 +677,22 @@ function Profile() {
 																padding: `${0.375*2}rem ${0}rem`,
 																textWrap: 'wrap',
 															}}>
-																{`
-																	${mobile?'+'+userInfo.phoneCode+' ':''}
-																	${mobile?formatPhoneNumber(userValue):
-																	sentence?sentenceCase(userValue):
-																	email?userValue:
-																	titleCase(userValue)}
-																	${isState?'|'+userInfo.stateCode:''}
-																`}
+
+																{/* all non location paragraphs content */}
+																{/* e.g email, mobile no, address,etc */}
+																{!userValue?
+																	<span className="font-italic">Not Provided.</span>:
+																	`
+																		${mobile?'+'+userInfo.phoneCode+' ':''}
+																		${mobile?formatPhoneNumber(userValue):
+																		sentence?sentenceCase(userValue):
+																		email?userValue:
+																		titleCase(userValue)}
+																		${isState?'|'+userInfo.stateCode:''}
+																	`
+																}
 														</span>
+														{/* edit button for all (locations inclusive) fields */}
 														<EditFieldButton
 														setEditFields={setEditFields}
 														userKey={userKey}
@@ -677,11 +701,10 @@ function Profile() {
 													</span>
 												</p>
 												:
+
 												// input field view (edit view)
-												// <div>
 												<div className="d-flex flex-column">
 
-													{/* <div> */}
 													{/* label for all fields */}
 													<label
 													htmlFor="userKey"
@@ -694,7 +717,7 @@ function Profile() {
 														{titleCase(userKey)}:</label>
 														{userKey==='country' ?
 
-														// country select
+														// country select field
 														<div
 														className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 														>
@@ -704,6 +727,7 @@ function Profile() {
 															onChange={(val) => setCountry(val)}
 															placeHolder="Select Country"
 															/>
+															{/* country cancel and submit buttons */}
 															<div>
 																<EditFieldButton
 																setEditFields={setEditFields}
@@ -716,7 +740,7 @@ function Profile() {
 														:
 														userKey==='state' ?
 
-															// state select
+															// state select field
 															<div
 															className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 															>
@@ -731,6 +755,7 @@ function Profile() {
 																}}
 																placeHolder="Select State"
 																/>
+																{/* state cancel and submit buttons */}
 																<div>
 																	{!countryStateCity&&<EditFieldButton
 																	setEditFields={setEditFields}
@@ -743,7 +768,7 @@ function Profile() {
 															:
 															userKey==='city' ?
 
-																// city select
+																// city select field
 																<div
 																className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 																>
@@ -756,6 +781,7 @@ function Profile() {
 																	onChange={(val) => setCity(val)}
 																	placeHolder="Select City"
 																	/>
+																	{/* city cancel and submit buttons */}
 																	<div>
 																		{(!countryStateCity&&!stateCity)&&<EditFieldButton
 																		setEditFields={setEditFields}
@@ -767,13 +793,8 @@ function Profile() {
 																</div>
 																:
 
-																// all other fields
+																// all other fields (input and textarea fields)
 																<>
-																{/* // className="d-flex flex-row align-items-center justify-content-between" */}
-																{/* > */}
-
-
-
 																	<div className={`d-flex flex-${(toTextArea(userKey, textAreaFieldsArr)||deviceType)?'column':'row'} justify-content-between`}>
 
 																		<span className={`d-flex ${deviceType?'':'w-100'} flex-row align-items-center`}>
@@ -785,9 +806,8 @@ function Profile() {
 																				paddingRight: '0.5rem',
 																			}}>{'+'+userInfo.phoneCode}</span>}
 
-																			{/* input field */}
-																			
 																				{toTextArea(userKey, textAreaFieldsArr)?
+																				// text area field
 																				<textarea
 																				id={userKey}
 																				name={userKey}
@@ -801,6 +821,8 @@ function Profile() {
 																				rows={4}
 																				/>
 																				:
+
+																				// input field
 																				<input
 																				id={userKey}
 																				name={userKey}
@@ -813,6 +835,7 @@ function Profile() {
 																				type={getInputType(userKey)}
 																				/>}
 																		</span>
+																				{/* cancel and submit buttons for all non location fields (input and textarea) */}
 																				<EditFieldButton
 																				setEditFields={setEditFields}
 																				userKey={userKey}
