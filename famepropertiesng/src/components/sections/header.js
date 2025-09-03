@@ -375,7 +375,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 												padding: '0rem 1rem',
 												marginLeft: 0,
 												marginRight: 0,
-												marginTop: menu?.menu?.toLowerCase() === "contact" ? '20rem' : '',
+												marginTop: menu?.menu?.toLowerCase() === "contact" ? '15rem' : '',
 												marginBottom: lastItem ? '60%' : '',
 												border: '2px outset buttonborder',
 												borderTopLeftRadius: 0,
