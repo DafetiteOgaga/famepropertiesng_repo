@@ -33,6 +33,8 @@ const initialFormData = {
 	stateCode: '',
 	phoneCode: '',
 	city: '',
+	hasStates: false,
+	hasCities: false,
 }
 
 // basic format check
@@ -84,11 +86,45 @@ function Profile() {
 		// console.log('No user info found in local storage.');
 		}
 	}, [userInfo])
-	// console.log('userInfo from local storage:', userInfo);
-	// console.log('testget from local storage:', testget);
 
+	// updates country, state, city and image details in formData whenever they change
+	useEffect(() => {
+		// console.log('updating country/state/city in formData...')
+		setFormData(prev => ({
+			...prev,
+
+			// country
+			country: country?.name||null,
+			countryId: country?.id||null,
+			phoneCode: country?.phone_code||null,
+			hasStates: country?.hasStates??false,
+
+			// state
+			state: country?(state?.name):null,
+			stateId: country?(state?.id):null,
+			stateCode: country?(state?.state_code):null,
+			hasCities: country?(state?.hasCities):false,
+
+			// city
+			city: state?(city?.name):null,
+			cityId: state?(city?.id):null,
+		}))
+		if (uploadedImage.current) {
+			const imageDetails = {
+				image_url: uploadedImage.current.url,
+				fileId: uploadedImage.current.fileId,
+			}
+			setFormData(prev => ({
+				...prev,
+				...imageDetails,
+			}))
+		}
+	}, [country, state, city, uploadedImage.current])
+
+	// Step 2: Populate formData from userInfo once userInfo is available
 	useEffect(() => {
 		if (userInfo) {
+			// console.log('setting formData from userInfo...')
 			setFormData(prev => ({
 				...prev,
 				...userInfo,
@@ -107,12 +143,15 @@ function Profile() {
 				phoneCode: userInfo.phoneCode||'',
 				city: userInfo.city||'',
 				cityId: userInfo.cityId||'',
+				hasStates: userInfo.hasStates,
+				hasCities: userInfo.hasCities,
 			}))
 			if (userInfo.country) {
 				setCountry({
 					name: userInfo.country,
 					phone_code: userInfo.phoneCode,
 					id: userInfo.countryId,
+					hasStates: userInfo.hasStates,
 				})
 			}
 			if (userInfo.state) {
@@ -120,6 +159,7 @@ function Profile() {
 					name: userInfo.state,
 					state_code: userInfo.stateCode,
 					id: userInfo.stateId,
+					hasCities: userInfo.hasCities,
 				})
 			}
 			if (userInfo.city) {
@@ -149,40 +189,6 @@ function Profile() {
 			[name]: value
 		}))
 	}
-
-	// updates country, state, city and image details in formData whenever they change
-	useEffect(() => {
-		// console.log('updating country/state/city in formData...')
-		setFormData(prev => ({
-			...prev,
-
-			// country
-			country: country?.name||null,
-			countryId: country?.id||null,
-			phoneCode: country?.phone_code||null,
-			hasStates: country?.hasStates||false,
-
-			// state
-			state: country?.hasStates?(state?.name):null,
-			stateId: country?.hasStates?(state?.id):null,
-			stateCode: country?.hasStates?(state?.state_code):null,
-			hasCities: state?.hasCities||false,
-
-			// city
-			city: state?.hasCities?(city?.name):null,
-			cityId: state?.hasCities?(city?.id):null,
-		}))
-		if (uploadedImage.current) {
-			const imageDetails = {
-				image_url: uploadedImage.current.url,
-				fileId: uploadedImage.current.fileId,
-			}
-			setFormData(prev => ({
-				...prev,
-				...imageDetails,
-			}))
-		}
-	}, [country, state, city, uploadedImage.current])
 
 	// watches if type is password handles switching between text and password types
 	const getInputType = (input) => {

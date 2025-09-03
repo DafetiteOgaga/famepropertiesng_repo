@@ -37,6 +37,8 @@ const initialFormData = {
 	stateCode: '',
 	phoneCode: '',
 	city: '',
+	hasStates: false,
+	hasCities: false,
 }
 
 // basic format check
@@ -98,11 +100,13 @@ function SignUp() {
 			country: country?.name||null,
 			countryId: country?.id||null,
 			phoneCode: country?.phone_code||null,
+			hasStates: country?.hasStates||false,
 
 			// state
 			state: country?.hasStates?(state?.name):null,
 			stateId: country?.hasStates?(state?.id):null,
 			stateCode: country?.hasStates?(state?.state_code):null,
+			hasCities: state?.hasCities||false,
 
 			// city
 			city: state?.hasCities?(city?.name):null,
@@ -152,6 +156,8 @@ function SignUp() {
 				key==='stateCode'||
 				key==='phoneCode'||
 				key==='password' ||
+				key==='hasStates'||
+				key==='hasCities' ||
 				typeof value === 'number'
 			)?value:value.trim().toLowerCase();
 		})
@@ -168,6 +174,7 @@ function SignUp() {
 				// Handle non-2xx HTTP responses
 				const errorData = await response.json();
 				setIsError(errorData?.error)
+				setLoading(false);
 				console.warn('Registration Error:', errorData);
 				toast.error(errorData?.error || 'Registration Error!');
 				return;
@@ -177,7 +184,7 @@ function SignUp() {
 			toast.success(
 				<div>
 					Registration Successful.<br />
-					Welcome, <strong>{data.first_name}!</strong>
+					Welcome, <strong>{titleCase(data.first_name)}!</strong>
 				</div>
 			);
 			// toast.success(`Registration Successful.\nWelcome, ${data.first_name}!`);
@@ -281,6 +288,7 @@ function SignUp() {
 				if (!uploadResponse.ok) {
 					const errorText = "Upload failed"
 					toast.error(errorText);
+					setLoading(false);
 					throw new Error(errorText);
 					// return;
 				}
@@ -294,6 +302,8 @@ function SignUp() {
 				toast.error('Upload failed. Please try again.');
 				console.error("Upload failed:", err);
 				return;
+			} finally {
+				setLoading(false);
 			}
 		} else {
 			// just submit if no file to upload
@@ -334,6 +344,7 @@ function SignUp() {
 	}, [isError])
 
 	// console.log({country, state, city})
+	// console.log({formData})
 	return (
 		<>
 			<form onSubmit={handleImageUploadToCloud}
