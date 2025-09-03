@@ -69,13 +69,15 @@ function Profile() {
 
 	// redirect to home if no user info found (i.e user is logged out)
 	useEffect(() => {
-		const isLogout = setTimeout(() => {
-			if (!userInfo) {
-				// toast.info('You have been logged out. Please log in again to continue.');
-				navigate('/')
-			}
-		}, 1000);
-		return () => clearTimeout(isLogout);
+		if (!userInfo)	{
+				const isLogout = setTimeout(() => {
+				if (!userInfo) {
+					// toast.info('You have been logged out. Please log in again to continue.');
+					navigate('/')
+				}
+			}, 1000);
+			return () => clearTimeout(isLogout);
+		}
 	}, [userInfo])
 
 
