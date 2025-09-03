@@ -204,6 +204,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 			onClose={() => setImageSrc(null)}
 			isOpen={imageSrc}
 			onRequestClose={null}
+			ariaHideApp={false}
 			contentLabel="Crop image"
 			shouldCloseOnOverlayClick={true}
 			shouldCloseOnEsc={true}
