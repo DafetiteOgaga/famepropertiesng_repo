@@ -6609,7 +6609,7 @@ button:disabled,
 .Toastify__toast--success {
   --toastify-icon-color-success: #F8F6F2;
   --toastify-color-progress-success: #F8F6F2;
-  /* --toastify-color-progress-error: #e91e63;
-  --toastify-color-progress-warning: #ffc107;
-  --toastify-color-progress-info: #2196f3; */
+  /* --toastify-color-progress-error: #e91e63; */
+  /* --toastify-color-progress-warning: #ffc107; */
+  --toastify-color-progress-info: #6C757D;
 }
