@@ -912,7 +912,7 @@ function EditFieldButton({
 			{editField &&
 			<button
 			type="button"
-			className="btn btn-profile ml-2"
+			className={`btn ${loading?'':'btn-profile'} ml-2`}
 			style={{
 				padding: '0.2.5rem 0.7rem'
 			}}
@@ -921,7 +921,8 @@ function EditFieldButton({
 				else onSubmitHandler(e);
 			}}
 			disabled={loading}>
-				{loading?<BouncingDots size="ts" color="#475569" p="0" />:'Submit'}
+				{loading?<BouncingDots size="ts" color="#475569" p="0" />:
+				'Submit'}
 			</button>}
 		</span>
 	)
