@@ -76,6 +76,7 @@ function Header({mTop}) {
 	// const [scrollUp, setScrollUp] = useState(scrollingDown)
 	const deviceType = useDeviceType()
 	const currentPage = useLocation().pathname.split('/').pop();
+	const navigate = useNavigate();
 	const menuHandler = () => {
 		setIsMenuOpen(prev=> {
 			// console.log("Menu Opened:", !prev);
@@ -95,6 +96,20 @@ function Header({mTop}) {
 
 		const handleClickToCloseMenu = (e) => {
 			// console.log("Clicked:", e.target);
+
+			// close menu overlay when logout is clicked
+			const anchor = e.target;
+			const span = anchor.querySelector('span');
+			const spanId = span?.id?.toLowerCase();
+			console.log('spanId:', spanId);
+			if (spanId==='logout') {
+				// console.log("Clicked on overlay, closing menu");
+				setIsMenuOpen(false);
+				renderdelay(); // your animation cleanup
+				// console.log('logout process initiated and navigating to home')
+				// navigate('/')
+			}
+
 			// if you clicked on the menu itself or any of its children, do nothing
 			if (menuRef.current && menuRef.current.contains(e.target)) return;
 			if (categoryMenuRef.current && categoryMenuRef.current.contains(e.target)) return;
@@ -218,6 +233,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 		if (statusLink.toLowerCase()==='logout') {
 			// console.log('logout process initiated')
 			createLocal.removeAllItems();
+			// console.log('navigating to home')
 			navigate('/')
 		} else {
 			// console.log('navigate click')
@@ -386,6 +402,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 												height: '3.3rem',
 												}}>
 													<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
+													id={status}
 													style={{marginRight: 8, fontSize: '1rem'}} />
 														{status}
 														{status.toLowerCase()==='cart'&&

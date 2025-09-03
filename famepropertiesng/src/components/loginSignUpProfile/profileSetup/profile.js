@@ -14,6 +14,7 @@ import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
 import { isFieldsValid, validatePassword } from "../signUpSetup/formInfo";
 import { reOrderFields, toTextArea } from "./profileMethods";
+// import { NavigateToComp } from "../../../hooks/navigateToComp";
 
 const baseURL = getBaseURL();
 
@@ -41,6 +42,7 @@ const initialFormData = {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function Profile() {
+	// const { navigateTo } = NavigateToComp()
 	const updatedFieldRef = useRef(null);
 	const handleImageProcessingRef = useRef();
 	const { createLocal } = useCreateStorage();
@@ -64,6 +66,19 @@ function Profile() {
 
 	// get user info from local storage if any
 	const userInfo = createLocal.getItem('fpng-user');
+
+	// redirect to home if no user info found (i.e user is logged out)
+	useEffect(() => {
+		if (!userInfo)	{
+				const isLogout = setTimeout(() => {
+				if (!userInfo) {
+					// toast.info('You have been logged out. Please log in again to continue.');
+					navigate('/')
+				}
+			}, 1000);
+			return () => clearTimeout(isLogout);
+		}
+	}, [userInfo])
 
 
 	// Step 1: Load userInfo into state once (so it's stable)

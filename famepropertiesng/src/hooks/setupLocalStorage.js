@@ -129,7 +129,7 @@ function useStorage(storage) {
 		},
 
 		removeItem(key) {
-			console.log('Removing item with key:', key);
+			// console.log('Removing item with key:', key);
 			storage.removeItem(key);
 		},
 
@@ -141,11 +141,11 @@ function useStorage(storage) {
 				// console.log({allAppKeys})
 				for (let i = 0; i < allAppKeys.length; i++) {
 					const key = allAppKeys[i];
-					console.log('Removing item with key:', key);
+					// console.log('Removing item with key:', key);
 					storage.removeItem(key);
 				};
 				storage.removeItem("fpng-app-keys");
-				console.log('All app keys removed');
+				// console.log('All app keys removed');
 			}
 		},
 
