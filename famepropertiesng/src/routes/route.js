@@ -9,10 +9,11 @@ import { Detail } from '../components/detail';
 import { PageNotFound } from '../components/pageNotFound';
 import { Products } from '../components/sections/products';
 import { LogIn } from '../components/loginSignUpProfile/login';
-import { SignUp } from '../components/loginSignUpProfile/signUp';
+import { SignUp } from '../components/loginSignUpProfile/signUpSetup/signUp';
 import { AdminPage } from '../components/addProduct';
 import { ProcessImage } from '../components/downloadAndCrop';
 import { Welcome } from '../components/welcome';
+import { Profile } from '../components/loginSignUpProfile/profileSetup/profile';
 
 function AppRoutes() {
 	return (
@@ -36,6 +37,8 @@ function AppRoutes() {
 				<Route path="cart" element={<Cart />} />
 				{/* welcome */}
 				<Route path="welcome" element={<Welcome />} />
+				{/* profile */}
+				<Route path="profile" element={<Profile />} />
 				{/* log in */}
 				<Route path="login" element={<LogIn />} />
 				{/* sign up */}
