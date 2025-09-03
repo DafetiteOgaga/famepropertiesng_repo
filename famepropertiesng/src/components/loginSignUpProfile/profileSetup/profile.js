@@ -152,6 +152,7 @@ function Profile() {
 
 	// updates country, state, city and image details in formData whenever they change
 	useEffect(() => {
+		// console.log('updating country/state/city in formData...')
 		setFormData(prev => ({
 			...prev,
 
@@ -159,11 +160,13 @@ function Profile() {
 			country: country?.name||null,
 			countryId: country?.id||null,
 			phoneCode: country?.phone_code||null,
+			hasStates: country?.hasStates||false,
 
 			// state
 			state: country?.hasStates?(state?.name):null,
 			stateId: country?.hasStates?(state?.id):null,
 			stateCode: country?.hasStates?(state?.state_code):null,
+			hasCities: state?.hasCities||false,
 
 			// city
 			city: state?.hasCities?(city?.name):null,
@@ -251,10 +254,11 @@ function Profile() {
 				// console.log('multiple fields to update, checking for actual changes...')
 				const updates = updatedFieldRef.current.map(field => ({
 					field,
-					update: typeof formData[field]==='number'?formData[field]:formData[field]?.trim(),
+					update: (typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim(),
 					original: userInfo?.[field],
-					isUpdated: (typeof formData[field]==='number'?formData[field]:formData[field]?.trim())!==userInfo?.[field],
+					isUpdated: ((typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim())!==userInfo?.[field],
 				}))
+				// console.log({updates})
 				const changedFields = updates.filter(item => item.isUpdated)
 				// console.log({updates, changedFields})
 				if (updates.some(item => (!item.isUpdated||!item.update))) {
@@ -288,6 +292,14 @@ function Profile() {
 				cleanedData['fileId'] = newFileID
 			}
 		}
+
+		// add hasStates and hasCities if city or state is being updated
+		if (updatedFieldRef.current.includes('state')) {
+			updatedFieldRef.current.push('hasStates');
+		}
+		if (updatedFieldRef.current.includes('city')) {
+			updatedFieldRef.current.push('hasCities');
+		}
 		// console.log('cleanedData:', cleanedData)
 
 		const exemptArr = [
@@ -301,6 +313,8 @@ function Profile() {
 			'countryId',
 			'id',
 			'is_staff',
+			'hasStates',
+			'hasCities',
 		]
 		// console.log({isImage}, 'uploadedImage:', uploadedImage.current)
 		if (!isImage) {
@@ -453,8 +467,18 @@ function Profile() {
 	// array of fields that should be text areas instead of input fields
 	const textAreaFieldsArr = ['address', 'nearest_bus_stop']
 
+	// fields to skip displaying
+	const skipArr = [
+		'id', 'is_staff', 'image_url', 'fileId', 'phoneCode',
+		'stateCode', 'first_name', 'last_name', 'countryId',
+		'stateId', 'cityId', 'date_joined', 'last_login',
+		'hasStates', 'hasCities', 'password', 'password_confirmation'
+	]
+
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
+	// console.log({formData})
+	// console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})
@@ -620,11 +644,6 @@ function Profile() {
 								</span>
 							</p>
 							{reOrderFields(Object.entries(userInfo), reOrderFieldsArr).map(([userKey, userValue], index) => {
-								const skipArr = [
-									'id', 'is_staff', 'image_url', 'fileId', 'phoneCode',
-									'stateCode', 'first_name', 'last_name', 'countryId',
-									'stateId', 'cityId', 'date_joined', 'last_login',
-								]
 								if (skipArr.includes(userKey)) return null;
 								const mobile = userKey==='mobile_no'
 								const isState = userKey==='state'
