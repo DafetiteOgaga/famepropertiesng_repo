@@ -1,19 +1,19 @@
 import { useEffect, useState, useRef } from "react";
 import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
 import 'react-country-state-city/dist/react-country-state-city.css';
-import { Breadcrumb } from "../sections/breadcrumb"
-import { useDeviceType } from "../../hooks/deviceType"
+import { Breadcrumb } from "../../sections/breadcrumb"
+import { useDeviceType } from "../../../hooks/deviceType"
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleAuthButtonAndSetup } from "../../hooks/allAuth/googleAuthButtonAndSetup";
-import { titleCase } from "../../hooks/changeCase";
-import { useAuth } from "../../hooks/allAuth/authContext";
+import { GoogleAuthButtonAndSetup } from "../../../hooks/allAuth/googleAuthButtonAndSetup";
+import { titleCase } from "../../../hooks/changeCase";
+import { useAuth } from "../../../hooks/allAuth/authContext";
 import { toast } from "react-toastify";
-import { getBaseURL } from "../../hooks/fetchAPIs";
+import { getBaseURL } from "../../../hooks/fetchAPIs";
 import { IKContext, IKUpload, IKImage } from "imagekitio-react";
-import { useImageKitAPIs } from "../../hooks/fetchAPIs";
-import { ImageCropAndCompress } from "../../hooks/fileResizer/ImageCropAndCompress";
-import { BouncingDots } from "../../spinners/spinner";
-import { authenticator } from "./dynamicFetchSetup";
+import { useImageKitAPIs } from "../../../hooks/fetchAPIs";
+import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCompress";
+import { BouncingDots } from "../../../spinners/spinner";
+import { authenticator } from "../dynamicFetchSetup";
 import {
 	inputArr, isFieldsValid, validatePassword,
 	checkEmailUniqueness, validateEmail,
@@ -46,7 +46,7 @@ function SignUp() {
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
 	// const emailRef = useRef();
-	const handleDoneRef = useRef();
+	const handleImageProcessingRef = useRef();
 	const baseAPIURL = useImageKitAPIs()?.data;
 	const navigate = useNavigate();
 	const { accessToken, updateToken, userInfo, updateUserInfo, RotCipher, encrypt, decrypt, } = useAuth();
@@ -61,8 +61,6 @@ function SignUp() {
 	const [previewURL, setPreviewURL] = useState(null);     // local preview
 	const [uploadedImage, setUploadedImage] = useState(null); // imagekit response like {image_url, fileId}
 	const [returnedFile, setReturnedFile] = useState(null);
-	// const [animate, setAnimate] = useState(false);
-	// const [getHandleDoneFromChild, setGetHandleDoneFromChild] = useState(null);
 	const [imagePreview, setImagePreview] = useState(false);
 	const [formData, setFormData] = useState(initialFormData);
 	const [isEmailValid, setIsEmailValid] = useState(null);
@@ -95,11 +93,20 @@ function SignUp() {
 	useEffect(() => {
 		setFormData(prev => ({
 			...prev,
-			country: country?.name||'',
-			state: state?.name||'',
-			stateCode: state?.state_code||'',
-			phoneCode: country?.phone_code||'',
-			city: city?.name||'',
+
+			// country
+			country: country?.name||null,
+			countryId: country?.id||null,
+			phoneCode: country?.phone_code||null,
+
+			// state
+			state: country?.hasStates?(state?.name):null,
+			stateId: country?.hasStates?(state?.id):null,
+			stateCode: country?.hasStates?(state?.state_code):null,
+
+			// city
+			city: state?.hasCities?(city?.name):null,
+			cityId: state?.hasCities?(city?.id):null,
 		}))
 		if (uploadedImage) {
 			const imageDetails = {
@@ -126,11 +133,14 @@ function SignUp() {
 	const checkFields = isFieldsValid({formData, passwordErrorMessage});
 
 	// handles final form submission
-	const onSubmitHandler = async () => {
-		// e.preventDefault();
+	const onSubmitToServerHandler = async (e=null) => {
+		if (e) e.preventDefault();
+
+		setLoading(true);
+
 		if (!checkFields) {
 			console.warn('Form is invalid');
-			toast.error('Error! Login Failed. Invalid form data');
+			toast.error('Error! Form is invalid');
 			return;
 		}
 		const cleanedData = {};
@@ -141,10 +151,11 @@ function SignUp() {
 				key==='image_url'||
 				key==='stateCode'||
 				key==='phoneCode'||
-				key==='password'
+				key==='password' ||
+				typeof value === 'number'
 			)?value:value.trim().toLowerCase();
 		})
-		console.log('submitting form:', cleanedData);
+		// console.log('submitting form:', cleanedData);
 		// toast.success('Registration Successful!');
 		try {
 			const response = await fetch(`${baseURL}/users/`, {
@@ -162,14 +173,21 @@ function SignUp() {
 				return;
 			}
 			const data = await response.json();
-			console.log('Response data from server',data)
-			toast.success('Registration Successful!');
-			// setFormData(initialFormData);
+			// console.log('Response data from server',data)
+			toast.success(
+				<div>
+					Registration Successful.<br />
+					Welcome, <strong>{data.first_name}!</strong>
+				</div>
+			);
+			// toast.success(`Registration Successful.\nWelcome, ${data.first_name}!`);
+			setFormData(initialFormData); // reset form
 			// navigate('/welcome')
+			navigate('/login') // go to login page after signup
 			return data;
 		} catch (error) {
-			console.error("Error during login:", error);
-			toast.error('Error! Login Failed. Please try again.');
+			console.error("Error during registration:", error);
+			toast.error('Error! Registration Failed. Please try again.');
 			return null;
 		} finally {
 			setLoading(false);
@@ -177,46 +195,49 @@ function SignUp() {
 	}
 
 	// auto upload when selectedFile changes (i.e when image has been processed)
-	useEffect(() => {
-		console.log("Selected file changed:", selectedFile);
-		if (selectedFile) handleUpload(); // auto upload on file select
-	}, [selectedFile]);
+	// useEffect(() => {
+	// 	console.log("Selected file changed:", selectedFile);
+	// 	if (selectedFile) handleImageUploadToCloud(); // auto upload on file select
+	// }, [selectedFile]);
 
 	// auto submit form when formData has url and fileID filled (i.e when image has been uploded to cloud)
 	useEffect(() => {
-		console.log('formData.image_url or formData.fileId changed:', formData.image_url, formData.fileId);
-		if (formData.image_url&&formData.fileId) onSubmitHandler(); // auto submit on image upload
+		// console.log('formData.image_url or formData.fileId changed:', formData.image_url, formData.fileId);
+		if (formData.image_url&&formData.fileId) onSubmitToServerHandler(); // auto submit on image upload
 	}, [formData.image_url, formData.fileId]);
 
 	// handle start of form submission, trigger child to process image first if any
-	const handleSubmitOkayFromChild = (e) => {
-		e.preventDefault();
-		setLoading(true);
-		if (handleDoneRef.current&&imagePreview) {
-			console.log("Triggering child handleDone function...");
-			console.log('selectedFile before child processing:', selectedFile);
-			handleDoneRef.current.handleDone(); // parent directly triggers child’s function
-			console.log('selectedFile after child processing:', selectedFile);
-			// handleUpload(e); // then upload
-		} else if (!imagePreview) {
-			handleUpload(e); // no image to process, just upload
-		} else {
-			console.warn("Child handleDone function not available");
-			toast.error("Image processing not ready. Please try again.");
-			return;
-		}
-	}
+	// const handleSubmitOkayFromChild = (e) => {
+	// 	e.preventDefault();
+	// 	setLoading(true);
+	// 	if (handleImageProcessingRef.current&&imagePreview) {
+	// 		console.log("Triggering child handleImageProcessing function...");
+	// 		console.log('selectedFile before child processing:', selectedFile);
+	// 		handleImageProcessingRef.current.handleImageProcessing(); // parent directly triggers child’s function
+	// 		console.log('selectedFile after child processing:', selectedFile);
+	// 		// handleImageUploadToCloud(e); // then upload
+	// 	} else if (!imagePreview) {
+	// 		console.log("No image selected, skipping processing...");
+	// 		handleImageUploadToCloud(e); // no image to process, just upload
+	// 	} else {
+	// 		console.warn("Child handleImageProcessing function not available");
+	// 		toast.error("Image processing not ready. Please try again.");
+	// 		return;
+	// 	}
+	// }
 
 	// handle image upload to cloud then finally submit form after
-	const handleUpload = async (e=null) => {
+	const handleImageUploadToCloud = async (e=null) => {
 		if (e) e.preventDefault();
+
+		setLoading(true);
 
 		// if (!selectedFile) {
 		// 	toast.error("Please select a file first");
 		// 	return;
 		// }
 
-		console.log("Uploading file:", selectedFile);
+		// console.log("Uploading file:", selectedFile);
 		if (selectedFile instanceof Blob || selectedFile instanceof File) {
 			try {
 				const imageFormData = new FormData();
@@ -239,10 +260,10 @@ function SignUp() {
 				// }
 				// return
 			
-				for (let [key, value] of imageFormData.entries()) {
-					console.log(key, ":", value);
-				}
-				console.log("Uploading image to ImageKit...");
+				// for (let [key, value] of imageFormData.entries()) {
+				// 	console.log(key, ":", value);
+				// }
+				// console.log("Uploading image to ImageKit...");
 
 				// return
 
@@ -264,11 +285,11 @@ function SignUp() {
 					// return;
 				}
 				const result = await uploadResponse.json();
-				console.log("Upload successful:", result);
+				// console.log("Upload successful:", result);
 				setUploadedImage(result); // save response
 
 				// finally submit form
-				// onSubmitHandler(); // submit form after successful upload
+				// onSubmitToServerHandler(); // submit form after successful upload
 			} catch (err) {
 				toast.error('Upload failed. Please try again.');
 				console.error("Upload failed:", err);
@@ -276,7 +297,7 @@ function SignUp() {
 			}
 		} else {
 			// just submit if no file to upload
-			onSubmitHandler(); // submit form after successful upload
+			onSubmitToServerHandler(); // submit form after successful upload
 		}
 	};
 
@@ -311,9 +332,12 @@ function SignUp() {
 			return ()=>clearTimeout(delay)
 		}
 	}, [isError])
+
+	// console.log({country, state, city})
 	return (
 		<>
-			<form onSubmit={handleSubmitOkayFromChild}
+			<form onSubmit={handleImageUploadToCloud}
+			// onSubmit={handleSubmitOkayFromChild}
 			className="row px-xl-5"
 			style={{
 				display: 'flex',
@@ -440,8 +464,7 @@ function SignUp() {
 									</div>
 								)
 							})}
-							<div
-							>
+							<div>
 								<div
 								className="col-md-6 form-group">
 									{/* File Picker */}
@@ -451,7 +474,7 @@ function SignUp() {
 									<ImageCropAndCompress
 									onComplete={setSelectedFile}
 									type={'profilePhoto'}
-									ref={handleDoneRef}
+									ref={handleImageProcessingRef}
 									isImagePreview={setImagePreview} />
 
 								</div>

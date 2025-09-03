@@ -1,4 +1,5 @@
-import { getBaseURL } from "../../hooks/fetchAPIs";
+import { getBaseURL } from "../../../hooks/fetchAPIs";
+import { toast } from "react-toastify";
 
 const baseURL = getBaseURL();
 const inputArr = [
@@ -179,6 +180,12 @@ const checkEmailUniqueness = async ({
 		const data = await response.json();
 		// console.log("Server says:", data);
 		setIsEmailValid(data)
+		// toast.success(
+		// 	<div>
+		// 		Registration Successful.<br />
+		// 		Welcome, <strong>{data.message}!</strong>
+		// 	</div>
+		// );
 		return data
 	} catch (error) {
 		setIsEmailValid(null)

@@ -7,7 +7,7 @@ function Checkout() {
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
 
-			<div className="container-fluid"style={{
+			<div className="container-fluid mt-3"style={{
 				paddingLeft: deviceType ? 0 : '',
 				paddingRight: deviceType ? 0 : '',
 			}}>

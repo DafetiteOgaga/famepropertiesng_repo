@@ -4,7 +4,7 @@ import { useDeviceType } from "../../hooks/deviceType"
 import { createLocal } from "../../hooks/setupLocalStorage";
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useAuthFetch } from "../../hooks/authFetch";
+import { useAuthFetch } from "./authFetch";
 import { GoogleAuthButtonAndSetup } from "../../hooks/allAuth/googleAuthButtonAndSetup";
 import { titleCase } from "../../hooks/changeCase";
 import { useAuth } from "../../hooks/allAuth/authContext";

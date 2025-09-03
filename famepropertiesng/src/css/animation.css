@@ -92,6 +92,34 @@
 	/* animation: fadeInDown */
 }
 
+@keyframes fadeInDownHalfUname {
+	0% {
+	  transform: translate3d(0, -50%, 0); /* start halfway up */
+	  opacity: 0; /* start invisible */
+	}
+	100% {
+	  transform: translate3d(0, 0, 0); /* end in place */
+	  opacity: 1; /* fully visible */
+	}
+}
+.fadeInDownHalfUname {
+	animation: fadeInDownHalfUname 0.6s ease-out;
+}
+
+@keyframes fadeInDownHalfProfilePic {
+	0% {
+	  transform: translate3d(0, -20%, 0); /* start halfway up */
+	  opacity: 0; /* start invisible */
+	}
+	100% {
+	  transform: translate3d(0, 0, 0); /* end in place */
+	  opacity: 1; /* fully visible */
+	}
+}
+.fadeInDownHalfProfilePic {
+	animation: fadeInDownHalfProfilePic 0.6s ease-out;
+}
+
 @keyframes bounceIn {
 	0% , 20%, 40%, 60%, 80%,
 	to {

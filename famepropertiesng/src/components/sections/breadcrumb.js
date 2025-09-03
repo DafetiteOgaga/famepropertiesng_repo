@@ -35,7 +35,7 @@ function Breadcrumb({page}) {
 		}}>
 			<div className="row px-xl-5">
 				<div className="col-12">
-					<nav className="breadcrumb bg-light mb-30"
+					<nav className="breadcrumb bg-light mb-0"
 					style={{
 						borderRadius: '8px',
 						}}>

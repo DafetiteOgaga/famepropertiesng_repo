@@ -1,7 +1,7 @@
 // import { createLocal } from "./setupLocalStorage";
-import { useCreateStorage } from "./setupLocalStorage";
-import { useAuth } from "./allAuth/authContext";
-import { getBaseURL } from "./fetchAPIs";
+import { useCreateStorage } from "../../hooks/setupLocalStorage";
+import { useAuth } from "../../hooks/allAuth/authContext";
+import { getBaseURL } from "../../hooks/fetchAPIs";
 import { useEffect, useRef } from "react";
 // import { useNavigate } from 'react-router-dom';
 
