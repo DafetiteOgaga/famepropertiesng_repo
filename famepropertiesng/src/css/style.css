@@ -6527,7 +6527,8 @@ a.text-dark:hover, a.text-dark:focus {
   color: #fff !important;
 }
 
-button:disabled {
+button:disabled,
+.btn:disabled {
   /* color: #475569;
   background-color: transparent;
   border-color: #475569; */
