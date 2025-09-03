@@ -47,6 +47,7 @@ function FACog(color="blue", size="2x") {
 }
 
 function BouncingDots({ size = "md", color = "#3498db", p = 12 }) {
+	// console.log({size, color, p})
 	// Define some named sizes (like FA)
 	const sizeMap = {
 		ts: 3,
