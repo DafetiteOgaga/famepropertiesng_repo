@@ -38,10 +38,10 @@ const headerMenuArr = [
 		angleD: "fas fa-angle-down",
 		angleL: "fas fa-angle-left",
 	},
-	{
-		menu: "Account Settings",
-		link: "/settings"
-	},
+	// {
+	// 	menu: "Account Settings",
+	// 	link: "/settings"
+	// },
 	{
 		menu: "Admin Page",
 		link: "/admin-page",
@@ -343,6 +343,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 										// console.log({statusLink})
 									}
 									// console.log('menu?.menu?.toLowerCase():', menu?.menu?.toLowerCase() ,menu?.authItems)
+									// console.log({status})
 									return (
 										<Fragment key={index}>
 											<Link to={(menu?.menu?.toLowerCase()!=='categories'&&statusLink.split('/').pop()!=='logout')&&statusLink}
@@ -375,7 +376,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 												padding: '0rem 1rem',
 												marginLeft: 0,
 												marginRight: 0,
-												marginTop: menu?.menu?.toLowerCase() === "contact" ? '15rem' : '',
+												marginTop: menu?.menu?.toLowerCase() === "contact" ? '18rem' : '',
 												marginBottom: lastItem ? '60%' : '',
 												border: '2px outset buttonborder',
 												borderTopLeftRadius: 0,
@@ -387,6 +388,14 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 													<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
 													style={{marginRight: 8, fontSize: '1rem'}} />
 														{status}
+														{status.toLowerCase()==='cart'&&
+														<>
+															<span style={{whiteSpace: 'pre'}}> </span>
+															<span className="fas fa-shopping-cart fa-sm mb-1"
+															style={{
+																color: '#F8F6F2',
+															}}></span>
+														</>}
 											</Link>
 										</Fragment>
 									)
