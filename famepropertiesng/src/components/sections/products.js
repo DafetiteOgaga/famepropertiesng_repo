@@ -66,7 +66,7 @@ function Products() {
 	const isMobile = deviceType.width<=576
 	// console.log('parameters:', parameters);
 	const fetchServerData = async (endpoint="products") => {
-		console.log(`Fetching data from endpoint: ${endpoint}`);
+		// console.log(`Fetching data from endpoint: ${endpoint}`);
 		try {
 			const prodRes = await (fetch(`${baseURL}/${endpoint}/`));
 			if (!prodRes.ok) {
@@ -74,8 +74,8 @@ function Products() {
 			}
 			const prodData = await prodRes.json();
 			if (isLike) {
-				console.log('Response from server:', prodData);
-				console.log({productItemArr})
+				// console.log('Response from server:', prodData);
+				// console.log({productItemArr})
 				const prevArr = productItemArr?.map((item) => {
 					if (item.id === prodData.id) {
 						return { ...item, noOfReviewers: prodData.noOfReviewers };
@@ -86,20 +86,20 @@ function Products() {
 				setIsLike(null);
 				return
 			}
-			console.log("fetch on mount ...")
+			// console.log("fetch on mount ...")
 			setProductItemArr(prodData);
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
 	}
 	useEffect(() => {
-		console.log("Fetching data from server on mount...");
+		// console.log("Fetching data from server on mount...");
 		fetchServerData();
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
 	useEffect(() => {
 		if (isLike) {
-			console.log("Fetching like-product data...");
+			// console.log("Fetching like-product data...");
 			fetchServerData(`like-product/${isLike}`);
 		}
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
@@ -183,7 +183,7 @@ function Products() {
 										{!productObjItem.sold&&
 										<div className="product-action">
 											{productsActionArr.map((action, actionIndex) => {
-												console.log({productObjItem})
+												// console.log({productObjItem})
 												return (
 													<Fragment key={actionIndex}>
 														{action.type==='link'?
