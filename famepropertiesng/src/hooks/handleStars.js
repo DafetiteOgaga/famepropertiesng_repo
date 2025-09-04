@@ -1,21 +1,23 @@
 import React from "react";
 
+const maxLikes = 100;
+
 // helper function: convert likes → 0–5 stars
-function convertLikesToStars(likes, maxLikes = 100, maxStars = 5) {
+function convertLikesToStars(likes, maxStars = 5) {
 	if (likes <= 0) return 0;
 	const rating = ((likes / maxLikes) * maxStars).toFixed(2);
 	return Math.min(rating, maxStars); // cap at maxStars
 }
 
 // StarRating component
-function StarRating({ rating, maxLikes = 100 }) {
-	const starValue = convertLikesToStars(rating, maxLikes);
+function StarRating({ rating }) {
+	const starValue = convertLikesToStars(rating);
 
 	const fullStars = Math.floor(starValue);
 	const halfStar = starValue % 1 !== 0 ? 1 : 0;
 	const emptyStars = 5 - fullStars - halfStar;
 
-	console.log({starValue, fullStars, halfStar, emptyStars});
+	// console.log({starValue, fullStars, halfStar, emptyStars});
 	// const stars = [fullStars, halfStar, emptyStars];
 
 	const starsArray = [];
