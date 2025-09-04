@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { TestSpinners } from '../spinners/spinner';
+// import { TestSpinners } from '../spinners/spinner';
+// import { StarRating } from '../hooks/handleStars';
 
 function PageNotFound() {
 	// const location = useLocation().pathname.split("/").pop();
@@ -41,6 +42,16 @@ function PageNotFound() {
 				className="text-uppercase"
 				style={{color: '#475569',}}>Page Not Found</h2>
 			</div>
+			
+
+
+			{/* <div className="container-fluid"
+			style={{
+				display: 'flex',
+				justifyContent: 'center',
+				}}>
+				<StarRating rating={63} />
+			</div> */}
 			{/* <TestSpinners /> */}
 		</>
 	)
