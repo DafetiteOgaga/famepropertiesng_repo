@@ -25,22 +25,22 @@ function Index() {
 	}, [])
 
 	const handleAddToCart = (product) => {
-		console.log('Adding to cart:', product);
+		// console.log('Adding to cart:', product);
 
 		// Retrieve existing cart from localStorage
 		const existingCart = createLocal.getItemRaw('fpng-cart');
 		let cart = existingCart??[];
 
-		console.log('Existing cart:', cart);
+		// console.log('Existing cart:', cart);
 		// Check if product already exists in cart
 		const isProductExist = cart.find(item => item.prdId === product.id);
 		const productIndex = cart.findIndex(item => item.prdId === product.id);
 		if (isProductExist) {
-			console.log('Product exists in cart, incrementing quantity.');
+			// console.log('Product exists in cart, incrementing quantity.');
 			// If it exists, increment the quantity
 			cart[productIndex].nop += 1;
 		} else {
-			console.log('Product does not exist in cart, adding new item.');
+			// console.log('Product does not exist in cart, adding new item.');
 			// If it doesn't exist, add it with quantity 1
 			cart.push({ prdId: product.id, nop: 1 });
 		}
