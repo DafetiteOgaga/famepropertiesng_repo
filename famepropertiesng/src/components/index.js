@@ -10,15 +10,18 @@ import { toast } from 'react-toastify';
 
 function Index() {
 	const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
+	// const [isUserDetected, setIsUserDetected] = useState(null)
 	const { lastScrollY } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
 	const deviceType = useDeviceType();
 	const { createLocal } = useCreateStorage()
+	// const userIn = createLocal.getItemRaw('fpng-user');
 	const productsInCart = createLocal.getItemRaw('fpng-cart');
 	useEffect(() => {
 		if (productsInCart) {
 			const numberOfItems = productsInCart.length
 			setNumberOfProductsInCart(numberOfItems)
 		}
+		// setIsUserDetected(!!userIn)
 	}, [])
 
 	const handleAddToCart = (product) => {
@@ -49,6 +52,10 @@ function Index() {
 		// Optionally, you can provide feedback to the user
 		// alert(`${product.name} has been added to your cart.`);
 	}
+	const handleClearCart = () => {
+		createLocal.removeItem('fpng-cart');
+		setNumberOfProductsInCart(0)
+	}
 	const mTop = deviceType.laptop ? '12':deviceType.desktop ?'6':'22';
 	return (
 		<>
@@ -65,7 +72,10 @@ function Index() {
 				marginTop: `${mTop}%`
 			}}>
 				{/* Header */}
-				<Header mTop={mTop} numberOfProductsInCart={numberOfProductsInCart} />
+				<Header mTop={mTop}
+				numberOfProductsInCart={numberOfProductsInCart}
+				// isUserDetected={isUserDetected}
+				handleClearCart={handleClearCart} />
 				{/* // styling dynamically for mobile and desktop - to be resolved later ########## */}
 				{(deviceType.width>=992) &&
 					<div>
