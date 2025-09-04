@@ -61,11 +61,12 @@ const dressesArr = [
 	"baby's dresses"
 ]
 
-function Header({mTop}) {
-	// console.log({mTop})
+function Header({mTop, numberOfProductsInCart}) {
+	console.log({numberOfProductsInCart})
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	// const [isVisible, setIsVisible] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
+	// const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
 	const renderdelay = () => {setTimeout(() => setShouldRender(false), 200)}
 	const overlayRef = useRef(null); // not exactly in use
 	const menuRef = useRef(null);
@@ -86,6 +87,16 @@ function Header({mTop}) {
 			return !prev;
 		});
 	}
+
+	// const { createLocal } = useCreateStorage()
+	// const productsInCart = createLocal.getItemRaw('fpng-cart');
+	// useEffect(() => {
+	// 	if (productsInCart) {
+	// 		const numberOfItems = productsInCart.length
+	// 		setNumberOfProductsInCart(numberOfItems)
+	// 	}
+	// }, [productsInCart])
+	
 	useEffect(() => {
 		// console.log("is Menu Opened:", isMenuOpen);
 		if (isMenuOpen) {
@@ -177,7 +188,7 @@ function Header({mTop}) {
 					}
 					>
 						<Brand />
-						<CartLink propStyle={"ml-3"} />
+						<CartLink propStyle={"ml-3"} numberOfProductsInCart={numberOfProductsInCart} />
 					</span>
 					<button
 					onClick={(e) => {
@@ -195,7 +206,7 @@ function Header({mTop}) {
 				// desktop
 				<div className="navbar-collapse justify-content-between" id="navbarCollapse">
 					<Brand />
-					<MenuItems />
+					<MenuItems numberOfProductsInCart={numberOfProductsInCart} />
 				</div>}
 			</nav>
 			{shouldRender && <MenuItems
@@ -210,7 +221,9 @@ function Header({mTop}) {
 	)
 }
 
-function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, currentPage}) {
+function MenuItems({mTop, isMenuOpen, overlayRef,
+					menuRef, categoryMenuRef,
+					currentPage, numberOfProductsInCart}) {
 	const { createLocal } = useCreateStorage();
 
 	const accessToken = createLocal.getItem('fpng-acc');
@@ -513,7 +526,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef, menuRef, categoryMenuRef, curr
 							})}
 						</div>
 					</div>
-					<CartLink />
+					<CartLink numberOfProductsInCart={numberOfProductsInCart} />
 				</div>}
 		</>
 	)
@@ -541,16 +554,25 @@ function Brand() {
 		</Link>
 	)
 }
-function CartLink({propStyle}) {
+function CartLink({propStyle, numberOfProductsInCart}) {
+	// const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
 	const deviceType = useDeviceType()
 	const removeLabelName = deviceType.width<400
+	// const { createLocal } = useCreateStorage()
+	// const productsInCart = createLocal.getItemRaw('fpng-cart');
+	// useEffect(() => {
+	// 	if (productsInCart) {
+	// 		const numberOfItems = productsInCart.length
+	// 		setNumberOfProductsInCart(numberOfItems)
+	// 	}
+	// }, [productsInCart])
 	return (
 		<Link to={"cart"} className={`btn px-0 ml-0 ${propStyle} ${removeLabelName?'pr-3':''}`}>
 			<span className="fas fa-shopping-cart fa-lg"
 			style={{
 				color: '#F8F6F2',
 			}}></span>
-			<span className="badge text-secondary border border-secondary rounded-circle navbar-span">0</span>
+			<span className="badge text-secondary border border-secondary rounded-circle navbar-span">{numberOfProductsInCart}</span>
 		</Link>
 	)
 }
