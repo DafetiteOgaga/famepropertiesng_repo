@@ -592,31 +592,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 								if (menu?.menu?.toLowerCase() === "cart") return null;
 								if (menu?.menu?.toLowerCase() === "categories") return null;
 								if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
-								// let button = false
-								// let statusLink = null;
-								// let logout = menu.authItems?.logout?.menu?.toLowerCase()==='logout'
-								// console.log('auth-logout:', !!logout, `${menu.menu}`, `${(logout)?logout:''}`)
-								
-								// if (menu?.menu?.toLowerCase() === "auth") {
-								// 	button = true;
-								// 	// console.log('login:', !!menu.authItems.login)
-								// 	// console.log('logout:', !!menu.authItems.logout)
-								// 	// if (menu.authItems.logout) logout = true
-								// 	// console.log({logout})
-								// 	// console.log({status})
-								// 	statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
-								// 	status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-								// 	// console.log({status})
-									
-								// 	// console.log({statusLink})
-								// }
-								// if (menu?.clear) {
-								// 	button = true
-								// 	status = menu.clear
-								// 	if (!numberOfProductsInCart) return null;
-								// }
-								// if (menu?.menu?.toLowerCase() === "categories") return null;
-								// console.log({logout}, `${menu.menu}`)
 								return (
 									<Fragment key={index}>
 										{menu.type==='button' ?
