@@ -16,6 +16,7 @@ const addRotKeys = (storage) => {
 	}
 }
 function SetAllKeys(storage, key) {
+	if (key.startsWith("fpng-cart")) return; // skip cart key
 	const allAppKeys = storage.getItem("fpng-app-keys");
 	if (allAppKeys) {
 		const parsedKeys = JSON.parse(allAppKeys);
@@ -125,6 +126,30 @@ function useStorage(storage) {
 				return true;
 			} catch {
 				return false;
+			}
+		},
+
+		setItemRaw(key, value) {
+			SetAllKeys(storage, key);
+
+			// Step 1: store as JSON string
+			const storeStr = JSON.stringify(value);
+			storage.setItem(key, storeStr);
+		},
+
+		getItemRaw(key) {
+			// 1: get string from storage
+			const value = storage.getItem(key);
+
+			// 2: if no string, return null
+			if (!value) return null;
+
+			// 3: parse the string
+			try {
+				const item = JSON.parse(value);
+				return item;
+			} catch {
+				return null; // if parsing fails
 			}
 		},
 
