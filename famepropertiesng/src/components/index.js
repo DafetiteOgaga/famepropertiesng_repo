@@ -1,22 +1,54 @@
-import React  from 'react';
-// import { TopBar } from './bars/topbar';
+import React, {useState, useEffect} from 'react';
 import { Header } from './sections/header';
-import { Carousel } from './sections/carousel';
-// import { Features } from './sections/features';
-// import { Categories } from './sections/categories';
-import { Products } from './sections/products';
-// import { Offer } from './sections/offer';
 import { Footer } from './sections/footer';
 import { Sidebar } from './bars/sidebar';
 import { useDeviceType } from '../hooks/deviceType';
 import { Outlet } from 'react-router-dom';
-import { Home } from './home';
 import { useScrollDetection } from '../hooks/scrollDetection';
-import { getBaseUrl } from '../hooks/baseImgUrl';
+import { useCreateStorage } from '../hooks/setupLocalStorage';
+import { toast } from 'react-toastify';
 
 function Index() {
+	const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
 	const { lastScrollY } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
 	const deviceType = useDeviceType();
+	const { createLocal } = useCreateStorage()
+	const productsInCart = createLocal.getItemRaw('fpng-cart');
+	useEffect(() => {
+		if (productsInCart) {
+			const numberOfItems = productsInCart.length
+			setNumberOfProductsInCart(numberOfItems)
+		}
+	}, [])
+
+	const handleAddToCart = (product) => {
+		console.log('Adding to cart:', product);
+
+		// Retrieve existing cart from localStorage
+		const existingCart = createLocal.getItemRaw('fpng-cart');
+		let cart = existingCart??[];
+
+		console.log('Existing cart:', cart);
+		// Check if product already exists in cart
+		const isProductExist = cart.find(item => item.prdId === product.id);
+		const productIndex = cart.findIndex(item => item.prdId === product.id);
+		if (isProductExist) {
+			console.log('Product exists in cart, incrementing quantity.');
+			// If it exists, increment the quantity
+			cart[productIndex].nop += 1;
+		} else {
+			console.log('Product does not exist in cart, adding new item.');
+			// If it doesn't exist, add it with quantity 1
+			cart.push({ prdId: product.id, nop: 1 });
+		}
+
+		// Save updated cart back to localStorage and state
+		setNumberOfProductsInCart(cart.length)
+		createLocal.setItemRaw('fpng-cart', cart);
+		// toast.success(`${product.name} has been added to your cart.`);
+		// Optionally, you can provide feedback to the user
+		// alert(`${product.name} has been added to your cart.`);
+	}
 	const mTop = deviceType.laptop ? '12':deviceType.desktop ?'6':'22';
 	return (
 		<>
@@ -33,7 +65,7 @@ function Index() {
 				marginTop: `${mTop}%`
 			}}>
 				{/* Header */}
-				<Header mTop={mTop}/>
+				<Header mTop={mTop} numberOfProductsInCart={numberOfProductsInCart} />
 				{/* // styling dynamically for mobile and desktop - to be resolved later ########## */}
 				{(deviceType.width>=992) &&
 					<div>
@@ -41,7 +73,7 @@ function Index() {
 						<Sidebar />
 					</div>}
 				<div>
-					<Outlet />
+					<Outlet context={{ handleAddToCart }} />
 				</div>
 			</main>
 			{/* Footer */}

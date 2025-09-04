@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from '../../hooks/deviceType';
 import { getImage } from '../../hooks/baseImgUrl';
@@ -6,6 +6,8 @@ import { digitSeparator, titleCase } from '../../hooks/changeCase';
 import { getBaseURL } from '../../hooks/fetchAPIs';
 import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { BouncingDots } from '../../spinners/spinner';
+import { toast } from 'react-toastify';
+import { useOutletContext } from 'react-router-dom';
 
 const baseURL = getBaseURL();
 // const produc8tImagesArr = [
@@ -26,10 +28,14 @@ const productsActionArr = [
 	{
 		icon: "fa fa-shopping-cart",
 		url: '',
+		click: 'add-to-cart',
+		type: 'button'
 	},
 	{
 		icon: "far fa-heart",
 		url: '',
+		click: 'like-product',
+		type: 'button'
 	},
 	// {
 	// 	icon: "fa fa-sync-alt",
@@ -44,10 +50,13 @@ const productsActionArr = [
 	{
 		icon: "fa fa-expand",
 		url: "detail",
+		click: 'go-to-detail',
+		type: 'link'
 	}
 ]
 const productStar = "fa fa-star"
 function Products() {
+	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage();
 	const [productItemArr, setProductItemArr] = useState([]);
 	const parameters = useParams();
@@ -77,6 +86,28 @@ function Products() {
 	// createLocal.setItem('fpng-product-str', 'products');
 	// createLocal.setItem('fpng-product-arr', ['one', 'two', 'three']);
 	// createLocal.setItem('fpng-product-obj', {name: 'Product One', price: 1000});
+	// const handleAddToCart = (product) => {
+	// 	// Retrieve existing cart from localStorage
+	// 	const existingCart = createLocal.getItemRaw('fpng-cart');
+	// 	let cart = existingCart??[];
+
+	// 	// Check if product already exists in cart
+	// 	const isProductExist = cart.find(item => item.prdId === product.id);
+	// 	const productIndex = cart.findIndex(item => item.prdId === product.id);
+	// 	if (isProductExist) {
+	// 		// If it exists, increment the quantity
+	// 		cart[productIndex].nop += 1;
+	// 	} else {
+	// 		// If it doesn't exist, add it with quantity 1
+	// 		cart.push({ prdId: product.id, nop: 1 });
+	// 	}
+
+	// 	// Save updated cart back to localStorage
+	// 	createLocal.setItemRaw('fpng-cart', cart);
+	// 	toast.success(`${product.name} has been added to your cart.`);
+	// 	// Optionally, you can provide feedback to the user
+	// 	// alert(`${product.name} has been added to your cart.`);
+	// }
 	return (
 		<div className="container-fluid pb-3">
 			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3"
@@ -128,11 +159,26 @@ function Products() {
 										{!productObjItem.sold&&
 										<div className="product-action">
 											{productsActionArr.map((action, actionIndex) => {
+												console.log({productObjItem})
 												return (
-													<Link to={`${action.url}/${productObjItem.id}`} key={actionIndex}
-													style={{textDecoration: 'none'}}>
-														<span className="btn btn-outline-dark btn-square"><span className={`${action.icon}`}></span></span>
-													</Link>
+													<Fragment key={actionIndex}>
+														{action.type==='link'?
+														<Link
+														to={`${action.url}/${productObjItem.id}`}
+														style={{textDecoration: 'none'}}>
+															<span className="btn btn-outline-dark btn-square">
+																<span className={`${action.icon}`}></span>
+															</span>
+														</Link>
+														:
+														<span
+														onClick={()=>handleAddToCart(productObjItem)}
+														style={{textDecoration: 'none'}}>
+															<span className="btn btn-outline-dark btn-square">
+																<span className={`${action.icon}`}></span>
+															</span>
+														</span>}
+													</Fragment>
 												)
 											})}
 										</div>}
