@@ -8,6 +8,7 @@ import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { BouncingDots } from '../../spinners/spinner';
 import { toast } from 'react-toastify';
 import { useOutletContext } from 'react-router-dom';
+import { StarRating, convertLikesToStars } from '../../hooks/handleStars';
 
 const baseURL = getBaseURL();
 // const produc8tImagesArr = [
@@ -28,13 +29,13 @@ const productsActionArr = [
 	{
 		icon: "fa fa-shopping-cart",
 		url: '',
-		click: 'add-to-cart',
+		click: 'cart',
 		type: 'button'
 	},
 	{
 		icon: "far fa-heart",
 		url: '',
-		click: 'like-product',
+		click: 'like',
 		type: 'button'
 	},
 	// {
@@ -50,7 +51,7 @@ const productsActionArr = [
 	{
 		icon: "fa fa-expand",
 		url: "detail",
-		click: 'go-to-detail',
+		click: 'detail',
 		type: 'link'
 	}
 ]
@@ -59,27 +60,50 @@ function Products() {
 	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage();
 	const [productItemArr, setProductItemArr] = useState([]);
+	const [isLike, setIsLike] = useState(null);
 	const parameters = useParams();
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width<=576
 	// console.log('parameters:', parameters);
-	const fetchServerData = async () => {
+	const fetchServerData = async (endpoint="products") => {
+		// console.log(`Fetching data from endpoint: ${endpoint}`);
 		try {
-			const prodRes = await (fetch(`${baseURL}/products/`));
+			const prodRes = await (fetch(`${baseURL}/${endpoint}/`));
 			if (!prodRes.ok) {
 				throw new Error("Network response was not ok");
 			}
 			const prodData = await prodRes.json();
+			if (isLike) {
+				// console.log('Response from server:', prodData);
+				// console.log({productItemArr})
+				const prevArr = productItemArr?.map((item) => {
+					if (item.id === prodData.id) {
+						return { ...item, noOfReviewers: prodData.noOfReviewers };
+					}
+					return item;
+				});
+				setProductItemArr(prevArr);
+				setIsLike(null);
+				return
+			}
+			// console.log("fetch on mount ...")
 			setProductItemArr(prodData);
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
 	}
 	useEffect(() => {
-		// console.log("Fetching server data...");
+		// console.log("Fetching data from server on mount...");
 		fetchServerData();
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
+	useEffect(() => {
+		if (isLike) {
+			// console.log("Fetching like-product data...");
+			fetchServerData(`like-product/${isLike}`);
+		}
+		// console.log("productItemArr:", productItemArr, productItemArr.length);
+	}, [isLike]);
 	// if (productItemArr.length) console.log("productItemArr:", productItemArr, productItemArr.length);
 	// if (productItemArr.length) console.log("last item:", productItemArr[productItemArr.length-1]);
 	// console.log('product component rendered')
@@ -159,7 +183,7 @@ function Products() {
 										{!productObjItem.sold&&
 										<div className="product-action">
 											{productsActionArr.map((action, actionIndex) => {
-												console.log({productObjItem})
+												// console.log({productObjItem})
 												return (
 													<Fragment key={actionIndex}>
 														{action.type==='link'?
@@ -172,7 +196,14 @@ function Products() {
 														</Link>
 														:
 														<span
-														onClick={()=>handleAddToCart(productObjItem)}
+														onClick={()=>{
+															if (action.click==='cart') {
+																handleAddToCart(productObjItem);
+															} else if (action.click==='like') {
+																setIsLike(productObjItem.id);
+																toast.info(`${titleCase(productObjItem.name)} Rated`);
+															}
+														}}
 														style={{textDecoration: 'none'}}>
 															<span className="btn btn-outline-dark btn-square">
 																<span className={`${action.icon}`}></span>
@@ -196,18 +227,22 @@ function Products() {
 												<del>₦{digitSeparator(productObjItem.marketPrice)}</del>
 											</h6>
 										</div>
-										<div className="d-flex align-items-center justify-content-center mb-1">
-											{Array.from({length: 5}, (_, starIndex) => {
+										<div className="d-flex flex-column align-items-center justify-content-center mb-1">
+											<StarRating rating={productObjItem.noOfReviewers} />
+											{/* {Array.from({length: 5}, (_, starIndex) => {
 												const isStar = (starIndex+1) <= randomNumber;
 												const halfStar = randomNumber%2!==0&&(starIndex+1)===randomNumber
 												// console.log({isStar}, {starIndex}, {randomNumber})
 												return (
-													<small
-													key={starIndex}
-													className={`${productStar}${(halfStar?'-half-alt':'')} ${isStar?'text-warning':'text-secondary'} mr-1`}></small>
+													<Fragment key={starIndex}>
+														<StarRating rating={productObjItem.noOfReviewers} />
+													</Fragment>
+													// <small
+													// key={starIndex}
+													// className={`${productStar}${(halfStar?'-half-alt':'')} ${isStar?'text-warning':'text-secondary'} mr-1`}></small>
 												)
-											})}
-											<small>({productObjItem.noOfReviewers})</small>
+											})} */}
+											<small>({convertLikesToStars(productObjItem.noOfReviewers)} from {productObjItem.noOfReviewers} likes)</small>
 										</div>
 									</div>
 								</div>

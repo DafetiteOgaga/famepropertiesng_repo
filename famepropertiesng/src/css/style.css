@@ -6609,7 +6609,17 @@ button:disabled,
 .Toastify__toast--success {
   --toastify-icon-color-success: #F8F6F2;
   --toastify-color-progress-success: #F8F6F2;
-  /* --toastify-color-progress-error: #e91e63; */
-  /* --toastify-color-progress-warning: #ffc107; */
+}
+/* Info toast overrides */
+.Toastify__toast--info {
+  --toastify-icon-color-info: #6C757D;
   --toastify-color-progress-info: #6C757D;
 }
+
+/* (Optional) Error and warning */
+/* .Toastify__toast--error {
+  --toastify-color-progress-error: #e91e63;
+} */
+/* .Toastify__toast--warning {
+  --toastify-color-progress-warning: #ffc107;
+} */
