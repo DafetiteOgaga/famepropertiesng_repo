@@ -11,30 +11,41 @@ import { useAuth } from '../../hooks/allAuth/authContext';
 import { titleCase } from '../../hooks/changeCase';
 
 const headerMenuArr = [
+	// {
+	// 	menu: "auth",
+	// 	type: "button",
+	// 	authItems: {
+	// 		login: {
+	// 			menu: "Login",
+	// 			link: "/login"
+	// 		},
+	// 		logout: {
+	// 			menu: "Logout",
+	// 			link: "logout"
+	// 		},
+	// 		signup: {
+	// 			menu: "Sign Up",
+	// 			link: "/signup"
+	// 		},
+	// 	},
+	// },
 	{
-		menu: "auth",
-		authItems: {
-			login: {
-				menu: "Login",
-				link: "/login"
-			},
-			logout: {
-				menu: "Logout",
-				link: "logout"
-			},
-			signup: {
-				menu: "Sign Up",
-				link: "/signup"
-			},
-		},
+		menu: "Logout",
+		type: "button",
+	},
+	{
+		menu: "Login",
+		link: "/login",
+		type: "link",
 	},
 	{
 		menu: "Cart",
+		type: "link",
 		link: "cart"
 	},
 	{
 		menu: "Categories",
-		link: "",
+		type: "button",
 		angleD: "fas fa-angle-down",
 		angleL: "fas fa-angle-left",
 	},
@@ -45,14 +56,21 @@ const headerMenuArr = [
 	{
 		menu: "Admin Page",
 		link: "/admin-page",
+		type: "link",
 	},
 	{
 		menu: "Contact",
-		link: "/contact"
+		link: "/contact",
+		type: "link",
 	},
 	{
 		menu: "FAQs",
-		link: "/faqs"
+		link: "/faqs",
+		type: "link",
+	},
+	{
+		menu: "Clear Cart",
+		type: "button",
 	},
 ]
 const dressesArr = [
@@ -61,8 +79,9 @@ const dressesArr = [
 	"baby's dresses"
 ]
 
-function Header({mTop, numberOfProductsInCart}) {
-	console.log({numberOfProductsInCart})
+function Header({mTop, numberOfProductsInCart, handleClearCart}) {
+	// console.log({numberOfProductsInCart})
+	// console.log({isUserDetected})
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	// const [isVisible, setIsVisible] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
@@ -109,17 +128,17 @@ function Header({mTop, numberOfProductsInCart}) {
 			// console.log("Clicked:", e.target);
 
 			// close menu overlay when logout is clicked
-			const anchor = e.target;
-			const span = anchor.querySelector('span');
-			const spanId = span?.id?.toLowerCase();
-			console.log('spanId:', spanId);
-			if (spanId==='logout') {
-				// console.log("Clicked on overlay, closing menu");
-				setIsMenuOpen(false);
-				renderdelay(); // your animation cleanup
-				// console.log('logout process initiated and navigating to home')
-				// navigate('/')
-			}
+			// const anchor = e.target;
+			// const span = anchor.querySelector('span');
+			// const spanId = span?.id?.toLowerCase();
+			// console.log('spanId:', spanId);
+			// if (spanId==='logout') {
+			// 	// console.log("Clicked on overlay, closing menu");
+			// 	setIsMenuOpen(false);
+			// 	renderdelay(); // your animation cleanup
+			// 	// console.log('logout process initiated and navigating to home')
+			// 	// navigate('/')
+			// }
 
 			// if you clicked on the menu itself or any of its children, do nothing
 			if (menuRef.current && menuRef.current.contains(e.target)) return;
@@ -206,7 +225,10 @@ function Header({mTop, numberOfProductsInCart}) {
 				// desktop
 				<div className="navbar-collapse justify-content-between" id="navbarCollapse">
 					<Brand />
-					<MenuItems numberOfProductsInCart={numberOfProductsInCart} />
+					<MenuItems handleClearCart={handleClearCart}
+					numberOfProductsInCart={numberOfProductsInCart}
+					// isUserDetected={isUserDetected}
+					/>
 				</div>}
 			</nav>
 			{shouldRender && <MenuItems
@@ -216,24 +238,32 @@ function Header({mTop, numberOfProductsInCart}) {
 								// menuWrapperRef={menuWrapperRef}
 								overlayRef={overlayRef}
 								menuRef={menuRef}
-								categoryMenuRef={categoryMenuRef} />}
+								categoryMenuRef={categoryMenuRef}
+								numberOfProductsInCart={numberOfProductsInCart}
+								handleClearCart={handleClearCart}
+								// isUserDetected={isUserDetected}
+								/>}
 		</>
 	)
 }
 
 function MenuItems({mTop, isMenuOpen, overlayRef,
 					menuRef, categoryMenuRef,
-					currentPage, numberOfProductsInCart}) {
+					currentPage, numberOfProductsInCart,
+					handleClearCart}) {
 	const { createLocal } = useCreateStorage();
-
+	const [isUserDetected, setIsUserDetected] = useState(null)
 	const accessToken = createLocal.getItem('fpng-acc');
 	const userInfo = createLocal.getItem('fpng-user');
 	const refreshToken = createLocal.getItem('fpng-ref');
 	// console.log({accessToken}, {userInfo})
 	// console.log({refreshToken})
-
 	const deviceType = useDeviceType()
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		setIsUserDetected(!!userInfo)
+	}, [userInfo])
 	let status = accessToken
 	// console.log('fpng-status:', status)
 	status = status??null;
@@ -241,18 +271,51 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	const handleMenuItemClick = () => {
 		setItemClicked(prev => !prev);
 	}
-	const handleLogout = (statusLink) => {
-		// console.log('onclick event', statusLink)
+	const handleSidbarMenuButtonClick = (statusLink) => {
+		// console.log('handleSidbarMenuButtonClick', {statusLink})
 		if (statusLink.toLowerCase()==='logout') {
 			// console.log('logout process initiated')
 			createLocal.removeAllItems();
 			// console.log('navigating to home')
 			navigate('/')
+		} else if (statusLink.toLowerCase()==='clear cart') {
+			// console.log('clearing cart ...')
+			handleClearCart()
 		} else {
 			// console.log('navigate click')
 			navigate(statusLink)
 		}
 	}
+	function moveItem(array, fromIndex, toIndex) {
+		const newArray = [...array]; // copy to avoid mutating original
+		const [movedItem] = newArray.splice(fromIndex, 1); // remove item
+		newArray.splice(toIndex, 0, movedItem); // insert at new index
+		return newArray;
+	}
+	// usage;
+	// const reordered = moveItem(menuArrItems, 2, 1);
+	let resortedMobile = moveItem(headerMenuArr, 7, 3);
+	let resortedPc
+	// console.log({headerMenuArr})
+	// console.log({resortedMobile})
+	// console.log({resortedPc})
+	// console.log({isUserDetected})
+	// console.log({menuRef})
+
+	if (!isUserDetected) {
+		// console.log('removing logout')
+		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'logout');
+		resortedPc = headerMenuArr.filter(obj => obj.menu.toLowerCase() !== 'logout');
+	} else {
+		// console.log('removing login')
+		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'login');
+		resortedPc = headerMenuArr.filter(obj => obj.menu.toLowerCase() !== 'login');
+	}
+	// console.log('filtered:', {resortedMobile})
+	// else {
+	// 	// Remove item
+	// 	resortedMobile = resortedMobile.filter(obj => obj.menu !== 'logout');
+	// }
 	// console.log({overlayRef, menuRef})
 	return (
 		<>
@@ -281,14 +344,18 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						{itemClicked && <span
 						style={{
 							position: 'relative',
-							top: '-2rem',
+							top: '3rem',
 						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
 						<div className="h-100 pt-0"
 						ref={menuRef}
 						style={{
+							// position: 'absolute',
 							backgroundColor: 'rgba(0, 0, 0, 0.62)',
 							marginRight: '-1rem',
 							borderBottomLeftRadius: 20,
+							display: 'flex',
+							flexDirection: 'column',
+							alignSelf: 'flex-start'
 						}}>
 							{userInfo &&
 							<>
@@ -356,77 +423,116 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 										}}>{titleCase(userInfo.first_name)}</span>
 									</Link>
 							</>}
-								{headerMenuArr.map((menu, index) => {
+								{resortedMobile.map((menu, index) => {
 									const lastItem = index === headerMenuArr.length - 1;
-									let statusLink = menu.link;
-									const temp = status
-									status = menu?.menu;
-									if (status.toLowerCase() === "auth") {
-										status = temp;
-										// button = true;
-										// console.log({status})
-										statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
-										status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-										// console.log({status}, {statusLink})
-										
-										// console.log({statusLink})
-									}
-									// console.log('menu?.menu?.toLowerCase():', menu?.menu?.toLowerCase() ,menu?.authItems)
-									// console.log({status})
+									// console.log('isUserDetected:', isUserDetected)
+									if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
 									return (
 										<Fragment key={index}>
-											<Link to={(menu?.menu?.toLowerCase()!=='categories'&&statusLink.split('/').pop()!=='logout')&&statusLink}
-											onClick={(e) => {
-												const logout = statusLink?.split('/')?.pop()?.toLowerCase()
-												// console.log("Clicked on:", status);
-												if (menu?.menu?.toLowerCase() === 'categories') {
-													// console.log("Clicked on Categories");
-													e.stopPropagation();
-													handleMenuItemClick();
-												}
-												else if (logout === 'logout') {
-													// console.log("Clicked on auth");
-													// console.log({statusLink})
-													e.stopPropagation();
-													handleLogout(logout)
-												}
-											}}
-											// onClick={handleMenuItemClick}
-											className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
-											style={{
-												display: 'flex',
-												justifyContent: 'center',
-												alignItems: 'center',
-												animationDelay: `${index * 0.1}s`,
-												textWrap: 'nowrap',
-												fontSize: '0.8rem',
-												color: '#E2E8F0',
-												textAlign: 'center',
-												padding: '0rem 1rem',
-												marginLeft: 0,
-												marginRight: 0,
-												marginTop: menu?.menu?.toLowerCase() === "contact" ? '18rem' : '',
-												marginBottom: lastItem ? '60%' : '',
-												border: '2px outset buttonborder',
-												borderTopLeftRadius: 0,
-												borderTopRightRadius: 0,
-												borderBottomLeftRadius: 9,
-												borderBottomRightRadius: 9,
-												height: '3.3rem',
-												}}>
-													<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
-													id={status}
-													style={{marginRight: 8, fontSize: '1rem'}} />
-														{status}
-														{status.toLowerCase()==='cart'&&
-														<>
-															<span style={{whiteSpace: 'pre'}}> </span>
-															<span className="fas fa-shopping-cart fa-xs"
-															style={{
-																color: '#F8F6F2',
-															}}></span>
-														</>}
-											</Link>
+											{menu?.type==='button'?
+												<span
+												onClick={(e) => {
+													// const logout = status?.toLowerCase()
+													// const clearCart = menu?.clear?.toLowerCase()
+													// console.log("Clicked on");
+													// console.log({menu, status, logout, clearCart, statusLink})
+													
+													// console.log('menu.clear:', logoutOrClearCart)
+													if (menu?.menu?.toLowerCase() === 'categories') {
+														// console.log("Clicked on Categories");
+														e.stopPropagation();
+														handleMenuItemClick();
+													}
+													else if (menu.menu.toLowerCase() === 'logout') {
+														// console.log("Clicked on auth");
+														// console.log({statusLink})
+														// console.log('logout 414 clicked')
+														e.stopPropagation();
+														handleSidbarMenuButtonClick(menu.menu.toLowerCase())
+													}
+													else if (menu.menu.toLowerCase()==='clear cart') {
+														// console.log("Clicked on auth");
+														// console.log({statusLink})
+														// console.log('clear cart 414 clicked')
+														e.stopPropagation();
+														handleSidbarMenuButtonClick(menu.menu.toLowerCase())
+													}
+												}}
+												// onClick={handleMenuItemClick}
+												className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
+												style={{
+													display: 'flex',
+													justifyContent: 'center',
+													alignItems: 'center',
+													animationDelay: `${index * 0.1}s`,
+													textWrap: 'nowrap',
+													fontSize: '0.8rem',
+													color: '#E2E8F0',
+													textAlign: 'center',
+													padding: '0rem 1rem',
+													marginLeft: 0,
+													marginRight: 0,
+													// marginTop: menu?.menu?.toLowerCase() === "contact" ? '14rem' : '',
+													marginBottom: lastItem ? '60%' : '',
+													border: '2px outset buttonborder',
+													borderTopLeftRadius: 0,
+													borderTopRightRadius: 0,
+													borderBottomLeftRadius: 9,
+													borderBottomRightRadius: 9,
+													height: '3.3rem',
+													cursor: 'pointer',
+													}}>
+														<span className={`${menu?.angleD&&!itemClicked?menu.angleD:(itemClicked?menu.angleL:'')}`}
+														id={menu.menu.toLowerCase()}
+														style={{marginRight: 8, fontSize: '1rem'}} />
+															{menu.menu}
+															{menu.menu.toLowerCase()==='cart'&&
+															<>
+																<span style={{whiteSpace: 'pre'}}> </span>
+																<span className="fas fa-shopping-cart fa-xs"
+																style={{
+																	color: '#F8F6F2',
+																}}></span>
+															</>}
+												</span>
+												:
+												<Link to={menu.link}
+												// onClick={handleMenuItemClick}
+												className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
+												style={{
+													display: 'flex',
+													justifyContent: 'center',
+													alignItems: 'center',
+													animationDelay: `${index * 0.1}s`,
+													textWrap: 'nowrap',
+													fontSize: '0.8rem',
+													color: '#E2E8F0',
+													textAlign: 'center',
+													padding: '0rem 1rem',
+													marginLeft: 0,
+													marginRight: 0,
+													marginTop: menu?.menu?.toLowerCase() === "contact" ? '14rem' : '',
+													marginBottom: lastItem ? '60%' : '',
+													border: '2px outset buttonborder',
+													borderTopLeftRadius: 0,
+													borderTopRightRadius: 0,
+													borderBottomLeftRadius: 9,
+													borderBottomRightRadius: 9,
+													height: '3.3rem',
+													}}>
+														<span className={''}
+														id={menu.menu.toLowerCase()}
+														style={{marginRight: 8, fontSize: '1rem'}} />
+															{menu.menu}
+															{menu.menu.toLowerCase()==='cart'&&
+															<>
+																<span style={{whiteSpace: 'pre'}}> </span>
+																<span className="fas fa-shopping-cart fa-xs"
+																style={{
+																	color: '#F8F6F2',
+																}}></span>
+															</>}
+												</Link>}
 										</Fragment>
 									)
 								})}
@@ -482,30 +588,38 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 								className='profile-name-text'>{titleCase(userInfo.first_name)}</span>
 						</Link>}
 						<div className="d-inline-flex align-items-center h-100">
-							{headerMenuArr.map((menu, index) => {
-								if (menu.menu.toLowerCase() === "cart") return null;
-								let button = false
-								let statusLink = null;
+							{resortedPc.map((menu, index) => {
+								if (menu?.menu?.toLowerCase() === "cart") return null;
+								if (menu?.menu?.toLowerCase() === "categories") return null;
+								if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
+								// let button = false
+								// let statusLink = null;
 								// let logout = menu.authItems?.logout?.menu?.toLowerCase()==='logout'
 								// console.log('auth-logout:', !!logout, `${menu.menu}`, `${(logout)?logout:''}`)
-								if (menu.menu.toLowerCase() === "auth") {
-									button = true;
-									// console.log('login:', !!menu.authItems.login)
-									// console.log('logout:', !!menu.authItems.logout)
-									// if (menu.authItems.logout) logout = true
-									// console.log({logout})
-									// console.log({status})
-									statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
-									status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
-									// console.log({status})
+								
+								// if (menu?.menu?.toLowerCase() === "auth") {
+								// 	button = true;
+								// 	// console.log('login:', !!menu.authItems.login)
+								// 	// console.log('logout:', !!menu.authItems.logout)
+								// 	// if (menu.authItems.logout) logout = true
+								// 	// console.log({logout})
+								// 	// console.log({status})
+								// 	statusLink = status? menu.authItems.logout.link : menu.authItems.login.link;
+								// 	status = status? menu.authItems.logout.menu : menu.authItems.login.menu;
+								// 	// console.log({status})
 									
-									// console.log({statusLink})
-								}
-								if (menu.menu.toLowerCase() === "categories") return null;
+								// 	// console.log({statusLink})
+								// }
+								// if (menu?.clear) {
+								// 	button = true
+								// 	status = menu.clear
+								// 	if (!numberOfProductsInCart) return null;
+								// }
+								// if (menu?.menu?.toLowerCase() === "categories") return null;
 								// console.log({logout}, `${menu.menu}`)
 								return (
 									<Fragment key={index}>
-										{button ?
+										{menu.type==='button' ?
 											<button
 											style={{
 												// paddingRight: '1rem',
@@ -513,10 +627,10 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 												border: '1px solid rgba(248, 246, 242, 0.23)',
 												borderRadius: '3px',
 											}}
-											onClick={()=>handleLogout(statusLink.split('/').pop())}
+											onClick={()=>handleSidbarMenuButtonClick(menu.menu)}
 											className="dropdown-item"
 											type="button">
-												{status}
+												{menu.menu}
 											</button>
 											:
 											<Link to={menu.link} className="text-body mr-3"
@@ -524,6 +638,18 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 									</Fragment>
 								)
 							})}
+							{/* {numberOfProductsInCart &&
+							<button
+							style={{
+								color: '#F8F6F2',
+								border: '1px solid rgba(248, 246, 242, 0.23)',
+								borderRadius: '3px',
+							}}
+							onClick={()=>handleClearCart()}
+							className="dropdown-item"
+							type="button">
+								Clear Cart
+							</button>} */}
 						</div>
 					</div>
 					<CartLink numberOfProductsInCart={numberOfProductsInCart} />
