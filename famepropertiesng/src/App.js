@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 // import 'react-country-state-city/dist/react-country-state-city.css';
 import './App.css';
 import './css/style.css';
@@ -11,8 +12,16 @@ import { AppRoutes } from './routes/route';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceType } from './hooks/deviceType';
+import { getTotalUsers } from './hooks/getTotalUsers';
 
 function App() {
+  const totalU = sessionStorage.getItem('fpng-tot');
+  useEffect(() => {
+    if (!totalU) {
+      console.log("Fetching total users...");
+      getTotalUsers();
+    }
+  }, [totalU])
   const deviceType = useDeviceType().width <= 576;
   return (
     <>
