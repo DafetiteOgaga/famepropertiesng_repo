@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, Fragment, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from '../../hooks/deviceType';
 import { getImage } from '../../hooks/baseImgUrl';
@@ -9,22 +9,9 @@ import { BouncingDots } from '../../spinners/spinner';
 import { toast } from 'react-toastify';
 import { useOutletContext } from 'react-router-dom';
 import { StarRating, convertLikesToStars } from '../../hooks/handleStars';
+import { parse } from '@fortawesome/fontawesome-svg-core';
 
 const baseURL = getBaseURL();
-// const produc8tImagesArr = [
-// 	"product-1.jpg",
-// 	"product-2.jpg",
-// 	"product-3.jpg",
-// 	"product-4.jpg",
-// 	"product-5.jpg",
-// 	"product-6.jpg",
-// 	"product-7.jpg",
-// 	"product-8.jpg",
-// 	"product-3.jpg",
-// 	"product-4.jpg",
-// 	"product-5.jpg",
-// 	"product-6.jpg",
-// ]
 const productsActionArr = [
 	{
 		icon: "fa fa-shopping-cart",
@@ -55,20 +42,58 @@ const productsActionArr = [
 		type: 'link'
 	}
 ]
-const productStar = "fa fa-star"
+const checkproductRating = (productId, productRatingArr) => {
+	if (productRatingArr?.length) {
+		const found = productRatingArr.find((item) => item.product === productId);
+		// console.log({found, productId})
+		return found ? true : false;
+	}
+	return false;
+}
+const totalNoOfReviewers = (arr) => {
+	if (!arr?.length) return 0;
+
+	return arr.reduce((acc, curr) => {
+		return acc + (curr.liked ? 1 : 0)
+	}, 0);
+}
+// const productStar = "fa fa-star"
 function Products() {
+	const hasValue = useRef(false);
 	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage();
 	const [productItemArr, setProductItemArr] = useState([]);
 	const [isLike, setIsLike] = useState(null);
+	const [productRatingArr, setProductRatingArr] = useState(null);
 	const parameters = useParams();
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width<=576
+	const userInfo = createLocal.getItem('fpng-user');
+	const isNotLoggedIn = !userInfo;
+	// console.log({isNotLoggedIn})
+	// if (userInfo) {
+	// 	setProductRatingArr(userInfo.product_ratings);
+	// }
 	// console.log('parameters:', parameters);
 	const fetchServerData = async (endpoint="products") => {
 		// console.log(`Fetching data from endpoint: ${endpoint}`);
+		const config = {
+			method: isLike?'POST':'GET',
+			body: isLike?JSON.stringify({
+				userId: userInfo.id,
+				productId: isLike,
+				liked: true,
+			}):null,
+		}
 		try {
-			const prodRes = await (fetch(`${baseURL}/${endpoint}/`));
+			const prodRes = await (fetch(`${baseURL}/${endpoint}/`,
+				{
+					...config,
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				}
+			));
 			if (!prodRes.ok) {
 				throw new Error("Network response was not ok");
 			}
@@ -76,18 +101,27 @@ function Products() {
 			if (isLike) {
 				// console.log('Response from server:', prodData);
 				// console.log({productItemArr})
-				const prevArr = productItemArr?.map((item) => {
-					if (item.id === prodData.id) {
-						return { ...item, noOfReviewers: prodData.noOfReviewers };
-					}
-					return item;
-				});
-				setProductItemArr(prevArr);
+				const prevArr = [...userInfo.product_ratings, prodData]
+				createLocal.setItem('fpng-user', {...userInfo, product_ratings: prevArr});
+				setProductItemArr(prev=>{
+					return prev.map(item=>{
+						if (item.id===prodData.product) {
+							return {
+								...item,
+								total_liked: item.total_liked + 1,
+								total_reviewed: item.total_reviewed + 1,
+							}
+						}
+						return item
+					})
+				})
+				setProductRatingArr(prevArr);
 				setIsLike(null);
 				return
 			}
 			// console.log("fetch on mount ...")
 			setProductItemArr(prodData);
+			// setProductRatingArr(prodData.product_ratings);
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
@@ -98,40 +132,25 @@ function Products() {
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
 	useEffect(() => {
-		if (isLike) {
+		// if (isLike) {
+		// 	// console.log("Fetching like-product data...");
+		// 	fetchServerData(`product-rating/${isLike}`);
+		// }
+		if (userInfo && isLike) {
 			// console.log("Fetching like-product data...");
-			fetchServerData(`like-product/${isLike}`);
+			// fetchServerData(`product-rating/${isLike}`);
+			fetchServerData(`product-rating-create/${userInfo.id}`);
+		}
+		if (userInfo && !hasValue.current) {
+			setProductRatingArr(userInfo.product_ratings);
+			hasValue.current = true;
 		}
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
-	}, [isLike]);
-	// if (productItemArr.length) console.log("productItemArr:", productItemArr, productItemArr.length);
-	// if (productItemArr.length) console.log("last item:", productItemArr[productItemArr.length-1]);
-	// console.log('product component rendered')
-	// createLocal.setItem('fpng-product-str', 'products');
-	// createLocal.setItem('fpng-product-arr', ['one', 'two', 'three']);
-	// createLocal.setItem('fpng-product-obj', {name: 'Product One', price: 1000});
-	// const handleAddToCart = (product) => {
-	// 	// Retrieve existing cart from localStorage
-	// 	const existingCart = createLocal.getItemRaw('fpng-cart');
-	// 	let cart = existingCart??[];
-
-	// 	// Check if product already exists in cart
-	// 	const isProductExist = cart.find(item => item.prdId === product.id);
-	// 	const productIndex = cart.findIndex(item => item.prdId === product.id);
-	// 	if (isProductExist) {
-	// 		// If it exists, increment the quantity
-	// 		cart[productIndex].nop += 1;
-	// 	} else {
-	// 		// If it doesn't exist, add it with quantity 1
-	// 		cart.push({ prdId: product.id, nop: 1 });
-	// 	}
-
-	// 	// Save updated cart back to localStorage
-	// 	createLocal.setItemRaw('fpng-cart', cart);
-	// 	toast.success(`${product.name} has been added to your cart.`);
-	// 	// Optionally, you can provide feedback to the user
-	// 	// alert(`${product.name} has been added to your cart.`);
-	// }
+	}, [isLike, userInfo, hasValue.current]);
+	const totalUsers = sessionStorage.getItem('fpng-tot');
+	if (totalUsers) parseInt(totalUsers, 10);
+	// console.log({userInfo, productRatingArr, totalUsers})
+	// console.log('totalUsers:', totalUsers);
 	return (
 		<div className="container-fluid pb-3">
 			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3"
@@ -139,7 +158,11 @@ function Products() {
 			{productItemArr.length ?
 				<div className="row">
 					{productItemArr&&productItemArr.map((productObjItem, index) => {
-						const randomNumber = Math.floor(Math.random() * 6);
+						// const randomNumber = Math.floor(Math.random() * 6);
+						// const no = totalNoOfReviewers(productRatingArr);
+						// const numberOfLikes = convertLikesToStars(productObjItem.total_liked, 10)
+						// console.log({productObjItem})
+						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
 						return (
 							<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
@@ -184,6 +207,10 @@ function Products() {
 										<div className="product-action">
 											{productsActionArr.map((action, actionIndex) => {
 												// console.log({productObjItem})
+												const isPrevLiked = checkproductRating(productObjItem.id, productRatingArr)&&
+																	action.click==='like';
+												if (isNotLoggedIn&&action.click==='like') return null;
+												// console.log({isPrevLiked}, productObjItem.id)
 												return (
 													<Fragment key={actionIndex}>
 														{action.type==='link'?
@@ -195,20 +222,23 @@ function Products() {
 															</span>
 														</Link>
 														:
-														<span
-														onClick={()=>{
-															if (action.click==='cart') {
-																handleAddToCart(productObjItem);
-															} else if (action.click==='like') {
-																setIsLike(productObjItem.id);
-																toast.info(`${titleCase(productObjItem.name)} Rated`);
-															}
-														}}
-														style={{textDecoration: 'none'}}>
-															<span className="btn btn-outline-dark btn-square">
-																<span className={`${action.icon}`}></span>
+														<>
+															<span
+															className={`${isPrevLiked?'d-none':''}`}
+															onClick={()=>{
+																if (action.click==='cart') {
+																	handleAddToCart(productObjItem);
+																} else if (action.click==='like') {
+																	setIsLike(productObjItem.id);
+																	// toast.info(`${titleCase(productObjItem.name)} Rated`);
+																}
+															}}
+															style={{textDecoration: 'none'}}>
+																<span className="btn btn-outline-dark btn-square">
+																	<span className={`${action.icon}`}></span>
+																</span>
 															</span>
-														</span>}
+														</>}
 													</Fragment>
 												)
 											})}
@@ -228,21 +258,20 @@ function Products() {
 											</h6>
 										</div>
 										<div className="d-flex flex-column align-items-center justify-content-center mb-1">
-											<StarRating rating={productObjItem.noOfReviewers} />
-											{/* {Array.from({length: 5}, (_, starIndex) => {
-												const isStar = (starIndex+1) <= randomNumber;
-												const halfStar = randomNumber%2!==0&&(starIndex+1)===randomNumber
-												// console.log({isStar}, {starIndex}, {randomNumber})
-												return (
-													<Fragment key={starIndex}>
-														<StarRating rating={productObjItem.noOfReviewers} />
-													</Fragment>
-													// <small
-													// key={starIndex}
-													// className={`${productStar}${(halfStar?'-half-alt':'')} ${isStar?'text-warning':'text-secondary'} mr-1`}></small>
-												)
-											})} */}
-											<small>({convertLikesToStars(productObjItem.noOfReviewers)} from {productObjItem.noOfReviewers} likes)</small>
+											{/* star rating */}
+											{totalUsers ?
+												(<>
+													<StarRating rating={productObjItem.total_liked} maxLikes={totalUsers} />
+													{productObjItem.total_reviewed ?
+														(<small>
+														({convertLikesToStars(productObjItem.total_liked, totalUsers)} from {productObjItem.total_reviewed} like{`${productObjItem.total_reviewed > 1 ? 's' : ''}`})
+														</small>)
+														: <small>(No review yet)</small>
+													}
+												</>)
+												:
+												(<BouncingDots size={"ts"} color={"#475569"} p={"0"} />)
+												}
 										</div>
 									</div>
 								</div>
