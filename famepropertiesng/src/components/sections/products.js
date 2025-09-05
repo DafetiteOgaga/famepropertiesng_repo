@@ -149,7 +149,7 @@ function Products() {
 	}, [isLike, userInfo, hasValue.current]);
 	const totalUsers = sessionStorage.getItem('fpng-tot');
 	if (totalUsers) parseInt(totalUsers, 10);
-	// console.log({userInfo, productRatingArr, totalUsers})
+	// console.log({userInfo})
 	// console.log('totalUsers:', totalUsers);
 	return (
 		<div className="container-fluid pb-3">
