@@ -3712,7 +3712,7 @@ input[type="button"].btn-block {
   /* color: #6c757d; */
   color: #d8d6d1;
   pointer-events: none;
-  cursor: auto;
+  cursor: not-allowed;
   background-color: #fff;
   border-color: #F8F6F2;
 }
