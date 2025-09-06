@@ -64,6 +64,7 @@ function Products() {
 	const { createLocal } = useCreateStorage();
 	const [productItemArr, setProductItemArr] = useState([]);
 	const [isLike, setIsLike] = useState(null);
+	const [load, setLoad] = useState(0);
 	const [pagination, setPagination] = useState({
 		prev: null,
 		next: null,
@@ -132,7 +133,9 @@ function Products() {
 				next: prodData?.next,
 				count: prodData?.count,
 				total_pages: prodData?.total_pages,
+				load: load,
 			});
+			setLoad(prev=>prev+1);
 			setProductItemArr(prodData?.results);
 			console.log({prodData})
 			// setProductRatingArr(prodData.product_ratings);
