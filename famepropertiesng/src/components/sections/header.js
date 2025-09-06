@@ -346,10 +346,11 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 							position: 'relative',
 							top: '3rem',
 						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
-						<div className="h-100 pt-0"
+						<div className="w-35 pt-0"
 						ref={menuRef}
 						style={{
 							// position: 'absolute',
+							height: '95vh',
 							backgroundColor: 'rgba(0, 0, 0, 0.62)',
 							marginRight: '-1rem',
 							borderBottomLeftRadius: 20,
