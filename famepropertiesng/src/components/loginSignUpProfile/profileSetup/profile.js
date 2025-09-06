@@ -489,11 +489,12 @@ function Profile() {
 	const textAreaFieldsArr = ['address', 'nearest_bus_stop']
 
 	// fields to skip displaying
-	const skipArr = [
+	const skipFieldArr = [
 		'id', 'is_staff', 'image_url', 'fileId', 'phoneCode',
 		'stateCode', 'first_name', 'last_name', 'countryId',
 		'stateId', 'cityId', 'date_joined', 'last_login',
-		'hasStates', 'hasCities', 'password', 'password_confirmation'
+		'hasStates', 'hasCities', 'password', 'password_confirmation',
+		'product_ratings',
 	]
 
 	// const switchBool = () => setSwitchState(prev => !prev);
@@ -665,7 +666,8 @@ function Profile() {
 								</span>
 							</p>
 							{reOrderFields(Object.entries(userInfo), reOrderFieldsArr).map(([userKey, userValue], index) => {
-								if (skipArr.includes(userKey)) return null;
+								if (skipFieldArr.includes(userKey)) return null;
+								// console.log({userKey})
 								const mobile = userKey==='mobile_no'
 								const isState = userKey==='state'
 								const email = userKey==='email'
