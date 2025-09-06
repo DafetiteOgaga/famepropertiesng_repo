@@ -30,8 +30,8 @@ function Index() {
 		// Retrieve existing cart from localStorage
 		const existingCart = createLocal.getItemRaw('fpng-cart');
 		let cart = existingCart??[];
-
 		// console.log('Existing cart:', cart);
+
 		// Check if product already exists in cart
 		const isProductExist = cart.find(item => item.prdId === product.id);
 		const productIndex = cart.findIndex(item => item.prdId === product.id);
