@@ -18,6 +18,13 @@ function Pagination({ pagination, onPageChange }) {
 		// )
 		if (loading && loadRef.current!==load) {
 			// console.log('Load changed, stop loading spinner');
+			// setTimeout(() => {
+				
+			// 	setLoading({
+			// 		action: false,
+			// 		mode: null,
+			// 	});
+			// }, 2000);
 			setLoading({
 				action: false,
 				mode: null,

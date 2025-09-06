@@ -3693,18 +3693,18 @@ input[type="button"].btn-block {
   margin-left: 0;
 }
 
-.page-link:hover {
-  /* z-index: 3; */
+/* .page-link:hover {
   color: #fff;
   background-color: #475569;
   border-color: #E2E8F0;
-}
+} */
 
 .page-item.active .page-link {
   z-index: 3;
   color: #fff;
   background-color: #475569;
-  border-color: #E2E8F0;
+  border: 1px solid #F8F6F2;
+  /* border-color: #E2E8F0; */
 }
 
 .page-item.disabled .page-link {
@@ -3712,8 +3712,9 @@ input[type="button"].btn-block {
   color: #d8d6d1;
   pointer-events: none;
   cursor: not-allowed;
+  border: 1px solid #F8F6F2;
   background-color: #fff;
-  border-color: #F8F6F2;
+  /* border-color: #F8F6F2; */
 }
 
 .pagination-lg .page-link {
