@@ -48,12 +48,13 @@ function UploadImageItem({type}) {
   // const [imageName, setImageName] = useState("");
 
   const fetchServerData = async (section=null) => {
+    // console.log({section})
 		try {
       let serverUrls
       if (section) {
         serverUrls = await (fetch(`${baseURL}/${section}s/`));
       } else {
-        serverUrls = await (fetch(`${baseURL}/${type}s/`));
+        serverUrls = await (fetch(`${baseURL}/${type}s/${type==='product'?`all/`:''}`));
       }
 			if (!serverUrls.ok) {
         const errorText = "Network response was not ok"
@@ -61,6 +62,7 @@ function UploadImageItem({type}) {
 				throw new Error(errorText);
 			}
 			const serverData = await serverUrls.json();
+      // console.log({serverData})
 			setProductPreview(serverData);
       console.log("Server Data fetched successfully");
 		} catch (error) {
@@ -240,6 +242,7 @@ function UploadImageItem({type}) {
   // const input1 = itemsInputs.heading||itemsInputs.discount;
   // const input2 = itemsInputs.paragraph;
   // const input3 = itemsInputs.anchor;
+  // console.log({productPreview})
   return (
     <div className="p-4 max-w-md mx-auto border rounded-xl shadow-md space-y-4"
     style={{
