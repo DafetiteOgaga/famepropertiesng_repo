@@ -49,10 +49,11 @@ function UploadImageItem({type}) {
 
   const fetchServerData = async (section=null) => {
     // console.log({section})
+    // console.log({type})
 		try {
       let serverUrls
       if (section) {
-        serverUrls = await (fetch(`${baseURL}/${section}s/`));
+        serverUrls = await (fetch(`${baseURL}/${section}s/${section==='product'?`all/`:''}`));
       } else {
         serverUrls = await (fetch(`${baseURL}/${type}s/${type==='product'?`all/`:''}`));
       }
