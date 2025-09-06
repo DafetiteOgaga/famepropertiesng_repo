@@ -6,13 +6,16 @@ function DafetiteFooter() {
 	const year = DateHook().todayYear;
 	return (
 		<>
-			<span>
-				&copy; Copyright {year} | Developed by
+			<span className="span-dafetite">
+				&copy;Copyright {year} | Developed by
 				<a
 				target="_blank"
 				rel="noopener noreferrer"
 				href="https://dafetiteogaga.github.io/dafetite/">
-					<img src={dafetite} alt="dafetite ogaga" className="dafetite" />
+					<img
+					src={dafetite}
+					alt="dafetite ogaga"
+					className="dafetite" />
 				</a>
 			</span>
 		</>
