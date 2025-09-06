@@ -3684,11 +3684,11 @@ input[type="button"].btn-block {
   border-color: #F8F6F2;
 }
 
-.page-link:focus {
+/* .page-link:focus {
   z-index: 3;
   outline: 0;
   box-shadow: none;
-}
+} */
 
 .page-item:first-child .page-link {
   margin-left: 0;
