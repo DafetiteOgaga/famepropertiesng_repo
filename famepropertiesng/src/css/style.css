@@ -3701,12 +3701,12 @@ input[type="button"].btn-block {
   border-color: #E2E8F0;
 }
 
-.page-item.active .page-link {
+/* .page-item.active .page-link {
   z-index: 3;
   color: #fff;
   background-color: #475569;
   border-color: #E2E8F0;
-}
+} */
 
 .page-item.disabled .page-link {
   /* color: #6c757d; */
