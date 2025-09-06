@@ -344,7 +344,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						{itemClicked && <span
 						style={{
 							position: 'relative',
-							top: '3rem',
+							top: '0rem',
 						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
 						<div className="w-35 pt-0"
 						ref={menuRef}
