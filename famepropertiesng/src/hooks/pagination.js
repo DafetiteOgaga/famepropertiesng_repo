@@ -158,6 +158,8 @@ function Pagination({ pagination, onPageChange }) {
 					<li className="page-item active">
 						<button className="page-link"
 						style={{
+							cursor: 'not-allowed',
+							pointerEvents: 'none',
 							borderTopLeftRadius: "0.35rem",
 							borderBottomLeftRadius: "0.35rem",
 							borderTopRightRadius: "0.35rem",
@@ -172,7 +174,8 @@ function Pagination({ pagination, onPageChange }) {
 				<li className={`page-item`}>
 					<button className="page-lk"
 					style={{
-						// cursor: next ? "pointer" : "not-allowed",
+						cursor: 'not-allowed',
+						pointerEvents: 'none',
 						borderTopRightRadius: "1rem",
 						borderBottomRightRadius: "1rem",
 						borderTopLeftRadius: "0.35rem",
