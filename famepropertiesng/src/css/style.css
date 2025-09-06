@@ -3655,10 +3655,23 @@ input[type="button"].btn-block {
 .page-link {
   position: relative;
   display: block;
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.75rem;
   margin-left: -1px;
   line-height: 1.25;
-  color: #E2E8F0;
+  /* color: #E2E8F0; */
+  color: #6c757d;
+  background-color: #fff;
+  border: 1px solid #F8F6F2;
+}
+
+.page-lk {
+  position: relative;
+  display: block;
+  padding: 0.4rem 0.75rem;
+  margin-left: -1px;
+  line-height: 1.25;
+  /* color: #E2E8F0; */
+  color: #6c757d;
   background-color: #fff;
   border: 1px solid #F8F6F2;
 }
@@ -3681,15 +3694,23 @@ input[type="button"].btn-block {
   margin-left: 0;
 }
 
+.page-link:hover {
+  /* z-index: 3; */
+  color: #fff;
+  background-color: #475569;
+  border-color: #E2E8F0;
+}
+
 .page-item.active .page-link {
   z-index: 3;
   color: #fff;
-  background-color: #E2E8F0;
+  background-color: #475569;
   border-color: #E2E8F0;
 }
 
 .page-item.disabled .page-link {
-  color: #6c757d;
+  /* color: #6c757d; */
+  color: #d8d6d1;
   pointer-events: none;
   cursor: auto;
   background-color: #fff;

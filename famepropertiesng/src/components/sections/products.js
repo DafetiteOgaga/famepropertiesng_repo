@@ -9,7 +9,7 @@ import { BouncingDots } from '../../spinners/spinner';
 import { toast } from 'react-toastify';
 import { useOutletContext } from 'react-router-dom';
 import { StarRating, convertLikesToStars } from '../../hooks/handleStars';
-import { parse } from '@fortawesome/fontawesome-svg-core';
+import Pagination from '../../hooks/pagination';
 
 const baseURL = getBaseURL();
 const productsActionArr = [
@@ -64,19 +64,25 @@ function Products() {
 	const { createLocal } = useCreateStorage();
 	const [productItemArr, setProductItemArr] = useState([]);
 	const [isLike, setIsLike] = useState(null);
+	const [pagination, setPagination] = useState({
+		prev: null,
+		next: null,
+		count: null,
+		total_pages: null,
+	});
 	const [productRatingArr, setProductRatingArr] = useState(null);
 	const parameters = useParams();
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width<=576
 	const userInfo = createLocal.getItem('fpng-user');
 	const isNotLoggedIn = !userInfo;
-	// console.log({isNotLoggedIn})
+	console.log({userInfo})
 	// if (userInfo) {
 	// 	setProductRatingArr(userInfo.product_ratings);
 	// }
 	// console.log('parameters:', parameters);
 	const fetchServerData = async (endpoint="products") => {
-		// console.log(`Fetching data from endpoint: ${endpoint}`);
+		console.log(`Fetching data from endpoint: ${endpoint}`);
 		const config = {
 			method: isLike?'POST':'GET',
 			body: isLike?JSON.stringify({
@@ -85,8 +91,9 @@ function Products() {
 				liked: true,
 			}):null,
 		}
+		console.log({isLike})
 		try {
-			const prodRes = await (fetch(`${baseURL}/${endpoint}/`,
+			const prodRes = await (fetch(`${baseURL}/${endpoint}${endpoint.includes('?')?'':'/'}`,
 				{
 					...config,
 					headers: {
@@ -119,8 +126,15 @@ function Products() {
 				setIsLike(null);
 				return
 			}
-			// console.log("fetch on mount ...")
-			setProductItemArr(prodData);
+			console.log("fetch on mount ...")
+			setPagination({
+				prev: prodData?.previous,
+				next: prodData?.next,
+				count: prodData?.count,
+				total_pages: prodData?.total_pages,
+			});
+			setProductItemArr(prodData?.results);
+			console.log({prodData})
 			// setProductRatingArr(prodData.product_ratings);
 		} catch (error) {
 			console.error("Error fetching data:", error);
@@ -149,6 +163,31 @@ function Products() {
 	}, [isLike, userInfo, hasValue.current]);
 	const totalUsers = sessionStorage.getItem('fpng-tot');
 	if (totalUsers) parseInt(totalUsers, 10);
+	const handlePagination = (page) => {
+		console.log('Pagination to:', page);
+		if (!page) return;
+		console.log({page})
+		fetchServerData(`products/?page=${page}`);
+	}
+	const handleProductPrevAddedToCart = (product) => {
+		// toast.info('Please login to add products to cart.');
+		const cartExist = createLocal.getItemRaw('fpng-cart');
+		if (cartExist) {
+			const isProductExist = cartExist.find(item=>item.prdId===product.id);
+			if (isProductExist) {
+				// toast.info(`${titleCase(product.name)} is already in cart.`);
+				return true;
+			}
+		}
+		return false;
+	}
+	console.log({productItemArr, pagination})
+	console.log(
+		'\nprev:', pagination?.prev,
+		'\nnext:', pagination?.next,
+		'\ncount:', pagination?.count,
+		'\ntotal_pages:', pagination?.total_pages,
+	)
 	// console.log({userInfo})
 	// console.log('totalUsers:', totalUsers);
 	return (
@@ -210,6 +249,10 @@ function Products() {
 												const isPrevLiked = checkproductRating(productObjItem.id, productRatingArr)&&
 																	action.click==='like';
 												if (isNotLoggedIn&&action.click==='like') return null;
+												const isAddedToCart = handleProductPrevAddedToCart(productObjItem)&&
+																	action.click==='cart';
+												if (isAddedToCart) return null;
+												// console.log({isAddedToCart}, productObjItem.id)
 												// console.log({isPrevLiked}, productObjItem.id)
 												return (
 													<Fragment key={actionIndex}>
@@ -281,11 +324,7 @@ function Products() {
 					<div className="col-12">
 						<nav>
 							<ul className="pagination justify-content-center">
-								<li className="page-item disabled"><a className="page-link" href="##"><span>Previous</span></a></li>
-								<li className="page-item active"><a className="page-link" href="##">1</a></li>
-								<li className="page-item"><a className="page-link" href="##">2</a></li>
-								<li className="page-item"><a className="page-link" href="##">3</a></li>
-								<li className="page-item"><a className="page-link" href="##">Next</a></li>
+								<Pagination pagination={pagination} onPageChange={handlePagination} />
 							</ul>
 						</nav>
 					</div>
