@@ -86,7 +86,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 	
 	// watch imageSrc separately
 	useEffect(() => {
-		isImagePreview(!!imageSrc);  // true if imageSrc exists, false otherwise
+		if (isImagePreview) isImagePreview(!!imageSrc);  // true if imageSrc exists, false otherwise
 	}, [imageSrc]);
 
   	// crop + compress in one click
