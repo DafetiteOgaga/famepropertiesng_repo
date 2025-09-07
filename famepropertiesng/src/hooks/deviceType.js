@@ -57,4 +57,14 @@ const useDeviceType = () => {
 	return deviceType;
 };
 
-export { useDeviceType };
+const useDeviceInfo = () => {
+	const deviceInfoObject = useDeviceType();
+	const { width, ...rest } = deviceInfoObject;
+	// console.log("Device Width:", width);
+	// console.log("Device Info:", rest);
+	const deviceInfo = Object.entries(deviceInfoObject).find(([key, value]) => value === true)?.[0] || "unknown";
+	// console.log("Device Info Label:", deviceInfo);
+	return { deviceInfo, width };
+};
+
+export { useDeviceType, useDeviceInfo };
