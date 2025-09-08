@@ -12,7 +12,7 @@ import { useImageKitAPIs } from "../../../hooks/fetchAPIs";
 import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCompress";
 import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
-import { isFieldsValid, validatePassword } from "../signUpSetup/formInfo";
+import { isFieldsValid, validatePassword } from "../signUpSetup/signUpFormInfo";
 import { reOrderFields, toTextArea } from "./profileMethods";
 // import { NavigateToComp } from "../../../hooks/navigateToComp";
 
@@ -42,6 +42,7 @@ const initialFormData = {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function Profile() {
+	// const allFields = useRef([])
 	// const { navigateTo } = NavigateToComp()
 	const updatedFieldRef = useRef(null);
 	const handleImageProcessingRef = useRef();
@@ -489,12 +490,23 @@ function Profile() {
 	const textAreaFieldsArr = ['address', 'nearest_bus_stop']
 
 	// fields to skip displaying
-	const skipFieldArr = [
-		'id', 'is_staff', 'image_url', 'fileId', 'phoneCode',
-		'stateCode', 'first_name', 'last_name', 'countryId',
-		'stateId', 'cityId', 'date_joined', 'last_login',
-		'hasStates', 'hasCities', 'password', 'password_confirmation',
-		'product_ratings',
+	// const skipFieldArr = [
+	// 	'id', 'is_staff', 'image_url', 'fileId', 'phoneCode',
+	// 	'stateCode', 'first_name', 'last_name', 'countryId',
+	// 	'stateId', 'cityId', 'date_joined', 'last_login',
+	// 	'hasStates', 'hasCities', 'password', 'password_confirmation',
+	// 	'product_ratings', 'is_seller',
+	// ]
+	const allResponseFields = [
+		'email', 'mobile_no', 'username', 'address', 'country',
+		'state', 'city', 'nearest_bus_stop', 'id', 'first_name',
+		'last_name', 'is_staff', 'image_url', 'fileId', 'phoneCode',
+		'stateCode', 'countryId', 'stateId', 'cityId', 'hasCities',
+		'hasStates', 'product_ratings', 'is_seller',
+	]
+	const acceptedRenderFields = [
+		'email', 'mobile_no', 'username', 'address', 'country',
+		'state', 'city', 'nearest_bus_stop'
 	]
 
 	// const switchBool = () => setSwitchState(prev => !prev);
@@ -666,7 +678,9 @@ function Profile() {
 								</span>
 							</p>
 							{reOrderFields(Object.entries(userInfo), reOrderFieldsArr).map(([userKey, userValue], index) => {
-								if (skipFieldArr.includes(userKey)) return null;
+								if (!acceptedRenderFields.includes(userKey)) return null;
+								// if (!allFields.current.includes(userKey)) allFields.current.push(userKey)
+								// console.log('allFields:', allFields.current)
 								// console.log({userKey})
 								const mobile = userKey==='mobile_no'
 								const isState = userKey==='state'
