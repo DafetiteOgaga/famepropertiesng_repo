@@ -7,7 +7,7 @@ function DafetiteFooter() {
 	return (
 		<>
 			<span className="span-dafetite">
-				&copy;Copyright {year} | Developed by
+				<sup>&copy;</sup>Copyright {year} | Developed by
 				<a
 				target="_blank"
 				rel="noopener noreferrer"
