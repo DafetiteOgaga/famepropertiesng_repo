@@ -65,7 +65,7 @@ function UploadImageItem({type}) {
 			const serverData = await serverUrls.json();
       // console.log({serverData})
 			setProductPreview(serverData);
-      console.log("Server Data fetched successfully");
+      // console.log("Server Data fetched successfully");
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
@@ -146,7 +146,7 @@ function UploadImageItem({type}) {
         type==='product'&&productsObj
       ); // Reset inputs after successful upload
       const successText = `${type} file uploaded to image-cloud and data to server successfully!`
-      console.log(successText);
+      // console.log(successText);
       toast.success(successText);
       setReloadSection(type); // trigger re-fetch
     } catch (error) {
@@ -165,7 +165,7 @@ function UploadImageItem({type}) {
         throw new Error(errorText);
       }
       const data = await response.json();
-      console.log("Authentication data received");
+      // console.log("Authentication data received");
       // console.log("Authentication data:", data);
       return data;
     } catch (error) {
@@ -199,7 +199,7 @@ function UploadImageItem({type}) {
         throw new Error(errorText);
       }
       const successText = `${type} file deleted successfully!`
-      console.log(successText);
+      // console.log(successText);
       setSelectedImage(null); // clear preview
       setReloadSection(type); // trigger re-fetch
       toast.success(successText);
@@ -224,7 +224,7 @@ function UploadImageItem({type}) {
         throw new Error(errorText);
       }
       const successText = `${type} item designated as sold successfully!`
-      console.log(successText);
+      // console.log(successText);
       setSelectedImage(null); // clear preview
 
       // handle notifications here
