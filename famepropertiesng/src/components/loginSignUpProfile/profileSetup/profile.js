@@ -14,6 +14,7 @@ import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
 import { isFieldsValid, validatePassword } from "../signUpSetup/signUpFormInfo";
 import { reOrderFields, toTextArea } from "./profileMethods";
+import { limitInput } from "./profileMethods";
 // import { NavigateToComp } from "../../../hooks/navigateToComp";
 
 const baseURL = getBaseURL();
@@ -64,6 +65,7 @@ function Profile() {
 	const [editFields, setEditFields] = useState({});
 	const userInfoRef = useRef(false)
 	const [imgPreview, setImgPreview] = useState(null);
+	const [fieldStats, setFieldStats] = useState({})
 
 	// get user info from local storage if any
 	const userInfo = createLocal.getItem('fpng-user');
@@ -198,11 +200,43 @@ function Profile() {
 	// handle input changes
 	const onChangeHandler = (e) => {
 		e.preventDefault();
-		const { name, value } = e.target
+		const { name, value, tagName } = e.target
+		let maxChars;
+		if (name==='first_name'||name==='last_name'||name==='username') {
+			maxChars = 50;
+		} else if (name==='email') {
+			maxChars = 100;
+		} else if (name==='mobile_no') {
+			maxChars = 20;
+		} else if (name==='password'||name==='password_confirmation') {
+			maxChars = 64;
+		} else if (name==='address'||name==='nearest_bus_stop') {
+			maxChars = 150;
+		}
+
+		// auto-detect textarea
+		const isTextArea = String(tagName).toUpperCase() === 'TEXTAREA';
+
+		// pass explicit limits so behavior is clear
+		const {
+			value: limitedValue,
+			charCount,
+			wordCount,
+			colorIndicator,
+			maxCharsLimit,
+			maxWords,
+		} =
+			limitInput(value, maxChars, undefined, isTextArea);
 		// console.log({name})
 		setFormData(prev => ({
 			...prev,
-			[name]: value
+			[name]: limitedValue
+		}))
+		setFieldStats(prev => ({
+			...prev,
+			[name]: { charCount, wordCount, colorIndicator,
+						maxCharsLimit, maxWords,
+					},
 		}))
 	}
 
@@ -509,6 +543,14 @@ function Profile() {
 		'state', 'city', 'nearest_bus_stop'
 	]
 
+	// other phone input props
+	const phoneProps = {
+		inputMode: 'numeric',       // brings up number keypad on mobile
+		minLength: 7,               // <-- number, not string
+		maxLength: 10,              // <-- match pattern
+		pattern: '[0-9]{7,10}',     // only digits, between 7–14 long
+	};
+
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
@@ -652,6 +694,7 @@ function Profile() {
 										{editFields.last_name &&
 										<span className={`d-flex ${deviceType?'flex-column':'flex-row'} align-items-center justify-content-center fadeInDownHalfUname`}>
 
+											<span>
 												{/* last name input field */}
 												<input
 												id={"last_name"}
@@ -662,10 +705,26 @@ function Profile() {
 													borderRadius: '5px',
 													width: '40%',
 												}}
-												className={`form-control ${deviceType?'w-100':''}`}
+												className={`form-control w-100`}
 												type={getInputType("last_name")}
 												/>
+												<span
+												style={{
+													fontSize: '0.625rem',
+													color: fieldStats['last_name']?.colorIndicator
+												}}
+												className={`justify-content-end d-flex font-italic`}>
+												{fieldStats['last_name']?.charCount ?
+													<>
+														{`${fieldStats['last_name']?.charCount}/${fieldStats['last_name']?.maxCharsLimit} chars`}
+													</>
+													:null}
+												
+												</span>
+											</span>
+												
 
+											<span className={`align-self-${deviceType?'center':'baseline'}`}>
 											{/* last name cancel and submit buttons */}
 											<EditFieldButton
 											setEditFields={setEditFields}
@@ -673,8 +732,22 @@ function Profile() {
 											editField={editFields["last_name"]}
 											onSubmitHandler={onSubmitHandler}
 											loading={loading} />
+											</span>
 										</span>}
 									</>
+									{/* <span
+									style={{
+										fontSize: '0.625rem',
+										color: fieldStats['last_name']?.colorIndicator
+									}}
+									className={`justify-content-end d-flex font-italic`}>
+									{fieldStats['last_name']?.charCount ?
+										<>
+											{`${fieldStats['last_name']?.charCount}/${fieldStats['last_name']?.maxCharsLimit} chars`}
+										</>
+										:null}
+									
+									</span> */}
 								</span>
 							</p>
 							{reOrderFields(Object.entries(userInfo), reOrderFieldsArr).map(([userKey, userValue], index) => {
@@ -698,6 +771,7 @@ function Profile() {
 								const stateCity = ['state', 'city'].every(
 									key => key in editFields && Boolean(editFields[key])
 								);
+								const isTextArea = toTextArea(userKey, textAreaFieldsArr)
 								return (
 									<Fragment key={index}>
 										<form
@@ -851,9 +925,9 @@ function Profile() {
 
 																// all other fields (input and textarea fields)
 																<>
-																	<div className={`d-flex flex-${(toTextArea(userKey, textAreaFieldsArr)||deviceType)?'column':'row'} justify-content-between`}>
+																	<div className={`d-flex flex-${(isTextArea||deviceType)?'column':'row'} justify-content-between`}>
 
-																		<span className={`d-flex ${deviceType?'':'w-100'} flex-row align-items-center`}>
+																		<span className={`d-flex ${deviceType?'':'w-100'} flex-column align-items-center`}>
 																			{userKey==='mobile_no'&&
 
 																			// phone code prefix for mobile number
@@ -862,7 +936,7 @@ function Profile() {
 																				paddingRight: '0.5rem',
 																			}}>{'+'+userInfo.phoneCode}</span>}
 
-																				{toTextArea(userKey, textAreaFieldsArr)?
+																				{isTextArea?
 																				// text area field
 																				<textarea
 																				id={userKey}
@@ -889,19 +963,48 @@ function Profile() {
 																				}}
 																				className="form-control"
 																				type={getInputType(userKey)}
+																				{...(userKey === 'mobile_no' ? phoneProps : {})}
 																				/>}
+																				<>
+																					{!['email','password', 'password_confirmation', 'mobile_no'].includes(userKey)&&
+																					<span
+																					style={{
+																						fontSize: '0.625rem',
+																						color: fieldStats[userKey]?.colorIndicator
+																					}}
+																					className={`align-self-end d-flex font-italic`}>
+																					{
+																					(
+																						fieldStats[userKey]?.charCount
+																					||
+																						fieldStats[userKey]?.wordCount) ?
+																							(isTextArea ?
+																							<>
+																								{`${fieldStats[userKey]?.charCount} chars • ${fieldStats[userKey]?.wordCount}/${fieldStats[userKey]?.maxWords} words`}
+																							</>
+																							:
+																							<>
+																								{`${fieldStats[userKey]?.charCount}/${fieldStats[userKey]?.maxCharsLimit} chars`}
+																							</>)
+																						:null}
+																					
+																					</span>}
+																				</>
 																		</span>
-																				{/* cancel and submit buttons for all non location fields (input and textarea) */}
-																				<EditFieldButton
-																				setEditFields={setEditFields}
-																				userKey={userKey}
-																				editField={editField}
-																				onSubmitHandler={onSubmitHandler}
-																				loading={loading} />
+																		<span className={`align-self-${(deviceType||isTextArea)?'center':'baseline'}`}>
+																			{/* cancel and submit buttons for all non location fields (input and textarea) */}
+																			<EditFieldButton
+																			setEditFields={setEditFields}
+																			userKey={userKey}
+																			editField={editField}
+																			onSubmitHandler={onSubmitHandler}
+																			loading={loading} />
+																		</span>
 																		{/* </> */}
 																	</div>
 																</>
 														}
+														
 												</div>
 												// /</div>
 											}
