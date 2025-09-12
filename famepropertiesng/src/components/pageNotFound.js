@@ -55,8 +55,8 @@ function PageNotFound() {
 				alignItems: 'center',
 				flexDirection: 'column',
 				}}>
-				<h3 style={{color: '#475569', fontSize: 20}}>{`Device type: ${deviceInfo.deviceInfo}`}</h3>
-				<h3 style={{color: '#475569', fontSize: 20}}>{`Device width: ${deviceInfo.width}px`}</h3>
+				<h3 style={{color: '#475569', fontSize: 16}}>{`Device type: ${deviceInfo.deviceInfo}`}</h3>
+				<h3 style={{color: '#475569', fontSize: 16}}>{`Device width: ${deviceInfo.width}px`}</h3>
 			</div>
 			{/* <div className="container-fluid"
 			style={{
