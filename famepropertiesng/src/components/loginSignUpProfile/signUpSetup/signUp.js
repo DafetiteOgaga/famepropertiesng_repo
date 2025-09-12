@@ -14,10 +14,11 @@ import { useImageKitAPIs } from "../../../hooks/fetchAPIs";
 import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCompress";
 import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
+import { limitInput } from "../profileSetup/profileMethods";
 import {
 	inputArr, isFieldsValid, validatePassword,
 	checkEmailUniqueness, validateEmail,
-} from "./formInfo";
+} from "./signUpFormInfo";
 
 const baseURL = getBaseURL();
 
@@ -67,6 +68,7 @@ function SignUp() {
 	const [formData, setFormData] = useState(initialFormData);
 	const [isEmailValid, setIsEmailValid] = useState(null);
 	const [isEmailLoading, setIsEmailLoading] = useState(false);
+	const [fieldStats, setFieldStats] = useState({})
 	const deviceType = useDeviceType().width <= 576;
 
 	// validate password on change
@@ -78,16 +80,51 @@ function SignUp() {
 
 	// validate email on change
 	useEffect(() => {
-			validateEmail({formData, setIsEmailLoading})
+			validateEmail({
+				email: formData.email,
+				setIsEmailLoading})
 	}, [formData.email])
 
 	// handle input changes
 	const onChangeHandler = (e) => {
 		e.preventDefault();
-		const { name, value } = e.target
+		const { name, value, tagName } = e.target
+
+		let maxChars;
+		if (name==='first_name'||name==='last_name'||name==='username') {
+			maxChars = 50;
+		} else if (name==='email') {
+			maxChars = 100;
+		} else if (name==='mobile_no') {
+			maxChars = 20;
+		} else if (name==='password'||name==='password_confirmation') {
+			maxChars = 64;
+		} else if (name==='address'||name==='nearest_bus_stop') {
+			maxChars = 150;
+		}
+
+		// auto-detect textarea
+		const isTextArea = String(tagName).toUpperCase() === 'TEXTAREA';
+
+		// pass explicit limits so behavior is clear
+		const {
+			value: limitedValue,
+			charCount,
+			wordCount,
+			colorIndicator,
+			maxCharsLimit,
+			maxWords,
+		} =
+			limitInput(value, maxChars, undefined, isTextArea);
 		setFormData(prev => ({
 			...prev,
-			[name]: value
+			[name]: limitedValue
+		}))
+		setFieldStats(prev => ({
+			...prev,
+			[name]: { charCount, wordCount, colorIndicator,
+						maxCharsLimit, maxWords,
+					},
 		}))
 	}
 
@@ -144,7 +181,7 @@ function SignUp() {
 
 		if (!checkFields) {
 			console.warn('Form is invalid');
-			toast.error('Error! Form is invalid');
+			toast.error('Error! All fields with * are required');
 			return;
 		}
 		const cleanedData = {};
@@ -158,8 +195,10 @@ function SignUp() {
 				key==='password' ||
 				key==='hasStates'||
 				key==='hasCities' ||
+				key==='email' ||
 				typeof value === 'number'
 			)?value:value.trim().toLowerCase();
+			if (key==='email') cleanedData[key] = value.trim()
 		})
 		// console.log('submitting form:', cleanedData);
 		// toast.success('Registration Successful!');
@@ -345,6 +384,7 @@ function SignUp() {
 
 	// console.log({country, state, city})
 	// console.log({formData})
+	console.log({selectedFile})
 	return (
 		<>
 			<form onSubmit={handleImageUploadToCloud}
@@ -465,13 +505,39 @@ function SignUp() {
 													passwordErrorMessage={passwordErrorMessage} />}
 
 													{/* email validity messages */}
-													{(input.type==='email'&&isEmailValid?.boolValue)&&
-													<EmailValidText isEmailValid={isEmailValid} />}
+													{(input.type==='email')&&
+													<EmailValidText
+													isEmailValid={isEmailValid}
+													isEmailLoading={isEmailLoading} />}
 
 													{/* email loading spinner */}
-													{(input.type==='email'&&isEmailLoading)&&
-													<BouncingSpinner />}
+													{/* {(input.type==='email'&&isEmailLoading)&&
+													<BouncingSpinner />} */}
 												</>}
+												<>
+													{!['email','password', 'password_confirmation', 'mobile_no'].includes(input.name)&&
+													<span
+													style={{
+														fontSize: '0.625rem',
+														color: fieldStats[input.name]?.colorIndicator
+													}}
+													className={`justify-content-end d-flex font-italic`}>
+													{
+													// (
+														fieldStats[input.name]?.charCount ?
+													// ||
+													// 	fieldStats[input.name]?.wordCount) ?
+													// 		(isTextArea ?
+													// 		<>
+													// 			{`${fieldStats[input.name]?.charCount} chars • ${fieldStats[input.name]?.wordCount}/${fieldStats[input.name]?.maxWords} words`}
+													// 		</>
+													// 		:
+															<>
+																{`${fieldStats[input.name]?.charCount}/${fieldStats[input.name]?.maxCharsLimit} chars`}
+															</>:null}
+													
+													</span>}
+												</>
 									</div>
 								)
 							})}
@@ -483,11 +549,26 @@ function SignUp() {
 
 									{/* select, crop and compress file */}
 									<ImageCropAndCompress
+									buttonText={'profile picture'}
 									onComplete={setSelectedFile}
 									type={'profilePhoto'}
 									ref={handleImageProcessingRef}
 									isImagePreview={setImagePreview} />
 
+									{/* <button
+									type="button"
+									onClick={() => {
+										setSelectedFile(null);
+										setPreviewURL(null);
+										setFormData(prev => ({
+											...prev,
+											previewURL: ''
+										}))
+									}}
+									className="btn btn-sm btn-danger d-block mt-2"
+									>
+										Remove
+									</button> */}
 								</div>
 							</div>
 						</div>
@@ -536,16 +617,20 @@ function PasswordErrorMessage({passwordErrorMessage}) {
 		</>
 	)
 }
-function EmailValidText({isEmailValid}) {
+function EmailValidText({
+	isEmailValid, isEmailLoading}) {
 	return (
 		<>
+			{isEmailLoading ?
+			<BouncingSpinner />
+			:
 			<span
 			style={{
-				color: isEmailValid.color,
+				color: isEmailValid?.color,
 				fontSize: '0.75rem',
 				display: 'inline-block',
 				transform: 'skewX(-17deg)',
-			}}>{isEmailValid?.message}</span>
+			}}>{isEmailValid?.message}</span>}
 		</>
 	)
 }
