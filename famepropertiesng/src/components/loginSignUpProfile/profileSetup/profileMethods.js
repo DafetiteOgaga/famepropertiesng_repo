@@ -25,4 +25,51 @@ const reOrderFields = (entries, reOrderFieldsArr) => {
 const toTextArea = (str, textAreaFieldsArr) => {
 	return textAreaFieldsArr.includes(str)
 }
-export { reOrderFields, toTextArea };
+
+// function to limit input characters and words when plugged into onchange events
+const limitInput = (value, maxChars = 80, maxWords = 200, isTextArea = false) => {
+	let limitedWordsValue = value ?? '';
+	let limitedCharsValue = value ?? '';
+	let color = '';
+
+	const maxCharsLimit = isTextArea ? 200 : maxChars;
+
+	// char warning (80% threshold)
+	if (maxCharsLimit && limitedCharsValue.length > maxCharsLimit * 0.8) {
+		color = '#BC4B51';
+	}
+
+	// hard char limit
+	if (maxCharsLimit && limitedCharsValue.length > maxCharsLimit) {
+		limitedCharsValue = limitedCharsValue.slice(0, maxCharsLimit);
+	}
+
+	// safer words count
+	const currentTrim = limitedWordsValue.trim();
+	const wordsCount = currentTrim ? currentTrim.split(/\s+/).length : 0;
+	if (maxWords && wordsCount > maxWords * 0.8) {
+		color = '#BC4B51';
+	}
+
+	// hard word limit
+	let words = currentTrim ? currentTrim.split(/\s+/) : [];
+	if (maxWords && words.length > maxWords) {
+		words = words.slice(0, maxWords);
+		limitedWordsValue = words.join(' ');
+	}
+
+	const limitedValue = isTextArea ? limitedWordsValue : limitedCharsValue;
+	const charCount = limitedValue.length;
+	const wordCount = limitedValue.trim() ? limitedValue.trim().split(/\s+/).length : 0;
+	// const maxValue = isTextArea ? 200 : maxChars;
+
+	return {
+		value: limitedValue,
+		charCount,
+		wordCount,
+		colorIndicator: color,
+		maxCharsLimit,
+		maxWords,
+	};
+};
+export { reOrderFields, toTextArea, limitInput };
