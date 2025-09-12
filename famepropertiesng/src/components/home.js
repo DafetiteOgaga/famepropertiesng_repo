@@ -1,6 +1,6 @@
 import React from "react"
 import { Carousel } from "./sections/carousel"
-import { Products } from "./sections/products"
+import { Products } from "./products/products"
 import { BouncingDots } from "../spinners/spinner"
 
 function Home() {
