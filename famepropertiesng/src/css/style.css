@@ -6570,9 +6570,14 @@ button:disabled,
   cursor: not-allowed;
   pointer-events: none;     /* completely prevents hover */
 }
+.custom-upload-btn:disabled {
+  /* color: #475569; */
+  background-color: #86909d;
+  /* border-color: #475569; */
+}
 
 .btn-color-dark {
-  background-color: #475569 !important;
+  background-color: #475569;
   border: none;
 }
 .btn-color-dark:focus {
