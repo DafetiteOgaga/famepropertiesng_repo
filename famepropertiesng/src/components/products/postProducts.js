@@ -279,6 +279,7 @@ function PostProduct() {
 	// console.log('renderedFormIDs', renderedFormIDs.current)
 	// console.log('productSectionRefs:', productSectionRefs.current)
 	// console.log({sections})
+	// console.log('sections length:', sections.length)
 	// console.log('trackEmptyFormsRef:\n'.repeat(2), trackEmptyFormsRef.current)
 	// console.log({checkFields})
 	// console.log('firstImages:', firstImages)
