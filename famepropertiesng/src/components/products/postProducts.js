@@ -283,7 +283,7 @@ function PostProduct() {
 	// console.log('trackEmptyFormsRef:\n'.repeat(2), trackEmptyFormsRef.current)
 	// console.log({checkFields})
 	// console.log('firstImages:', firstImages)
-	console.log({userInfo})
+	// console.log({userInfo})
 	return (
 		<>
 			<Breadcrumb page={'Post Products'} />
