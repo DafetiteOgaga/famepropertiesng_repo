@@ -21,6 +21,7 @@ function useScrollDetection() {
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, [lastScrollY]);
 
+	// console.log({scrollingDown, lastScrollY});
 	return { scrollingDown, lastScrollY};
 }
 export { useScrollDetection };

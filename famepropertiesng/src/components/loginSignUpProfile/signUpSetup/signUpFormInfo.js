@@ -137,10 +137,10 @@ const validatePassword = ({formData, setPasswordErrorMessage}) => {
 
 // basic format check
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const validateEmail = ({formData, setIsEmailLoading}) => {
+const validateEmail = ({email, setIsEmailLoading}) => {
 	// validate email field whenever it changes
-	if (formData.email) {
-		if (emailRegex.test(formData.email)) {
+	if (email) {
+		if (emailRegex.test(email)) {
 			setIsEmailLoading(true)
 		} else {
 			setIsEmailLoading(false)
@@ -150,22 +150,10 @@ const validateEmail = ({formData, setIsEmailLoading}) => {
 
 // Check if all required (specified) fields are filled
 const isFieldsValid = ({formData, passwordErrorMessage}) => {
-	// list all required fields here
-	const requiredFields = [
-		'first_name',
-		'address',
-		'nearest_bus_stop',
-		'mobile_no',
-		'email',
-		'password',
-		'password_confirmation',
-		'country',
-		'state',
-		'stateCode',
-		'phoneCode',
-		'city',
-	];
-	const isFieldValid = requiredFields.every((field) => formData[field].trim() !== "");
+	// get list of all required fields
+	const isRequiredArr = inputArr.filter(field => field.important);
+	// console.log({isRequiredArr})
+	const isFieldValid = isRequiredArr.every((field) => typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!=="");
 	return isFieldValid && !passwordErrorMessage
 };
 

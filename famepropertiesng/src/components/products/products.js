@@ -77,13 +77,13 @@ function Products() {
 	const isMobile = deviceType.width<=576
 	const userInfo = createLocal.getItem('fpng-user');
 	const isNotLoggedIn = !userInfo;
-	console.log({userInfo})
+	// console.log({userInfo})
 	// if (userInfo) {
 	// 	setProductRatingArr(userInfo.product_ratings);
 	// }
 	// console.log('parameters:', parameters);
 	const fetchServerData = async (endpoint="products") => {
-		console.log(`Fetching data from endpoint: ${endpoint}`);
+		// console.log(`Fetching data from endpoint: ${endpoint}`);
 		const config = {
 			method: isLike?'POST':'GET',
 			body: isLike?JSON.stringify({
@@ -92,7 +92,7 @@ function Products() {
 				liked: true,
 			}):null,
 		}
-		console.log({isLike})
+		// console.log({isLike})
 		try {
 			const prodRes = await (fetch(`${baseURL}/${endpoint}${endpoint.includes('?')?'':'/'}`,
 				{
@@ -127,7 +127,7 @@ function Products() {
 				setIsLike(null);
 				return
 			}
-			console.log("fetch on mount ...")
+			// console.log("fetch on mount ...")
 			setPagination({
 				prev: prodData?.previous,
 				next: prodData?.next,
@@ -137,7 +137,7 @@ function Products() {
 			});
 			setLoad(prev=>prev+1);
 			setProductItemArr(prodData?.results);
-			console.log({prodData})
+			// console.log({prodData})
 			// setProductRatingArr(prodData.product_ratings);
 		} catch (error) {
 			console.error("Error fetching data:", error);
@@ -184,13 +184,13 @@ function Products() {
 		}
 		return false;
 	}
-	console.log({productItemArr, pagination})
-	console.log(
-		'\nprev:', pagination?.prev,
-		'\nnext:', pagination?.next,
-		'\ncount:', pagination?.count,
-		'\ntotal_pages:', pagination?.total_pages,
-	)
+	// console.log({productItemArr, pagination})
+	// console.log(
+	// 	'\nprev:', pagination?.prev,
+	// 	'\nnext:', pagination?.next,
+	// 	'\ncount:', pagination?.count,
+	// 	'\ntotal_pages:', pagination?.total_pages,
+	// )
 	// console.log({userInfo})
 	// console.log('totalUsers:', totalUsers);
 	return (
@@ -203,7 +203,7 @@ function Products() {
 						// const randomNumber = Math.floor(Math.random() * 6);
 						// const no = totalNoOfReviewers(productRatingArr);
 						// const numberOfLikes = convertLikesToStars(productObjItem.total_liked, 10)
-						// console.log({productObjItem})
+						// console.log({productObjItem, userInfo})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
 						return (
@@ -218,7 +218,7 @@ function Products() {
 									<div className="product-img position-relative overflow-hidden">
 										<img className="img-fluid w-100" alt="" src={
 											// getImage(productObjItem, 'img')
-											productObjItem.image_url
+											productObjItem.image_url_0
 											}/>
 
 										{/* SOLD Overlay */}

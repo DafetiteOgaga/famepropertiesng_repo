@@ -59,6 +59,16 @@ const headerMenuArr = [
 		type: "link",
 	},
 	{
+		menu: "Register Store",
+		link: "/store-sign-up/id",
+		type: "link",
+	},
+	{
+		menu: "Post Products",
+		link: "/post-products/id",
+		type: "link",
+	},
+	{
 		menu: "Contact",
 		link: "/contact",
 		type: "link",
@@ -189,6 +199,7 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 		<>
 			<nav className={`container-fluid container-fluid-nav navbar bg-dark navbar-expand-lg navbar-dark py-3 py-lg-0 px-xl-5 ${isMenuOpen?'':!scrollingDown ? 'hidden' : ''}`}
 			style={{
+				top: -1,
 				height: '8%',
 				flexWrap: 'nowrap',
 				}}>
@@ -266,7 +277,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	}, [userInfo])
 	let status = accessToken
 	// console.log('fpng-status:', status)
-	status = status??null;
+	// status = status??null;
 	const [itemClicked, setItemClicked] = useState(false);
 	const handleMenuItemClick = () => {
 		setItemClicked(prev => !prev);
@@ -286,15 +297,23 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 			navigate(statusLink)
 		}
 	}
-	function moveItem(array, fromIndex, toIndex) {
+	function moveItem(array, from, toIndex) {
+		let fromIndex = from;
+		if (typeof fromIndex === 'string') {
+			fromIndex = array.findIndex(obj => obj.menu.toLowerCase() === 'clear cart')
+			// const clearCartItem = array[fromIndex];
+			// console.log({fromIndex ,clearCartItem})
+		}
 		const newArray = [...array]; // copy to avoid mutating original
+		// console.log('newArray:', newArray)
 		const [movedItem] = newArray.splice(fromIndex, 1); // remove item
 		newArray.splice(toIndex, 0, movedItem); // insert at new index
 		return newArray;
 	}
 	// usage;
 	// const reordered = moveItem(menuArrItems, 2, 1);
-	let resortedMobile = moveItem(headerMenuArr, 7, 3);
+	// console.log({headerMenuArr})
+	let resortedMobile = moveItem(headerMenuArr, 'clear cart', 3);
 	let resortedPc
 	// console.log({headerMenuArr})
 	// console.log({resortedMobile})
@@ -302,16 +321,46 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	// console.log({isUserDetected})
 	// console.log({menuRef})
 
+	let isLoggedIn = false
 	if (!isUserDetected) {
-		// console.log('removing logout')
-		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'logout');
-		resortedPc = headerMenuArr.filter(obj => obj.menu.toLowerCase() !== 'logout');
+		// not logged in - remove logout button, keep login button
+		// remove register user and post products buttons if not logged in
+		resortedMobile = resortedMobile.filter(obj => (
+			obj.menu.toLowerCase() !== 'logout'&&
+			obj.menu.toLowerCase() !== 'register store'&&
+			obj.menu.toLowerCase() !== 'post products'
+		));
+		resortedPc = headerMenuArr.filter(obj => (
+			obj.menu.toLowerCase() !== 'logout'&&
+			obj.menu.toLowerCase() !== 'register store'&&
+			obj.menu.toLowerCase() !== 'post products'
+		));
 	} else {
-		// console.log('removing login')
-		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'login');
-		resortedPc = headerMenuArr.filter(obj => obj.menu.toLowerCase() !== 'login');
+		// logged in - remove login button, keep logout button
+		// add user id to the link for register store and post products
+		isLoggedIn = true
+		resortedMobile = resortedMobile.filter(obj => {
+			if (obj?.menu.toLowerCase() === 'register store'||
+				obj?.menu.toLowerCase() === 'post products') {
+				// console.log('found register store menu item')
+				// console.log('link before:', obj.link)
+				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
+				// console.log('link after:', obj.link)
+			}
+			return obj.menu.toLowerCase() !== 'login'
+		});
+		resortedPc = headerMenuArr.filter(obj => {
+			if (obj?.menu.toLowerCase() === 'register store'||
+				obj?.menu.toLowerCase() === 'post products') {
+				// console.log('found register store menu item')
+				// console.log('link before:', obj.link)
+				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
+				// console.log('link after:', obj.link)
+			}
+			return obj.menu.toLowerCase() !== 'login'
+		});
 	}
-	// console.log('filtered:', {resortedMobile})
+	// console.log({resortedMobile, resortedPc})
 	// else {
 	// 	// Remove item
 	// 	resortedMobile = resortedMobile.filter(obj => obj.menu !== 'logout');
@@ -512,7 +561,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 													padding: '0rem 1rem',
 													marginLeft: 0,
 													marginRight: 0,
-													marginTop: menu?.menu?.toLowerCase() === "contact" ? '14rem' : '',
+													marginTop: menu?.menu?.toLowerCase()==="contact"?(isLoggedIn?'6rem':'20rem'):'',
 													marginBottom: lastItem ? '60%' : '',
 													border: '2px outset buttonborder',
 													borderTopLeftRadius: 0,
