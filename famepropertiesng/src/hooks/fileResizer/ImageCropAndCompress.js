@@ -3,6 +3,7 @@ import Cropper from "react-easy-crop";
 import imageCompression from "browser-image-compression";
 import { useDeviceType } from "../deviceType";
 import Modal from "react-modal";
+import { titleCase } from "../changeCase";
 
 // Utility: turn crop pixels into a File via canvas
 const getCroppedImg = (imageSrc, cropPixels) => {
@@ -35,7 +36,8 @@ const getCroppedImg = (imageSrc, cropPixels) => {
 	});
 };
 
-const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, ref) => {
+const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview, imageId=null, buttonText=null }, ref) => {
+	// console.log({imageId})
 	const [imageSrc, setImageSrc] = useState(null);
 	const [crop, setCrop] = useState({ x: 0, y: 0 });
 	const [zoom, setZoom] = useState(1);
@@ -45,14 +47,16 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 	const [fileName, setFileName] = useState("No file chosen");
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
-	// console.log({type})
+	const [isFileSelected, setIsFileSelected] = useState(false);
+	// console.log({onComplete})
 
 	let targetHeight // target height
 	let targetWidth // target width
 	if (type === "product") {
 		targetHeight = 500;
 		targetWidth = 500;
-	} else if (type==="profilePhoto"||type==='changeProfilePhoto') {
+	} else if (type==="profilePhoto"||
+		type==='changeProfilePhoto') {
 		targetHeight = 200;
 		targetWidth = 200;
 	} else {
@@ -63,6 +67,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 
 	// handle crop done
 	const handleCropComplete = useCallback((_, croppedAreaPixels) => {
+		// console.log({croppedAreaPixels})
 		setCroppedAreaPixels(croppedAreaPixels);
 	}, []);
 
@@ -109,9 +114,12 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 				const options = {
 					maxSizeMB: maxSizeMB, // target ~300KB
 					maxWidthOrHeight: targetWidth, // just in case
+					// initialQuality: 0.7, // start at 70% quality
+					fileType: "image/jpeg", // output as JPEG
 					useWebWorker: true,
 				};
 
+				// console.log('compressing with options:', options)
 				// Step 2: compress
 				compressedFile = await imageCompression(croppedFile, options);
 			}
@@ -124,7 +132,11 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 			// console.log("Final file:", compressedFile);
 
 			// send file to parent
-			if (onComplete) onComplete(compressedFile);
+			if (onComplete) {
+				// console.log('sending to parent ...')
+				onComplete(compressedFile);
+				setIsFileSelected(true);
+			}
 
 		} catch (err) {
 			console.error(err);
@@ -141,6 +153,10 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 	};
 
 	// console.log({imageSrc})
+	// console.log({finalImageUrl})
+	// console.log({finalFile})
+	// console.log({fileName})
+	// console.log({croppedAreaPixels})
 	return (
 		<>
 			{/* File input */}
@@ -149,22 +165,24 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 				marginBottom: (type!=='changeProfilePhoto')?'10px':'',
 			}}>
 				<label
-				htmlFor="fileUpload"
+				htmlFor={`${imageId?imageId:'fileUpload'}`}
 				className="custom-upload-btn bg-dark"
 				style={{
 					marginBottom: 0,
 				}}>
-					Upload Image
+					{buttonText?titleCase(`${isFileSelected?'change':'select'} ${buttonText}`):'Upload Image'}
 				</label>
 				<span
 				className="ml-2"
 				style={{
 					fontSize: '0.9rem',
 					textWrap: 'nowrap',
-				}}>{fileName.length>15?fileName.slice(0, 15)+'... '+fileName.slice(fileName.lastIndexOf('.')):fileName}</span>
+				}}>
+					{fileName.length>15?fileName.slice(0, 15)+'... '+fileName.slice(fileName.lastIndexOf('.')):fileName}
+				</span>
 			</div>
 			<input
-			id="fileUpload"
+			id={`${imageId?imageId:'fileUpload'}`}
 			// className=" mb-2"
 			type="file"
 			accept="image/*" // accept images only
@@ -199,105 +217,114 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 				</div>
 			)} */}
 			{imageSrc && (
-			<Modal
-			open={true}
-			onClose={() => setImageSrc(null)}
-			isOpen={imageSrc}
-			onRequestClose={null}
-			ariaHideApp={false}
-			contentLabel="Crop image"
-			shouldCloseOnOverlayClick={true}
-			shouldCloseOnEsc={true}
-			style={{
-				overlay: { backgroundColor: "rgba(0,0,0,0.6)", zIndex: 99 },
-				content: {
-					inset: "50% auto auto 50%",
-					transform: "translate(-50%, -50%)",
-					padding: 0,
-					border: "none",
-					borderRadius: 16,
-					width: "90vw",
-					maxWidth: 900,
-					height: "80vh",
-					overflow: "hidden",
-					display: "flex",
-					flexDirection: "column",
-					background: "transparent",
-				},
-			}}
-			>
-				<div style={{
-				position: "absolute",
-				top: "50%",
-				left: "50%",
-				transform: "translate(-50%, -50%)",
-				width: isMobile?"100%":"80%",
-				height: isMobile?"70%":"80%",
-				// background: "#fff",
-				borderRadius: "10px",
-				overflow: "hidden",
-				}}>
-					{(imageSrc) && (
-				<div
-				style={{
-					display: "flex",
-					gap: 12,
-					padding: 12,
-					justifySelf: "flex-end",
-					// background: "#fff",
-					position: "relative",
-					zIndex: 100,
-					}}>
-					<button
-					type="button"
-					className="btn btn-secondary px-2 py-1"
-					// style={{
-					// 	padding: '0.2.5rem 0.7rem'
-					// }}
-					onClick={()=> {
-						setImageSrc(null);
-						setFileName("No file chosen");
-					}}>
-						Cancel
-					</button>
-					<button
-					type="button"
-					className="btn btn-secondary px-2 py-1"
-					// style={{
-					// 	padding: '0.2.5rem 0.7rem'
-					// }}
-					onClick={handleImageProcessing}>
-						Use Photo
-					</button>
-				</div>
-				// <button
-				// onClick={handleImageProcessing}
-				// className="mt-3 px-4 py-2 rounded-lg"
-				// style={{
-				// 	position: "absolute",
-				// 	top: "30%",
-				// }}
-				// >
-				// 	Done (Crop + Compress)
-				// </button>
-			)}
-				<Cropper
-					image={imageSrc}
-					crop={crop}
-					zoom={zoom}
-					aspect={targetAspectRatio}
-					onCropChange={setCrop}
-					onZoomChange={setZoom}
-					onCropComplete={handleCropComplete}
-					cropShape={(type==='profilePhoto'||type==='changeProfilePhoto')?'round':'rect'}
-				/>
-				</div>
-			</Modal>
+				<>
+					<Modal
+					open={true}
+					onClose={() => setImageSrc(null)}
+					isOpen={imageSrc}
+					onRequestClose={null}
+					ariaHideApp={false}
+					contentLabel="Crop image"
+					shouldCloseOnOverlayClick={true}
+					shouldCloseOnEsc={true}
+					style={{
+						overlay: { backgroundColor: "rgba(0,0,0,0.6)", zIndex: 99 },
+						content: {
+							inset: "50% auto auto 50%",
+							transform: "translate(-50%, -50%)",
+							padding: 0,
+							border: "none",
+							borderRadius: 16,
+							width: "90vw",
+							maxWidth: 900,
+							height: "80vh",
+							overflow: "hidden",
+							display: "flex",
+							flexDirection: "column",
+							background: "transparent",
+						},
+					}}
+					>
+						<div style={{
+						position: "absolute",
+						top: "50%",
+						left: "50%",
+						transform: "translate(-50%, -50%)",
+						width: isMobile?"100%":"80%",
+						height: isMobile?"70%":"80%",
+						// background: "#fff",
+						borderRadius: "10px",
+						overflow: "hidden",
+						}}>
+							{(imageSrc) && (
+						<div
+						style={{
+							display: "flex",
+							gap: 12,
+							padding: 12,
+							justifySelf: "flex-end",
+							// background: "#fff",
+							position: "relative",
+							zIndex: 100,
+							}}>
+							<button
+							type="button"
+							className="btn btn-secondary px-2 py-1"
+							// style={{
+							// 	padding: '0.2.5rem 0.7rem'
+							// }}
+							onClick={()=> {
+								setImageSrc(null);
+								setFileName("No file chosen");
+							}}>
+								Cancel
+							</button>
+							<button
+							type="button"
+							className="btn btn-secondary px-2 py-1"
+							// style={{
+							// 	padding: '0.2.5rem 0.7rem'
+							// }}
+							onClick={handleImageProcessing}>
+								Use Image
+							</button>
+						</div>
+						// <button
+						// onClick={handleImageProcessing}
+						// className="mt-3 px-4 py-2 rounded-lg"
+						// style={{
+						// 	position: "absolute",
+						// 	top: "30%",
+						// }}
+						// >
+						// 	Done (Crop + Compress)
+						// </button>
+					)}
+						<Cropper
+							image={imageSrc}
+							crop={crop}
+							zoom={zoom}
+							aspect={targetAspectRatio}
+							onCropChange={setCrop}
+							onZoomChange={setZoom}
+							onCropComplete={handleCropComplete}
+							cropShape={
+								(type==='profilePhoto'||
+								type==='changeProfilePhoto')?
+									'round':'rect'
+							}
+						/>
+						</div>
+					</Modal>
+					
+				</>
 			)}
 
 			
 
-			{(finalImageUrl&&!imageSrc&&type!=='changeProfilePhoto') && (
+			{(finalImageUrl&&
+				!imageSrc&&
+				type!=='changeProfilePhoto') && (
 			<div
 			style={{
 				// position: "relative",   // required
@@ -311,22 +338,43 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview }, r
 				// height: "13vh",       // takes half viewport height
 			}}
 			>
-					{(type!=='profilePhoto'&&type!=='changeProfilePhoto')&&<p>Final Preview:</p>}
+					{(type!=='profilePhoto'&&
+						type!=='changeProfilePhoto'&&
+						type!=="product")&&
+							<p>Final Preview:</p>}
 					<img src={finalImageUrl}
 					alt="Final"
 					style={{
 						width: "200px",         // set a width
 						height: "200px",        // set a height
 						// background: "#333",     // optional: dark background
-						borderRadius: "50%",   // optional: rounded edges
+						borderRadius: type==="product"?"3%":"50%",   // optional: rounded edges
 						padding: (type==='profilePhoto'||type==='changeProfilePhoto')?'2px':'0', // padding for profile photos
 						border: (type==='profilePhoto'||type==='changeProfilePhoto')?'1px solid #666':'none',
 						// overflow: "hidden",     // keeps crop area inside
 					}}
 					className=""
 					/>
+					<button
+					type="button"
+					onClick={() => {
+						setFinalImageUrl(null);
+						setFinalFile(null);
+						setFileName("No file chosen");
+						isImagePreview(false);
+						if (onComplete) {
+							onComplete(null);
+							setIsFileSelected(false);
+						}
+					}}
+					className="btn btn-sm btn-danger d-block mt-2"
+					>
+						Remove
+					</button>
 
-					{(type!=='profilePhoto'&&type!=='changeProfilePhoto')&&
+					{(type!=='profilePhoto'&&
+						type!=='changeProfilePhoto'&&
+						type!=="product")&&
 					<button
 					onClick={handleDownload}
 					className="px-4 py-2 rounded-lg"
