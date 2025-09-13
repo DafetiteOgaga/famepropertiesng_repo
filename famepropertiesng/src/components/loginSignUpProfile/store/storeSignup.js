@@ -554,9 +554,7 @@ function StoreSignUp() {
 													{(input.name==='store_name')&&
 													<StoreNameAndNoteValidText
 													isStoreNameAvailable={isStoreNameAvailable}
-													isStoreLoading={isStoreLoading} />
-														
-														}
+													isStoreLoading={isStoreLoading} />}
 
 													{/* email validity messages */}
 													{(input.type==='email')&&
