@@ -283,6 +283,7 @@ function PostProduct() {
 	// console.log('trackEmptyFormsRef:\n'.repeat(2), trackEmptyFormsRef.current)
 	// console.log({checkFields})
 	// console.log('firstImages:', firstImages)
+	console.log({userInfo})
 	return (
 		<>
 			<Breadcrumb page={'Post Products'} />
@@ -353,7 +354,7 @@ function PostProduct() {
 						)})}
 
 						{/* select store */}
-						<div className="col-md-6 form-group">
+						<div className="col-md-6 form-group px-0 mb-0">
 							<label
 							htmlFor={'storeID'}>Select Store<span>*</span></label>
 							<select
@@ -364,8 +365,9 @@ function PostProduct() {
 							style={{borderRadius: '5px'}}
 							value={selectData['storeID']}
 							required={true}
+							disabled={loading||!storesArr?.length}
 							>
-								<option value="">-- Select a store --</option>
+								<option value="">-- {(storesArr?.length)?'Select a store':'No Store Registered'} --</option>
 								{storesArr?.map((store, i) => {
 									return (
 										<option
@@ -375,10 +377,14 @@ function PostProduct() {
 								})}
 							</select>
 						</div>
-						<div className="d-flex justify-content-around my-4">
+						{/* if user has no store */}
+						{(!storesArr?.length)&&
+						<StoreNameAndNoteValidText />}
+
+						<div className={`d-flex flex-${deviceType?'column':'row'} justify-content-${deviceType?'between':'around'} my-4`}>
 							<button
 							type="button"
-							className="custom-upload-btn btn-color-dark"
+							className={`custom-upload-btn btn-color-dark ${deviceType?'mb-2':''}`}
 							onClick={handleAddSection}>
 								<span className="fa fa-plus"/> Add Section
 							</button>
@@ -904,6 +910,19 @@ function BouncingSpinner() {
 			}}>
 				<BouncingDots size="vm" color="#475569" p="0" />
 			</span>
+		</>
+	)
+}
+function StoreNameAndNoteValidText({
+	isStoreNameAvailable, isStoreLoading}) {
+	return (
+		<>
+			<span
+			style={{
+				fontSize: '0.75rem',
+				display: 'inline-block',
+				transform: 'skewX(-17deg)',
+			}}>*You currently have no store registered</span>
 		</>
 	)
 }
