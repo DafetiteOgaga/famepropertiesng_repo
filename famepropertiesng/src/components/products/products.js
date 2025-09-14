@@ -40,6 +40,12 @@ const productsActionArr = [
 		url: "detail",
 		click: 'detail',
 		type: 'link'
+	},
+	{
+		icon: "fa fa-pen",
+		url: "edit-product",
+		click: 'editProduct',
+		type: 'link'
 	}
 ]
 const checkproductRating = (productId, productRatingArr) => {
@@ -191,7 +197,7 @@ function Products() {
 	// 	'\ncount:', pagination?.count,
 	// 	'\ntotal_pages:', pagination?.total_pages,
 	// )
-	// console.log({userInfo})
+	console.log({userInfo})
 	// console.log('totalUsers:', totalUsers);
 	return (
 		<div className="container-fluid pb-3">
@@ -256,6 +262,17 @@ function Products() {
 												const isAddedToCart = handleProductPrevAddedToCart(productObjItem)&&
 																	action.click==='cart';
 												if (isAddedToCart) return null;
+												const canEdit = productObjItem?.store?.user?.id === userInfo?.id&&userInfo?.is_seller
+												// const nl = '\n'
+												// console.log({
+												// 	canEdit,
+												// 	click: action.click,
+												// 	url: action.url,
+												// 	type: action.type,
+												// })
+												// enable this when edit product component page is done
+												// if (!canEdit&&action.click==='editProduct') return null;
+
 												// console.log({isAddedToCart}, productObjItem.id)
 												// console.log({isPrevLiked}, productObjItem.id)
 												return (
