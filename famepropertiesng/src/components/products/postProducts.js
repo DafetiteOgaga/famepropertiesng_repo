@@ -60,14 +60,8 @@ function PostProduct() {
 			const cleanedData = {};
 			Object.entries(formObj).forEach(([key, value]) => {
 				cleanedData[key] = (
-					key==='fileId'||
-					key==='fileId1'||
-					key==='fileId2'||
-					key==='fileId3'||
-					key==='image_url'||
-					key==='image_url1'||
-					key==='image_url2'||
-					key==='image_url3'||
+					key.startsWith('fileId')||
+					key.startsWith('image_url')||
 					key==='market_price'||
 					key==='discount_price'||
 					// key==='storeID'||
@@ -107,6 +101,10 @@ function PostProduct() {
 					<strong>{titleCase('')} Product Created!</strong>
 				</div>
 			);
+			console.log('Product Created Successfully:', data);
+			// use a transparent background to refresh this page
+			// reset to one section
+			// productSectionRefs.current[0].resetForm();
 			// setFormData(initialFormData); // reset form
 			// // navigate('/') // go to home page after registration
 			return data;
@@ -265,8 +263,9 @@ function PostProduct() {
 		// console.log({areInstancesValid, allValid, allFormsFirstImageSelected, selectData})
 		return submittedForm.length&&
 				// allValid&&
-				selectData.storeID&&
-				allFormsFirstImageSelected;
+				selectData.storeID
+				// &&
+				// allFormsFirstImageSelected;
 	}
 	const checkFields = handleFieldsValidation();
 
@@ -278,7 +277,7 @@ function PostProduct() {
 	// console.log('formdata from child:\n'.repeat(5), submittedForm)
 	// console.log('renderedFormIDs', renderedFormIDs.current)
 	// console.log('productSectionRefs:', productSectionRefs.current)
-	// console.log({sections})
+	console.log({sections})
 	// console.log('sections length:', sections.length)
 	// console.log('trackEmptyFormsRef:\n'.repeat(2), trackEmptyFormsRef.current)
 	// console.log({checkFields})
@@ -381,17 +380,23 @@ function PostProduct() {
 						{(!storesArr?.length)&&
 						<StoreNameAndNoteValidText />}
 
+						{/* add and remove form section buttons */}
 						<div className={`d-flex flex-${deviceType?'column':'row'} justify-content-${deviceType?'between':'around'} my-4`}>
+							{/* add form button */}
 							<button
 							type="button"
 							className={`custom-upload-btn btn-color-dark ${deviceType?'mb-2':''}`}
-							onClick={handleAddSection}>
+							onClick={handleAddSection}
+							disabled={sections.length >= 5}>
 								<span className="fa fa-plus"/> Add Section
 							</button>
+
+							{/* remove form button */}
 							<button
 							type="button"
 							className="custom-upload-btn btn-color-dark"
-							onClick={()=>handleRemoveSection()} disabled={sections.length === 1}>
+							onClick={()=>handleRemoveSection()}
+							disabled={sections.length === 1}>
 								<span className="fa fa-minus"/> Remove Last Section
 							</button>
 						</div>
@@ -717,6 +722,11 @@ const ProductSection = forwardRef(({renderedFormIDs,
 				throw error; // rethrow so parent knows
 			}
 		},
+		resetForm: () => {
+			console.log("Resetting form data ...");
+			// resets form data
+			resetForm();
+		}
 	}));
 
 	// handle setting selected files from ImageCropAndCompress component
