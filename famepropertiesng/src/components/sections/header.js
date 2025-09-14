@@ -378,7 +378,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		// console.log('menu:', menu)
 		return page === link;
 	}
-	console.log({resortedMobile, resortedPc})
+	// console.log({resortedMobile, resortedPc})
 	// else {
 	// 	// Remove item
 	// 	resortedMobile = resortedMobile.filter(obj => obj.menu !== 'logout');
@@ -497,7 +497,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 									if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
 									const isActive = handleIsActive(menu);
 									// console.log({itemClicked})
-									console.log({isActive, name: menu.menu, type: menu.type, link: menu.link})
+									// console.log({isActive, name: menu.menu, type: menu.type, link: menu.link})
 									return (
 										<Fragment key={index}>
 											{menu?.type==='button'?
