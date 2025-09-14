@@ -204,6 +204,7 @@ function Products() {
 						// const no = totalNoOfReviewers(productRatingArr);
 						// const numberOfLikes = convertLikesToStars(productObjItem.total_liked, 10)
 						// console.log({productObjItem, userInfo})
+						console.log({id:productObjItem.id, productObjItem})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
 						return (
