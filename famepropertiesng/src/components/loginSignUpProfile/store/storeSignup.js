@@ -244,10 +244,13 @@ function StoreSignUp() {
 				return;
 			}
 			const data = await response.json();
-			const updateSellerStatus = data?.user?.is_seller;
-			createLocal.setItem('fpng-user', {...userInfo, is_seller: updateSellerStatus});
-			// console.log('Response data from server',data)
-			// setSellerValue(data)
+			const updateUserInfo = {
+				...userInfo,
+				is_seller: data?.user?.id === userInfo?.id,
+				store: [...userInfo.store, data]
+			};
+			createLocal.setItem('fpng-user', updateUserInfo);
+			console.log('Response data from server',data)
 			toast.success(
 				<div>
 					Successful.<br />
@@ -449,6 +452,8 @@ function StoreSignUp() {
 
 	// console.log({country, state, city})
 	// console.log({userInfo})
+	// console.log({store:userInfo?.store})
+	// console.log({seller:userInfo?.is_seller})
 	// const userInfoSeller = userInfo?.is_seller;
 	// console.log({userInfoSeller})
 	// console.log({sellerValue})
