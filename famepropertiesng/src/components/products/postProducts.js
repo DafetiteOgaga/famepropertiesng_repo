@@ -411,6 +411,7 @@ function PostProduct() {
 							{!loading?'Post':
 							<BouncingDots size="sm" color="#fff" p="1" />}
 						</button>
+						<NoteOnNumOfPosts />
 
 						{/* show error response message */}
 						{isError && <ShowErrorFromServer isError={isError} />}
@@ -933,6 +934,20 @@ function StoreNameAndNoteValidText({
 				display: 'inline-block',
 				transform: 'skewX(-17deg)',
 			}}>*You currently have no store registered</span>
+		</>
+	)
+}
+
+function NoteOnNumOfPosts() {
+	return (
+		<>
+			<span
+			style={{
+				fontSize: '0.75rem',
+				display: 'inline-block',
+				transform: 'skewX(-10deg)',
+				textAlign: 'center',
+			}}>*You can only submit 5 products in one post. To post more, make multiple posts</span>
 		</>
 	)
 }
