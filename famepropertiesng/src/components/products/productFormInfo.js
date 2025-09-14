@@ -42,14 +42,14 @@ const inputArr = [
 		name: 'technical_descriptions',
 		placeholder: '1.75-inch AMOLED display, Bluetooth 5.0, GPS, 50m water resistance, 7-day battery life',
 		type: 'text',
-		important: true,
+		important: false,
 		autoComplete: true,
 	},
 	{
 		name: 'marketing_descriptions',
 		placeholder: 'Stay connected and track your health with an elegant smartwatch built for style and performance',
 		type: 'text',
-		important: true,
+		important: false,
 		autoComplete: true,
 	},
 ]
