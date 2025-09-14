@@ -947,7 +947,7 @@ function NoteOnNumOfPosts() {
 				display: 'inline-block',
 				transform: 'skewX(-10deg)',
 				textAlign: 'center',
-			}}>*You can only submit 5 products in one post. To post more, make multiple posts</span>
+			}}>*Note: You can only submit 5 products in one post. To post more, make multiple posts</span>
 		</>
 	)
 }
