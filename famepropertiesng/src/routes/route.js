@@ -16,6 +16,8 @@ import { Welcome } from '../components/welcome';
 import { Profile } from '../components/loginSignUpProfile/profileSetup/profile';
 import { StoreSignUp } from '../components/loginSignUpProfile/store/storeSignup';
 import { PostProduct } from '../components/products/postProducts';
+import { SingleImageUploader } from '../hooks/backgroundRemover/singleBackgroundRemover';
+import { BulkImageUploader } from '../hooks/backgroundRemover/multipleBackgroundRemover';
 
 function AppRoutes() {
 	return (
@@ -23,7 +25,11 @@ function AppRoutes() {
 			<Route path="/" element={<Index />}>
 				{/* This makes Home the default route */}
 				<Route index element={<Home />} />
-				
+
+				{/* test routes */}
+				<Route path="s-img-remover" element={<SingleImageUploader />} />
+				<Route path="b-img-remover" element={<BulkImageUploader />} />
+
 				{/* Other routes from Outlet in Index */}
 				{/* products */}
 				<Route path="products/:productname" element={<Products />} />
