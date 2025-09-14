@@ -41,7 +41,7 @@ const headerMenuArr = [
 	{
 		menu: "Cart",
 		type: "link",
-		link: "cart"
+		link: "/cart"
 	},
 	{
 		menu: "Categories",
@@ -105,7 +105,7 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	let { scrollingDown } = useScrollDetection();
 	// const [scrollUp, setScrollUp] = useState(scrollingDown)
 	const deviceType = useDeviceType()
-	const currentPage = useLocation().pathname.split('/').pop();
+	const currentPage = useLocation().pathname;
 	const navigate = useNavigate();
 	const menuHandler = () => {
 		setIsMenuOpen(prev=> {
@@ -236,24 +236,28 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 				// desktop
 				<div className="navbar-collapse justify-content-between" id="navbarCollapse">
 					<Brand />
-					<MenuItems handleClearCart={handleClearCart}
+					<MenuItems
+					handleClearCart={handleClearCart}
+					currentPage={currentPage}
 					numberOfProductsInCart={numberOfProductsInCart}
 					// isUserDetected={isUserDetected}
 					/>
 				</div>}
 			</nav>
-			{shouldRender && <MenuItems
-								currentPage={currentPage}
-								mTop={mTop}
-								isMenuOpen={isMenuOpen}
-								// menuWrapperRef={menuWrapperRef}
-								overlayRef={overlayRef}
-								menuRef={menuRef}
-								categoryMenuRef={categoryMenuRef}
-								numberOfProductsInCart={numberOfProductsInCart}
-								handleClearCart={handleClearCart}
-								// isUserDetected={isUserDetected}
-								/>}
+			{shouldRender &&
+				// mobile
+				<MenuItems
+				currentPage={currentPage}
+				mTop={mTop}
+				isMenuOpen={isMenuOpen}
+				// menuWrapperRef={menuWrapperRef}
+				overlayRef={overlayRef}
+				menuRef={menuRef}
+				categoryMenuRef={categoryMenuRef}
+				numberOfProductsInCart={numberOfProductsInCart}
+				handleClearCart={handleClearCart}
+				// isUserDetected={isUserDetected}
+				/>}
 		</>
 	)
 }
@@ -360,7 +364,21 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 			return obj.menu.toLowerCase() !== 'login'
 		});
 	}
-	// console.log({resortedMobile, resortedPc})
+	const handleIsActive = (menu) => {
+		const page = currentPage.split('/')[1];
+		const link = menu?.link?.split('/')[1];
+		// console.log({type: menu.type, menu: menu.menu, itemClicked})
+		if (menu.type==='button'&&
+			menu.menu.toLowerCase()==='categories'&&
+			itemClicked) {
+			// console.log('categories active')
+			return itemClicked
+		}
+		// console.log({page, link, mlink:menu?.link})
+		// console.log('menu:', menu)
+		return page === link;
+	}
+	console.log({resortedMobile, resortedPc})
 	// else {
 	// 	// Remove item
 	// 	resortedMobile = resortedMobile.filter(obj => obj.menu !== 'logout');
@@ -410,7 +428,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 							{userInfo &&
 							<>
 								<Link to={"/profile"}
-								className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
+								className={`dropdown-item slideInRight mr-0 ${handleIsActive({menu: 'Profile', link:"/profile"})?'active':''}`} // removed mr-3 to mr-0
 								style={{
 									display: 'flex',
 									justifyContent: 'center',
@@ -477,6 +495,9 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 									const lastItem = index === headerMenuArr.length - 1;
 									// console.log('isUserDetected:', isUserDetected)
 									if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
+									const isActive = handleIsActive(menu);
+									// console.log({itemClicked})
+									console.log({isActive, name: menu.menu, type: menu.type, link: menu.link})
 									return (
 										<Fragment key={index}>
 											{menu?.type==='button'?
@@ -509,7 +530,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 													}
 												}}
 												// onClick={handleMenuItemClick}
-												className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
+												className={`dropdown-item slideInRight mr-0 ${isActive?'active':''}`} // removed mr-3 to mr-0
 												style={{
 													display: 'flex',
 													justifyContent: 'center',
@@ -518,6 +539,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 													textWrap: 'nowrap',
 													fontSize: '0.8rem',
 													color: '#E2E8F0',
+													// backgroundColor: isActive?'#475569':'',
 													textAlign: 'center',
 													padding: '0rem 1rem',
 													marginLeft: 0,
@@ -548,7 +570,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 												:
 												<Link to={menu.link}
 												// onClick={handleMenuItemClick}
-												className={`dropdown-item slideInRight mr-0`} // removed mr-3 to mr-0
+												className={`dropdown-item slideInRight mr-0 ${isActive?'active':''}`} // removed mr-3 to mr-0
 												style={{
 													display: 'flex',
 													justifyContent: 'center',
@@ -642,6 +664,16 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 								if (menu?.menu?.toLowerCase() === "cart") return null;
 								if (menu?.menu?.toLowerCase() === "categories") return null;
 								if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
+								const page = currentPage.split('/')[1];
+								const isActive = handleIsActive(menu);
+								// console.log(
+								// 	'\ncurrentPage:', currentPage,
+								// 	'\npage:', page,
+								// 	'\nmenuLink[1]:', menu?.link?.split('/')[1],
+								// 	'\nmenu:', menu.menu, '- type:', menu.type,
+								// 	'\nisActive:', isActive
+								// )
+								// console.log({menu})
 								return (
 									<Fragment key={index}>
 										{menu.type==='button' ?
@@ -658,7 +690,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 												{menu.menu}
 											</button>
 											:
-											<Link to={menu.link} className="text-body mr-3"
+											<Link to={menu.link} className={`text-body head-item ${isActive?'active':''}`}
 											style={{textWrap: 'nowrap'}}>{menu.menu}</Link>}
 									</Fragment>
 								)
