@@ -267,6 +267,22 @@
 	will-change: transform;
 }
 
+@keyframes opacy {
+	0% {
+		opacity: 0;
+		visibility: hidden;
+	}
+	to {
+		opacity: 1;
+		visibility: visible;
+	}
+}
+.opacy {
+	animation: opacy 1s forwards;
+	/* animation-fill-mode: both; */
+	will-change: opacy;
+}
+
 @keyframes slideOutRight {
 	0% {
 		transform:translateZ(0)
