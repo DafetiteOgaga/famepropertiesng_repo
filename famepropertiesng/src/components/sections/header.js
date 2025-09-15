@@ -127,10 +127,13 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	// }, [productsInCart])
 	
 	useEffect(() => {
+		// const rootContainer = document.getElementById('root');
 		// console.log("is Menu Opened:", isMenuOpen);
 		if (isMenuOpen) {
+			document.documentElement.style.overflow = "hidden";
 			document.body.style.overflow = "hidden";
 		} else {
+			document.documentElement.style.overflow = "";
 			document.body.style.overflow = "";
 		}
 
@@ -423,7 +426,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 							borderBottomLeftRadius: 20,
 							display: 'flex',
 							flexDirection: 'column',
-							alignSelf: 'flex-start'
+							alignSelf: 'flex-start',
+							overflowY: 'auto',
 						}}>
 							{userInfo &&
 							<>
