@@ -21,12 +21,33 @@ const initialFormData = () => ({
 	product_description: '',
 	full_descriptions: '',
 	technical_descriptions: '',
+	technical_feature_1: '',
+	technical_feature_2: '',
+	technical_feature_3: '',
+	technical_feature_4: '',
+	technical_feature_5: '',
 	marketing_descriptions: '',
 	market_price: '',
 	discount_price: '',
 	storeID: '',
 	id: crypto.randomUUID(),
 })
+
+const isEmpty =  (formObj, ignoreID=true) => {
+	const emptyCheck = Object.entries(formObj).every(([key, value]) => {
+		if (ignoreID && key==='id') return true; // ignore ID field
+		const fieldsBool = value === null ||
+							value === undefined ||
+							(typeof value === 'string' && value.trim() === '') ||
+							(Array.isArray(value) && value.length === 0) ||
+							(typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
+		return fieldsBool // returns every() value to isEmpty fxn
+	})
+	if (emptyCheck) {
+		console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
+	}
+	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
+};
 
 function PostProduct() {
 	const trackEmptyFormsRef = useRef([]);
@@ -42,6 +63,7 @@ function PostProduct() {
 	const productSectionRefs = useRef([]); // keep refs for each section/form
 	const firstImages = useRef([]); // track if first image for all forms are selected
 	const renderedFormIDs = useRef([])
+	const [renderedFormIDChanged, setRenderedFormIDChanged] = useState(false)
 	const deviceType = useDeviceType().width <= 576;
 
 	const userInfo = createLocal.getItem('fpng-user')
@@ -56,26 +78,46 @@ function PostProduct() {
 		setLoading(true);
 
 		// clean data: trim strings and convert to lowercase except for certain fields
-		const cleanedDataArray = submittedForm.map(formObj => {
-			const cleanedData = {};
-			Object.entries(formObj).forEach(([key, value]) => {
-				cleanedData[key] = (
-					key.startsWith('fileId')||
-					key.startsWith('image_url')||
-					key==='market_price'||
-					key==='discount_price'||
-					// key==='storeID'||
-					typeof value === 'number'
-				)?value:value.trim().toLowerCase();
-			})
+		const cleanedDataArray = submittedForm
+			.map(formObj => {
+				// check and track empty forms
+				if (isEmpty(formObj)) return null; // skip empty forms
 
-			// add select data
-			cleanedData['storeID'] = selectData['storeID'];
-			setSelectData({storeID: ''}) // reset select data after transferring to cleaned data
+				// if (isEmpty) {
+				// 	if (!trackEmptyFormsRef.current.includes(formObj.id)) {
+				// 		trackEmptyFormsRef.current.push(formObj.id);
+				// 	}
+				// } else {
+				// 	// remove from empty forms tracking if it exists
+				// 	trackEmptyFormsRef.current = trackEmptyFormsRef.current.filter(id => id !== formObj.id);
+				// }
+				// // console.log(`Form ID ${formObj.id} is empty:`, isEmpty);
 
-			// console.log('Submitting form with cleaned data:', cleanedData);
-			return cleanedData;
-		});
+				// clean data
+				const cleanedData = {};
+				Object.entries(formObj)
+					.forEach(([key, value]) => {
+						cleanedData[key] = (
+							key.startsWith('fileId')||
+							key.startsWith('image_url')||
+							key==='market_price'||
+							key==='discount_price'||
+							// key==='storeID'||
+							typeof value === 'number'
+						)?value:value.trim().toLowerCase();
+					})
+
+				// add select data
+				cleanedData['storeID'] = selectData['storeID'];
+				// setSelectData({storeID: ''}) // reset select data after transferring to cleaned data
+
+				console.log('Submitting form with cleaned data:', cleanedData);
+				return cleanedData;
+			}).filter(item => item !== null);;
+
+
+		// setLoading(false);
+		// return
 
 		try {
 			const response = await fetch(`${baseURL}/products/`, {
@@ -226,9 +268,11 @@ function PostProduct() {
 			if (index === -1 || index === productSectionRefs.current.length - 1) {
 				productSectionRefs.current.pop();
 				renderedFormIDs.current.pop();
+				setRenderedFormIDChanged(prev => !prev) // trigger re-render
 			} else if (index > 0) {
 				productSectionRefs.current.splice(index, 1);
 				renderedFormIDs.current.splice(index, 1);
+				setRenderedFormIDChanged(prev => !prev) // trigger re-render
 			}
 		}
 
@@ -256,19 +300,24 @@ function PostProduct() {
 			const isValid = isFieldsValid({formData: value});
 			return { fieldId, isValid };
 		})
-		const allValid = areInstancesValid.every(item => item.isValid);
-		const allFormsFirstImageSelected =
-											// firstImages.current.length === sections.length&&
-											firstImages.current.every(obj => obj.selected);
-		// console.log({areInstancesValid, allValid, allFormsFirstImageSelected, selectData})
+		// const allValid = areInstancesValid.every(item => item.isValid);
+		const allFormsFirstImageSelected = firstImages.current.every(obj => obj.selected)&&
+											// or maybe i should use renderedFormIDs.length (its still consistent with instant updates)
+											sections.length===firstImages.current.length;
+		console.log({allFormsFirstImageSelected, selectData: selectData.storeID, submittedForm: submittedForm.length})
 		return submittedForm.length&&
 				// allValid&&
-				selectData.storeID
-				// &&
-				// allFormsFirstImageSelected;
+				selectData.storeID&&
+				allFormsFirstImageSelected;
 	}
 	const checkFields = handleFieldsValidation();
 
+	useEffect(() => {
+		const renderedFormsIDs = renderedFormIDs?.current?.map(form=>form.id)||[];
+		console.log('Rendered form IDs changed, checking first images selected ...', renderedFormsIDs);
+		firstImages.current = firstImages.current.filter(obj => renderedFormsIDs.includes(obj.id));
+		console.log('Tracking first images selected for forms:', firstImages.current);
+	}, [renderedFormIDChanged])
 	// // track current form ID
 	// const handleCurrentFormID = (id) => {
 	// 	console.log({id})
@@ -277,11 +326,18 @@ function PostProduct() {
 	// console.log('formdata from child:\n'.repeat(5), submittedForm)
 	// console.log('renderedFormIDs', renderedFormIDs.current)
 	// console.log('productSectionRefs:', productSectionRefs.current)
-	console.log({sections})
+	console.log({sections: sections.length, submittedForm: submittedForm.length})
 	// console.log('sections length:', sections.length)
 	// console.log('trackEmptyFormsRef:\n'.repeat(2), trackEmptyFormsRef.current)
 	// console.log({checkFields})
-	// console.log('firstImages:', firstImages)
+	console.log(
+		'\nfirstImages:', firstImages,
+		'\nall', `(${firstImages.current.length})`,
+		'true:', firstImages.current.every(obj => obj.selected),
+		`\nsections(${sections.length}) = firstImages(${firstImages.current.length}):`, sections.length===firstImages.current.length,
+		'\ncheckFields:', checkFields,
+		'\nrenderedFormIDs:', renderedFormIDs.current,
+	)
 	// console.log({userInfo})
 	return (
 		<>
@@ -338,6 +394,7 @@ function PostProduct() {
 								renderedFormIDs={renderedFormIDs}
 								// handleCurrentFormID={handleCurrentFormID}
 								submittedForm={submittedForm}
+								setRenderedFormIDChanged={setRenderedFormIDChanged}
 								setSubmittedForm={handlSubmittedForm}
 								setCheckReadiness={setCheckReadiness}
 								setLoading={setLoading}
@@ -408,7 +465,7 @@ function PostProduct() {
 						disabled={
 							!checkFields||
 							loading}>
-							{!loading?'Post':
+							{!loading?`Post ${sections.length>1?`All (${sections.length}) Products`:'Product'}`:
 							<BouncingDots size="sm" color="#fff" p="1" />}
 						</button>
 						<NoteOnNumOfPosts />
@@ -425,6 +482,7 @@ const ProductSection = forwardRef(({renderedFormIDs,
 									// handleCurrentFormID,
 									setSubmittedForm,
 									submittedForm,
+									setRenderedFormIDChanged,
 									onSubmitToServerHandler,
 									formImageCountRef,
 									trackEmptyFormsRef,
@@ -460,7 +518,12 @@ const ProductSection = forwardRef(({renderedFormIDs,
 		let maxChars;
 		if (name==='product_name') {
 			maxChars = 60;
-		} else if (name==='product_description') {
+		} else if (name==='product_description'||
+					name==='technical_feature_1'||
+					name==='technical_feature_2'||
+					name==='technical_feature_3'||
+					name==='technical_feature_4'||
+					name==='technical_feature_5') {
 			maxChars = 150;
 		} else if (name==='market_price'||name==='discount_price') {
 			maxChars = 10;
@@ -505,14 +568,14 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			id: `product_image3_${formData.id}`,
 			label: "Product Image 3",
 		},
-		{
-			id: `product_image4_${formData.id}`,
-			label: "Product Image 4",
-		},
-		{
-			id: `product_image5_${formData.id}`,
-			label: "Product Image 5",
-		}
+		// {
+		// 	id: `product_image4_${formData.id}`,
+		// 	label: "Product Image 4",
+		// },
+		// {
+		// 	id: `product_image5_${formData.id}`,
+		// 	label: "Product Image 5",
+		// }
 	]
 
 	const imageLength = imageCropAndCompressArrDetails.length;
@@ -759,10 +822,10 @@ const ProductSection = forwardRef(({renderedFormIDs,
 	// check if all fields are empty (skipping id)
 	useEffect(() => {
 		// check if all fields (except id) are empty strings
-		const allEmpty = Object.entries(formData).every(([key, value]) => {
-			if (key === 'id') return true // skip id
-			return value === '' // check others are empty strings
-		})
+		// const allEmpty = Object.entries(formData).every(([key, value]) => {
+		// 	if (key === 'id') return true // skip id
+		// 	return value === '' // check others are empty strings
+		// })
 		// console.log({allEmpty})
 		const isFormTracked = renderedFormIDs.current.find(form=>form.id===formData.id)
 
@@ -772,13 +835,14 @@ const ProductSection = forwardRef(({renderedFormIDs,
 				idx: renderedFormIDs.current.length,
 				id: formData.id
 			});
+			setRenderedFormIDChanged(prev => !prev) // trigger re-render
 		}
 
 		// console.log('current form:XXXXXXX\n'.repeat(5), formData);
 		// console.log('existing forms:ZZZZZ\n'.repeat(5), submittedForm);
 
 		// only send to parent if some fields are filled (i.e form not empty)
-		if (!allEmpty) {
+		if (!isEmpty(formData)) {
 			// remove from empty tracking if it exists
 			// console.log("Removing form ID from empty tracking array if exists ...");
 			trackEmptyFormsRef.current = trackEmptyFormsRef.current.filter(id => id !== formData.id);
