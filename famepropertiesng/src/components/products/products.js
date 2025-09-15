@@ -71,6 +71,7 @@ function Products() {
 	const [productItemArr, setProductItemArr] = useState([]);
 	const [isLike, setIsLike] = useState(null);
 	const [load, setLoad] = useState(0);
+	const [isImageLoading, setIsImageLoading] = useState(true);
 	const [pagination, setPagination] = useState({
 		prev: null,
 		next: null,
@@ -88,6 +89,11 @@ function Products() {
 	// 	setProductRatingArr(userInfo.product_ratings);
 	// }
 	// console.log('parameters:', parameters);
+	useEffect(() => {
+		// whenever transition changes → new image starts loading
+		setIsImageLoading(true);
+	}, []); // set the dependency array if more images is to be rendered per product
+
 	const fetchServerData = async (endpoint="products") => {
 		// console.log(`Fetching data from endpoint: ${endpoint}`);
 		const config = {
@@ -213,6 +219,7 @@ function Products() {
 						console.log({id:productObjItem.id, productObjItem})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
+						const imageLoading = isImageLoading
 						return (
 							<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
 							style={isMobile ?
@@ -223,13 +230,19 @@ function Products() {
 								<div className={`${productObjItem.sold?'':'product-item'} bg-light mb-4`}
 								style={{borderRadius: '10px'}}>
 									<div className="product-img position-relative overflow-hidden">
-										<img className="img-fluid w-100" alt="" src={
-											// getImage(productObjItem, 'img')
-											productObjItem.image_url_0
-											}/>
+										<>
+											{imageLoading && (
+											<BouncingDots size="sm" color="#475569" p="8" />)}
+											<img
+											key={'use this to trigger image rerender, good for transition/animation'}
+											className={`img-fluid w-100 ${imageLoading?'d-none':''}`}
+											alt={productObjItem.name}
+											src={productObjItem.image_url_0}
+											onLoad={() => setIsImageLoading(false)}/>
+										</>
 
 										{/* SOLD Overlay */}
-										{productObjItem.sold && (
+										{(productObjItem.sold&&!imageLoading) && (
 											<div
 											style={{
 												position: "absolute",
@@ -252,7 +265,7 @@ function Products() {
 											</div>
 										)}
 
-										{!productObjItem.sold&&
+										{(!productObjItem.sold&&!imageLoading)&&
 										<div className="product-action">
 											{productsActionArr.map((action, actionIndex) => {
 												// console.log({productObjItem})
@@ -291,7 +304,7 @@ function Products() {
 															className={`${isPrevLiked?'d-none':''}`}
 															onClick={()=>{
 																if (action.click==='cart') {
-																	handleAddToCart(productObjItem);
+																	handleAddToCart(productObjItem, 'add');
 																} else if (action.click==='like') {
 																	setIsLike(productObjItem.id);
 																	// toast.info(`${titleCase(productObjItem.name)} Rated`);
@@ -351,24 +364,24 @@ function Products() {
 					</div>
 				</div>
 				:
-				(isMobile?
-					((Array.from({length: 2})).map((_, index) => {
-					return (
-						<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
-						style={{paddingLeft: 0,
-								paddingRight: 0,}}>
-								{(Array.from({length: 4}).map((_, innerIndex) => {
-									return (
-											<div key={innerIndex} className={`product-item bg-light mb-4`}
-											style={{borderRadius: '10px'}}>
-												<BouncingDots size={"lg"} color={"#475569"} p={"10"} />
-											</div>
-								)}))}
-						</div>
-					)
-					}))
-				:
-				<BouncingDots size={"lg"} color={"#475569"} p={"12"} />)
+				// (isMobile?
+				// 	((Array.from({length: 2})).map((_, index) => {
+				// 	return (
+				// 		<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
+				// 		style={{paddingLeft: 0,
+				// 				paddingRight: 0,}}>
+				// 				{(Array.from({length: 4}).map((_, innerIndex) => {
+				// 					return (
+				// 							<div key={innerIndex} className={`product-item bg-light mb-4`}
+				// 							style={{borderRadius: '10px'}}>
+				// 								<BouncingDots size={"lg"} color={"#475569"} p={"10"} />
+				// 							</div>
+				// 				)}))}
+				// 		</div>
+				// 	)
+				// 	}))
+				// :
+				<BouncingDots size={isMobile?"sm":"lg"} color={"#475569"} p={isMobile?"8":"12"} />
 			}
 		</div>
 	)
