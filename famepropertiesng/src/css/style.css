@@ -6632,6 +6632,14 @@ button:disabled,
   border-radius: 2px;
 }
 
+.details-img {
+  transition: opacity 2s ease-in-out;
+  opacity: 0;
+}
+.details-img.block {
+  opacity: 1;
+}
+
 /* ################################################# */
 /* ====================
    Number Input (remove arrows)
