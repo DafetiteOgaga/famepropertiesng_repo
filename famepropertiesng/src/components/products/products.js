@@ -234,8 +234,8 @@ function Products() {
 											{imageLoading && (
 											<BouncingDots size="sm" color="#475569" p="8" />)}
 											<img
-											key={'use this to trigger image rerender, good for transition/animation'}
-											className={`img-fluid w-100 ${imageLoading?'d-none':''}`}
+											key={imageLoading}
+											className={`img-fluid w-100 ${imageLoading?'d-none':'opacy'}`}
 											alt={productObjItem.name}
 											src={productObjItem.image_url_0}
 											onLoad={() => setIsImageLoading(false)}/>
