@@ -127,7 +127,7 @@ function Index() {
 		createLocal.removeItem('fpng-cart');
 		setNumberOfProductsInCart(0)
 	}
-	const mTop = deviceType.laptop ? '12':deviceType.desktop ?'6':'22';
+	const mTop = deviceType.laptop ? '12':deviceType.desktop ?'6':'22.5';
 	return (
 		<>
 			<main className='container-fluid px-xl-5'
