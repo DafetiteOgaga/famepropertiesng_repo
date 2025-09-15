@@ -5,7 +5,7 @@ import { Home } from '../components/home';
 import { Index } from '../components';
 import { Cart } from '../components/cart';
 import { Checkout } from '../components/checkout';
-import { Detail } from '../components/detail';
+import { Detail } from '../components/productDetails/detail';
 import { PageNotFound } from '../components/pageNotFound';
 import { Products } from '../components/products/products';
 import { LogIn } from '../components/loginSignUpProfile/login';
