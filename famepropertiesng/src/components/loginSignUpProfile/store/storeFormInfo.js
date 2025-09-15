@@ -71,7 +71,7 @@ const inputArr = [
 		name: 'store_phone_number',
 		placeholder: '806 000 1111',
 		type: 'tel',
-		important: false,
+		important: true,
 		autoComplete: 'tel-national', // phone number (local format)
 		phoneProps: {
 			inputMode: 'numeric',   // <!-- brings up number keypad on mobile -->
