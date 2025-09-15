@@ -56,6 +56,7 @@ const tabPane = [
 		component: ProductReview,
 	},
 ]
+const randomNumber = Math.floor(Math.random() * 6);
 const productStar = "fa fa-star"
 function Detail() {
 	const { handleAddToCart } = useOutletContext();
@@ -115,7 +116,7 @@ function Detail() {
 		}
 	}
 	// const image = productImagesArr[transition]
-	const randomNumber = Math.floor(Math.random() * 6);
+	// const randomNumber = Math.floor(Math.random() * 6);
 	// const productImages = {}
 	const productImages = productItem?
 		Object.entries(productItem)
