@@ -24,31 +24,102 @@ function Index() {
 		// setIsUserDetected(!!userIn)
 	}, [])
 
-	const handleAddToCart = (product) => {
-		// console.log('Adding to cart:', product);
+	const handleAddToCart = (product, mode='add') => {
+		console.log('Adding to cart:', product);
 
-		// Retrieve existing cart from localStorage
+		// array of add/remove
+		const addOrRemove = ['add', 'remove']
+
+		// array of increase/decrease
+		const increaseOrDecrease = ['+', '-']
+
+		// Retrieve/create existing/new cart from localStorage
 		const existingCart = createLocal.getItemRaw('fpng-cart');
 		let cart = existingCart??[];
-		// console.log('Existing cart:', cart);
+		console.log('Existing cart:', cart);
 
 		// Check if product already exists in cart
 		const isProductExist = cart.find(item => item.prdId === product.id);
 		const productIndex = cart.findIndex(item => item.prdId === product.id);
+		let event
 		if (isProductExist) {
+			if (mode === 'remove') {
+				console.log('Product exists in cart, removing item.');
+				event = 'removed from'
+				// If it exists and mode is remove, remove the item
+				cart.splice(productIndex, 1);
+				// If cart is empty after removal, clear it from localStorage
+				if (cart.length === 0) {
+					createLocal.removeItem('fpng-cart');
+					setNumberOfProductsInCart(0)
+					toast.info('Your cart is now empty.');
+					return;
+				}
+			} else if (increaseOrDecrease.includes(mode)) {
+				if (mode === '+') {
+					console.log('Product exists in cart, incrementing quantity.');
+					event = 'incremented in'
+					// If it exists and mode is +, increment the quantity
+					cart[productIndex].nop += 1;
+				} else if (mode === '-') {
+					console.log('Product exists in cart, decrementing quantity.');
+					event = 'decremented in'
+					// If it exists and mode is -, decrement the quantity
+					if (cart[productIndex].nop > 1) {
+						cart[productIndex].nop -= 1;
+					} else {
+						// If quantity is 1, do nothing
+						// cart.splice(productIndex, 1); // remove the item
+						event = 'left unchanged in'
+						// If cart is empty after removal, clear it from localStorage
+						if (cart.length === 0) {
+							createLocal.removeItem('fpng-cart');
+							setNumberOfProductsInCart(0)
+							toast.info('Your cart is now empty.');
+							return;
+						}
+					}
+				}
+			}
 			// console.log('Product exists in cart, incrementing quantity.');
-			// If it exists, increment the quantity
-			cart[productIndex].nop += 1;
+			// event = 'incremented in'
+			// // If it exists, increment the quantity
+			// cart[productIndex].nop += 1;
 		} else {
+			if (mode === 'remove' || mode === '-') {
+				console.log('Product does not exist in cart, nothing to remove or decrement.');
+				toast.error(`${product.name} is not in your cart.`);
+				return;
+			} else if (mode === '+' || mode === 'add') {
+				console.log('Product does not exist in cart, adding new item with quantity 1.');
+				event = 'added to'
+				if (mode === 'add') {
+					// If it doesn't exist and mode is add, add it with quantity 1
+					cart.push({ prdId: product.id, nop: 1 });
+				} else if (mode === '+') {
+					// If it doesn't exist and mode is +, add it with quantity 2
+					cart.push({ prdId: product.id, nop: 2 });
+				}
+				// Save updated cart back to localStorage and state
+				setNumberOfProductsInCart(cart.length)
+				createLocal.setItemRaw('fpng-cart', cart);
+				toast.success(`${product.name} has been ${event} your cart.`);
+				return;
+			} else {
+				console.log('Invalid mode provided. Use "add", "remove", "+", or "-".');
+				toast.error('Invalid action. Please try again.');
+				return;
+			}
 			// console.log('Product does not exist in cart, adding new item.');
-			// If it doesn't exist, add it with quantity 1
-			cart.push({ prdId: product.id, nop: 1 });
+			// event = 'added to'
+			// // If it doesn't exist, add it with quantity 1
+			// cart.push({ prdId: product.id, nop: 1 });
 		}
 
 		// Save updated cart back to localStorage and state
 		setNumberOfProductsInCart(cart.length)
 		createLocal.setItemRaw('fpng-cart', cart);
-		// toast.success(`${product.name} has been added to your cart.`);
+		toast.success(`${product.name} has been ${event} your cart.`);
 		// Optionally, you can provide feedback to the user
 		// alert(`${product.name} has been added to your cart.`);
 	}
