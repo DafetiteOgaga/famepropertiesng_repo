@@ -272,6 +272,9 @@ function Detail() {
 									</div>
 								</div>
 								<button
+								onClick={()=>{
+									handleAddToCart(productItem, 'add');
+								}}
 								disabled={Boolean(isItemAdded)}
 								className="btn btn-primary px-3">
 									<span className="fa fa-shopping-cart mr-1"/>{` ${Boolean(isItemAdded)?'Already Added to Cart':'Add To Cart'}`}
