@@ -158,7 +158,7 @@ function Detail() {
 			// remove item from cart
 			updated.splice(itemIndex, 1);
 		} else {
-			if (itemIndex === -1) {
+			if (itemIndex === -1 && mode === '+') {
 				// item not found, nothing to update
 				console.log("Item not found in cart for id:", id);
 				console.log('creating local copy of cart for this item')
@@ -173,7 +173,7 @@ function Detail() {
 				setReload(prev => !prev)
 				return updated;
 			}
-			const currentValue = updated[itemIndex].nop || 1;
+			const currentValue = updated[itemIndex]?.nop || 1;
 			if (mode === '+') {
 				computedCurrVal = currentValue + 1;
 			} else if (mode === '-') {
