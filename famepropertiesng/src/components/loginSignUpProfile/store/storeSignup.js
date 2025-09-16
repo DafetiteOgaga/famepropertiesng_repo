@@ -77,6 +77,7 @@ function StoreSignUp() {
 	const [isStoreNameAvailable, setIsStoreNameAvailable] = useState(null);
 	const [isEmailLoading, setIsEmailLoading] = useState(false);
 	const [isStoreLoading, setIsStoreLoading] = useState(false);
+	const [isMounting, setIsMounting] = useState(true);
 	const [fieldStats, setFieldStats] = useState({})
 	const deviceType = useDeviceType().width <= 576;
 
@@ -464,10 +465,15 @@ function StoreSignUp() {
 	// console.log({selectedFile}, 'is and instance of blob, file:', selectedFile instanceof Blob, selectedFile instanceof File)
 	// console.log({previewURL})
 	// console.log({isEmailLoading})
+	useEffect(() => {
+		// flip loading off immediately after mount
+		setIsMounting(false);
+	}, []);
 	return (
 		<>
 			<Breadcrumb page={'Register Store'} />
 
+			{!isMounting ?
 			<form onSubmit={handleImageUploadToCloud}
 			// onSubmit={handleSubmitOkayFromChild}
 			className="row px-xl-5"
@@ -682,6 +688,8 @@ function StoreSignUp() {
 					</div>
 				</div>
 			</form>
+			:
+			<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }

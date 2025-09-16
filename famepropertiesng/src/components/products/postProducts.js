@@ -64,6 +64,7 @@ function PostProduct() {
 	const firstImages = useRef([]); // track if first image for all forms are selected
 	const renderedFormIDs = useRef([])
 	const [renderedFormIDChanged, setRenderedFormIDChanged] = useState(false)
+	const [isMounting, setIsMounting] = useState(true);
 	const deviceType = useDeviceType().width <= 576;
 
 	const userInfo = createLocal.getItem('fpng-user')
@@ -339,10 +340,15 @@ function PostProduct() {
 		'\nrenderedFormIDs:', renderedFormIDs.current,
 	)
 	// console.log({userInfo})
+	useEffect(() => {
+		// flip loading off immediately after mount
+		setIsMounting(false);
+	}, []);
 	return (
 		<>
 			<Breadcrumb page={'Post Products'} />
 
+			{!isMounting ?
 			<form
 			onSubmit={handleSubmittingProcessedImagesWithForm}
 			// className="container-fluid"
@@ -475,6 +481,8 @@ function PostProduct() {
 					</div>
 				</div>
 			</form>
+			:
+			<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }

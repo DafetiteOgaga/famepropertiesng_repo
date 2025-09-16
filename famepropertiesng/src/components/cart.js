@@ -27,6 +27,7 @@ function Cart() {
 	const [inputValue, setInputValue] = useState([]);
 	const [totalAmount, setTotalAmount] = useState(0);
 	const [reload, setReload] = useState(false);
+	const [isMounting, setIsMounting] = useState(true);
 
 	// console.log({cartInStorage})
 	useEffect(() => {
@@ -125,11 +126,16 @@ function Cart() {
 	// console.log({inputValue});
 	// console.log({userInfo})
 	// console.log({totalAmount})
+	useEffect(() => {
+		// flip loading off immediately after mount
+		setIsMounting(false);
+	}, []);
 	return (
 		<>
 			<Breadcrumb page={'Shopping Cart'} />
 
 			{/* <!-- Cart Start --> */}
+			{!isMounting ?
 			<div className="container-fluid mt-3"style={{
 				paddingLeft: deviceType ? 0 : '',
 				paddingRight: deviceType ? 0 : '',
@@ -303,6 +309,8 @@ function Cart() {
 					</div>
 				</div>
 			</div>
+			:
+			<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }

@@ -248,6 +248,7 @@ function Detail() {
 	// console.log({transition, len: productImages?.length})
 	// console.log({transitionEffect})
 	console.log({inputValue})
+	console.log({deviceType})
 	return (
 		<>
 			<Breadcrumb page={'Product'} />
@@ -444,7 +445,7 @@ function Detail() {
 					</div>
 				</>
 				:
-				<BouncingDots size="lg" color="#475569" p="14" />}
+				<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
 			</div>
 		</>
 	)
