@@ -7,6 +7,7 @@ import { Outlet } from 'react-router-dom';
 import { useScrollDetection } from '../hooks/scrollDetection';
 import { useCreateStorage } from '../hooks/setupLocalStorage';
 import { toast } from 'react-toastify';
+import { titleCase } from '../hooks/changeCase';
 
 function Index() {
 	const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
@@ -28,7 +29,7 @@ function Index() {
 		console.log('Adding to cart:', product);
 
 		// array of add/remove
-		const addOrRemove = ['add', 'remove']
+		const addOrRemove = ['add', 'x']
 
 		// array of increase/decrease
 		const increaseOrDecrease = ['+', '-']
@@ -39,20 +40,22 @@ function Index() {
 		console.log('Existing cart:', cart);
 
 		// Check if product already exists in cart
-		const isProductExist = cart.find(item => item.prdId === product.id);
-		const productIndex = cart.findIndex(item => item.prdId === product.id);
+		// const productID = product.id??product.prdId;
+		console.log('Product ID:', product.id);
+		const isProductExist = cart?.find(item => item?.prdId === product.id);
+		const productIndex = cart?.findIndex(item => item?.prdId === product.id);
 		let event
 		if (isProductExist) {
-			if (mode === 'remove') {
+			if (mode === 'x') {
 				console.log('Product exists in cart, removing item.');
 				event = 'removed from'
-				// If it exists and mode is remove, remove the item
+				// If it exists and mode is x, remove the item
 				cart.splice(productIndex, 1);
 				// If cart is empty after removal, clear it from localStorage
 				if (cart.length === 0) {
 					createLocal.removeItem('fpng-cart');
 					setNumberOfProductsInCart(0)
-					toast.info('Your cart is now empty.');
+					toast.info('Your cart is empty.');
 					return;
 				}
 			} else if (increaseOrDecrease.includes(mode)) {
@@ -75,7 +78,7 @@ function Index() {
 						if (cart.length === 0) {
 							createLocal.removeItem('fpng-cart');
 							setNumberOfProductsInCart(0)
-							toast.info('Your cart is now empty.');
+							toast.info('Your cart is empty.');
 							return;
 						}
 					}
@@ -86,27 +89,39 @@ function Index() {
 			// // If it exists, increment the quantity
 			// cart[productIndex].nop += 1;
 		} else {
-			if (mode === 'remove' || mode === '-') {
+			if (mode === 'x' || mode === '-') {
 				console.log('Product does not exist in cart, nothing to remove or decrement.');
-				toast.error(`${product.name} is not in your cart.`);
+				toast.error(`${titleCase(product.name)} is not in your cart.`);
 				return;
 			} else if (mode === '+' || mode === 'add') {
 				console.log('Product does not exist in cart, adding new item with quantity 1.');
 				event = 'added to'
 				if (mode === 'add') {
 					// If it doesn't exist and mode is add, add it with quantity 1
-					cart.push({ prdId: product.id, nop: 1 });
+					cart.push({
+						prdId: product?.id,
+						nop: 1,
+						image: product?.image_url_0,
+						name: product?.name,
+						price: product?.discountPrice,
+					});
 				} else if (mode === '+') {
 					// If it doesn't exist and mode is +, add it with quantity 2
-					cart.push({ prdId: product.id, nop: 2 });
+					cart.push({
+						prdId: product?.id,
+						nop: 2,
+						image: product?.image_url_0,
+						name: product?.name,
+						price: product?.discountPrice,
+					});
 				}
 				// Save updated cart back to localStorage and state
 				setNumberOfProductsInCart(cart.length)
 				createLocal.setItemRaw('fpng-cart', cart);
-				toast.success(`${product.name} has been ${event} your cart.`);
+				toast.success(`${titleCase(product.name)} has been ${event} your cart.`);
 				return;
 			} else {
-				console.log('Invalid mode provided. Use "add", "remove", "+", or "-".');
+				console.log('Invalid mode provided. Use "add", "x", "+", or "-".');
 				toast.error('Invalid action. Please try again.');
 				return;
 			}
@@ -119,7 +134,7 @@ function Index() {
 		// Save updated cart back to localStorage and state
 		setNumberOfProductsInCart(cart.length)
 		createLocal.setItemRaw('fpng-cart', cart);
-		toast.success(`${product.name} has been ${event} your cart.`);
+		toast.success(`${titleCase(product.name)} has been ${event} your cart.`);
 		// Optionally, you can provide feedback to the user
 		// alert(`${product.name} has been added to your cart.`);
 	}
