@@ -10,12 +10,14 @@ function titleCase(str) {
 }
 
 function digitSeparator(num) {
+	if (!num) return
 	// if (typeof num!=='number') return
 	// return num.toLocaleString()
 	return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 function formatPhoneNumber(num) {
+	if (!num) return
 	const str = String(num).replace(/\D/g, ""); // remove non-digits
 	return str.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
 }

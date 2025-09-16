@@ -34,6 +34,10 @@ const initialFormData = {
 	state: '',
 	stateCode: '',
 	phoneCode: '',
+	currency: '',
+	currencyName: '',
+	currencySymbol: '',
+	countryEmoji: '',
 	city: '',
 	hasStates: false,
 	hasCities: false,
@@ -115,6 +119,10 @@ function Profile() {
 			country: country?.name||null,
 			countryId: country?.id||null,
 			phoneCode: country?.phone_code||null,
+			currency: country?.currency||null,
+			currencyName: country?.currency_name||null,
+			currencySymbol: country?.currency_symbol||null,
+			countryEmoji: country?.emoji||null,
 			hasStates: country?.hasStates??false,
 
 			// state
@@ -159,6 +167,10 @@ function Profile() {
 				stateId: userInfo.stateId||'',
 				stateCode: userInfo.stateCode||'',
 				phoneCode: userInfo.phoneCode||'',
+				currency: userInfo?.currency||null,
+				currencyName: userInfo?.currencyName||null,
+				currencySymbol: userInfo?.currencySymbol||null,
+				countryEmoji: userInfo?.countryEmoji||null,
 				city: userInfo.city||'',
 				cityId: userInfo.cityId||'',
 				hasStates: userInfo.hasStates,
@@ -168,6 +180,10 @@ function Profile() {
 				setCountry({
 					name: userInfo.country,
 					phone_code: userInfo.phoneCode,
+					currency: userInfo?.currency||null,
+					currency_name: userInfo?.currencyName||null,
+					currency_symbol: userInfo?.currencySymbol||null,
+					emoji: userInfo?.countryEmoji||null,
 					id: userInfo.countryId,
 					hasStates: userInfo.hasStates,
 				})
@@ -267,15 +283,17 @@ function Profile() {
 		const isImage = updatedFieldRef.current.includes('image_url')
 		// console.log('isImage update:', isImage)
 
-		if (updatedFieldRef.current.includes('country')) {
-			updatedFieldRef.current.push('countryId', 'phoneCode');
-		}
-		if (updatedFieldRef.current.includes('state')) {
-			updatedFieldRef.current.push('stateId', 'stateCode');
-		}
-		if (updatedFieldRef.current.includes('city')) {
-			updatedFieldRef.current.push('cityId');
-		}
+		// if (updatedFieldRef.current.includes('country')) {
+		// 	updatedFieldRef.current.push(
+		// 		'countryId', 'phoneCode', 'currency',
+		// 		'currencyName', 'currencySymbol', 'countryEmoji');
+		// }
+		// if (updatedFieldRef.current.includes('state')) {
+		// 	updatedFieldRef.current.push('stateId', 'stateCode');
+		// }
+		// if (updatedFieldRef.current.includes('city')) {
+		// 	updatedFieldRef.current.push('cityId');
+		// }
 		if (isImage) {
 			updatedFieldRef.current.push('fileId');
 		}
@@ -314,7 +332,7 @@ function Profile() {
 					original: userInfo?.[field],
 					isUpdated: ((typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim())!==userInfo?.[field],
 				}))
-				// console.log({updates})
+				console.log({updates})
 				const changedFields = updates.filter(item => item.isUpdated)
 				// console.log({updates, changedFields})
 				if (updates.some(item => (!item.isUpdated||!item.update))) {
@@ -349,12 +367,20 @@ function Profile() {
 			}
 		}
 
-		// add hasStates and hasCities if city or state is being updated
+		// add more metadata to country, state, city if they are being updated
+		if (updatedFieldRef.current.includes('country')) {
+			updatedFieldRef.current.push(
+				'countryId', 'phoneCode', 'currency',
+				'currencyName', 'currencySymbol', 'countryEmoji'
+			);
+		}
 		if (updatedFieldRef.current.includes('state')) {
-			updatedFieldRef.current.push('hasStates');
+			updatedFieldRef.current.push('stateId', 'stateCode',
+				'hasStates',
+			);
 		}
 		if (updatedFieldRef.current.includes('city')) {
-			updatedFieldRef.current.push('hasCities');
+			updatedFieldRef.current.push('cityId', 'hasCities');
 		}
 		// console.log('cleanedData:', cleanedData)
 
@@ -363,6 +389,10 @@ function Profile() {
 			'image_url',
 			'stateCode',
 			'phoneCode',
+			'currency',
+			'currencyName',
+			'currencySymbol',
+			'countryEmoji',
 			'password',
 			'cityId',
 			'stateId',
@@ -535,6 +565,7 @@ function Profile() {
 		'email', 'mobile_no', 'username', 'address', 'country',
 		'state', 'city', 'nearest_bus_stop', 'id', 'first_name',
 		'last_name', 'is_staff', 'image_url', 'fileId', 'phoneCode',
+		'currency', 'currencyName', 'currencySymbol', 'countryEmoji',
 		'stateCode', 'countryId', 'stateId', 'cityId', 'hasCities',
 		'hasStates', 'product_ratings', 'is_seller',
 	]
@@ -554,7 +585,7 @@ function Profile() {
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
-	// console.log({userInfo})
+	console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})

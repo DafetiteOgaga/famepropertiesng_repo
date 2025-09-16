@@ -71,7 +71,8 @@ function Products() {
 	const [productItemArr, setProductItemArr] = useState([]);
 	const [isLike, setIsLike] = useState(null);
 	const [load, setLoad] = useState(0);
-	const [isImageLoading, setIsImageLoading] = useState(true);
+	// const [isImageLoading, setIsImageLoading] = useState(true);
+	const [loadingImages, setLoadingImages] = useState({});
 	const [pagination, setPagination] = useState({
 		prev: null,
 		next: null,
@@ -89,10 +90,19 @@ function Products() {
 	// 	setProductRatingArr(userInfo.product_ratings);
 	// }
 	// console.log('parameters:', parameters);
-	useEffect(() => {
-		// whenever transition changes → new image starts loading
-		setIsImageLoading(true);
-	}, []); // set the dependency array if more images is to be rendered per product
+	// useEffect(() => {
+	// 	// whenever transition changes → new image starts loading
+	// 	setIsImageLoading(true);
+	// }, []); // set the dependency array if more images is to be rendered per product
+
+	// handles image loading state
+	const handleImageLoad = (id) => {
+		setLoadingImages(prev => ({ ...prev, [id]: false }));
+	};
+
+	const handleImageStart = (id) => {
+		setLoadingImages(prev => ({ ...prev, [id]: true }));
+	};
 
 	const fetchServerData = async (endpoint="products") => {
 		// console.log(`Fetching data from endpoint: ${endpoint}`);
@@ -188,7 +198,7 @@ function Products() {
 		// toast.info('Please login to add products to cart.');
 		const cartExist = createLocal.getItemRaw('fpng-cart');
 		if (cartExist) {
-			const isProductExist = cartExist.find(item=>item.prdId===product.id);
+			const isProductExist = cartExist?.find(item=>item?.prdId===product?.id);
 			if (isProductExist) {
 				// toast.info(`${titleCase(product.name)} is already in cart.`);
 				return true;
@@ -219,7 +229,7 @@ function Products() {
 						console.log({id:productObjItem.id, productObjItem})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
-						const imageLoading = isImageLoading
+						const imageLoading = loadingImages[productObjItem?.id]
 						return (
 							<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
 							style={isMobile ?
@@ -234,11 +244,14 @@ function Products() {
 											{imageLoading && (
 											<BouncingDots size="sm" color="#475569" p="8" />)}
 											<img
-											key={imageLoading}
+											key={productObjItem.id}
 											className={`img-fluid w-100 ${imageLoading?'d-none':'opacy'}`}
 											alt={productObjItem.name}
 											src={productObjItem.image_url_0}
-											onLoad={() => setIsImageLoading(false)}/>
+											onLoad={() => handleImageLoad(productObjItem?.id)}
+											onError={() => handleImageLoad(productObjItem?.id)} // stop loader on error too
+											onLoadStart={() => handleImageStart(productObjItem?.id)}
+										/>
 										</>
 
 										{/* SOLD Overlay */}

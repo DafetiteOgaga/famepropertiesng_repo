@@ -10,20 +10,7 @@ import { BouncingDots } from "../../spinners/spinner";
 import { useOutletContext } from 'react-router-dom';
 
 const baseURL = getBaseURL();
-// const productImagesArr = [
-// 	"product-1.jpg",
-// 	"product-2.jpg",
-// 	"product-3.jpg",
-// 	"product-4.jpg",
-// 	"product-5.jpg",
-// 	"product-6.jpg",
-// 	"product-7.jpg",
-// 	"product-8.jpg",
-// 	"product-3.jpg",
-// 	"product-4.jpg",
-// 	"product-5.jpg",
-// 	"product-6.jpg",
-// ]
+
 const socials = [
 	{
 		icon: "fab fa-facebook-f",
@@ -61,9 +48,11 @@ const productStar = "fa fa-star"
 function Detail() {
 	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage()
+	const [inputValue, setInputValue] = useState([]);
+	const [reload, setReload] = useState(false);
 	// const [imageIdx, setImageIdx] = useState(0);
 	const [isImageLoading, setIsImageLoading] = useState(true);
-	const [trsnsitionEffect, setTransitionEffect] = useState('') // slideInRight, slideInLeft
+	const [transitionEffect, setTransitionEffect] = useState('') // slideInRight, slideInLeft
 	const [productItem, setProductItem] = useState(null);
 	const id = useParams().id;
 	console.log('id:', id);
@@ -96,6 +85,96 @@ function Detail() {
 		fetchServerData();
 		// console.log("productItem:", productItem);
 	}, []);
+
+	useEffect(() => {
+		const cartInStorage = createLocal.getItemRaw('fpng-cart')||[]
+		console.log({cartInStorage})
+		setInputValue(cartInStorage);
+	}, [reload]);
+
+	const handleInputChange = (e, cart, id) => {
+		e.preventDefault();
+		console.log("Input changed:", e.target.value);
+		let value = e.target.value;
+
+		// only allow digits
+		if (!/^\d*$/.test(value)) return;
+		console.log('Valid input:', value);
+
+		const index = inputValue?.findIndex(item=>item?.prdId===parseInt(id));
+		// handle empty string (let user clear before typing a new number)
+		if (value === "") {
+			console.log('Input cleared');
+			setInputValue(prev => {
+				const updated = [...prev];
+				updated[index] = { ...updated[index], nop: "" };
+				createLocal.setItemRaw("fpng-cart", updated);
+				return updated;
+			});
+			return;
+		}
+
+		// parse number and auto-correct 0 → 1
+		let newValue = Math.max(1, parseInt(value, 10));
+
+		// update state and localStorage with typed value
+		setInputValue(prev => {
+			console.log('Updating inputValue at index', index, 'to', newValue);
+			const updated = [...prev];
+			updated[index] = { ...updated[index], nop: newValue };
+			createLocal.setItemRaw("fpng-cart", updated);
+			return updated;
+		});
+	};
+
+	// on input blur, if empty reset to 1
+	const handleInputBlur = (cart, id) => {
+		setInputValue(prev => {
+			const updated = [...prev];
+			const index = updated?.findIndex(item=>item?.prdId===parseInt(id));
+			let currentValue = updated[index].nop;
+
+			// if user left it empty, reset to 1
+			if (currentValue === "" || currentValue === undefined) {
+				updated[index] = { ...updated[index], nop: 1 };
+				createLocal.setItemRaw("fpng-cart", updated);
+			}
+
+			return updated;
+		});
+	};
+
+	const handleStateFuncOnClicks = (prev, id, mode) => {
+		console.log("Handling state update for id:", id, "with mode:", mode);
+		console.log({prev})
+		let computedCurrVal
+		const updated = [...prev];
+		console.log({updated})
+		// find index of item with matching id
+		let itemIndex = updated?.findIndex(item => item?.prdId === parseInt(id));
+		console.log({itemIndex})
+		if (mode === 'x') {
+			// remove item from cart
+			updated.splice(itemIndex, 1);
+		} else {
+			if (itemIndex === -1) {
+				// item not found, nothing to update
+				console.log("Item not found in cart for id:", id);
+				setReload(prev => !prev)
+				return prev;
+			}
+			const currentValue = updated[itemIndex].nop || 1;
+			if (mode === '+') {
+				computedCurrVal = currentValue + 1;
+			} else if (mode === '-') {
+				computedCurrVal = currentValue - 1;
+			}
+			const newValue = Math.max(1, computedCurrVal);
+			updated[itemIndex] = { ...updated[itemIndex], nop: newValue };
+		}
+		// createLocal.setItemRaw("fpng-cart", updated);
+		return updated;
+	}
 
 	const handleQInputChange = (e) => {
 		e.preventDefault();
@@ -145,18 +224,19 @@ function Detail() {
 	}, [transition]);
 
 	const cartItems = createLocal.getItemRaw('fpng-cart');
-	const isItemAdded = cartItems?.find(item => item.prdId === productItem?.id);
-	console.log({isItemAdded})
+	const isItemAdded = cartItems?.find(item => item?.prdId === productItem?.id);
+	// console.log({isItemAdded})
 
-	console.log({productImages, isImageLoading})
+	// console.log({productImages, isImageLoading})
 
-	console.log({productImages})
+	// console.log({productImages})
 	// console.log({selectedTab})
 	// console.log({image})
-	console.log({randomNumber})
-	console.log("productItem:", productItem);
-	console.log({transition, len: productImages?.length})
-	console.log({trsnsitionEffect})
+	// console.log({randomNumber})
+	// console.log("productItem:", productItem);
+	// console.log({transition, len: productImages?.length})
+	// console.log({transitionEffect})
+	console.log({inputValue})
 	return (
 		<>
 			<Breadcrumb page={'Product'} />
@@ -183,7 +263,7 @@ function Detail() {
 											key={transition}
 											src={productImages[transition]}
 											alt={productItem?.name||'product image'}
-											className={`w-100 h-100 details-img ${trsnsitionEffect} ${isImageLoading ? "hidden" : "block"}`}
+											className={`w-100 h-100 details-img ${transitionEffect} ${isImageLoading ? "hidden" : "block"}`}
 											onLoad={() => setIsImageLoading(false)}
 											/>
 										</>
@@ -250,24 +330,38 @@ function Detail() {
 								<div className="input-group quantity mr-3 detail-div-div1">
 									<div className="input-group-btn">
 										<button className="btn btn-primary btn-minus"
-										onClick={()=>{
-											handleQuantityChange('-');
-											handleAddToCart(productItem, '-');
-										}}>
+										// onClick={()=>{
+										// 	handleQuantityChange('-');
+										// 	handleAddToCart(productItem, '-');
+										// }}>
+										onClick={() => {
+											console.log('clicked with id:', id)
+											console.log('inputValue before set:', inputValue)
+											setInputValue(prev => handleStateFuncOnClicks(prev, id, '-'));
+											console.log('inputValue after set:', inputValue)
+											handleAddToCart(productItem, '-')
+											setReload(prev => !prev)}}>
 											<span className="fa fa-minus"></span>
 										</button>
 									</div>
 									<input
 									type="text"
 									className="form-control bg-secondary border-0 text-center"
-									onChange={(e)=>handleQInputChange(e)}
-									value={quantity}/>
+									// onChange={(e)=>handleQInputChange(e)}
+									onChange={(e) => handleInputChange(e, productItem, id)}
+									onBlur={() => handleInputBlur(productItem, id)}
+									// value={quantity}/
+									value={inputValue?.[inputValue?.findIndex(item=>item?.prdId===parseInt(id))]?.nop ?? "1"}/>
 									<div className="input-group-btn">
 										<button className="btn btn-primary btn-plus"
-										onClick={()=>{
-											handleQuantityChange('+');
+										// onClick={()=>{
+										// 	handleQuantityChange('+');
+										// 	handleAddToCart(productItem, '+');
+										// }}>
+										onClick={() => {
+											setInputValue(prev => handleStateFuncOnClicks(prev, id, '+'));
 											handleAddToCart(productItem, '+');
-										}}>
+											setReload(prev => !prev)}}>
 											<span className="fa fa-plus"></span>
 										</button>
 									</div>

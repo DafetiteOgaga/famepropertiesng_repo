@@ -367,6 +367,14 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 			return obj.menu.toLowerCase() !== 'login'
 		});
 	}
+	const cartPage = currentPage.split('/')[1].toLowerCase() === 'cart'
+	console.log({cartPage})
+	if (cartPage) {
+		// remove cart from menu if on cart page
+		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
+		resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
+	}
+	console.log({resortedMobile, resortedPc})
 	const handleIsActive = (menu) => {
 		const page = currentPage.split('/')[1];
 		const link = menu?.link?.split('/')[1];

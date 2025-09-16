@@ -193,8 +193,8 @@ const useCreateStorage = () => {
 	
 	// Create two versions
 	const createLocal = useStorage(localStorage);
-	// export const createSession = useStorage(sessionStorage);
-	return { createLocal };
+	const createSession = useStorage(sessionStorage); // not used yet
+	return { createLocal, createSession };
 }
 export { useCreateStorage };
 // Example usage:
