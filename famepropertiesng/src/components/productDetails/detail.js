@@ -89,6 +89,7 @@ function Detail() {
 	useEffect(() => {
 		const cartInStorage = createLocal.getItemRaw('fpng-cart')||[]
 		console.log({cartInStorage})
+		// console.log('11111'.repeat(10))
 		setInputValue(cartInStorage);
 	}, [reload]);
 
@@ -144,7 +145,7 @@ function Detail() {
 		});
 	};
 
-	const handleStateFuncOnClicks = (prev, id, mode) => {
+	const handleStateFuncOnClicks = (prev, id, mode, product) => {
 		console.log("Handling state update for id:", id, "with mode:", mode);
 		console.log({prev})
 		let computedCurrVal
@@ -160,8 +161,17 @@ function Detail() {
 			if (itemIndex === -1) {
 				// item not found, nothing to update
 				console.log("Item not found in cart for id:", id);
+				console.log('creating local copy of cart for this item')
+				updated.push({
+					prdId: product?.id,
+					nop: 2,
+					image: product?.image_url_0,
+					name: product?.name,
+					price: product?.discountPrice,
+				});
+				setInputValue(updated)
 				setReload(prev => !prev)
-				return prev;
+				return updated;
 			}
 			const currentValue = updated[itemIndex].nop || 1;
 			if (mode === '+') {
@@ -173,6 +183,7 @@ function Detail() {
 			updated[itemIndex] = { ...updated[itemIndex], nop: newValue };
 		}
 		// createLocal.setItemRaw("fpng-cart", updated);
+		setInputValue(updated)
 		return updated;
 	}
 
@@ -337,7 +348,7 @@ function Detail() {
 										onClick={() => {
 											console.log('clicked with id:', id)
 											console.log('inputValue before set:', inputValue)
-											setInputValue(prev => handleStateFuncOnClicks(prev, id, '-'));
+											handleStateFuncOnClicks(inputValue, id, '-', productItem);
 											console.log('inputValue after set:', inputValue)
 											handleAddToCart(productItem, '-')
 											setReload(prev => !prev)}}>
@@ -359,8 +370,11 @@ function Detail() {
 										// 	handleAddToCart(productItem, '+');
 										// }}>
 										onClick={() => {
-											setInputValue(prev => handleStateFuncOnClicks(prev, id, '+'));
+											console.log('clicked with id:', id)
+											console.log('inputValue before set:', inputValue)
+											handleStateFuncOnClicks(inputValue, id, '+', productItem);
 											handleAddToCart(productItem, '+');
+											console.log('inputValue after set:', inputValue)
 											setReload(prev => !prev)}}>
 											<span className="fa fa-plus"></span>
 										</button>
