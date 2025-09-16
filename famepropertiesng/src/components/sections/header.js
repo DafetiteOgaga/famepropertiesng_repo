@@ -367,8 +367,9 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 			return obj.menu.toLowerCase() !== 'login'
 		});
 	}
-	const cartPage = currentPage.split('/')[1].toLowerCase() === 'cart'
-	console.log({cartPage})
+	const page = currentPage.split('/')[1].toLowerCase();
+	const cartPage = page === 'cart'||page === 'detail'
+	console.log({page, cartPage})
 	if (cartPage) {
 		// remove cart from menu if on cart page
 		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
