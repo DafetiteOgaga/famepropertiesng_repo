@@ -39,6 +39,7 @@ function PostProduct() {
 	const [uploadedImages, setUploadedImages] = useState([null, null, null, null]); // imagekit response like {image_url, fileId}
 	const [imagePreviews, setImagePreviews] = useState([false, false, false, false]);
 	const [formData, setFormData] = useState(initialFormData);
+	const [isMounting, setIsMounting] = useState(true);
 	const [fieldStats, setFieldStats] = useState({})
 	const deviceType = useDeviceType().width <= 576;
 
@@ -386,10 +387,15 @@ function PostProduct() {
 	// console.log({imagePreview1})
 	// console.log({imagePreview2})
 	console.log('imagePreviews array:', imagePreviews)
+	useEffect(() => {
+		// flip loading off immediately after mount
+		setIsMounting(false);
+	}, []);
 	return (
 		<>
 			<Breadcrumb page={'Post Products'} />
 
+			{!isMounting ?
 			<form
 			// onSubmit={handleImageUploadToCloud}
 			onSubmit={handleSubmittingProcessedImagesWithForm}
@@ -670,6 +676,8 @@ function PostProduct() {
 					</div>
 				</div>
 			</form>
+			:
+			<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }
