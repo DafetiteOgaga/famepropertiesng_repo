@@ -386,7 +386,7 @@ function Detail() {
 								}}
 								disabled={Boolean(isItemAdded)}
 								className="btn btn-primary px-3">
-									<span className="fa fa-shopping-cart mr-1"/>{` ${Boolean(isItemAdded)?'Already Added to Cart':'Add To Cart'}`}
+									<span className="fa fa-shopping-cart mr-1"/>{` ${Boolean(isItemAdded)?'Added to Cart':'Add To Cart'}`}
 								</button>
 							</div>
 							<div className="d-flex pt-2">
