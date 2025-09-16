@@ -37,6 +37,10 @@ const initialFormData = {
 	state: '',
 	stateCode: '',
 	phoneCode: '',
+	currency: '',
+	currencyName: '',
+	currencySymbol: '',
+	countryEmoji: '',
 	city: '',
 	hasStates: false,
 	hasCities: false,
@@ -137,6 +141,10 @@ function SignUp() {
 			country: country?.name||null,
 			countryId: country?.id||null,
 			phoneCode: country?.phone_code||null,
+			currency: country?.currency||null,
+			currencyName: country?.currency_name||null,
+			currencySymbol: country?.currency_symbol||null,
+			countryEmoji: country?.emoji||null,
 			hasStates: country?.hasStates||false,
 
 			// state
@@ -192,6 +200,10 @@ function SignUp() {
 				key==='image_url'||
 				key==='stateCode'||
 				key==='phoneCode'||
+				key==='currency'||
+				key==='currencyName'||
+				key==='currencySymbol'||
+				key==='countryEmoji'||
 				key==='password' ||
 				key==='hasStates'||
 				key==='hasCities' ||
@@ -382,7 +394,7 @@ function SignUp() {
 		}
 	}, [isError])
 
-	// console.log({country, state, city})
+	console.log({country, state, city})
 	// console.log({formData})
 	console.log({selectedFile})
 	return (
