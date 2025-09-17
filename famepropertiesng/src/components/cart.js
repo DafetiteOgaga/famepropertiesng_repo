@@ -203,7 +203,11 @@ function Cart() {
 
 											{/* product name */}
 											<td className="align-middle text-wrap" // text-left"
-											style={deviceType?styles.mobilePadding:{}}>{titleCase(cart?.name||'')}</td>
+											onClick={() => navigate(`/detail/${cart?.prdId}`)}
+											style={{
+												...deviceType?styles.mobilePadding:{},
+												cursor: 'pointer',
+												}}>{titleCase(cart?.name||'')}</td>
 
 											{/* price */}
 											<td className="align-middle text-bg-color text-nowrap"
@@ -305,7 +309,7 @@ function Cart() {
 								</div>
 								<button
 								className="btn btn-block btn-primary font-weight-bold my-3 py-3"
-								onClick={() => {}}
+								onClick={() => navigate('checkout')}
 								disabled={inputValue.length===0}
 								>
 									Proceed To Checkout
