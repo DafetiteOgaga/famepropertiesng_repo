@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useRef } from "react";
 import { Breadcrumb } from "../sections/breadcrumb";
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useDeviceType } from "../../hooks/deviceType";
 import { getImage } from "../../hooks/baseImgUrl";
 import { digitSeparator, titleCase } from "../../hooks/changeCase";
@@ -46,6 +46,7 @@ const tabPane = [
 const randomNumber = Math.floor(Math.random() * 6);
 const productStar = "fa fa-star"
 function Detail() {
+	const navigate = useNavigate();
 	const imgRef = useRef(null);
 	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage()
@@ -430,6 +431,15 @@ function Detail() {
 									<span className="fa fa-shopping-cart mr-1"/>{` ${Boolean(isItemAdded)?'Added to Cart':'Add To Cart'}`}
 								</button>
 							</div>
+							{(cartItems?.length>0)&&
+							<div className="d-flex align-items-center mb-4 pt-2">
+								<button
+								onClick={()=>navigate('/cart')}
+								disabled={!cartItems?.length}
+								className="btn btn-primary px-3">
+									<span className="fa fa-shopping-cart mr-1"/>{` Go to Cart (${cartItems?.length||0})`}
+								</button>
+							</div>}
 							<div className="d-flex pt-2">
 								<strong className="text-dark mr-2">Share on:</strong>
 								<div className="d-inline-flex">
