@@ -73,6 +73,7 @@ function SignUp() {
 	const [isEmailValid, setIsEmailValid] = useState(null);
 	const [isEmailLoading, setIsEmailLoading] = useState(false);
 	const [fieldStats, setFieldStats] = useState({})
+	const [isMounting, setIsMounting] = useState(true);
 	const deviceType = useDeviceType().width <= 576;
 
 	// validate password on change
@@ -394,11 +395,17 @@ function SignUp() {
 		}
 	}, [isError])
 
+	useEffect(() => {
+		// flip loading off immediately after mount
+		setIsMounting(false);
+	}, []);
+
 	console.log({country, state, city})
 	// console.log({formData})
 	console.log({selectedFile})
 	return (
 		<>
+			{!isMounting ?
 			<form onSubmit={handleImageUploadToCloud}
 			// onSubmit={handleSubmitOkayFromChild}
 			className="row px-xl-5"
@@ -613,6 +620,8 @@ function SignUp() {
 					</div>
 				</div>
 			</form>
+			:
+			<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }
