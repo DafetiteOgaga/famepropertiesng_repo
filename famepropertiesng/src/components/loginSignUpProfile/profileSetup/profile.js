@@ -54,7 +54,6 @@ function Profile() {
 	const { createLocal } = useCreateStorage();
 	const [loading, setLoading] = useState(false);
 	const baseAPIURL = useImageKitAPIs()?.data;
-	const navigate = useNavigate();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [country, setCountry] = useState(''); // whole country object
@@ -70,6 +69,8 @@ function Profile() {
 	const userInfoRef = useRef(false)
 	const [imgPreview, setImgPreview] = useState(null);
 	const [fieldStats, setFieldStats] = useState({})
+	const [isMounting, setIsMounting] = useState(true);
+	const navigate = useNavigate();
 
 	// get user info from local storage if any
 	const userInfo = createLocal.getItem('fpng-user');
@@ -582,6 +583,11 @@ function Profile() {
 		pattern: '[0-9]{7,10}',     // only digits, between 7–14 long
 	};
 
+	useEffect(() => {
+		// flip loading off immediately after mount
+		setIsMounting(false);
+	}, []);
+
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
@@ -597,7 +603,8 @@ function Profile() {
 		<>
 			<Breadcrumb page={"My Profile"} />
 
-			<span
+			{!isMounting ?
+			<div
 			className="row px-xl-5"
 			style={{
 				display: 'flex',
@@ -1053,7 +1060,9 @@ function Profile() {
 						<BouncingDots size="lg" color="#475569" p="8" />}
 					</div>
 				</div>
-			</span>
+			</div>
+			:
+			<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }

@@ -303,14 +303,28 @@ function Cart() {
 									<h5>Total</h5>
 									<h5>{currencySym} {totalAmount?digitSeparator(parseInt(totalAmount)+parseInt(shipping)):'0'}</h5>
 								</div>
-								<Link to={"checkout"} className="btn btn-block btn-primary font-weight-bold my-3 py-3">Proceed To Checkout</Link>
+								<button
+								className="btn btn-block btn-primary font-weight-bold my-3 py-3"
+								onClick={() => {}}
+								disabled={inputValue.length===0}
+								>
+									Proceed To Checkout
+									{/* <Link
+									type="button"
+									
+									to={"checkout"}
+									className="btn btn-block btn-primary font-weight-bold my-3 py-3"
+									>
+										Proceed To Checkout
+									</Link> */}
+								</button>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			:
-			<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
+			<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }

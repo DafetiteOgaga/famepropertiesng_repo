@@ -689,7 +689,7 @@ function StoreSignUp() {
 				</div>
 			</form>
 			:
-			<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
+			<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }

@@ -31,6 +31,7 @@ const inputArr = [
 ]
 
 function LogIn() {
+	const [isMounting, setIsMounting] = useState(true);
 	const [loading, setLoading] = useState(false);
 	const authFetch = useAuthFetch()
 	const [showPassword, setShowPassword] = useState(false);
@@ -115,8 +116,13 @@ function LogIn() {
 			return ()=>clearTimeout(delay)
 		}
 	}, [isError])
+	useEffect(() => {
+		// flip loading off immediately after mount
+		setIsMounting(false);
+	}, []);
 	return (
 		<>
+			{!isMounting ?
 			<form onSubmit={onSubmitHandler}
 			className=""
 			style={{
@@ -190,6 +196,8 @@ function LogIn() {
 				</div>
 				{/* <GoogleAuthButtonAndSetup /> */}
 			</form>
+			:
+			<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
 		</>
 	)
 }
