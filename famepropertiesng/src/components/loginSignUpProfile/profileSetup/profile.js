@@ -851,7 +851,7 @@ function Profile() {
 																{!userValue?
 																	<span className="font-italic">Not Provided.</span>:
 																	`
-																		${mobile?'+'+userInfo.phoneCode+' ':''}
+																		${mobile?userInfo.phoneCode+' ':''}
 																		${mobile?formatPhoneNumber(userValue):
 																		sentence?sentenceCase(userValue):
 																		email?userValue:
@@ -963,16 +963,21 @@ function Profile() {
 
 																// all other fields (input and textarea fields)
 																<>
-																	<div className={`d-flex flex-${(isTextArea||deviceType)?'column':'row'} justify-content-between`}>
+																	<div className={`d-flex flex-${(isTextArea||deviceType)?'column':'row'} justify-content-between align-items-baseline`}>
 
+																		{(!deviceType)&&
+																		// phone code prefix for mobile number
+																		<PhoneCode
+																		ukey={userKey}
+																		phoneCode={userInfo.phoneCode} />}
+																		
 																		<span className={`d-flex ${deviceType?'':'w-100'} flex-column align-items-center`}>
-																			{userKey==='mobile_no'&&
-
-																			// phone code prefix for mobile number
-																			<span
-																			style={{
-																				paddingRight: '0.5rem',
-																			}}>{'+'+userInfo.phoneCode}</span>}
+																			<span className="d-flex flex-row align-items-center w-100">
+																				{(deviceType)&&
+																				// phone code prefix for mobile number
+																				<PhoneCode
+																				ukey={userKey}
+																				phoneCode={userInfo.phoneCode} />}
 
 																				{isTextArea?
 																				// text area field
@@ -1028,6 +1033,7 @@ function Profile() {
 																					
 																					</span>}
 																				</>
+																			</span>
 																		</span>
 																		<span className={`align-self-${(deviceType||isTextArea)?'center':'baseline'}`}>
 																			{/* cancel and submit buttons for all non location fields (input and textarea) */}
@@ -1124,6 +1130,17 @@ function EditFieldButton({
 				'Submit'}
 			</button>}
 		</span>
+	)
+}
+
+function PhoneCode({ukey, phoneCode}) {
+	if (ukey!=='mobile_no') return
+	return (
+		// phone code prefix for mobile number
+		<span
+		style={{
+			paddingRight: '0.5rem',
+		}}>{phoneCode}</span>
 	)
 }
 export { Profile }
