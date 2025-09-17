@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import { Breadcrumb } from "../sections/breadcrumb";
 import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from "../../hooks/deviceType";
@@ -46,6 +46,7 @@ const tabPane = [
 const randomNumber = Math.floor(Math.random() * 6);
 const productStar = "fa fa-star"
 function Detail() {
+	const imgRef = useRef(null);
 	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage()
 	const [inputValue, setInputValue] = useState([]);
@@ -232,6 +233,16 @@ function Detail() {
 	useEffect(() => {
 		// whenever transition changes → new image starts loading
 		setIsImageLoading(true);
+
+		if (!imgRef.current) return;
+
+		const observer = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				console.log("Observed size:", entry.contentRect.width, entry.contentRect.height);
+			}
+		});
+		observer.observe(imgRef.current);
+		return () => observer.disconnect();
 	}, [transition]);
 
 	const cartItems = createLocal.getItemRaw('fpng-cart');
@@ -249,6 +260,8 @@ function Detail() {
 	// console.log({transitionEffect})
 	console.log({inputValue})
 	console.log({deviceType})
+	const loadingImg = isImageLoading
+	console.log({loadingImg})
 	return (
 		<>
 			<Breadcrumb page={'Product'} />
@@ -263,48 +276,68 @@ function Detail() {
 					<div className="row px-xl-5">
 					<div className="col-lg-5 mb-30">
 						<div  className="carousel slide">
-							<div className="carousel-inner bg-light">
-								<div className="carousel-item active">
-									{/* preferrable make this load when when ready while the main page is already loaded to have something to render */}
-									{productImages && (
-										<>
-											{isImageLoading && (
-											<BouncingDots size="sm" color="#475569" p="14" />
+							{productImages ?
+								<>
+									<div className="carousel-inner bg-light">
+										<div className="carousel-item active">
+
+											{loadingImg && (
+											<div
+											style={{
+												width: '100%',
+												height: deviceType?'356px':'480px',
+											}}>
+												<BouncingDots size="sm" color="#475569" p={"10"} />
+											</div>
 											)}
 											<img
+											ref={imgRef}
 											key={transition}
 											src={productImages[transition]}
 											alt={productItem?.name||'product image'}
-											className={`w-100 h-100 details-img ${transitionEffect} ${isImageLoading ? "hidden" : "block"}`}
-											onLoad={() => setIsImageLoading(false)}
+											className={`w-100 h-100 details-img ${transitionEffect} ${loadingImg ? "d-none" : "block"}`}
+											onLoad={(e) => {
+												setIsImageLoading(false);
+
+												// Natural size of the image file
+												console.log("natural size:", e.target.naturalWidth, e.target.naturalHeight);
+
+												// Rendered size in the DOM (after CSS scaling)
+												console.log("rendered size:", e.target.offsetWidth, e.target.offsetHeight);
+											}}
 											/>
-										</>
-										)}
-								</div>
-							</div>
-							{productImages?
-							<>
-								{!isImageLoading&&
+										</div>
+									</div>
+
 									<>
-										{transition?
-										<span
-										className="carousel-control-prev"
-										onClick={()=>handleImageTransition('-')}>
+										{!loadingImg&&
+										<>
+											{transition?
 											<span
-											style={{border: '1px solid #475569', borderRadius: '10%', padding: '2px 10px'}}
-											className="fa fa-3x fa-angle-left text-dark" />
-										</span>:undefined}
-										{transition<(productImages.length-1)?
-										<span className="carousel-control-next"
-										onClick={()=>handleImageTransition('+')}>
-											<span
-											style={{border: '1px solid #475569', borderRadius: '10%', padding: '2px 10px'}}
-											className="fa fa-3x fa-angle-right text-dark" />
-										</span>:undefined}
-									</>}
-							</>
+											className="carousel-control-prev"
+											onClick={()=> {
+												setIsImageLoading(true);
+												handleImageTransition('-');
+											}}>
+												<span
+												style={{border: '1px solid #475569', borderRadius: '10%', padding: '2px 10px'}}
+												className="fa fa-3x fa-angle-left text-dark" />
+											</span>:undefined}
+											{transition<(productImages.length-1)?
+											<span className="carousel-control-next"
+											onClick={()=> {
+												setIsImageLoading(true);
+												handleImageTransition('+');
+											}}>
+												<span
+												style={{border: '1px solid #475569', borderRadius: '10%', padding: '2px 10px'}}
+												className="fa fa-3x fa-angle-right text-dark" />
+											</span>:undefined}
+										</>}
+									</>
+								</>
 							:
-							undefined}
+							<BouncingDots size={"sm"} color="#475569" p={deviceType?"10":"14"} />}
 						</div>
 					</div>
 
@@ -445,7 +478,7 @@ function Detail() {
 					</div>
 				</>
 				:
-				<BouncingDots size="lg" color="#475569" p={deviceType?"10":"14"} />}
+				<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
 			</div>
 		</>
 	)
