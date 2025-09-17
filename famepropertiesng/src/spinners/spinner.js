@@ -46,7 +46,7 @@ function FACog(color="blue", size="2x") {
 	);
 }
 
-function BouncingDots({ size = "md", color = "#3498db", p = 12 }) {
+function BouncingDots({ size = "md", color = "#3498db", p = 12, px = 0, py = 0, pt = 0, pb = 0, pl = 0, pr = 0 }) {
 	// console.log({size, color, p})
 	// Define some named sizes (like FA)
 	const sizeMap = {
@@ -105,7 +105,10 @@ function BouncingDots({ size = "md", color = "#3498db", p = 12 }) {
 	return (
 		<div className="dots"
 		style={{
-			padding: padSize,
+			paddingTop: pt || py || padSize,
+			paddingBottom: pb || py || padSize,
+			paddingLeft: pl || px || padSize,
+			paddingRight: pr || px || padSize,
 		}}>
 			{Array.from({ length: 3 }).map((_, index) => (
 			<span
