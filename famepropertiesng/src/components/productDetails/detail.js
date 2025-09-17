@@ -56,14 +56,15 @@ function Detail() {
 	const [transitionEffect, setTransitionEffect] = useState('') // slideInRight, slideInLeft
 	const [productItem, setProductItem] = useState(null);
 	const id = useParams().id;
-	console.log('id:', id);
+	// console.log('id:', id);
 	// const [qInput, setQInput] = useState('');
-	const deviceType = useDeviceType().width <= 576;
+	const deviceSpec = useDeviceType();
+	const isMobile = deviceSpec.width <= 576;
+	const deviceWidth = deviceSpec.width;
 	const [selectedTab, setSelectecTab] = useState('description');
 	const [transition, setTransition] = useState(0)
-	const [quantity, setQuantity] = useState(1);
-	const userInfo = createLocal.getItem('fpng-user');
-	console.log({userInfo})
+	// const userInfo = createLocal.getItem('fpng-user');
+	// console.log({userInfo})
 	const fetchServerData = async () => {
 		console.log("Fetching product data from server...");
 		try {
@@ -188,24 +189,6 @@ function Detail() {
 		return updated;
 	}
 
-	const handleQInputChange = (e) => {
-		e.preventDefault();
-		const value = e.target.value;
-		console.log("Quantity input changed", "from", quantity, "to:", value);
-		// setQInput(value);
-		setQuantity(value ? parseInt(value, 10) : 0) // Ensure it's a number
-	}
-	const handleQuantityChange = (mode) => {
-		console.log("Changing quantity:", mode);
-		console.log('this quantity calc may not be accurate')
-		if (mode === '+') {
-			console.log("Increasing quantity from:", quantity, "to", quantity + 1);
-			setQuantity(prev => prev + 1)
-		} else if (mode === '-') {
-			console.log("Decreasing quantity from:", quantity, "to", quantity - 1);
-			setQuantity(prev => prev > 1?(prev - 1): 1)
-		}
-	}
 	// const image = productImagesArr[transition]
 	// const randomNumber = Math.floor(Math.random() * 6);
 	// const productImages = {}
@@ -258,34 +241,52 @@ function Detail() {
 	// console.log("productItem:", productItem);
 	// console.log({transition, len: productImages?.length})
 	// console.log({transitionEffect})
-	console.log({inputValue})
-	console.log({deviceType})
+
 	const loadingImg = isImageLoading
-	console.log({loadingImg})
+
+
+	// console.log({inputValue})
+	// console.log({isMobile})
+	// console.log({loadingImg})
+	// console.log({deviceWidth})
 	return (
 		<>
 			<Breadcrumb page={'Product'} />
 
 			{/* <!-- Shop Detail Start --> */}
 			<div className="container-fluid mt-3 pb-5"style={{
-				paddingLeft: deviceType ? 0 : '',
-				paddingRight: deviceType ? 0 : '',
+				paddingLeft: isMobile ? 0 : '',
+				paddingRight: isMobile ? 0 : '',
 			}}>
 				{productItem ?
 				<>
 					<div className="row px-xl-5">
 					<div className="col-lg-5 mb-30">
 						<div  className="carousel slide">
-							{productImages ?
+							{(productImages&&deviceWidth) ?
 								<>
 									<div className="carousel-inner bg-light">
-										<div className="carousel-item active">
+										<div className="carousel-item active"
+										style={{
+											...isMobile?
+												// this dimension aids smooth transition without
+												// layout shift on small devices
+												{
+													height: deviceWidth-35,
+													width: deviceWidth-35,
+												}
+												:
+												{
+													height: '480px',
+													width: '480px',
+												},
+											}}>
 
 											{loadingImg && (
 											<div
 											style={{
 												width: '100%',
-												height: deviceType?'356px':'480px',
+												height: '100%',
 											}}>
 												<BouncingDots size="sm" color="#475569" p={"10"} />
 											</div>
@@ -296,6 +297,12 @@ function Detail() {
 											src={productImages[transition]}
 											alt={productItem?.name||'product image'}
 											className={`w-100 h-100 details-img ${transitionEffect} ${loadingImg ? "d-none" : "block"}`}
+											// style={{
+											// 	maxWidth: "100%",   // prevents overflow
+											// 	maxHeight: "100%",  // ensures it fits
+											// 	objectFit: "cover", // keeps aspect ratio
+											// 	margin: "auto",     // ensures centering
+											// }}
 											onLoad={(e) => {
 												setIsImageLoading(false);
 
@@ -337,15 +344,15 @@ function Detail() {
 									</>
 								</>
 							:
-							<BouncingDots size={"sm"} color="#475569" p={deviceType?"10":"14"} />}
+							<BouncingDots size={"sm"} color="#475569" p={isMobile?"10":"14"} />}
 						</div>
 					</div>
 
 					<div className={`col-lg-7 h-auto mb-30`}>
-						<div className={`h-100 bg-light ${deviceType?'':'p-30'}`}
+						<div className={`h-100 bg-light ${isMobile?'':'p-30'}`}
 						style={{
 							borderRadius: '10px',
-							padding: deviceType ? '15px 10px' : '',
+							padding: isMobile ? '15px 10px' : '',
 						}}>
 							<h3
 							style={{color: '#475569'}}>{titleCase(productItem.name)}</h3>
@@ -440,10 +447,10 @@ function Detail() {
 					</div>
 					<div className="row px-xl-5">
 						<div className="col">
-							<div className={`bg-light ${!deviceType && 'p-30'}`}
+							<div className={`bg-light ${!isMobile && 'p-30'}`}
 							style={{
 								borderRadius: '10px',
-								padding: deviceType ? '15px 10px' : '',
+								padding: isMobile ? '15px 10px' : '',
 								}}>
 								<div className="nav nav-tabs mb-4">
 									{tabPane.map((tab, index) => {
@@ -456,7 +463,7 @@ function Detail() {
 											style={{
 												cursor: 'pointer',
 												textTransform: 'capitalize',
-												padding: deviceType ? '5px 8px' : '',
+												padding: isMobile ? '5px 8px' : '',
 											}}
 											className={`nav-item nav-link text-dark ${isActive?'active':''}`}>
 												{tab.title}
@@ -478,7 +485,7 @@ function Detail() {
 					</div>
 				</>
 				:
-				<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
+				<BouncingDots size={isMobile?"sm":"lg"} color="#475569" p={isMobile?"10":"14"} />}
 			</div>
 		</>
 	)
