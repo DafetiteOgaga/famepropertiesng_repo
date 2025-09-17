@@ -14,7 +14,7 @@ function ProductAdvert({productSelector, productsArr}) {
 	// console.log({productsArr})
 	return (
 		<>
-			{!isLoading &&
+			{!isLoading ?
 			<>
 				{productsArr.map((productItem, index) => {
 					const isActive = productsArr[productSelector].id===productItem.id
@@ -74,8 +74,28 @@ function ProductAdvert({productSelector, productsArr}) {
 						</div>
 					)
 				})}
-			</>}
-			{isLoading && <BouncingDots size={!isMobile&&"sm"} color={!isMobile&&"#475569"} p={!isMobile&&"6"} />}  {/* shows dots only if loading */}
+			</>
+			:
+			<>
+				<div className="product-offer mb-30 carousel-div2"
+				style={{
+					...{display: 'block'},
+					...isMobile?{
+						position: 'absolute',
+						// top: isVeryVerySmallMobile?'70%':(isVerySmallMobile?'40%':'70%'),
+						top: '70%',
+						maxHeight: 300,
+						height: 150,
+						width: 170,
+						left: isVerySmallMobile?'45%':'55%',
+						bottom: '-7%',
+						borderTopRightRadius: 0,
+						borderBottomLeftRadius: 0,
+					}:{}
+					}}>
+						<BouncingDots size={"sm"} color={isMobile?"#fff":"#475569"} p={isMobile?"4":"6"} />
+				</div>
+			</>}  {/* shows dots only if loading */}
 		</>
 	)
 }
