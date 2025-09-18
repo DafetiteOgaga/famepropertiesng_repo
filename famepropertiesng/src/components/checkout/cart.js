@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Breadcrumb } from "./sections/breadcrumb";
+import { Breadcrumb } from "../sections/breadcrumb";
 import { Link, useNavigate } from 'react-router-dom';
-import { useDeviceType } from "../hooks/deviceType";
-import { useCreateStorage } from "../hooks/setupLocalStorage";
-import { BouncingDots } from "../spinners/spinner";
-import { digitSeparator, titleCase } from "../hooks/changeCase";
+import { useDeviceType } from "../../hooks/deviceType";
+import { useCreateStorage } from "../../hooks/setupLocalStorage";
+import { BouncingDots } from "../../spinners/spinner";
+import { digitSeparator, titleCase } from "../../hooks/changeCase";
 import { useOutletContext } from 'react-router-dom';
 
 const tableHeadArr = [
@@ -14,6 +14,8 @@ const tableHeadArr = [
 	"Quantity",
 	"X"
 ]
+
+const shipping = 1500
 
 function Cart() {
 	const navigate = useNavigate();
@@ -111,7 +113,6 @@ function Cart() {
 		return updated;
 	}
 	const currencySym = userInfo?.currencySymbol||'₦'
-	const shipping = 1500
 
 	// calculate total amount whenever inputValue changes
 	useEffect(() => {
