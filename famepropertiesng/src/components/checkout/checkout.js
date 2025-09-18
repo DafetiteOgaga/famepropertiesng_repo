@@ -62,6 +62,7 @@ function Checkout() {
 	const [payment, setPayment] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
+	const [morePx, setMorePx] = useState(0);
 	const isMobile = deviceSpec.width <= 576
 	const userInfo = createLocal.getItem('fpng-user')||{};
 	const currencySym = userInfo?.currencySymbol||'₦'
@@ -264,7 +265,7 @@ function Checkout() {
 			console.warn(emptyFieldsErrTxt);
 			toast.error(emptyFieldsErrTxt);
 			return;
-		} else if (!shipToDifferent&&loggedInFormData.paymentMethod==='') {
+		} else if (!shipToDifferent&&(loggedInFormData.paymentMethod===''||!loggedInFormData.paymentMethod)) {
 			console.log('using loggedInFormData ... (profile addy)')
 			const paymentErrTxt = 'Error! Please select a payment method'
 			setIsError(paymentErrTxt)
@@ -355,6 +356,17 @@ function Checkout() {
 		}
 	}, [isError])
 
+	useEffect(()=> {
+		const fieldsToWatch = inputArr.map(item => item.name);
+		console.log({fieldsToWatch})
+
+		// Count how many fields are non-empty
+		const filledCount = fieldsToWatch.filter(field => formData[field]?.trim() !== '').length;
+
+		// Update morePx once based on count
+		setMorePx(filledCount * 7);
+	}, [formData, loggedInFormData])
+
 	console.log({userInfo})
 	console.log({isLoggedIn})
 	// console.log({allFieldsArr})
@@ -405,7 +417,7 @@ function Checkout() {
 							style={{borderRadius: '10px'}}>
 								<div className={`flip-container ${shipToDifferent ? "flipped" : ""}`}>
 									<div className="flipper"
-									style={{minHeight: !isMobile?(shipToDifferent?'380px':'270px'):(shipToDifferent?'665px':'520px')}}>
+									style={{minHeight: !isMobile?(shipToDifferent?'380px':'270px'):(shipToDifferent?`${655+morePx}px`:'520px')}}>
 										<div className="front row">
 											{allowedFieldsArr.map((field, index) => {
 												return (

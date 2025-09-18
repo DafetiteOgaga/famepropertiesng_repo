@@ -7085,9 +7085,13 @@ WebKit (Chrome, Edge, Safari)
   border-bottom-right-radius: 4px; */
 }
 
+.toggle-switch input:checked + .slider {
+  background-color: #475569;
+}
+
 /* When the input is disabled, style the slider track */
 .toggle-switch input:disabled + .slider {
-  /* background-color: brown; */
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
@@ -7095,10 +7099,6 @@ WebKit (Chrome, Edge, Safari)
 .toggle-switch input:disabled + .slider:before {
   /* background-color: #6C757D; */
   background-color: #4755696c;
-}
-
-.toggle-switch input:checked + .slider {
-  background-color: #475569;
 }
 
 .toggle-switch input:checked + .slider:before {
