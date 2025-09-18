@@ -2833,7 +2833,7 @@ input[type="button"].btn-block {
 
 .custom-control-label::before {
   position: absolute;
-  top: 0.25rem;
+  /* top: 0.25rem; */
   left: -1.5rem;
   display: block;
   width: 1rem;
@@ -2846,11 +2846,11 @@ input[type="button"].btn-block {
 
 .custom-control-label::after {
   position: absolute;
-  top: 0.25rem;
-  left: -1.5rem;
+  top: 0.32rem;
+  left: -1.2rem;
   display: block;
-  width: 1rem;
-  height: 1rem;
+  width: 0.4rem;
+  height: 0.4rem;
   content: "";
   background: no-repeat 50% / 50% 50%;
 }
@@ -2881,7 +2881,9 @@ input[type="button"].btn-block {
 }
 
 .custom-radio .custom-control-input:checked ~ .custom-control-label::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+  /* background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); */
+  background-color: #fff;
+  border-radius: 50%;
 }
 
 .custom-radio .custom-control-input:disabled:checked ~ .custom-control-label::before {
@@ -6660,6 +6662,20 @@ button:disabled,
   opacity: 1;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ################################################# */
 /* ====================
    Number Input (remove arrows)
@@ -6738,3 +6754,395 @@ WebKit (Chrome, Edge, Safari)
 /* .Toastify__toast--warning {
   --toastify-color-progress-warning: #ffc107;
 } */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ################################################# */
+
+
+/* Toggle switch style */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  /* border-radius: 28px; */
+  border-radius: 5px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 2px;
+  bottom: 2px;
+  /* height: 20px; */
+  /* width: 20px; */
+  /* left: 4px; */
+  /* bottom: 4px; */
+  background-color: white;
+  transition: 0.4s;
+  /* border-radius: 50%; */
+  border-radius: 4px;
+  /* border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px; */
+}
+
+/* When the input is disabled, style the slider track */
+.toggle-switch input:disabled + .slider {
+  /* background-color: brown; */
+  cursor: not-allowed;
+}
+
+/* When the input is disabled, style the slider knob */
+.toggle-switch input:disabled + .slider:before {
+  /* background-color: #6C757D; */
+  background-color: #4755696c;
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: #475569;
+}
+
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+/* Flip animation */
+.flip-container {
+  perspective: 1000px;
+  width: 100%;
+  /* max-width: 400px; */
+  /* margin-top: 1rem; */
+}
+
+.flipper {
+  position: relative;
+  width: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+
+  /* min-height: 700px; */
+}
+
+.flip-container.flipped .flipper {
+  transform: rotateY(180deg);
+}
+
+.front,
+.back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  /* width: 100%; */
+  /* min-height: 150px; */
+  /* padding: 1rem; */
+  /* background: #f8f9fa; */
+  /* border: 1px solid #ddd; */
+  /* border-radius: 6px; */
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+}
+
+.back {
+  transform: rotateY(180deg);
+}
