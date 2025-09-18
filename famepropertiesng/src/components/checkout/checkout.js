@@ -571,7 +571,7 @@ function Checkout() {
 								<div className="d-flex justify-content-between">
 									<h6 className="font-weight-medium">Shipping</h6>
 									<h6 className="font-weight-medium">
-										{currencySym} {shipping}
+										{currencySym} {digitSeparator(shipping)}
 									</h6>
 								</div>
 							</div>
