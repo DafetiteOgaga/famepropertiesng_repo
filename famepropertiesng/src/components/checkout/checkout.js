@@ -274,22 +274,22 @@ function Checkout() {
 			return;
 		}
 
-		let formToBeSubmitted
-		let suctext
-		if (shipToDifferent) {
-			formToBeSubmitted = formData
-			suctext = 'using formData ... (diff addy)'
-		} else {
-			suctext = 'using loggedInFormData ... (profile addy)'
-			formToBeSubmitted = loggedInFormData
-		}
-		console.log({formToBeSubmitted})
-		toast.success(suctext);
-		return; // remove this when ready to test submission
+		const formToBeSubmitted = shipToDifferent ? formData : loggedInFormData
+		// let suctext
+		// if (shipToDifferent) {
+		// 	// formToBeSubmitted = formData
+		// 	suctext = 'using formData ... (diff addy)'
+		// } else {
+		// 	suctext = 'using loggedInFormData ... (profile addy)'
+		// 	// formToBeSubmitted = loggedInFormData
+		// }
+		// console.log({formToBeSubmitted})
+		// toast.success(suctext);
+		// return; // remove this when ready to test submission
 
 		const cleanedData = {};
-		Object.entries(formData).forEach(([key, value]) => {
-			if (key==='password_confirmation') return; // skip password_confirmation from submission
+		Object.entries(formToBeSubmitted).forEach(([key, value]) => {
+			// if (key==='password_confirmation') return; // skip password_confirmation from submission
 			cleanedData[key] = (
 				key==='fileId'||
 				key==='image_url'||
@@ -299,7 +299,11 @@ function Checkout() {
 				key==='currencyName'||
 				key==='currencySymbol'||
 				key==='countryEmoji'||
-				key==='password' ||
+				key==='cartDetails' ||
+				key==='shippingCost' ||
+				key==='subTotal' ||
+				key==='totalAmount' ||
+				key==='paymentMethod' ||
 				key==='hasStates'||
 				key==='hasCities' ||
 				key==='email' ||
@@ -307,10 +311,14 @@ function Checkout() {
 			)?value:value.trim().toLowerCase();
 			if (key==='email') cleanedData[key] = value.trim()
 		})
+
+		// add user id if logged in
+		cleanedData['userID'] = userInfo?.id||'';
+		// cleanedData['storeID'] = selectData['storeID'];
 		// console.log('submitting form:', cleanedData);
 		// toast.success('Registration Successful!');
 		try {
-			const response = await fetch(`${baseURL}/users/`, {
+			const response = await fetch(`${baseURL}/checkouts/`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(cleanedData),
@@ -329,12 +337,14 @@ function Checkout() {
 			// console.log('Response data from server',data)
 			toast.success(
 				<div>
-					Registration Successful.<br />
-					Welcome, <strong>{titleCase(data.first_name)}!</strong>
+					Successful.
+					{/* <br /> */}
+					{/* Welcome, <strong>{titleCase(data.first_name)}!</strong> */}
 				</div>
 			);
 			// toast.success(`Registration Successful.\nWelcome, ${data.first_name}!`);
-			setFormData(initialFormData); // reset form
+			// setFormData(initialFormData); // reset form
+			// setLoggedInFormData({});
 			// navigate('/welcome')
 			// navigate('/login') // go to login page after signup
 			return data;
