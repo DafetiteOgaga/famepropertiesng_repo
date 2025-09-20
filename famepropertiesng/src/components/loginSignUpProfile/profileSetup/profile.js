@@ -783,6 +783,7 @@ function Profile() {
 								// if (!allFields.current.includes(userKey)) allFields.current.push(userKey)
 								// console.log('allFields:', allFields.current)
 								// console.log({userKey})
+								console.log({country, state, city, hasStates, hasCities})
 								console.log({userKey, userValue, hasState: userInfo.hasStates, hasCity: userInfo.hasCities})
 								const mobile = userKey==='mobile_no'
 								const isState = userKey==='state'
@@ -801,6 +802,9 @@ function Profile() {
 									key => key in editFields && Boolean(editFields[key])
 								);
 								const isTextArea = toTextArea(userKey, textAreaFieldsArr)
+								if (userKey==='state') console.log({editField})
+								const stateHasStates = editField?userInfo.hasStates:hasStates
+								const stateHasCities = editField?userInfo.hasCities:hasCities
 								return (
 									<Fragment key={index}>
 										<form
@@ -871,8 +875,9 @@ function Profile() {
 												<div className="d-flex flex-column">
 
 													{/* label for all fields */}
-													{(userKey==='state'&&!hasStates)?undefined:
-													(userKey==='city'&&(!hasStates||!hasCities))?undefined:
+													{
+													(userKey==='state'&&!stateHasStates)?undefined:
+													(userKey==='city'&&(!stateHasStates||!stateHasCities))?undefined:
 													<label
 													htmlFor="userKey"
 													className="profile-control mb-0 bold-text"
@@ -908,8 +913,9 @@ function Profile() {
 														</div>
 														:
 														(userKey==='state'&&
-															hasStates&&
-															country!=='') ?
+															stateHasStates&&
+															country!==''
+														) ?
 
 															// state select field
 															<div
@@ -938,8 +944,8 @@ function Profile() {
 															</div>
 															:
 															(userKey==='city'&&
-																hasStates&&
-																hasCities&&
+																stateHasStates&&
+																stateHasCities&&
 																country!==''&&
 																state!==''
 															) ?
@@ -1063,8 +1069,8 @@ function Profile() {
 												// /</div>
 											}
 										</form>
-										{(userKey==='state'&&!hasStates&&editFields["state"])?undefined:
-										(userKey==='city'&&(!hasStates||!hasCities)&&editFields["city"])?undefined:
+										{(userKey==='state'&&!stateHasStates&&editFields["state"])?undefined:
+										(userKey==='city'&&(!stateHasStates||!stateHasCities)&&editFields["city"])?undefined:
 										<hr
 										style={{
 											marginTop: '0.8rem',
