@@ -1,6 +1,4 @@
 import { useEffect, useState, useRef, Fragment } from "react";
-import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
-import 'react-country-state-city/dist/react-country-state-city.css';
 import { Breadcrumb } from "../../sections/breadcrumb"
 import { useDeviceType } from "../../../hooks/deviceType"
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,8 +11,8 @@ import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCom
 import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
 import { isFieldsValid, validatePassword } from "../signUpSetup/signUpFormInfo";
-import { reOrderFields, toTextArea } from "./profileMethods";
-import { limitInput } from "./profileMethods";
+import { reOrderFields, toTextArea } from "./formsMethods";
+import { limitInput, useCountryStateCity } from "./formsMethods";
 // import { NavigateToComp } from "../../../hooks/navigateToComp";
 
 const baseURL = getBaseURL();
@@ -44,11 +42,12 @@ const initialFormData = {
 }
 
 // basic format check
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function Profile() {
 	// const allFields = useRef([])
 	// const { navigateTo } = NavigateToComp()
+	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const updatedFieldRef = useRef(null);
 	const handleImageProcessingRef = useRef();
 	const { createLocal } = useCreateStorage();
@@ -56,9 +55,9 @@ function Profile() {
 	const baseAPIURL = useImageKitAPIs()?.data;
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	const [country, setCountry] = useState(''); // whole country object
-	const [state, setState] = useState('');     // whole state object
-	const [city, setCity] = useState('');       // whole city object
+	// const [country, setCountry] = useState(''); // whole country object
+	// const [state, setState] = useState('');     // whole state object
+	// const [city, setCity] = useState('');       // whole city object
 	const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
 	const [selectedFile, setSelectedFile] = useState(null); // local file
 	const uploadedImage = useRef(null);
@@ -71,6 +70,7 @@ function Profile() {
 	const [fieldStats, setFieldStats] = useState({})
 	const [isMounting, setIsMounting] = useState(true);
 	const navigate = useNavigate();
+	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
 
 	// get user info from local storage if any
 	const userInfo = createLocal.getItem('fpng-user');
@@ -115,26 +115,7 @@ function Profile() {
 		// console.log('updating country/state/city in formData...')
 		setFormData(prev => ({
 			...prev,
-
-			// country
-			country: country?.name||null,
-			countryId: country?.id||null,
-			phoneCode: country?.phone_code||null,
-			currency: country?.currency||null,
-			currencyName: country?.currency_name||null,
-			currencySymbol: country?.currency_symbol||null,
-			countryEmoji: country?.emoji||null,
-			hasStates: country?.hasStates??false,
-
-			// state
-			state: country?(state?.name):null,
-			stateId: country?(state?.id):null,
-			stateCode: country?(state?.state_code):null,
-			hasCities: country?(state?.hasCities):false,
-
-			// city
-			city: state?(city?.name):null,
-			cityId: state?(city?.id):null,
+			...cscFormData,
 		}))
 		if (uploadedImage.current) {
 			const imageDetails = {
@@ -146,7 +127,7 @@ function Profile() {
 				...imageDetails,
 			}))
 		}
-	}, [country, state, city, uploadedImage.current])
+	}, [cscFormData, uploadedImage.current])
 
 	// Step 2: Populate formData from userInfo once userInfo is available
 	useEffect(() => {
@@ -177,32 +158,32 @@ function Profile() {
 				hasStates: userInfo.hasStates,
 				hasCities: userInfo.hasCities,
 			}))
-			if (userInfo.country) {
-				setCountry({
-					name: userInfo.country,
-					phone_code: userInfo.phoneCode,
-					currency: userInfo?.currency||null,
-					currency_name: userInfo?.currencyName||null,
-					currency_symbol: userInfo?.currencySymbol||null,
-					emoji: userInfo?.countryEmoji||null,
-					id: userInfo.countryId,
-					hasStates: userInfo.hasStates,
-				})
-			}
-			if (userInfo.state) {
-				setState({
-					name: userInfo.state,
-					state_code: userInfo.stateCode,
-					id: userInfo.stateId,
-					hasCities: userInfo.hasCities,
-				})
-			}
-			if (userInfo.city) {
-				setCity({
-					name: userInfo.city,
-					id: userInfo.cityId,
-				})
-			}
+			// if (userInfo.country) {
+			// 	setCountry({
+			// 		name: userInfo.country,
+			// 		phone_code: userInfo.phoneCode,
+			// 		currency: userInfo?.currency||null,
+			// 		currency_name: userInfo?.currencyName||null,
+			// 		currency_symbol: userInfo?.currencySymbol||null,
+			// 		emoji: userInfo?.countryEmoji||null,
+			// 		id: userInfo.countryId,
+			// 		hasStates: userInfo.hasStates,
+			// 	})
+			// }
+			// if (userInfo.state) {
+			// 	setState({
+			// 		name: userInfo.state,
+			// 		state_code: userInfo.stateCode,
+			// 		id: userInfo.stateId,
+			// 		hasCities: userInfo.hasCities,
+			// 	})
+			// }
+			// if (userInfo.city) {
+			// 	setCity({
+			// 		name: userInfo.city,
+			// 		id: userInfo.cityId,
+			// 	})
+			// }
 		}
 		// console.log('userInfo effect ran');
 	}, [])
@@ -264,6 +245,8 @@ function Profile() {
 		if (input.name === "password_confirmation") return showConfirmPassword ? "text" : "password";
 		return "password"; // default fallback
 	};
+
+	const countryStateCityArr = ['country', 'state', 'city']
 
 	// check if all required fields are filled
 	const checkFields = isFieldsValid({formData, passwordErrorMessage});
@@ -327,16 +310,18 @@ function Profile() {
 			} else if (len>1) {
 				// console.log('updatedField.current:', updatedFieldRef.current)
 				// console.log('multiple fields to update, checking for actual changes...')
-				const updates = updatedFieldRef.current.map(field => ({
+				const updates = updatedFieldRef.current.map(field => {
+					if (countryStateCityArr.includes(field)) return null
+					return ({
 					field,
 					update: (typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim(),
 					original: userInfo?.[field],
 					isUpdated: ((typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim())!==userInfo?.[field],
-				}))
+				})}).filter(item => item)
 				console.log({updates})
-				const changedFields = updates.filter(item => item.isUpdated)
-				// console.log({updates, changedFields})
-				if (updates.some(item => (!item.isUpdated||!item.update))) {
+				const changedFields = updates.filter(item => item?.isUpdated)
+				console.log({updates, changedFields})
+				if (updates.some(item => (!item?.isUpdated||!item?.update))) {
 					const errorText = `Some of the selected fields were not changed`;
 					console.warn(errorText);
 					toast.error(errorText);
@@ -402,6 +387,9 @@ function Profile() {
 			'is_staff',
 			'hasStates',
 			'hasCities',
+			'country',
+			'state',
+			'city',
 		]
 		// console.log({isImage}, 'uploadedImage:', uploadedImage.current)
 		if (!isImage) {
@@ -591,7 +579,7 @@ function Profile() {
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
-	console.log({userInfo})
+	// console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})
@@ -599,6 +587,8 @@ function Profile() {
 	// console.log({selectedFile})
 	// console.log({imgPreview})
 	// console.log('uploadedImage:', uploadedImage.current)
+	console.log('csc =', {country, state, city, hasStates, hasCities})
+	console.log({hasStates})
 	return (
 		<>
 			<Breadcrumb page={"My Profile"} />
@@ -793,6 +783,7 @@ function Profile() {
 								// if (!allFields.current.includes(userKey)) allFields.current.push(userKey)
 								// console.log('allFields:', allFields.current)
 								// console.log({userKey})
+								console.log({userKey, userValue, hasState: userInfo.hasStates, hasCity: userInfo.hasCities})
 								const mobile = userKey==='mobile_no'
 								const isState = userKey==='state'
 								const email = userKey==='email'
@@ -849,7 +840,11 @@ function Profile() {
 																{/* all non location paragraphs content */}
 																{/* e.g email, mobile no, address,etc */}
 																{!userValue?
-																	<span className="font-italic">Not Provided.</span>:
+																	<span className="font-italic">
+																		{((userKey==='state'&&!userInfo.hasStates)||
+																		(userKey==='city'&&(!userInfo.hasCities)))?'N/A':
+																		'Not Provided.'}
+																	</span>:
 																	`
 																		${mobile?userInfo.phoneCode+' ':''}
 																		${mobile?formatPhoneNumber(userValue):
@@ -861,11 +856,13 @@ function Profile() {
 																}
 														</span>
 														{/* edit button for all (locations inclusive) fields */}
+														{((userKey==='state'&&!userInfo.hasStates)||
+														(userKey==='city'&&(!userInfo.hasCities)))?undefined:
 														<EditFieldButton
 														setEditFields={setEditFields}
 														userKey={userKey}
 														editField={editField}
-														isDisabled={isDisabled} />
+														isDisabled={isDisabled} />}
 													</span>
 												</p>
 												:
@@ -874,6 +871,8 @@ function Profile() {
 												<div className="d-flex flex-column">
 
 													{/* label for all fields */}
+													{(userKey==='state'&&!hasStates)?undefined:
+													(userKey==='city'&&(!hasStates||!hasCities))?undefined:
 													<label
 													htmlFor="userKey"
 													className="profile-control mb-0 bold-text"
@@ -882,19 +881,21 @@ function Profile() {
 														textWrap: 'nowrap',
 													}}
 													>
-														{titleCase(userKey)}:</label>
+														{titleCase(userKey)}:
+													</label>}
 														{userKey==='country' ?
 
 														// country select field
 														<div
 														className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 														>
-															<CountrySelect
+															{/* <CountrySelect
 															id={userKey}
 															value={country}
 															onChange={(val) => setCountry(val)}
 															placeHolder="Select Country"
-															/>
+															/> */}
+															{CountryCompSelect}
 															{/* country cancel and submit buttons */}
 															<div>
 																<EditFieldButton
@@ -906,23 +907,25 @@ function Profile() {
 															</div>
 														</div>
 														:
-														userKey==='state' ?
+														(userKey==='state'&&
+															hasStates&&
+															country!=='') ?
 
 															// state select field
 															<div
 															className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 															>
-																<StateSelect
+																{/* <StateSelect
 																id={userKey}
 																key={country?.id || "no-country"}
 																countryid={country?.id}
 																value={state}
 																onChange={(val) => {
 																	setState(val);
-																	// console.log('State changed to:', val);
 																}}
 																placeHolder="Select State"
-																/>
+																/> */}
+																{StateCompSelect}
 																{/* state cancel and submit buttons */}
 																<div>
 																	{!countryStateCity&&<EditFieldButton
@@ -934,13 +937,18 @@ function Profile() {
 																</div>
 															</div>
 															:
-															userKey==='city' ?
+															(userKey==='city'&&
+																hasStates&&
+																hasCities&&
+																country!==''&&
+																state!==''
+															) ?
 
 																// city select field
 																<div
 																className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 																>
-																	<CitySelect
+																	{/* <CitySelect
 																	id={userKey}
 																	key={`${country?.id ?? "no-country"}-${state?.id ?? "no-state"}`}
 																	countryid={country?.id}
@@ -948,7 +956,8 @@ function Profile() {
 																	value={city}
 																	onChange={(val) => setCity(val)}
 																	placeHolder="Select City"
-																	/>
+																	/> */}
+																	{CityCompSelect}
 																	{/* city cancel and submit buttons */}
 																	<div>
 																		{(!countryStateCity&&!stateCity)&&<EditFieldButton
@@ -962,6 +971,7 @@ function Profile() {
 																:
 
 																// all other fields (input and textarea fields)
+																(!countryStateCityArr.includes(userKey) &&
 																<>
 																	<div className={`d-flex flex-${(isTextArea||deviceType)?'column':'row'} justify-content-between align-items-baseline`}>
 
@@ -1046,18 +1056,20 @@ function Profile() {
 																		</span>
 																		{/* </> */}
 																	</div>
-																</>
+																</>)
 														}
 														
 												</div>
 												// /</div>
 											}
 										</form>
+										{(userKey==='state'&&!hasStates&&editFields["state"])?undefined:
+										(userKey==='city'&&(!hasStates||!hasCities)&&editFields["city"])?undefined:
 										<hr
 										style={{
 											marginTop: '0.8rem',
 											marginBottom: '0.8rem',
-											}} />
+											}} />}
 									</Fragment>
 								)}
 							)}
