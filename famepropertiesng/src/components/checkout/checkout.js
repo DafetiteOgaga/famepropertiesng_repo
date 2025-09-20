@@ -394,14 +394,43 @@ function Checkout() {
 
 	useEffect(()=> {
 		const fieldsToWatch = inputArr.map(item => item.name);
-		console.log({fieldsToWatch})
+		// console.log({fieldsToWatch})
 
-		// Count how many fields are non-empty
-		const filledCount = fieldsToWatch.filter(field => formData[field]?.trim() !== '').length;
-
-		// Update morePx once based on count
-		setMorePx(filledCount * 7);
+		setMorePx(prev => {
+			// count the normal filled fields
+			const filledCount = fieldsToWatch.filter(
+			  val => formData[val] !== '' && formData[val] !== null && formData[val] !== undefined
+			).length;
+		
+			// base pixels
+			let newMorePx = filledCount * 7;
+		
+			// add +10 if state is filled
+			if (hasStates) {
+			  newMorePx += 80;
+			}
+		
+			// add +10 if city is filled
+			if (hasCities) {
+			  newMorePx += 80;
+			}
+		
+			console.log('Updating morePx from', prev, 'to', newMorePx);
+			return newMorePx;
+		  });
 	}, [formData, loggedInFormData])
+
+	// useEffect(() => {
+	// 	if (hasStates) setMorePx(prev => {
+	// 		console.log('hasStates: adding 10 to', prev, '=', prev+10)
+	// 		return prev + 10
+	// 	})
+	// 	else setMorePx(prev => {
+	// 		const initVal = prev >= 10 ? (prev-10) : 0
+	// 		console.log('no hasStates: subtracting 10 from', prev, '=', initVal)
+	// 		return initVal
+	// 	})
+	// }, [hasStates, hasCities])
 
 	// console.log({userInfo})
 	// console.log({isLoggedIn})
@@ -409,19 +438,20 @@ function Checkout() {
 	// console.log({allowedFieldsArr})
 	// console.log({phoneCode})
 	// console.log({shipToDifferent})
-	console.log({formData})
+	// console.log({formData})
 
 	// console.log({country, state, city})
 	
-	console.log('csc =', {country, state, city, hasStates, hasCities})
-	console.log('fd =', {country: formData.country, state: formData.state, city: formData.city})
-	// console.log({formData})
+	// console.log('csc =', {country, state, city, hasStates, hasCities})
+	// console.log('fd =', {country: formData.country, state: formData.state, city: formData.city})
+	console.log({formData})
 	// console.log({subTotalAmount})
 	// console.log({payment})
 	// console.log({checkFields})
 	// console.log({loggedInFormData})
 	// console.log({CountryCompSelect, StateCompSelect, CityCompSelect})
-	console.log({cscFormData})
+	// console.log({cscFormData})
+	console.log({morePx})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
@@ -460,7 +490,7 @@ function Checkout() {
 							style={{borderRadius: '10px'}}>
 								<div className={`flip-container ${shipToDifferent ? "flipped" : ""}`}>
 									<div className="flipper"
-									style={{minHeight: !isMobile?(shipToDifferent?'380px':'270px'):(shipToDifferent?`${655+morePx}px`:'520px')}}>
+									style={{minHeight: !isMobile?(shipToDifferent?'380px':'270px'):(shipToDifferent?`${500+morePx}px`:'520px')}}>
 										<div className="front row">
 											{allowedFieldsArr.map((field, index) => {
 												return (

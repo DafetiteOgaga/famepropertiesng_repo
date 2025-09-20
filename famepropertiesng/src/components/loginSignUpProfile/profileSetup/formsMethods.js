@@ -9,7 +9,7 @@ const useCountryStateCity = () => {
 	const [cscFormData, setCSCFormData] = useState({})
 
 	const updateFormData = () => {
-		console.log('Updating form data with country, state, city changes...');
+		// console.log('Updating form data with country, state, city changes...');
 		setCSCFormData(prev => ({
 			...prev,
 
@@ -53,7 +53,7 @@ const useCountryStateCity = () => {
 		updateFormData()
 	}, [country, state, city])
 
-	console.log('#####', {country, state, city})
+	// console.log('#####', {country, state, city})
 	return {
 		cscFormData,
 		CountryCompSelect: (
