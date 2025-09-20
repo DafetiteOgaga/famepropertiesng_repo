@@ -174,7 +174,7 @@ function Cart() {
 							<tbody className="align-middle">
 								{inputValue.map((cart, index) => {
 									const isLoading = loadingImages[cart?.prdId]
-									// console.log({cart})
+									console.log({cart})
 									const productMiniDetails = {
 										id: inputValue?.[index]?.prdId,
 										name: inputValue?.[index]?.name,
@@ -193,7 +193,7 @@ function Cart() {
 													<BouncingDots size="ts" color="#475569" p="1" />)}
 													<img
 													key={cart?.prdId}
-													src={cart?.image}
+													src={cart?.thumbnail||cart?.image}
 													alt={cart?.name}
 													className={`cart-image-img ${isLoading ? 'd-none' : ''}`}
 													onLoad={() => handleImageLoad(cart?.prdId)}
