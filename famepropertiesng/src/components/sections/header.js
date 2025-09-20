@@ -369,13 +369,13 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	}
 	const page = currentPage.split('/')[1].toLowerCase();
 	const cartPage = page === 'cart'||page === 'detail'
-	console.log({page, cartPage})
+	// console.log({page, cartPage})
 	if (cartPage) {
 		// remove cart from menu if on cart page
 		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 		resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 	}
-	console.log({resortedMobile, resortedPc})
+	// console.log({resortedMobile, resortedPc})
 	const handleIsActive = (menu) => {
 		const page = currentPage.split('/')[1];
 		const link = menu?.link?.split('/')[1];
