@@ -6509,11 +6509,21 @@ a.text-dark:hover, a.text-dark:focus {
   box-shadow: 0 0 30px #DDDDDD;
 }
 
-.product-item:hover .product-action {
+/* .product-item:hover .product-action {
   background: rgba(255, 255, 255, 0.7);
 }
 
 .product-item:hover .product-action span.btn:first-child {
+  opacity: 1;
+  margin-top: 0;
+  transition: .3s 0s;
+} */
+
+.product-item.active .product-action {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.product-item.active .product-action span.btn:first-child {
   opacity: 1;
   margin-top: 0;
   transition: .3s 0s;
@@ -6541,6 +6551,7 @@ a.text-dark:hover, a.text-dark:focus {
   transition: .5s;
 }
 
+.product-item.active .product-img img,
 .product-item:hover .product-img img {
   transform: scale(1.2);
 }
