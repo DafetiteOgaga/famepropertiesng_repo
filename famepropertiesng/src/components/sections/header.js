@@ -398,9 +398,10 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	// console.log({overlayRef, menuRef})
 	return (
 		<>
-			{(deviceType.width<992) ?
-				// mobile
-				<div className={`${isMenuOpen?'slideInRight':'slideOutRight'}`}
+			{/* mobile container */}
+			<div className="mobile-container">
+				<div
+				className={`${isMenuOpen?'slidePageInRight':'slidePageOutRight'}`}
 				style={{
 					position: 'fixed',
 					top: `${30-mTop}%`,
@@ -410,6 +411,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 					height: '100vh',
 					width: '100vw',
 					overflowY: 'auto',
+					// transition: 'transform 0.3s ease-in-out'
 					// cursor: 'pointer',
 				}}>
 					<div className={`col-lg-2 ${isMenuOpen?'slideInRight':'slideOutRight'}`}
@@ -420,11 +422,13 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						alignItems: 'center',
 						// backgroundColor: 'rgba(0, 0, 0, 0.82)',
 						}}>
-						{itemClicked && <span
+						{itemClicked &&
+						<span
 						style={{
 							position: 'relative',
 							top: '0rem',
-						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} /></span>}
+						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} />
+						</span>}
 						<div className="w-35 pt-0"
 						ref={menuRef}
 						style={{
@@ -624,8 +628,10 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						</div>
 					</div>
 				</div>
-				:
-				// desktop
+			</div>
+
+			{/* desktop container */}
+			<div className="desktop-container">
 				<div className="navbar-nav ml-auto py-0 d-lg-flex">
 					<div className="col-lg-2 pr-0"
 					style={{
@@ -723,7 +729,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						</div>
 					</div>
 					<CartLink numberOfProductsInCart={numberOfProductsInCart} />
-				</div>}
+				</div>
+			</div>
 		</>
 	)
 }

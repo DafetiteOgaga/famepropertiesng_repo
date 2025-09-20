@@ -43,6 +43,14 @@ main {
   outline: 0 !important;
 }
 
+/* for desktop container display */
+.mobile-container {
+  display: none;
+}
+.desktop-container {
+  display: block;
+}
+
 hr {
   box-sizing: content-box;
   height: 0;
