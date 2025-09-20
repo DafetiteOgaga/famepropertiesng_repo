@@ -104,6 +104,7 @@ function Index() {
 						image: product?.image_url_0,
 						name: product?.name,
 						price: product?.discountPrice,
+						thumbnail: product?.thumbnail_url_0
 					});
 				} else if (mode === '+') {
 					// If it doesn't exist and mode is +, add it with quantity 2
@@ -113,6 +114,7 @@ function Index() {
 						image: product?.image_url_0,
 						name: product?.name,
 						price: product?.discountPrice,
+						thumbnail: product?.thumbnail_url_0
 					});
 				}
 				// Save updated cart back to localStorage and state
