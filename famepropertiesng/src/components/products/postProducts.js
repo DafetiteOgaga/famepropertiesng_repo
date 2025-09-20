@@ -12,7 +12,7 @@ import { BouncingDots } from "../../spinners/spinner";
 import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { inputArr, isFieldsValid } from "./productFormInfo";
-import { toTextArea, limitInput } from "../loginSignUpProfile/profileSetup/profileMethods";
+import { toTextArea, limitInput } from "../loginSignUpProfile/profileSetup/formsMethods";
 
 const baseURL = getBaseURL();
 
