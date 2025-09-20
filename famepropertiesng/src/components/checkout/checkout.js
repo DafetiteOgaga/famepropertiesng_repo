@@ -399,25 +399,21 @@ function Checkout() {
 		setMorePx(prev => {
 			// count the normal filled fields
 			const filledCount = fieldsToWatch.filter(
-			  val => formData[val] !== '' && formData[val] !== null && formData[val] !== undefined
+				val => formData[val] !== '' && formData[val] !== null && formData[val] !== undefined
 			).length;
-		
 			// base pixels
 			let newMorePx = filledCount * 7;
-		
 			// add +10 if state is filled
 			if (hasStates) {
-			  newMorePx += 80;
+				newMorePx += 80;
 			}
-		
 			// add +10 if city is filled
 			if (hasCities) {
-			  newMorePx += 80;
+				newMorePx += 80;
 			}
-		
 			console.log('Updating morePx from', prev, 'to', newMorePx);
 			return newMorePx;
-		  });
+		});
 	}, [formData, loggedInFormData])
 
 	// useEffect(() => {
@@ -432,7 +428,7 @@ function Checkout() {
 	// 	})
 	// }, [hasStates, hasCities])
 
-	// console.log({userInfo})
+	console.log({userInfo})
 	// console.log({isLoggedIn})
 	// console.log({allFieldsArr})
 	// console.log({allowedFieldsArr})
@@ -451,7 +447,7 @@ function Checkout() {
 	// console.log({loggedInFormData})
 	// console.log({CountryCompSelect, StateCompSelect, CityCompSelect})
 	// console.log({cscFormData})
-	console.log({morePx})
+	// console.log({morePx})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
@@ -505,7 +501,9 @@ function Checkout() {
 														<p
 														style={{borderRadius: '5px'}}
 														className="">
-															{field.field.includes('mobile')?
+															{((field.field.toLowerCase()==='state'&&userInfo.hasStates===false)||
+															(field.field.toLowerCase()==='city'&&userInfo.hasCities===false))?'N/A':
+															field.field.includes('mobile')?
 																(phoneCode+' '+formatPhoneNumber(field.value)):
 																(field.field.includes('email')?
 																field.value.toLowerCase():
@@ -518,6 +516,8 @@ function Checkout() {
 										<div className="back row">
 											{inputArr.map((input, index) => {
 												// console.log({country, state})
+												// if (input.name==='state'&&hasStates===false) return null;
+												// if (input.name==='city'&&hasCities===false) return null;
 												const phone = input.name==='mobile_no' && country;
 												if ((input?.name.toLowerCase()==='state'||
 													input?.name.toLowerCase()==='city')&&
@@ -529,12 +529,17 @@ function Checkout() {
 													country==='') return null;
 												if (input?.name.toLowerCase()==='city'&&
 													state==='') return null;
-												// console.log(input.name, '-', {phone})
+												console.log(input.name, '-', {hasStates, hasCities})
 												return (
 													<div key={index}
 													className="col-md-6 form-group">
 														<label
-														htmlFor={input.name}>{titleCase(input.name)}<span>{`${input.important?'*':''}`}</span></label>
+														htmlFor={input.name}>
+															{titleCase(input.name)}
+															<span>
+																{`${input.important?'*':''}`}
+															</span>
+														</label>
 														{input.name==='country' ?
 														CountryCompSelect
 														// <CountrySelect
