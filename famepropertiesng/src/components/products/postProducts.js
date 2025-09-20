@@ -101,6 +101,7 @@ function PostProduct() {
 						cleanedData[key] = (
 							key.startsWith('fileId')||
 							key.startsWith('image_url')||
+							key.startsWith('thumbnail_url')||
 							key==='market_price'||
 							key==='discount_price'||
 							// key==='storeID'||
@@ -638,11 +639,13 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			if (uploadedImage) {
 				const imageKey = `image_url${index}`;
 				const fileIdKey = `fileId${index}`;
+				const thumbnailUrl = `thumbnail_url${index}`;
 				setFormData(prev => ({
 					...prev,
 					...{
 						[imageKey]: uploadedImage.url,
 						[fileIdKey]: uploadedImage.fileId,
+						[thumbnailUrl]: uploadedImage.thumbnailUrl,
 					},
 				}));
 
