@@ -312,7 +312,16 @@ function Products() {
 														{action.type==='link'?
 														<Link
 														to={`${action.url}/${productObjItem.id}`}
-														style={{textDecoration: 'none'}}>
+														style={{
+															textDecoration: 'none',
+															pointerEvents: isProductActive? 'auto':'none'
+														}}
+														onClick={(e) => {
+															e.stopPropagation(); // prevent parent click from firing
+															if (!isProductActive) {
+															  e.preventDefault(); // block navigation if inactive
+															}
+														}}>
 															<span className="btn btn-outline-dark btn-square">
 																<span className={`${action.icon}`}></span>
 															</span>
@@ -321,15 +330,20 @@ function Products() {
 														<>
 															<span
 															className={`${isPrevLiked?'d-none':''}`}
-															onClick={()=>{
+															style={{
+																textDecoration: 'none',
+																pointerEvents: isProductActive? 'auto':'none'
+															}}
+															onClick={(e)=>{
+																e.stopPropagation(); // prevent parent click from firing
+																if (!isProductActive) return; // bail out early if inactive
 																if (action.click==='cart') {
 																	handleAddToCart(productObjItem, 'add');
 																} else if (action.click==='like') {
 																	setIsLike(productObjItem.id);
 																	// toast.info(`${titleCase(productObjItem.name)} Rated`);
 																}
-															}}
-															style={{textDecoration: 'none'}}>
+															}}>
 																<span className="btn btn-outline-dark btn-square">
 																	<span className={`${action.icon}`}></span>
 																</span>
