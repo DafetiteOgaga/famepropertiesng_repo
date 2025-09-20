@@ -5,9 +5,9 @@ import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { BouncingDots } from "../../spinners/spinner";
 import { digitSeparator, formatPhoneNumber, sentenceCase, titleCase } from "../../hooks/changeCase";
 import { inputArr, isFieldsValid } from "./checkoutFormInfo";
-import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
-import 'react-country-state-city/dist/react-country-state-city.css';
-import { limitInput } from "../loginSignUpProfile/profileSetup/profileMethods";
+// import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
+// import 'react-country-state-city/dist/react-country-state-city.css';
+import { limitInput, useCountryStateCity } from "../loginSignUpProfile/profileSetup/formsMethods";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../hooks/fetchAPIs";
 
@@ -48,18 +48,19 @@ const paymentOptions = [
 ]
 
 function Checkout() {
+	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const { createLocal } = useCreateStorage()
 	const deviceSpec = useDeviceType();
 	const [isMounting, setIsMounting] = useState(true);
 	const [shipToDifferent, setShipToDifferent] = useState(false);
-	const [country, setCountry] = useState(''); // whole country object
-	const [state, setState] = useState('');     // whole state object
-	const [city, setCity] = useState('');       // whole city object
+	// const [country, setCountry] = useState(''); // whole country object
+	// const [state, setState] = useState('');     // whole state object
+	// const [city, setCity] = useState('');       // whole city object
 	const [formData, setFormData] = useState(initialFormData);
 	const [loggedInFormData, setLoggedInFormData] = useState({});
 	const [subTotalAmount, setsubTotalAmount] = useState(0);
 	const [fieldStats, setFieldStats] = useState({})
-	const [payment, setPayment] = useState("");
+	// const [payment, setPayment] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
 	const [morePx, setMorePx] = useState(0);
@@ -67,7 +68,9 @@ function Checkout() {
 	const userInfo = createLocal.getItem('fpng-user')||{};
 	const currencySym = userInfo?.currencySymbol||'₦'
 	const cartItems = createLocal.getItem('fpng-cart');
-	console.log({cartItems})
+
+	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
+	// console.log({cartItems})
 
 	// handle input changes
 	const onChangeHandler = (e) => {
@@ -172,25 +175,26 @@ function Checkout() {
 		setFormData(prev => ({
 			...prev,
 
-			// country
-			country: country?.name||null,
-			countryId: country?.id||null,
-			phoneCode: country?.phone_code||null,
-			currency: country?.currency||null,
-			currencyName: country?.currency_name||null,
-			currencySymbol: country?.currency_symbol||null,
-			countryEmoji: country?.emoji||null,
-			hasStates: country?.hasStates||false,
+			// // country
+			// country: country?.name||null,
+			// countryId: country?.id||null,
+			// phoneCode: country?.phone_code||null,
+			// currency: country?.currency||null,
+			// currencyName: country?.currency_name||null,
+			// currencySymbol: country?.currency_symbol||null,
+			// countryEmoji: country?.emoji||null,
+			// hasStates: country?.hasStates||false,
 
-			// state
-			state: country?.hasStates?(state?.name):null,
-			stateId: country?.hasStates?(state?.id):null,
-			stateCode: country?.hasStates?(state?.state_code):null,
-			hasCities: state?.hasCities||false,
+			// // state
+			// state: country?.hasStates?(state?.name):null,
+			// stateId: country?.hasStates?(state?.id):null,
+			// stateCode: country?.hasStates?(state?.state_code):null,
+			// hasCities: state?.hasCities||false,
 
-			// city
-			city: state?.hasCities?(city?.name):null,
-			cityId: state?.hasCities?(city?.id):null,
+			// // city
+			// city: state?.hasCities?(city?.name):null,
+			// cityId: state?.hasCities?(city?.id):null,
+			...cscFormData,
 
 			// order details
 			cartDetails: cartItems.map(item => ({
@@ -205,12 +209,30 @@ function Checkout() {
 			// payment method
 			// paymentMethod: payment,
 		}))
+
+		// if (country?.hasStates===false) {
+		// 	setState('');
+		// 	setCity('');
+		// }
 	}
+
+	// useEffect(() => {
+	// 	if (country?.name||country?.hasStates===false) {
+	// 		setState('');
+	// 		setCity('');
+	// 	}
+	// }, [country])
+
+	// useEffect(() => {
+	// 	if (state?.name||state?.hasCities===false) {
+	// 		setCity('');
+	// 	}
+	// }, [state])
 
 	// updates country, state, city and image details in formData whenever they change
 	useEffect(() => {
 		updateFormData()
-	}, [country, state, city, subTotalAmount])
+	}, [cscFormData, subTotalAmount])
 
 	useEffect(() => {
 		if (!shipToDifferent) {
@@ -256,7 +278,7 @@ function Checkout() {
 
 		updateFormData();
 
-		// setLoading(true);
+		setLoading(true);
 
 		if (shipToDifferent&&!checkFields) {
 			console.log('using formData ... (diff addy)')
@@ -290,25 +312,29 @@ function Checkout() {
 		const cleanedData = {};
 		Object.entries(formToBeSubmitted).forEach(([key, value]) => {
 			// if (key==='password_confirmation') return; // skip password_confirmation from submission
-			cleanedData[key] = (
-				key==='fileId'||
-				key==='image_url'||
-				key==='stateCode'||
-				key==='phoneCode'||
-				key==='currency'||
-				key==='currencyName'||
-				key==='currencySymbol'||
-				key==='countryEmoji'||
-				key==='cartDetails' ||
-				key==='shippingCost' ||
-				key==='subTotal' ||
-				key==='totalAmount' ||
-				key==='paymentMethod' ||
-				key==='hasStates'||
-				key==='hasCities' ||
-				key==='email' ||
-				typeof value === 'number'
-			)?value:value.trim().toLowerCase();
+			cleanedData[key] =
+				// typeof value === 'boolean' ? value:
+				value === null ? value:
+				(
+					key==='fileId'||
+					key==='image_url'||
+					key==='stateCode'||
+					key==='phoneCode'||
+					key==='currency'||
+					key==='currencyName'||
+					key==='currencySymbol'||
+					key==='countryEmoji'||
+					key==='cartDetails' ||
+					key==='shippingCost' ||
+					key==='subTotal' ||
+					key==='totalAmount' ||
+					key==='paymentMethod' ||
+					key==='hasStates'||
+					key==='hasCities' ||
+					key==='email' ||
+					typeof value === 'number'
+				)?value:
+					value.trim().toLowerCase();
 			if (key==='email') cleanedData[key] = value.trim()
 		})
 
@@ -377,18 +403,25 @@ function Checkout() {
 		setMorePx(filledCount * 7);
 	}, [formData, loggedInFormData])
 
-	console.log({userInfo})
-	console.log({isLoggedIn})
+	// console.log({userInfo})
+	// console.log({isLoggedIn})
 	// console.log({allFieldsArr})
 	// console.log({allowedFieldsArr})
 	// console.log({phoneCode})
-	console.log({shipToDifferent})
-	console.log({country, state, city})
+	// console.log({shipToDifferent})
 	console.log({formData})
-	console.log({subTotalAmount})
-	console.log({payment})
-	console.log({checkFields})
-	console.log({loggedInFormData})
+
+	// console.log({country, state, city})
+	
+	console.log('csc =', {country, state, city, hasStates, hasCities})
+	console.log('fd =', {country: formData.country, state: formData.state, city: formData.city})
+	// console.log({formData})
+	// console.log({subTotalAmount})
+	// console.log({payment})
+	// console.log({checkFields})
+	// console.log({loggedInFormData})
+	// console.log({CountryCompSelect, StateCompSelect, CityCompSelect})
+	console.log({cscFormData})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
@@ -454,7 +487,18 @@ function Checkout() {
 										</div>
 										<div className="back row">
 											{inputArr.map((input, index) => {
+												// console.log({country, state})
 												const phone = input.name==='mobile_no' && country;
+												if ((input?.name.toLowerCase()==='state'||
+													input?.name.toLowerCase()==='city')&&
+													hasStates===false) return null;
+												if (input?.name.toLowerCase()==='city'&&
+													(hasCities)===false) return null;
+												if ((input?.name.toLowerCase()==='state'||
+													input?.name.toLowerCase()==='city')&&
+													country==='') return null;
+												if (input?.name.toLowerCase()==='city'&&
+													state==='') return null;
 												// console.log(input.name, '-', {phone})
 												return (
 													<div key={index}
@@ -462,33 +506,36 @@ function Checkout() {
 														<label
 														htmlFor={input.name}>{titleCase(input.name)}<span>{`${input.important?'*':''}`}</span></label>
 														{input.name==='country' ?
-														<CountrySelect
-														id={input.name}
-														value={country}
-														onChange={(val) => setCountry(val)}
-														placeHolder="Select Country"
-														/>
+														CountryCompSelect
+														// <CountrySelect
+														// id={input.name}
+														// value={country}
+														// onChange={(val) => setCountry(val)}
+														// placeHolder="Select Country"
+														// />
 														:
 														input.name==='state' ?
-															<StateSelect
-															id={input.name}
-															key={country?.id || "no-country"} // to reset when country changes
-															countryid={country?.id}
-															value={state}
-															onChange={(val) => setState(val)}
-															placeHolder="Select State"
-															/>
+															StateCompSelect
+															// <StateSelect
+															// id={input.name}
+															// key={country?.id || "no-country"} // to reset when country changes
+															// countryid={country?.id}
+															// value={state}
+															// onChange={(val) => setState(val)}
+															// placeHolder="Select State"
+															// />
 															:
 															input.name==='city' ?
-																<CitySelect
-																id={input.name}
-																key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
-																countryid={country?.id}
-																stateid={state?.id}
-																value={city}
-																onChange={(val) => setCity(val)}
-																placeHolder="Select City"
-																/>
+																CityCompSelect
+																// <CitySelect
+																// id={input.name}
+																// key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
+																// countryid={country?.id}
+																// stateid={state?.id}
+																// value={city}
+																// onChange={(val) => setCity(val)}
+																// placeHolder="Select City"
+																// />
 																:
 																<>
 																	<div
@@ -502,7 +549,7 @@ function Checkout() {
 																		{phone && <p
 																		style={{
 																			marginRight: '0.5rem',
-																		}}>+{country.phone_code}</p>}
+																		}}>{countryPhoneCode}</p>}
 																		<input
 																		// ref={input.type==='email'?emailRef:null}
 																		id={input.name}
@@ -637,7 +684,7 @@ function Checkout() {
 												id={option}
 												value={option}
 												onChange={(e)=>{
-													setPayment(e.target.value);
+													// setPayment(e.target.value);
 													setFormData(prev=>({...prev, paymentMethod: e.target.value}));
 													setLoggedInFormData(prev=>({...prev, paymentMethod: e.target.value}))
 													}}/>
