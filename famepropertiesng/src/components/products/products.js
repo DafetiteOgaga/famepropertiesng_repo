@@ -65,6 +65,7 @@ const totalNoOfReviewers = (arr) => {
 }
 // const productStar = "fa fa-star"
 function Products() {
+	const [activeProductId, setActiveProductId] = useState(null);
 	const hasValue = useRef(false);
 	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage();
@@ -213,7 +214,7 @@ function Products() {
 	// 	'\ncount:', pagination?.count,
 	// 	'\ntotal_pages:', pagination?.total_pages,
 	// )
-	console.log({userInfo})
+	// console.log({userInfo})
 	// console.log('totalUsers:', totalUsers);
 	return (
 		<div className="container-fluid pb-3">
@@ -226,10 +227,12 @@ function Products() {
 						// const no = totalNoOfReviewers(productRatingArr);
 						// const numberOfLikes = convertLikesToStars(productObjItem.total_liked, 10)
 						// console.log({productObjItem, userInfo})
-						console.log({id:productObjItem.id, productObjItem})
+						// console.log({id:productObjItem.id, productObjItem})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
 						const imageLoading = loadingImages[productObjItem?.id]
+						const isProductActive = activeProductId === productObjItem.id;
+						console.log({isProductActive, id: productObjItem.id, activeProductId})
 						return (
 							<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
 							style={isMobile ?
@@ -237,8 +240,11 @@ function Products() {
 									paddingLeft: 0,
 									paddingRight: 0,
 								}:{}}>
-								<div className={`${productObjItem.sold?'':'product-item'} bg-light mb-4`}
-								style={{borderRadius: '10px'}}>
+								<div className={`${productObjItem.sold?'':'product-item'} ${isProductActive ? 'active' : ''} bg-light mb-4`}
+								style={{borderRadius: '10px'}}
+								onClick={() => {
+									setActiveProductId(prev => prev === productObjItem.id ? null : productObjItem.id);
+								}}>
 									<div className="product-img position-relative overflow-hidden">
 										<>
 											{imageLoading && (
