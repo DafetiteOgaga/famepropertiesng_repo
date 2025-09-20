@@ -253,7 +253,7 @@ function Products() {
 											key={productObjItem.id}
 											className={`img-fluid w-100 ${imageLoading?'d-none':'opacy'}`}
 											alt={productObjItem.name}
-											src={productObjItem.image_url_0}
+											src={productObjItem?.thumbnail_url_0||productObjItem.image_url_0}
 											onLoad={() => handleImageLoad(productObjItem?.id)}
 											onError={() => handleImageLoad(productObjItem?.id)} // stop loader on error too
 											onLoadStart={() => handleImageStart(productObjItem?.id)}
