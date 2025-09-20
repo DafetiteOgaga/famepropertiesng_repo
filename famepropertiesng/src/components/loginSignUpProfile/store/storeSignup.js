@@ -1,6 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
-import 'react-country-state-city/dist/react-country-state-city.css';
 import { Breadcrumb } from "../../sections/breadcrumb"
 import { useDeviceType } from "../../../hooks/deviceType"
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,7 +13,7 @@ import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCom
 import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
 import { useCreateStorage } from "../../../hooks/setupLocalStorage";
-import { limitInput } from "../profileSetup/profileMethods";
+import { limitInput, useCountryStateCity } from "../profileSetup/formsMethods";
 // import { inputArr } from "../signUpSetup/formInfo";
 import {
 	inputArr, isFieldsValid,
@@ -51,6 +49,7 @@ const initialFormData = {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function StoreSignUp() {
+	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	// const [sellerValue, setSellerValue] = useState(null);
 	const { createLocal } = useCreateStorage()
 	const [loading, setLoading] = useState(false);
@@ -61,9 +60,9 @@ function StoreSignUp() {
 	const navigate = useNavigate();
 	// const [showPassword, setShowPassword] = useState(false);
 	// const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	const [country, setCountry] = useState(''); // whole country object
-	const [state, setState] = useState('');     // whole state object
-	const [city, setCity] = useState('');       // whole city object
+	// const [country, setCountry] = useState(''); // whole country object
+	// const [state, setState] = useState('');     // whole state object
+	// const [city, setCity] = useState('');       // whole city object
 	// const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
 	// const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(false);
 	const [selectedFile, setSelectedFile] = useState(null); // local file
@@ -80,6 +79,8 @@ function StoreSignUp() {
 	const [isMounting, setIsMounting] = useState(true);
 	const [fieldStats, setFieldStats] = useState({})
 	const deviceType = useDeviceType().width <= 576;
+
+	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
 
 	const userInfo = createLocal.getItem('fpng-user')
 	// validate password on change
@@ -151,22 +152,7 @@ function StoreSignUp() {
 	useEffect(() => {
 		// setFormData(prev => ({
 		// 	...prev,
-
-		// 	// country
-		// 	country: country?.name||null,
-		// 	countryId: country?.id||null,
-		// 	phoneCode: country?.phone_code||null,
-		// 	hasStates: country?.hasStates||false,
-
-		// 	// state
-		// 	state: country?.hasStates?(state?.name):null,
-		// 	stateId: country?.hasStates?(state?.id):null,
-		// 	stateCode: country?.hasStates?(state?.state_code):null,
-		// 	hasCities: state?.hasCities||false,
-
-		// 	// city
-		// 	city: state?.hasCities?(city?.name):null,
-		// 	cityId: state?.hasCities?(city?.id):null,
+		// ...cscFormData,
 		// }))
 		if (uploadedImage) {
 			const imageDetails = {
@@ -180,7 +166,7 @@ function StoreSignUp() {
 			setUploadedImage(null);
 		}
 	}, [
-		// country, state, city,
+		// cscFormData,
 		uploadedImage])
 
 	// watches if type is password handles switching between text and password types
@@ -469,6 +455,8 @@ function StoreSignUp() {
 		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
+	console.log('csc =', {country, state, city, hasStates, hasCities})
+	console.log({cscFormData})
 	return (
 		<>
 			<Breadcrumb page={'Register Store'} />
@@ -504,33 +492,36 @@ function StoreSignUp() {
 										<label
 										htmlFor={input.name}>{titleCase(input.name)}<span>{`${input.important?'*':''}`}</span></label>
 										{input.name==='country' ?
-										<CountrySelect
-										id={input.name}
-										value={country}
-										onChange={(val) => setCountry(val)}
-										placeHolder="Select Country"
-										/>
+										CountryCompSelect
+										// <CountrySelect
+										// id={input.name}
+										// value={country}
+										// onChange={(val) => setCountry(val)}
+										// placeHolder="Select Country"
+										// />
 										:
 										input.name==='state' ?
-											<StateSelect
-											id={input.name}
-											key={country?.id || "no-country"} // to reset when country changes
-											countryid={country?.id}
-											value={state}
-											onChange={(val) => setState(val)}
-											placeHolder="Select State"
-											/>
+											StateCompSelect
+											// <StateSelect
+											// id={input.name}
+											// key={country?.id || "no-country"} // to reset when country changes
+											// countryid={country?.id}
+											// value={state}
+											// onChange={(val) => setState(val)}
+											// placeHolder="Select State"
+											// />
 											:
 											input.name==='city' ?
-												<CitySelect
-												id={input.name}
-												key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
-												countryid={country?.id}
-												stateid={state?.id}
-												value={city}
-												onChange={(val) => setCity(val)}
-												placeHolder="Select City"
-												/>
+												CityCompSelect
+												// <CitySelect
+												// id={input.name}
+												// key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
+												// countryid={country?.id}
+												// stateid={state?.id}
+												// value={city}
+												// onChange={(val) => setCity(val)}
+												// placeHolder="Select City"
+												// />
 												:
 												<>
 													<div
