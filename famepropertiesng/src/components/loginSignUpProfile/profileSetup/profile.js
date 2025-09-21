@@ -47,7 +47,7 @@ const initialFormData = {
 function Profile() {
 	// const allFields = useRef([])
 	// const { navigateTo } = NavigateToComp()
-	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
+	const { cscFormData, setCountry, setState, setCity, setCSC, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const updatedFieldRef = useRef(null);
 	const handleImageProcessingRef = useRef();
 	const { createLocal } = useCreateStorage();
@@ -131,8 +131,10 @@ function Profile() {
 
 	// Step 2: Populate formData from userInfo once userInfo is available
 	useEffect(() => {
+		// console.log('userInfo effect triggered');
 		if (userInfo) {
 			// console.log('setting formData from userInfo...')
+			console.log({userInfo})
 			setFormData(prev => ({
 				...prev,
 				...userInfo,
@@ -158,33 +160,38 @@ function Profile() {
 				hasStates: userInfo.hasStates,
 				hasCities: userInfo.hasCities,
 			}))
-			// if (userInfo.country) {
-			// 	setCountry({
-			// 		name: userInfo.country,
-			// 		phone_code: userInfo.phoneCode,
-			// 		currency: userInfo?.currency||null,
-			// 		currency_name: userInfo?.currencyName||null,
-			// 		currency_symbol: userInfo?.currencySymbol||null,
-			// 		emoji: userInfo?.countryEmoji||null,
-			// 		id: userInfo.countryId,
-			// 		hasStates: userInfo.hasStates,
-			// 	})
-			// }
-			// if (userInfo.state) {
-			// 	setState({
-			// 		name: userInfo.state,
-			// 		state_code: userInfo.stateCode,
-			// 		id: userInfo.stateId,
-			// 		hasCities: userInfo.hasCities,
-			// 	})
-			// }
-			// if (userInfo.city) {
-			// 	setCity({
-			// 		name: userInfo.city,
-			// 		id: userInfo.cityId,
-			// 	})
-			// }
+			setCSC(userInfo)
 		}
+		
+		// if (userInfo.country) {
+		// 	console.log('setting country from userInfo...')
+		// 	setCountry({
+		// 		name: userInfo.country,
+		// 		phone_code: userInfo.phoneCode,
+		// 		currency: userInfo?.currency||null,
+		// 		currency_name: userInfo?.currencyName||null,
+		// 		currency_symbol: userInfo?.currencySymbol||null,
+		// 		emoji: userInfo?.countryEmoji||null,
+		// 		id: userInfo.countryId,
+		// 		hasStates: userInfo.hasStates,
+		// 	})
+		// }
+		// if (userInfo.state) {
+		// 	console.log('setting state from userInfo...')
+		// 	setState({
+		// 		name: userInfo.state,
+		// 		state_code: userInfo.stateCode,
+		// 		id: userInfo.stateId,
+		// 		hasCities: userInfo.hasCities,
+		// 	})
+		// }
+		// if (userInfo.city) {
+		// 	console.log('setting city from userInfo...')
+		// 	setCity({
+		// 		name: userInfo.city,
+		// 		id: userInfo.cityId,
+		// 	})
+		// }
 		// console.log('userInfo effect ran');
 	}, [])
 
@@ -579,7 +586,7 @@ function Profile() {
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
-	// console.log({userInfo})
+	console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})
@@ -587,8 +594,8 @@ function Profile() {
 	// console.log({selectedFile})
 	// console.log({imgPreview})
 	// console.log('uploadedImage:', uploadedImage.current)
-	console.log('csc =', {country, state, city, hasStates, hasCities})
-	console.log({hasStates})
+	// console.log('csc =', {country, state, city, hasStates, hasCities})
+	// console.log({hasStates})
 	return (
 		<>
 			<Breadcrumb page={"My Profile"} />
@@ -783,8 +790,8 @@ function Profile() {
 								// if (!allFields.current.includes(userKey)) allFields.current.push(userKey)
 								// console.log('allFields:', allFields.current)
 								// console.log({userKey})
-								console.log({country, state, city, hasStates, hasCities})
-								console.log({userKey, userValue, hasState: userInfo.hasStates, hasCity: userInfo.hasCities})
+								// console.log({country, state, city, hasStates, hasCities})
+								// console.log({userKey, userValue, hasState: userInfo.hasStates, hasCity: userInfo.hasCities})
 								const mobile = userKey==='mobile_no'
 								const isState = userKey==='state'
 								const email = userKey==='email'
@@ -802,7 +809,7 @@ function Profile() {
 									key => key in editFields && Boolean(editFields[key])
 								);
 								const isTextArea = toTextArea(userKey, textAreaFieldsArr)
-								if (userKey==='state') console.log({editField})
+								// if (userKey==='state') console.log({editField})
 								const stateHasStates = editField?userInfo.hasStates:hasStates
 								const stateHasCities = editField?userInfo.hasCities:hasCities
 								return (
@@ -900,7 +907,9 @@ function Profile() {
 															onChange={(val) => setCountry(val)}
 															placeHolder="Select Country"
 															/> */}
-															{CountryCompSelect}
+															<div className={deviceType?'':'w-75'}>
+																{CountryCompSelect}
+															</div>
 															{/* country cancel and submit buttons */}
 															<div>
 																<EditFieldButton
@@ -931,7 +940,9 @@ function Profile() {
 																}}
 																placeHolder="Select State"
 																/> */}
-																{StateCompSelect}
+																<div className={deviceType?'':'w-75'}>
+																	{StateCompSelect}
+																</div>
 																{/* state cancel and submit buttons */}
 																<div>
 																	{!countryStateCity&&<EditFieldButton
@@ -963,7 +974,9 @@ function Profile() {
 																	onChange={(val) => setCity(val)}
 																	placeHolder="Select City"
 																	/> */}
-																	{CityCompSelect}
+																	<div className={deviceType?'':'w-75'}>
+																		{CityCompSelect}
+																	</div>
 																	{/* city cancel and submit buttons */}
 																	<div>
 																		{(!countryStateCity&&!stateCity)&&<EditFieldButton
