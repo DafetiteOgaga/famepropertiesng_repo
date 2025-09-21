@@ -708,7 +708,7 @@ function Profile() {
 
 										{/* first and last name */}
 										{titleCase(userInfo.first_name)}
-										<span className="d-flex flex-row align-items-center justify-content-between">
+										<span className={`d-flex flex-row align-items-${deviceType?'center':'baseline'} justify-content-between`}>
 											<span style={{whiteSpace: 'pre'}}>{' '}</span>
 
 												{/* last name with edit button */}
