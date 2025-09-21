@@ -340,6 +340,7 @@ const styles = {
 	},
 	mobileFontSize: {
 		fontSize: '14px',
+		padding: '10px 4px', // increase tap area
 	},
 	mobileQtyWidth: {
 		display: "flex",
