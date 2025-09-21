@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
 import 'react-country-state-city/dist/react-country-state-city.css';
+import { useLocation } from 'react-router-dom';
 
 const useCountryStateCity = () => {
+	const profilePage = useLocation().pathname.split('/')[1].toLowerCase()==='profile'; // to differentiate between profile and signup forms
+	const cscRef = useRef(false);
 	const [country, setCountry] = useState(''); // whole country object
 	const [state, setState] = useState('');     // whole state object
 	const [city, setCity] = useState('');       // whole city object
+	const [csc, setCSC] = useState(null);         // combined country-state-city string
 	const [cscFormData, setCSCFormData] = useState({})
 
 	const updateFormData = () => {
@@ -36,14 +40,75 @@ const useCountryStateCity = () => {
 	}
 
 	useEffect(() => {
-		if (country?.name||country?.hasStates===false) {
+		// console.log('in useefect:', {csc})
+		if (csc&&!cscRef.current) {
+			// console.log('csc exists, not overwriting with country/state/city changes')
+			if (csc.country) {
+				// console.log('setting country from userInfo...')
+				setCountry({
+					name: csc?.country,
+					phone_code: csc?.phoneCode,
+					currency: csc?.currency||null,
+					currency_name: csc?.currencyName||null,
+					currency_symbol: csc?.currencySymbol||null,
+					emoji: csc?.countryEmoji||null,
+					id: csc?.countryId,
+					hasStates: csc?.hasStates,
+				})
+			}
+			if (csc.state) {
+				// console.log('setting state from userInfo...')
+				setState({
+					name: csc?.state,
+					state_code: csc.stateCode,
+					id: csc?.stateId,
+					hasCities: csc?.hasCities,
+				})
+			}
+			if (csc.city) {
+				// console.log('setting city from userInfo...')
+				setCity({
+					name: csc?.city,
+					id: csc?.cityId,
+				})
+			}
+			cscRef.current = true; // prevent future overwrites
+		}
+	}, [csc])
+
+	// Re-enable resets if the user changes country on profile page
+	useEffect(() => {
+		if (profilePage && cscRef.current) {
+			// If the selected country is different from the prefilled one, unlock state and city resets
+			if (country && country.id !== csc?.countryId) {
+				cscRef.current = false;
+			}
+
+			// If the selected state is different from the prefilled one, unlock city reset
+			if (state && state.id !== csc?.stateId) {
+				cscRef.current = false; // allow city to reset
+			}
+		}
+	}, [country, state, profilePage, csc]);
+
+	// // Re-enable resets if the user changes state on profile page
+	// useEffect(() => {
+	// 	if (profilePage && cscRef.current) {
+	// 		if (state && state.id !== csc?.stateId) {
+	// 			cscRef.current = false; // allow city to reset
+	// 		}
+	// 	}
+	// }, [state, profilePage, csc]);
+
+	useEffect(() => {
+		if (!profilePage&&(country?.name||country?.hasStates===false)) {
 			setState('');
 			setCity('');
 		}
 	}, [country])
 
 	useEffect(() => {
-		if (state?.name||state?.hasCities===false) {
+		if (!profilePage&&(state?.name||state?.hasCities===false)) {
 			setCity('');
 		}
 	}, [state])
@@ -54,8 +119,15 @@ const useCountryStateCity = () => {
 	}, [country, state, city])
 
 	// console.log('#####', {country, state, city})
+	// console.log('in comp', {csc})
+	// console.log({location})
+	console.log({cscref: cscRef.current})
 	return {
 		cscFormData,
+		setCountry,
+		setState,
+		setCity,
+		setCSC,
 		CountryCompSelect: (
 			<CountrySelect
 			value={country}
