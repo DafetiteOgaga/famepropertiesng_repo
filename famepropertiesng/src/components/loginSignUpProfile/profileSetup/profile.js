@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, Fragment } from "react";
 import { Breadcrumb } from "../../sections/breadcrumb"
 import { useDeviceType } from "../../../hooks/deviceType"
 import { Link, useNavigate } from 'react-router-dom';
-import { formatPhoneNumber, sentenceCase, titleCase } from "../../../hooks/changeCase";
+import { digitSeparator, formatPhoneNumber, sentenceCase, titleCase } from "../../../hooks/changeCase";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../../hooks/fetchAPIs";
 import { useCreateStorage } from "../../../hooks/setupLocalStorage";
@@ -47,6 +47,7 @@ const initialFormData = {
 function Profile() {
 	// const allFields = useRef([])
 	// const { navigateTo } = NavigateToComp()
+	const [editStore, setEditStore] = useState({});
 	const { cscFormData, setCountry, setState, setCity, setCSC, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const updatedFieldRef = useRef(null);
 	const handleImageProcessingRef = useRef();
@@ -63,6 +64,7 @@ function Profile() {
 	const uploadedImage = useRef(null);
 	const [imagePreview, setImagePreview] = useState(false);
 	const [formData, setFormData] = useState(initialFormData);
+	const [storeFormData, setStoreFormData] = useState({});
 	const deviceType = useDeviceType().width <= 576;
 	const [editFields, setEditFields] = useState({});
 	const userInfoRef = useRef(false)
@@ -94,6 +96,12 @@ function Profile() {
 	// 	const stored = createLocal.getItem('fpng-user');
 	// 	return stored ? stored : null;
 	// });
+	const storeVariables = [
+		'nearest_bus_stop',
+		'store_phone_number',
+		'store_address',
+		'description',
+	]
 	useEffect(() => {
 		if (userInfo&&!userInfoRef.current) {
 			// console.log('User info found in local storage:', userInfo);
@@ -104,12 +112,57 @@ function Profile() {
 					return acc;
 				}, {})
 			}));
+			if (userInfo.is_seller && userInfo?.store?.length > 0) {
+				setEditStore(prev => ({
+					...prev,
+					...userInfo.store.reduce((acc, store) => {
+						acc[store.id] = storeVariables.reduce((obj, key) => {
+							obj[key] = false; // assign each variable a default value of false
+							return obj;
+						}, {});
+						return acc;
+					}, {})
+				}));
+			}
 			userInfoRef.current = true;
 		} else {
 		// console.log('No user info found in local storage.');
 		}
 	}, [userInfo])
 
+	// useEffect(() => {
+	// 	setFormData(prev => {
+	// 		// make a copy of prev (to avoid mutation)
+	// 		const updated = { ...prev };
+	// 		Object.entries(editFields).forEach(([key, value]) => {
+	// 			if (!value && userInfo?.hasOwnProperty(key)) {
+	// 				updated[key] = userInfo[key] || '';
+	// 			}
+	// 		});
+	// 		return updated; // return the new state
+	// 	});
+	// 	setStoreFormData(prev => {
+	// 		const updated = { ...prev }; // clone old state
+	// 		Object.entries(editStore).forEach(([storeID, storeField]) => {
+	// 			Object.entries(storeField).forEach(([key, value]) => {
+	// 				// only update if field is NOT being edited
+	// 				if (!value && userInfo?.is_seller && userInfo?.store?.length > 0) {
+	// 					const storeInfo = userInfo.store.find(
+	// 						store => store.id.toString() === storeID.toString()
+	// 					);
+	// 					if (storeInfo && storeInfo.hasOwnProperty(key)) {
+	// 						updated[storeID] = {
+	// 							...updated[storeID],
+	// 							[key]: storeInfo[key] || '',
+	// 						};
+	// 					}
+	// 				}
+	// 			});
+	// 		});
+	// 		return updated; // <-- don’t forget to return!
+	// 	});
+	// }, [editFields, editStore])
+	// console.log({editFields, editStore})
 	// updates country, state, city and image details in formData whenever they change
 	useEffect(() => {
 		// console.log('updating country/state/city in formData...')
@@ -161,6 +214,21 @@ function Profile() {
 				hasCities: userInfo.hasCities,
 			}))
 			setCSC(userInfo)
+			setStoreFormData(prev => {
+				if (userInfo.is_seller && userInfo?.store?.length > 0) {
+					return userInfo.store.reduce((acc, store) => {
+						acc[store.id] = {
+							...prev[store.id], // keep existing values if already present
+							...storeVariables.reduce((fieldAcc, field) => {
+								fieldAcc[field] = store[field] || '';
+								return fieldAcc;
+							}, {})
+						};
+						return acc;
+					}, { ...prev });
+				}
+				return prev;
+			});
 		}
 		
 		// if (userInfo.country) {
@@ -245,6 +313,65 @@ function Profile() {
 		}))
 	}
 
+	// handle input changes
+	const onChangeStoreHandler = (e, storeID) => {
+		e.preventDefault();
+		// console.log('in onChangeStoreHandler for storeID:', storeID)
+		const { name, value, tagName } = e.target
+		// console.log({ name, value, tagName })
+		let maxChars;
+		// if (name==='first_name'||name==='last_name'||name==='username') {
+		// 	maxChars = 50;
+		// } else if (name==='email') {
+		// 	maxChars = 100;
+		// } else
+		if (name==='store_phone_number') {
+			maxChars = 20;
+		}
+		// else if (name==='password'||name==='password_confirmation') {
+		// 	maxChars = 64;
+		// }
+		else if (name==='store_address'||name==='nearest_bus_stop') {
+			maxChars = 150;
+		}
+
+		// auto-detect textarea
+		const isTextArea = String(tagName).toUpperCase() === 'TEXTAREA';
+
+		// pass explicit limits so behavior is clear
+		const {
+			value: limitedValue,
+			charCount,
+			wordCount,
+			colorIndicator,
+			maxCharsLimit,
+			maxWords,
+		} =
+			limitInput(value, maxChars, undefined, isTextArea);
+		// console.log({name})
+		setStoreFormData(prev => ({
+			...prev,
+			[storeID]: {
+			  ...prev[storeID],     // keep other fields for this store
+			  [name]: limitedValue  // set dynamic field
+			}
+		}))
+		setFieldStats(prev => ({
+			...prev,
+			[storeID]: {
+				...prev[storeID], // keep other fields for this store
+					[name]: {
+						charCount,
+						wordCount,
+						colorIndicator,
+						maxCharsLimit,
+						maxWords,
+					}
+				}
+			}
+		))
+	}
+
 	// watches if type is password handles switching between text and password types
 	const getInputType = (input) => {
 		if (input.type !== "password") return input.type;
@@ -253,7 +380,7 @@ function Profile() {
 		return "password"; // default fallback
 	};
 
-	const countryStateCityArr = ['country', 'state', 'city']
+	const countryStateCityArr = ['country', 'state', 'city', 'store']
 
 	// check if all required fields are filled
 	const checkFields = isFieldsValid({formData, passwordErrorMessage});
@@ -547,7 +674,10 @@ function Profile() {
 	const reOrderFieldsArr = ["email", "mobile_no", "username", "address", "country", "state", "city", "nearest_bus_stop"];
 
 	// array of fields that should be text areas instead of input fields
-	const textAreaFieldsArr = ['address', 'nearest_bus_stop']
+	const textAreaFieldsArr = [
+		'address', 'nearest_bus_stop',
+		'store_address', 'nearest_bus_stop',
+	]
 
 	// fields to skip displaying
 	// const skipFieldArr = [
@@ -567,7 +697,7 @@ function Profile() {
 	]
 	const acceptedRenderFields = [
 		'email', 'mobile_no', 'username', 'address', 'country',
-		'state', 'city', 'nearest_bus_stop'
+		'state', 'city', 'nearest_bus_stop', 'store',
 	]
 
 	// other phone input props
@@ -586,7 +716,7 @@ function Profile() {
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
-	console.log({userInfo})
+	// console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})
@@ -596,6 +726,11 @@ function Profile() {
 	// console.log('uploadedImage:', uploadedImage.current)
 	// console.log('csc =', {country, state, city, hasStates, hasCities})
 	// console.log({hasStates})
+	// console.log({fieldStats})
+	// const ch = fieldStats
+	// console.log({ch: ch['15']?.store_phone_number})
+	// console.log({editStore})
+	// console.log({editFields})
 	return (
 		<>
 			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
@@ -693,7 +828,13 @@ function Profile() {
 											editField={editFields["image_url"]}
 											onSubmitHandler={onSubmitHandler}
 											loading={loading}
-											isDisabled={Object.values(editFields)?.some?.(value=>value)||false} />
+											isDisabled={
+												(Object.values(editFields)?.some?.(value=>value)||
+												Object.values(editStore)
+														.filter((value)=>value)
+														.map((obj)=>Object.values(obj))
+														.flat().some((val)=>val))
+												||false} />
 									</span>)}
 							</div>
 							<p
@@ -720,7 +861,13 @@ function Profile() {
 													editField={editFields["last_name"]}
 													onSubmitHandler={onSubmitHandler}
 													loading={loading}
-													isDisabled={Object.values(editFields)?.some?.(value=>value)||false} />}
+													isDisabled={
+														(Object.values(editFields)?.some?.(value=>value)||
+														Object.values(editStore)
+														.filter((value)=>value)
+														.map((obj)=>Object.values(obj))
+														.flat().some((val)=>val))||false
+														} />}
 										</span>
 									</span>
 
@@ -792,15 +939,26 @@ function Profile() {
 								// console.log({userKey})
 								// console.log({country, state, city, hasStates, hasCities})
 								// console.log({userKey, userValue, hasState: userInfo.hasStates, hasCity: userInfo.hasCities})
+								if (userKey==='store'&&(!userInfo.is_seller)) return null;
+								const stores = userKey==='store'
 								const mobile = userKey==='mobile_no'
 								const isState = userKey==='state'
 								const email = userKey==='email'
 								const sentence = userKey==='address' || userKey==='nearest_bus_stop'
 								const editField = editFields[userKey]
+								// console.log({editStore})
+								const editStoreField = Object.values(editStore)
+														.filter((value)=>value)
+														.map((obj)=>Object.values(obj))
+														.flat().some((val)=>val)
+								
 								const fieldSelected = Object.entries(editFields).filter(([key, value])=>value).map(([key])=>key)
 								
+								// const storeFieldSelected = Object.entries(editStore).filter(([key, value])=>value).map(([key])=>key)
+								
 								const isFieldSelected = !!fieldSelected.length
-								const isDisabled = isFieldSelected?!fieldSelected?.includes(userKey):false
+								// console.log({editStoreField, isFieldSelected})
+								const isDisabled = (isFieldSelected||editStoreField)?!fieldSelected?.includes(userKey):false
 								if (isFieldSelected) updatedFieldRef.current = fieldSelected
 								const countryStateCity = ['country', 'state', 'city'].every(
 									key => key in editFields && Boolean(editFields[key])
@@ -814,6 +972,14 @@ function Profile() {
 								const stateHasCities = editField?userInfo.hasCities:hasCities
 								return (
 									<Fragment key={index}>
+										{(userKey==='state'&&!stateHasStates&&editFields["state"])?undefined:
+										(userKey==='city'&&(!stateHasStates||!stateHasCities)&&editFields["city"])?undefined:
+										(!index)?undefined:
+										<hr
+										style={{
+											marginTop: '0.8rem',
+											marginBottom: '0.8rem',
+											}} />}
 										<form
 										style={{
 											...{
@@ -834,41 +1000,228 @@ function Profile() {
 													{/* title label */}
 													<span
 													className="bold-text"
-													style={{}}>{titleCase(userKey)}:
+													style={{textDecoration: userKey==='store'?'underline':''}}>{titleCase((userKey==='store'&&userValue.length>=1)?userKey+'s':userKey)}:
 													</span>
 
 													{/* paragraph text and phone code span */}
 													<span
 													className="d-flex flex-row align-items-center justify-content-between">
 														<span
-														className="profile-control"
+														className={`${stores?'w-100':''} profile-control`}
 															style={{
 																fontStyle: email?'italic':'',
-																padding: `${0.375*2}rem ${0}rem`,
+																padding: stores?'':`${0.375*2}rem ${0}rem`,
 																textWrap: 'wrap',
+																display: stores?'initial':'',
 															}}>
 
 																{/* all non location paragraphs content */}
 																{/* e.g email, mobile no, address,etc */}
 																{!userValue?
-																	<span className="font-italic">
+																	(<span className="font-italic">
 																		{((userKey==='state'&&!userInfo.hasStates)||
 																		(userKey==='city'&&(!userInfo.hasCities)))?'N/A':
 																		'Not Provided.'}
-																	</span>:
-																	`
-																		${mobile?userInfo.phoneCode+' ':''}
-																		${mobile?formatPhoneNumber(userValue):
-																		sentence?sentenceCase(userValue):
-																		email?userValue:
+																	</span>):
+																	stores?(userValue.map((store, storeIdx) => {
+																		// console.log({store, storeIdx})
+																		// console.log({charCount: fieldStats[store?.id]?.store_phone_number?.charCount, id: store.id})
+																		// console.log({userValue})
+																		return (
+																			<Fragment key={storeIdx}>
+																				{Object.entries(store).map(([sKey, sVal], sIdx) => {
+																					// console.log({sKey, sVal})
+																					// console.log('rendering phone code for store phone number:', userInfo.phoneCode)
+																					if (sKey==='id'||
+																						sKey==='rating'||
+																						// sKey==='store_status'||
+																						sKey==='user') return null;
+																					const storeFieldsToRender = ['store_phone_number', 'store_address', 'nearest_bus_stop', 'description', 'verified', 'store_status']
+																					// console.log({sKey, sVal})
+																					const phone = sKey==='store_phone_number'
+																					const editingStoreField = editStore[store.id]?.[sKey]
+																					// console.log({editingStoreField, storeID: store.id, sKey})
+																					const isStoreTextArea = toTextArea(sKey, textAreaFieldsArr)
+																					// console.log({sKey, isStoreTextArea})
+																					// console.log({storelen: store.length})
+																					return (
+																						<Fragment key={sKey}>
+																							<>
+																								{sKey==="store_name"&&
+																								<span
+																								className="bold-text"
+																								style={{textDecoration: 'underline'}}>{titleCase(sKey)}: {titleCase(sVal)}
+																								</span>}
+
+																								{/* {<hr className="my-1" />} */}
+																								{storeFieldsToRender.includes(sKey) &&
+																								<>
+																									<hr className="my-1" />
+																									<span className={`pl-3 d-flex flex-${deviceType?'column':'row'} align-items-${!deviceType?'end':(editingStoreField?'center':'end')} justify-content-between`}>
+																									{/* // <span className={`pl-3 d-flex flex-${deviceType?'column':'row'} align-items-${deviceType?'end':'end'} justify-content-between`}> */}
+																										<span className="w-100">
+																											<span className={`d-flex flex-column ${phone?'w-100':''}`}>
+																												<span className="bold-text text-nowrap">{titleCase(sKey)}:</span>
+
+																												{/* <span style={{whiteSpace: 'pre'}}>{' '}</span> */}
+																													{/* {(phone)&&
+																													// phone code prefix for mobile number
+																													<PhoneCode
+																													ukey={sKey}
+																													phoneCode={(sVal)?userInfo.phoneCode:''} />} */}
+
+																												{/* {console.log(`rendering editStore[${store.id}].${sKey}:`, editStore[store.id]?.[sKey])} */}
+																												{editingStoreField ?
+																												<span style={{whiteSpace: 'nowrap'}}>
+																													
+																														{(phone)&&
+																														// phone code prefix for mobile number
+																														<span style={{paddingLeft: '5%',}}>
+																															<PhoneCode
+																															ukey={sKey}
+																															phoneCode={(sVal)?userInfo.phoneCode:''} />
+																														</span>}
+
+																													{isStoreTextArea?
+																														// text area field
+																														<textarea
+																														id={sKey}
+																														name={sKey}
+																														onChange={(e) => onChangeStoreHandler(e, store.id)}
+																														value={storeFormData[store.id]?.[sKey]||''}
+																														style={{
+																														borderRadius: '5px',
+																														display: 'initial',
+																														width: deviceType?'100%':'95%',
+																														}}
+																														className="form-control"
+																														rows={2}
+																														/>
+																														:
+																														<input
+																														id={sKey}
+																														name={sKey}
+																														onChange={(e) => onChangeStoreHandler(e, store.id)}
+																														value={storeFormData[store.id]?.[sKey]||''}
+																														style={{
+																															borderRadius: '5px', width: '100%',
+																															display: 'inline-block',
+																														}}
+																														className={`form-control ${(!deviceType)?(sKey!=='description'?'w-80':'w-100'):(sKey==='store_phone_number'?'w-85':'w-100')}`}
+																														type="text"
+																														// type={getInputType(store.store_phone_number)}
+																														{...(sKey === 'store_phone_number' ? phoneProps : {})}
+																														/>}
+																													
+																													
+																												</span>
+																												:
+																												<span style={{whiteSpace: 'nowrap'}}>
+																													{(phone)&&
+																													// phone code prefix for mobile number
+																													<span style={{paddingLeft: '5%',}}>
+																														<PhoneCode
+																														ukey={sKey}
+																														phoneCode={(sVal)?userInfo.phoneCode:''} />
+																													</span>}
+
+																													<span
+																													style={{
+																														paddingLeft: phone?'':'5%',
+																														// display: 'inline-block',
+																														whiteSpace: 'pre-wrap',
+																														wordBreak: 'break-word',
+																														overflowWrap: 'break-word',
+																														width: '100%',
+																													}}>{((phone)?formatPhoneNumber(sVal):titleCase(sVal))||'Not Provided.'}</span>
+																												</span>}
+																												{/* <br style={{display: 'block'}} />
+																												<p style={{display: 'block'}}>xxxxxyyyyyy</p> */}
+																												{/* <br />
+																												<span>...........</span>
+																												<br /> */}
+																											</span>
+																											{editingStoreField &&
+																													<span
+																													style={{
+																														fontSize: '0.625rem',
+																														paddingRight: '3%',
+																														color: fieldStats[store?.id]?.[sKey]?.colorIndicator
+																													}}
+																													className={`justify-content-end d-flex font-italic`}>
+																													{(
+																														fieldStats[store?.id]?.[sKey]?.charCount
+																														||
+																														fieldStats[store?.id]?.[sKey]?.wordCount) ?
+																															(isStoreTextArea ?
+																															<>
+																																{`${fieldStats[store?.id]?.[sKey]?.charCount} chars • ${fieldStats[store?.id]?.[sKey]?.wordCount}/${fieldStats[store?.id]?.[sKey]?.maxWords} words`}
+																															</>
+																															:
+																															<>
+																																{`${fieldStats[store?.id]?.[sKey]?.charCount}/${fieldStats[store?.id]?.[sKey]?.maxCharsLimit} chars`}
+																															</>)
+																														:null}
+																													
+																													</span>
+																												}
+																											
+																										</span>
+																										<span className={`${(isStoreTextArea?(!fieldStats[store?.id]?.[sKey]?.charCount?'pb-0':'pb-4'):(!fieldStats[store?.id]?.[sKey]?.charCount?'pb-0':'pb-3'))}`}>
+																											{storeVariables.includes(sKey)&&
+																											<EditFieldButton
+																											store={{id: store.id, field: sKey}}
+																											setEditFields={setEditStore}
+																											userKey={sKey}
+																											editField={editingStoreField}
+																											isDisabled={isDisabled} />}
+																										</span>
+																									</span>
+																								</>}
+																								{/* {<hr className="my-1" />} */}
+																								{/* <span className="pl-3 d-flex flex-row align-items-center justify-content-between">
+																									<span>
+																										<span className="bold-text">{titleCase('nearest_bus_stop')}:</span> {store?.nearest_bus_stop||'Not Provided.'}
+																									</span>
+																									<EditFieldButton
+																									setEditFields={setEditFields}
+																									userKey={userKey}
+																									editField={editField}
+																									isDisabled={isDisabled} />
+																								</span> */}
+																								{/* <span className="pl-3 d-flex flex-row align-items-center justify-content-between">
+																									<span>
+																										<span className="bold-text">{titleCase('status')}:</span> {store?.store_status||'Not Provided.'}
+																									</span>
+																								</span> */}
+																								{/* <span className="pl-3 d-flex flex-row align-items-center justify-content-between">
+																									<span>
+																										<span className="bold-text">{titleCase('verified')}:</span> {store?.verified||'Not verified'}
+																									</span>
+																								</span> */}
+																								{/* <br /> */}
+																							</>
+																							{/* <br /> */}
+																						</Fragment>
+																					)
+																				})}
+																				<br />
+																			</Fragment>
+																		)
+																	})):
+																	<span>
+																		{mobile ? `${userInfo.phoneCode} ${formatPhoneNumber(userValue)}`:
+																		sentence ? sentenceCase(userValue):
+																		email ? userValue:
 																		titleCase(userValue)}
-																		${isState?'|'+userInfo.stateCode:''}
-																	`
+																		{isState && `|${userInfo.stateCode}`}
+																	</span>
 																}
 														</span>
 														{/* edit button for all (locations inclusive) fields */}
-														{((userKey==='state'&&!userInfo.hasStates)||
-														(userKey==='city'&&(!userInfo.hasCities)))?undefined:
+														{(((userKey==='state'&&!userInfo.hasStates)||
+														(userKey==='city'&&(!userInfo.hasCities)))||
+														userKey==='store')?undefined:
 														<EditFieldButton
 														setEditFields={setEditFields}
 														userKey={userKey}
@@ -885,6 +1238,7 @@ function Profile() {
 													{
 													(userKey==='state'&&!stateHasStates)?undefined:
 													(userKey==='city'&&(!stateHasStates||!stateHasCities))?undefined:
+													(userKey==='store')?undefined:
 													<label
 													htmlFor="userKey"
 													className="profile-control mb-0 bold-text"
@@ -990,9 +1344,9 @@ function Profile() {
 																:
 
 																// all other fields (input and textarea fields)
-																(!countryStateCityArr.includes(userKey) &&
+																(!countryStateCityArr.includes(userKey) ?
 																<>
-																	<div className={`d-flex flex-${(isTextArea||deviceType)?'column':'row'} justify-content-between align-items-baseline`}>
+																	<div className={`d-flex flex-${(isTextArea||deviceType)?'column':'row'} justify-content-between align-items-${deviceType?'normal':'baseline'}`}>
 
 																		{(!deviceType)&&
 																		// phone code prefix for mobile number
@@ -1001,7 +1355,7 @@ function Profile() {
 																		phoneCode={userInfo.phoneCode} />}
 																		
 																		<span className={`d-flex ${deviceType?'':'w-100'} flex-column align-items-center`}>
-																			<span className="d-flex flex-row align-items-center w-100">
+																			<span className={`d-flex flex-${!deviceType?'column':(userKey==='mobile_no'?'row':'column')} align-items-center w-100`}>
 																				{(deviceType)&&
 																				// phone code prefix for mobile number
 																				<PhoneCode
@@ -1045,8 +1399,7 @@ function Profile() {
 																						color: fieldStats[userKey]?.colorIndicator
 																					}}
 																					className={`align-self-end d-flex font-italic`}>
-																					{
-																					(
+																					{(
 																						fieldStats[userKey]?.charCount
 																					||
 																						fieldStats[userKey]?.wordCount) ?
@@ -1073,22 +1426,20 @@ function Profile() {
 																			onSubmitHandler={onSubmitHandler}
 																			loading={loading} />
 																		</span>
-																		{/* </> */}
 																	</div>
-																</>)
+																</>
+																:undefined)
 														}
-														
 												</div>
-												// /</div>
 											}
 										</form>
-										{(userKey==='state'&&!stateHasStates&&editFields["state"])?undefined:
+										{/* {(userKey==='state'&&!stateHasStates&&editFields["state"])?undefined:
 										(userKey==='city'&&(!stateHasStates||!stateHasCities)&&editFields["city"])?undefined:
 										<hr
 										style={{
 											marginTop: '0.8rem',
 											marginBottom: '0.8rem',
-											}} />}
+											}} />} */}
 									</Fragment>
 								)}
 							)}
@@ -1106,41 +1457,58 @@ function Profile() {
 
 function EditFieldButton({
 	userKey, editField, setEditFields, isDisabled,
-	onSubmitHandler, loading, handleUpload}) {
+	onSubmitHandler, loading, handleUpload,
+	store=null}) {
 	const deviceType = useDeviceType().width <= 576;
 	if (!userKey) return null;
 	if (userKey==='email') return null; // can't edit email for now
+	// console.log({store})
+	// console.log({editField})
 	return (
 		<span
 		className="d-flex align-items-center justify-content-center flex-row">
 			<button
 			type="button"
 			className={`btn btn-profile ${(deviceType&&userKey==='image_url')?'':(deviceType?'ml-1':'')}`}
-			disabled={isDisabled}
+			disabled={(store&&editField)?false:isDisabled}
 			style={{
 				padding: (deviceType&&userKey==='image_url')?'0.2rem 0.7rem':'0.25rem 0.7rem',
 				// borderRadius: (deviceType&&userKey==='image_url')?'30%':'5px',
 			}}
-			onClick={()=>setEditFields(prev=>{
-				if (userKey==='country') {
-					return ({
-						// ...prev,
-						country: !prev[userKey],
-						state: !prev[userKey],
-						city: !prev[userKey],
-					})
-				} else if (userKey==='state') {
-					return ({
-						// ...prev,
-						state: !prev[userKey],
-						city: !prev[userKey],
-					})
+			onClick={()=>{
+				if (store) {
+					// console.log(`toggling editStore[${store.id}].${store.field} from`, editField, 'to', !editField)
+					setEditFields(prev=>({
+						...prev,
+						[store.id]: {
+							...prev[store.id],
+							[store.field]: !prev[store.id]?.[store.field]
+						}
+					}))
 				} else {
-				return ({
-				// ...prev,
-				[userKey]: !prev[userKey]
-				})
-			}})}>
+					setEditFields(prev=>{
+						if (userKey==='country') {
+							return ({
+								// ...prev,
+								country: !prev[userKey],
+								state: !prev[userKey],
+								city: !prev[userKey],
+							})
+						} else if (userKey==='state') {
+							return ({
+								// ...prev,
+								state: !prev[userKey],
+								city: !prev[userKey],
+							})
+						} else {
+							return ({
+							// ...prev,
+							[userKey]: !prev[userKey]
+							})
+						}
+					})}
+				}
+			}>
 				{editField?'Cancel':'Edit'}
 			</button>
 
@@ -1165,7 +1533,9 @@ function EditFieldButton({
 }
 
 function PhoneCode({ukey, phoneCode}) {
-	if (ukey!=='mobile_no') return
+	// console.log({ukey, phoneCode})
+	if (ukey!=='mobile_no'&&ukey!=='store_phone_number') return
+	// console.log('rendering phone code for mobile number:', phoneCode)
 	return (
 		// phone code prefix for mobile number
 		<span
