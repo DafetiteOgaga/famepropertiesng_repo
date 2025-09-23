@@ -5571,6 +5571,37 @@ button.bg-dark:focus {
 .w-50 {
   width: 50% !important;
 }
+.w-51 {
+  width: 51% !important;
+}
+.w-52 {
+  width: 52% !important;
+}
+.w-53 {
+  width: 53% !important
+}
+.w-53_5 {
+  width: 53.5% !important
+}
+.w-53_8 {
+  width: 53.8% !important
+}
+.w-54 {
+  width: 54% !important;
+}
+.w-55 {
+  width: 55% !important;
+}
+
+.w-60 {
+  width: 60% !important;
+}
+.w-65 {
+  width: 65% !important;
+}
+.w-70 {
+  width: 70% !important;
+}
 
 .w-75 {
   width: 75% !important;
