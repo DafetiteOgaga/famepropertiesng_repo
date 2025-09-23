@@ -121,7 +121,7 @@ const useCountryStateCity = () => {
 	// console.log('#####', {country, state, city})
 	// console.log('in comp', {csc})
 	// console.log({location})
-	console.log({cscref: cscRef.current})
+	// console.log({cscref: cscRef.current})
 	return {
 		cscFormData,
 		setCountry,
@@ -178,7 +178,9 @@ const reOrderFields = (entries, reOrderFieldsArr) => {
 
 // Determine if a field should be a textarea based on its name
 const toTextArea = (str, textAreaFieldsArr) => {
-	return textAreaFieldsArr.includes(str)
+	const checker = textAreaFieldsArr.includes(str)
+	// console.log({str, checker})
+	return checker
 }
 
 // function to limit input characters and words when plugged into onchange events
