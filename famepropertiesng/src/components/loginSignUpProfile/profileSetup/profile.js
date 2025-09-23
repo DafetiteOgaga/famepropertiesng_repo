@@ -598,7 +598,7 @@ function Profile() {
 	// console.log({hasStates})
 	return (
 		<>
-			<Breadcrumb page={"My Profile"} />
+			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
 
 			{!isMounting ?
 			<div

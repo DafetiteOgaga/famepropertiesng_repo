@@ -18,6 +18,7 @@ import { StoreSignUp } from '../components/loginSignUpProfile/store/storeSignup'
 import { PostProduct } from '../components/products/postProducts';
 import { SingleImageUploader } from '../hooks/backgroundRemover/singleBackgroundRemover';
 import { BulkImageUploader } from '../hooks/backgroundRemover/multipleBackgroundRemover';
+import { EditProduct } from '../components/products/editProducts';
 
 function AppRoutes() {
 	return (
@@ -37,6 +38,8 @@ function AppRoutes() {
 				<Route path="products/:productname/detail" element={<Detail />} />
 				{/* detail */}
 				<Route path="detail/:id" element={<Detail />} />
+				{/* edit product */}
+				<Route path=":userID/product/:productID" element={<EditProduct />} />
 				{/* AddProduct */}
 				<Route path="admin-page" element={<AdminPage />} />
 				{/* process image page */}

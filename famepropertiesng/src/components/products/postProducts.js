@@ -29,6 +29,7 @@ const initialFormData = () => ({
 	marketing_descriptions: '',
 	market_price: '',
 	discount_price: '',
+	number_of_items: '',
 	storeID: '',
 	id: crypto.randomUUID(),
 })
@@ -104,6 +105,7 @@ function PostProduct() {
 							key.startsWith('thumbnail_url')||
 							key==='market_price'||
 							key==='discount_price'||
+							key==='number_of_items'||
 							// key==='storeID'||
 							typeof value === 'number'
 						)?value:value.trim().toLowerCase();
@@ -347,7 +349,7 @@ function PostProduct() {
 	}, []);
 	return (
 		<>
-			<Breadcrumb page={'Post Products'} />
+			<Breadcrumb page={'Add-Product(s)'} />
 
 			{!isMounting ?
 			<form
@@ -534,7 +536,9 @@ const ProductSection = forwardRef(({renderedFormIDs,
 					name==='technical_feature_4'||
 					name==='technical_feature_5') {
 			maxChars = 150;
-		} else if (name==='market_price'||name==='discount_price') {
+		} else if (name==='market_price'||
+			name==='discount_price'||
+			name==='number_of_items') {
 			maxChars = 10;
 		}
 		// auto-detect textarea

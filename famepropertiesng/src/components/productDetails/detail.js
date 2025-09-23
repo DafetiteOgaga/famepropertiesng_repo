@@ -252,7 +252,7 @@ function Detail() {
 	// console.log({deviceWidth})
 	return (
 		<>
-			<Breadcrumb page={'Product'} />
+			<Breadcrumb page={`Product / ${titleCase(productItem?.name)}`} slash={false} />
 
 			{/* <!-- Shop Detail Start --> */}
 			<div className="container-fluid mt-3 pb-5"style={{
@@ -355,9 +355,12 @@ function Detail() {
 							borderRadius: '10px',
 							padding: isMobile ? '15px 10px' : '',
 						}}>
-							<h3
+							<h3 className="mb-0"
 							style={{color: '#475569'}}>{titleCase(productItem.name)}</h3>
-							<div className="d-flex mb-3">
+							<small>
+								{productItem.numberOfItems} {productItem.numberOfItems>1?'quantities':'item'} {productItem.numberOfItems<=10?'remaining':'available'}
+							</small>
+							<div className="d-flex mb-3 mt-1">
 								<div className="text-primary mr-2">
 									{Array.from({length: 5}, (_, starIndex) => {
 										const isStar = (starIndex+1) <= randomNumber;

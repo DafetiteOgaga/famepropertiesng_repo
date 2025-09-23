@@ -36,7 +36,12 @@ const getCroppedImg = (imageSrc, cropPixels) => {
 	});
 };
 
-const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview, imageId=null, buttonText=null }, ref) => {
+const ImageCropAndCompress = forwardRef(({onComplete, type,
+											isImagePreview,
+											imageId=null,
+											buttonText=null,
+											disableBtn=false },
+											ref) => {
 	// console.log({imageId})
 	const [imageSrc, setImageSrc] = useState(null);
 	const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -166,9 +171,13 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview, ima
 			}}>
 				<label
 				htmlFor={`${imageId?imageId:'fileUpload'}`}
-				className="custom-upload-btn bg-dark"
+				className="custom-upload-btn"
 				style={{
 					marginBottom: 0,
+					cursor: disableBtn?'not-allowed':'pointer',
+					pointerEvents: disableBtn?'none':'auto',
+					// userSelect: disableBtn?'none':'auto',
+					backgroundColor: disableBtn?'#86909d':'#475569',
 				}}>
 					{buttonText?titleCase(`${isFileSelected?'change':'select'} ${buttonText}`):'Upload Image'}
 				</label>
@@ -188,6 +197,7 @@ const ImageCropAndCompress = forwardRef(({ onComplete, type, isImagePreview, ima
 			accept="image/*" // accept images only
 			// accept="video/*" // accept videos only
 			style={{ display: "none" }} // hidden input
+			disabled={disableBtn}
 			onChange={handleFileChange} />
 
 			{/* {imageSrc && (

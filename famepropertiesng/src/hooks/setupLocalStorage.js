@@ -35,7 +35,9 @@ function useStorage(storage) {
 	// decrypt = localRot ? -parseInt(localRot) : 0;
 	return {
 		setItem(key, value, duration = null) {
-			SetAllKeys(storage, key);
+			if (storage === localStorage) {
+				SetAllKeys(storage, key);
+			}
 			// console.log('#####useStorage setItem called'.repeat(5));
 			// console.log('setting key:', key);
 			// console.log('Original value:', typeof value);
@@ -130,7 +132,9 @@ function useStorage(storage) {
 		},
 
 		setItemRaw(key, value) {
-			SetAllKeys(storage, key);
+			if (storage === localStorage) {
+				SetAllKeys(storage, key);
+			}
 
 			// Step 1: store as JSON string
 			const storeStr = JSON.stringify(value);
