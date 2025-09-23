@@ -43,7 +43,7 @@ const productsActionArr = [
 	},
 	{
 		icon: "fa fa-pen",
-		url: "edit-product",
+		url: "id-product",
 		click: 'editProduct',
 		type: 'link'
 	}
@@ -68,7 +68,7 @@ function Products() {
 	const [activeProductId, setActiveProductId] = useState(null);
 	const hasValue = useRef(false);
 	const { handleAddToCart } = useOutletContext();
-	const { createLocal } = useCreateStorage();
+	const { createLocal, createSession } = useCreateStorage();
 	const [productItemArr, setProductItemArr] = useState([]);
 	const [isLike, setIsLike] = useState(null);
 	const [load, setLoad] = useState(0);
@@ -135,7 +135,7 @@ function Products() {
 				const prevArr = [...userInfo.product_ratings, prodData]
 				createLocal.setItem('fpng-user', {...userInfo, product_ratings: prevArr});
 				setProductItemArr(prev=>{
-					return prev.map(item=>{
+					return prev.map(item => {
 						if (item.id===prodData.product) {
 							return {
 								...item,
@@ -146,6 +146,25 @@ function Products() {
 						return item
 					})
 				})
+
+				// Update session storage products too
+				const sessionProducts = createSession.getItem('fpng-prod');
+				if (sessionProducts) {
+					const updatedSession = sessionProducts.map(item => {
+						if (item.id === prodData.product) {
+							// Replace the existing product with updated data
+							return {
+								...item,
+								total_liked: item.total_liked + 1,
+								total_reviewed: item.total_reviewed + 1,
+							};
+						}
+						return item;
+					});
+					createSession.setItem('fpng-prod', updatedSession);
+					createSession.setItemRaw('fpng-tprd', updatedSession.length);
+				}
+
 				setProductRatingArr(prevArr);
 				setIsLike(null);
 				return
@@ -160,7 +179,33 @@ function Products() {
 			});
 			setLoad(prev=>prev+1);
 			setProductItemArr(prodData?.results);
-			// console.log({prodData})
+			// check if item exists in session storage, if not or updates available,
+			// save/update else pass
+			const sessionProducts = createSession.getItem('fpng-prod'); // already parsed for you
+
+			if (sessionProducts) {
+				// console.log('Session products exist, checking for new products to add...');
+				// Extract product IDs already in session
+				const existingIds = new Set(sessionProducts.map(p => p.id));
+
+				// Filter new products (those not in session)
+				const newProducts = prodData.results.filter(p => !existingIds.has(p.id));
+
+				if (newProducts.length > 0) {
+					// console.log(`Found ${newProducts.length} new products, updating session...`);
+					const updatedSession = [...sessionProducts, ...newProducts];
+					createSession.setItem('fpng-prod', updatedSession);
+					createSession.setItemRaw('fpng-tprd', updatedSession.length);
+				}
+			} else {
+				// First time, just save all
+				// console.log('Saving products to session for the first time...');
+				// const totalProds = prodData.results.length;
+				// console.log({totalProds})
+				createSession.setItem('fpng-prod', prodData.results);
+				createSession.setItemRaw('fpng-tprd', prodData.results.length);
+			}
+			// console.log({sessionProducts, prodData})
 			// setProductRatingArr(prodData.product_ratings);
 		} catch (error) {
 			console.error("Error fetching data:", error);
@@ -214,8 +259,10 @@ function Products() {
 	// 	'\ncount:', pagination?.count,
 	// 	'\ntotal_pages:', pagination?.total_pages,
 	// )
-	// console.log({userInfo})
+	console.log({userInfo})
 	// console.log('totalUsers:', totalUsers);
+	// const editprod = productsActionArr[3].url.split('-').join(' ');
+	// console.log({editprod})
 	return (
 		<div className="container-fluid pb-3">
 			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3"
@@ -227,12 +274,12 @@ function Products() {
 						// const no = totalNoOfReviewers(productRatingArr);
 						// const numberOfLikes = convertLikesToStars(productObjItem.total_liked, 10)
 						// console.log({productObjItem, userInfo})
-						// console.log({id:productObjItem.id, productObjItem})
+						console.log({id:productObjItem.id, productObjItem})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
 						const imageLoading = loadingImages[productObjItem?.id]
 						const isProductActive = activeProductId === productObjItem.id;
-						console.log({isProductActive, id: productObjItem.id, activeProductId})
+						// console.log({isProductActive, id: productObjItem.id, activeProductId})
 						return (
 							<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
 							style={isMobile ?
@@ -240,7 +287,7 @@ function Products() {
 									paddingLeft: 0,
 									paddingRight: 0,
 								}:{}}>
-								<div className={`${productObjItem.sold?'':'product-item'} ${isProductActive ? 'active' : ''} bg-light mb-4`}
+								<div className={`${(productObjItem.numberOfItems<1)?'':'product-item'} ${isProductActive ? 'active' : ''} bg-light mb-4`}
 								style={{borderRadius: '10px'}}
 								onClick={() => {
 									setActiveProductId(prev => prev === productObjItem.id ? null : productObjItem.id);
@@ -261,7 +308,7 @@ function Products() {
 										</>
 
 										{/* SOLD Overlay */}
-										{(productObjItem.sold&&!imageLoading) && (
+										{((productObjItem.numberOfItems<1)&&!imageLoading) && (
 											<div
 											style={{
 												position: "absolute",
@@ -284,7 +331,7 @@ function Products() {
 											</div>
 										)}
 
-										{(!productObjItem.sold&&!imageLoading)&&
+										{((productObjItem.numberOfItems>=1)&&!imageLoading)&&
 										<div className="product-action">
 											{productsActionArr.map((action, actionIndex) => {
 												// console.log({productObjItem})
@@ -302,8 +349,16 @@ function Products() {
 												// 	url: action.url,
 												// 	type: action.type,
 												// })
+
 												// enable this when edit product component page is done
-												// if (!canEdit&&action.click==='editProduct') return null;
+												if (!canEdit&&action.click==='editProduct') return null;
+
+												let productActionUrl = action.url;
+												if (action.click==='editProduct') {
+													productActionUrl = userInfo?.id+'/'+action.url.split('-')[1]
+													// productActionUrl = `${userInfo?.id}/${productActionUrl}`;
+												}
+												// console.log({productActionUrl})
 
 												// console.log({isAddedToCart}, productObjItem.id)
 												// console.log({isPrevLiked}, productObjItem.id)
@@ -311,7 +366,7 @@ function Products() {
 													<Fragment key={actionIndex}>
 														{action.type==='link'?
 														<Link
-														to={`${action.url}/${productObjItem.id}`}
+														to={`${productActionUrl}/${productObjItem.id}`}
 														style={{
 															textDecoration: 'none',
 															pointerEvents: isProductActive? 'auto':'none'
@@ -361,7 +416,10 @@ function Products() {
 											display: 'flex',
 											flexDirection: 'column'
 										}}>
-											<h5>₦{digitSeparator(productObjItem.discountPrice)}</h5>
+											<div className="d-flex align-items-center justify-content-center">
+												<h5>₦{digitSeparator(productObjItem.discountPrice)}</h5>
+												{productObjItem.numberOfItems?<sub style={{whiteSpace: 'pre'}}> ({productObjItem.numberOfItems})</sub>:undefined}
+											</div>
 											<h6 className="text-muted ml-0"
 											style={{fontSize: '0.9rem'}}>
 												<del>₦{digitSeparator(productObjItem.marketPrice)}</del>
