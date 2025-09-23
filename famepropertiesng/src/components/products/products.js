@@ -86,6 +86,10 @@ function Products() {
 	const isMobile = deviceType.width<=576
 	const userInfo = createLocal.getItem('fpng-user');
 	const isNotLoggedIn = !userInfo;
+
+	useEffect(() => {
+		sessionStorage.removeItem('fpng-prod'); // to force re-fetch of total users on next login
+	}, []);
 	// console.log({userInfo})
 	// if (userInfo) {
 	// 	setProductRatingArr(userInfo.product_ratings);
