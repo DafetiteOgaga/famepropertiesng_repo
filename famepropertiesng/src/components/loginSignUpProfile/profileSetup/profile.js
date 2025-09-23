@@ -1133,7 +1133,9 @@ function Profile() {
 																														wordBreak: 'break-word',
 																														overflowWrap: 'break-word',
 																														width: '100%',
-																													}}>{((phone)?formatPhoneNumber(sVal):titleCase(sVal))||'Not Provided.'}</span>
+																													}}>{((phone)?formatPhoneNumber(sVal):
+																														sKey==='verified'&&!sVal?'Not Verified.':
+																														titleCase(sVal))||'Not Provided.'}</span>
 																												</span>}
 																												{/* <br style={{display: 'block'}} />
 																												<p style={{display: 'block'}}>xxxxxyyyyyy</p> */}
