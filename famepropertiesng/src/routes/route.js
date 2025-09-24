@@ -19,6 +19,7 @@ import { PostProduct } from '../components/products/postProducts';
 import { SingleImageUploader } from '../hooks/backgroundRemover/singleBackgroundRemover';
 import { BulkImageUploader } from '../hooks/backgroundRemover/multipleBackgroundRemover';
 import { EditProduct } from '../components/products/editProducts';
+import { StoreProducts } from '../components/loginSignUpProfile/profileSetup/storeProducts';
 
 function AppRoutes() {
 	return (
@@ -54,6 +55,8 @@ function AppRoutes() {
 				<Route path="post-products/:id" element={<PostProduct />} />
 				{/* profile */}
 				<Route path="profile" element={<Profile />} />
+				{/* store products */}
+				<Route path="profile/store-products/:storeID" element={<StoreProducts />} />
 				{/* log in */}
 				<Route path="login" element={<LogIn />} />
 				{/* sign up */}
