@@ -410,6 +410,7 @@ function Profile() {
 		if (e) e.preventDefault();
 
 		setLoading(true);
+		// console.log('setting loading to true...')
 
 		if (!updatedFieldRef.current&&!updatedStoreFieldRef.current) {
 			console.warn('Empty form is invalid');
@@ -621,6 +622,7 @@ function Profile() {
 			return null;
 		} finally {
 			setLoading(false);
+			// console.log('setting loading to false...')
 		}
 	}
 
@@ -1145,10 +1147,16 @@ function Profile() {
 																						<Fragment key={sKey}>
 																							<>
 																								{sKey==="store_name"&&
-																								<span
+																								<Link
 																								className="bold-text"
-																								style={{textDecoration: 'underline'}}>{titleCase(sKey)}: {titleCase(sVal)}
-																								</span>}
+																								to={`store-products/${store.id}`}
+																								// onClick={()=>navigate('/cart')}
+																								style={{
+																									textDecoration: 'underline',
+																									// cursor: 'pointer',
+																									color: '#475569'
+																									}}>{titleCase(sKey)}: {titleCase(sVal)}
+																								</Link>}
 
 																								{/* {<hr className="my-1" />} */}
 																								{storeFieldsToRender.includes(sKey) &&
@@ -1273,6 +1281,7 @@ function Profile() {
 																											store={{id: store.id, field: sKey, parentField: userKey}}
 																											setEditFields={setEditStore}
 																											userKey={sKey}
+																											loading={loading}
 																											onSubmitHandler={onSubmitHandler}
 																											editField={editingStoreField}
 																											isDisabled={isDisabled} />}
@@ -1626,6 +1635,7 @@ function EditFieldButton({
 	userKey, editField, setEditFields, isDisabled,
 	onSubmitHandler, loading, handleUpload,
 	store=null}) {
+	// console.log('loading:', loading)
 	const deviceType = useDeviceType().width <= 576;
 	if (!userKey) return null;
 	if (userKey==='email') return null; // can't edit email for now
