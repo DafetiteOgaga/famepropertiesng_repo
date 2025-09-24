@@ -1126,6 +1126,9 @@ function Profile() {
 																					const storeFieldsToRender = ['store_phone_number', 'store_address', 'nearest_bus_stop', 'description', 'verified', 'store_status']
 																					// console.log({sKey, sVal})
 																					const phone = sKey==='store_phone_number'
+																					const storeSentence = sKey==='store_address'||
+																											sKey==='nearest_bus_stop'||
+																											sKey==='description'
 																					
 																					// if (editingStoreField) {
 																					// 		console.log({
@@ -1229,6 +1232,7 @@ function Profile() {
 																														width: '100%',
 																													}}>{((phone)?formatPhoneNumber(sVal):
 																														sKey==='verified'&&!sVal?'Not Verified.':
+																														storeSentence?sentenceCase(sVal):
 																														titleCase(sVal))||'Not Provided.'}</span>
 																												</span>}
 																												{/* <br style={{display: 'block'}} />
