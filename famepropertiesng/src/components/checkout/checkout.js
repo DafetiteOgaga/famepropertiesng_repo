@@ -10,6 +10,7 @@ import { inputArr, isFieldsValid } from "./checkoutFormInfo";
 import { limitInput, useCountryStateCity } from "../loginSignUpProfile/profileSetup/formsMethods";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../hooks/fetchAPIs";
+import { ToggleButton } from "../../hooks/buttons";
 
 const initialFormData = {
 	first_name: '',
@@ -467,7 +468,11 @@ function Checkout() {
 						</h5>
 
 						{/* Toggle Switch */}
-						<span className="d-flex align-items-center">
+						<ToggleButton
+						checked={shipToDifferent}
+						onChange={(e) => setShipToDifferent(e.target.checked)}
+						disabled={!isLoggedIn} />
+						{/* <span className="d-flex align-items-center">
 							<label className="toggle-switch mb-0">
 								<input
 								disabled={!isLoggedIn}
@@ -478,7 +483,7 @@ function Checkout() {
 								<span className="slider"></span>
 							</label>
 							<span className="ml-2">Shipping {shipToDifferent?'to a different':'to profile'} address</span>
-						</span>
+						</span> */}
 
 						{!isMounting ?
 						<>

@@ -13,6 +13,7 @@ import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { inputArr, isFieldsValid } from "./productFormInfo";
 import { toTextArea, limitInput } from "../loginSignUpProfile/profileSetup/formsMethods";
+import { ToggleButton } from "../../hooks/buttons";
 
 const baseURL = getBaseURL();
 
@@ -560,16 +561,18 @@ function EditProduct() {
 					<div className={`bg-light ${deviceType?'p-18':'p-30'} mb-5`}
 					style={{borderRadius: '10px'}}>
 						{/* Toggle Switch */}
-						<span className="d-flex align-items-center justify-content-end">
+						<ToggleButton
+						onClick={() => setAllFieldsLocked(prev => !prev)}
+						miniStyle={'justify-content-end'}/>
+						{/* <span className="d-flex align-items-center justify-content-end">
 							<label className="toggle-switch mb-0">
 								<input
 								type="checkbox"
-								// checked={allFieldsLocked}
 								onClick={() => setAllFieldsLocked(prev => !prev)}
 								/>
 								<span className="slider"></span>
 							</label>
-						</span>
+						</span> */}
 						<div
 						className="d-flex justify-content-between align-items-baseline"
 						>

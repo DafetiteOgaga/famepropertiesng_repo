@@ -13,6 +13,7 @@ import { authenticator } from "../dynamicFetchSetup";
 import { isFieldsValid, validatePassword } from "../signUpSetup/signUpFormInfo";
 import { reOrderFields, toTextArea } from "./formsMethods";
 import { limitInput, useCountryStateCity } from "./formsMethods";
+import { ToggleButton } from "../../../hooks/buttons";
 // import { NavigateToComp } from "../../../hooks/navigateToComp";
 
 const baseURL = getBaseURL();
@@ -50,6 +51,7 @@ function Profile() {
 	const [editStore, setEditStore] = useState({});
 	const { cscFormData, setCountry, setState, setCity, setCSC, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const updatedFieldRef = useRef(null);
+	const updatedStoreFieldRef = useRef({});
 	const handleImageProcessingRef = useRef();
 	const { createLocal } = useCreateStorage();
 	const [loading, setLoading] = useState(false);
@@ -404,123 +406,17 @@ function Profile() {
 	const checkFields = isFieldsValid({formData, passwordErrorMessage});
 
 	// handles final form submission
-	const onSubmitHandler = async (e=null) => {
+	const onSubmitHandler = async (e=null, store=false) => {
 		if (e) e.preventDefault();
 
 		setLoading(true);
 
-		if (!updatedFieldRef.current) {
+		if (!updatedFieldRef.current&&!updatedStoreFieldRef.current) {
 			console.warn('Empty form is invalid');
 			toast.error('Oopsi! No updates made. Please edit a field and try again.');
 			setLoading(false);
 			return;
 		}
-
-		const isImage = updatedFieldRef.current.includes('image_url')
-		// console.log('isImage update:', isImage)
-
-		// if (updatedFieldRef.current.includes('country')) {
-		// 	updatedFieldRef.current.push(
-		// 		'countryId', 'phoneCode', 'currency',
-		// 		'currencyName', 'currencySymbol', 'countryEmoji');
-		// }
-		// if (updatedFieldRef.current.includes('state')) {
-		// 	updatedFieldRef.current.push('stateId', 'stateCode');
-		// }
-		// if (updatedFieldRef.current.includes('city')) {
-		// 	updatedFieldRef.current.push('cityId');
-		// }
-		if (isImage) {
-			updatedFieldRef.current.push('fileId');
-		}
-
-		// check that there is an actual update before proceeding
-		// to submit the form to the server
-		const len = updatedFieldRef.current.length
-		// console.log('checking the length of updatedFieldRef:', len)
-
-		const cleanedData = {};
-		if (!isImage) {
-			if (len===1) {
-				// console.log('updatedField.current:', updatedFieldRef.current)
-				// console.log('only one field to update, checking for actual change...')
-				const field = updatedFieldRef.current[0]
-				const update = formData[field]?.trim()
-				const original = userInfo?.[field]
-				const isUpdated = update!==original
-				// console.log({field, update, original, isUpdated})
-				// let [objKey, objValue] = Object.entries(updatedFieldRef.current).pop()
-				// objValue = objValue.trim()
-				// console.log({objKey}, '\n', {objValue},)
-				if (!isUpdated||!update) {
-					const errorText = `No changes made to the ${titleCase(field)} field`;
-					console.warn(errorText);
-					toast.error(errorText);
-					setLoading(false);
-					return;
-				}
-			} else if (len>1) {
-				// console.log('updatedField.current:', updatedFieldRef.current)
-				// console.log('multiple fields to update, checking for actual changes...')
-				const updates = updatedFieldRef.current.map(field => {
-					if (countryStateCityArr.includes(field)) return null
-					return ({
-					field,
-					update: (typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim(),
-					original: userInfo?.[field],
-					isUpdated: ((typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim())!==userInfo?.[field],
-				})}).filter(item => item)
-				console.log({updates})
-				const changedFields = updates.filter(item => item?.isUpdated)
-				console.log({updates, changedFields})
-				if (updates.some(item => (!item?.isUpdated||!item?.update))) {
-					const errorText = `Some of the selected fields were not changed`;
-					console.warn(errorText);
-					toast.error(errorText);
-					setLoading(false);
-					return;
-				}
-				// updatedFieldRef.current = changedFields.map(item => item.field)
-				// console.log('final fields to update:', updatedFieldRef.current)
-			}
-		} else {
-			// console.log('new image uploaded:', uploadedImage.current)
-			if (uploadedImage.current) {
-				const newFileID = uploadedImage.current?.fileId
-				const newUrl = uploadedImage.current?.url
-				const oldFileID = userInfo?.fileId
-				const oldUrl = userInfo?.image_url
-				// console.log('processing image update...')
-				// console.log('formData before image update:', formData)
-				// console.log('image fileid from upload:', newFileID)
-				// console.log('previous image fileid:', oldFileID)
-				// if (newFileID!==oldFileID) {
-				// 	// console.log('previous image:', oldFileID, oldUrl)
-				// }
-				// console.log('including image details in submission data...')
-				cleanedData['old_image_url'] = oldUrl
-				cleanedData['old_fileId'] = oldFileID
-				cleanedData['image_url'] = newUrl
-				cleanedData['fileId'] = newFileID
-			}
-		}
-
-		// add more metadata to country, state, city if they are being updated
-		if (updatedFieldRef.current.includes('country')) {
-			updatedFieldRef.current.push(
-				'countryId', 'phoneCode', 'currency',
-				'currencyName', 'currencySymbol', 'countryEmoji'
-			);
-		}
-		if (updatedFieldRef.current.includes('state')) {
-			updatedFieldRef.current.push('stateId', 'stateCode',
-				'hasStates',
-			);
-		}
-		if (updatedFieldRef.current.includes('city')) {
-			updatedFieldRef.current.push('cityId', 'hasCities');
-		}
-		// console.log('cleanedData:', cleanedData)
 
 		const exemptArr = [
 			'fileId',
@@ -542,22 +438,150 @@ function Profile() {
 			'country',
 			'state',
 			'city',
+			'store_phone_number'
 		]
-		// console.log({isImage}, 'uploadedImage:', uploadedImage.current)
-		if (!isImage) {
+
+		// let finalFormData
+		let cleanedData = {};
+		let isImage
+		let url
+		if (!store) {
+			url = 'users/update-profile'
+			isImage = updatedFieldRef.current.includes('image_url')
+			// console.log('isImage update:', isImage)
+
+			if (isImage) {
+				updatedFieldRef.current.push('fileId');
+			}
+
+			// check that there is an actual update before proceeding
+			// to submit the form to the server
+			const len = updatedFieldRef.current.length
+			// console.log('checking the length of updatedFieldRef:', len)
+
+			if (!isImage) {
+				if (len===1) {
+					// console.log('updatedField.current:', updatedFieldRef.current)
+					// console.log('only one field to update, checking for actual change...')
+					const field = updatedFieldRef.current[0]
+					const update = formData[field]?.trim()
+					const original = userInfo?.[field]
+					const isUpdated = update!==original
+					// console.log({field, update, original, isUpdated})
+					// let [objKey, objValue] = Object.entries(updatedFieldRef.current).pop()
+					// objValue = objValue.trim()
+					// console.log({objKey}, '\n', {objValue},)
+					if (!isUpdated||!update) {
+						const errorText = `No changes made to the ${titleCase(field)} field`;
+						console.warn(errorText);
+						toast.error(errorText);
+						setLoading(false);
+						return;
+					}
+				} else if (len>1) {
+					// console.log('updatedField.current:', updatedFieldRef.current)
+					// console.log('multiple fields to update, checking for actual changes...')
+					const updates = updatedFieldRef.current.map(field => {
+						if (countryStateCityArr.includes(field)) return null
+						return ({
+						field,
+						update: (typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim(),
+						original: userInfo?.[field],
+						isUpdated: ((typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim())!==userInfo?.[field],
+					})}).filter(item => item)
+					console.log({updates})
+					const changedFields = updates.filter(item => item?.isUpdated)
+					console.log({updates, changedFields})
+					if (updates.some(item => (!item?.isUpdated||!item?.update))) {
+						const errorText = `Some of the selected fields were not changed`;
+						console.warn(errorText);
+						toast.error(errorText);
+						setLoading(false);
+						return;
+					}
+					// updatedFieldRef.current = changedFields.map(item => item.field)
+					// console.log('final fields to update:', updatedFieldRef.current)
+				}
+			} else {
+				// console.log('new image uploaded:', uploadedImage.current)
+				if (uploadedImage.current) {
+					const newFileID = uploadedImage.current?.fileId
+					const newUrl = uploadedImage.current?.url
+					const oldFileID = userInfo?.fileId
+					const oldUrl = userInfo?.image_url
+					// console.log('processing image update...')
+					// console.log('formData before image update:', formData)
+					// console.log('image fileid from upload:', newFileID)
+					// console.log('previous image fileid:', oldFileID)
+					// if (newFileID!==oldFileID) {
+					// 	// console.log('previous image:', oldFileID, oldUrl)
+					// }
+					// console.log('including image details in submission data...')
+					cleanedData['old_image_url'] = oldUrl
+					cleanedData['old_fileId'] = oldFileID
+					cleanedData['image_url'] = newUrl
+					cleanedData['fileId'] = newFileID
+				}
+			}
+
+			// add more metadata to country, state, city if they are being updated
+			if (updatedFieldRef.current.includes('country')) {
+				updatedFieldRef.current.push(
+					'countryId', 'phoneCode', 'currency',
+					'currencyName', 'currencySymbol', 'countryEmoji'
+				);
+			}
+			if (updatedFieldRef.current.includes('state')) {
+				updatedFieldRef.current.push('stateId', 'stateCode',
+					'hasStates',
+				);
+			}
+			if (updatedFieldRef.current.includes('city')) {
+				updatedFieldRef.current.push('cityId', 'hasCities');
+			}
+			// console.log('cleanedData:', cleanedData)
+
+			if (!isImage) {
 				Object.entries(formData).forEach(([key, value]) => {
 				if (!updatedFieldRef.current.includes(key)) return; // only submit updated fields
 				if (key==='password_confirmation') return; // skip password_confirmation from submission
-				cleanedData[key] = (exemptArr.includes(key))?value:value?.trim()?.toLowerCase();
-			})
-		}
+					cleanedData[key] = (exemptArr.includes(key))?value:value?.trim()?.toLowerCase();
+				})
+			}
 
-		// console.log('submitting form:', cleanedData);
+		} else {
+			url = 'store/update-store'
+			const storeID = updatedStoreFieldRef.current?.id
+			const storeField = updatedStoreFieldRef.current?.field
+			let prevVal = userInfo?.store?.find(store => store.id.toString() === storeID.toString())
+			prevVal = storeField==='store_phone_number'?prevVal?.[storeField] : prevVal?.[storeField].trim()
+			let newVal = storeFormData?.[storeID]?.[storeField]?.trim()
+			newVal = storeField==='store_phone_number'?newVal : newVal?.trim()
+			console.log({storeID, storeField, prevVal, newVal})
+			if (prevVal === newVal || !newVal) {
+				const errorText = `No changes detected in ${titleCase(storeField)} Field`;
+				console.warn(errorText);
+				toast.error(errorText);
+				setLoading(false);
+				return;
+			}
+			cleanedData = { storeID: storeID, [storeField]: newVal }
+			// finalFormData = { ...storeFormData };
+		}
+		// console.log({finalFormData})
+		
+		// console.log({isImage}, 'uploadedImage:', uploadedImage.current)
+		
+
+		console.log('submitting form:', cleanedData);
 		// Object.entries(formData).forEach(([key, value]) => {
 		// 	console.log(key, ":", value);
 		// })
+		// setLoading(false)
+		// return
+
 		try {
-			const response = await fetch(`${baseURL}/users/update-profile/${userInfo.id}/`, {
+			const response = await fetch(`${baseURL}/${url}/${userInfo.id}/`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(cleanedData),
@@ -572,10 +596,24 @@ function Profile() {
 			}
 			const data = await response.json();
 			// console.log('Response data from server',data)
-			createLocal.setItem("fpng-user", data);
-			uploadedImage.current = null; // reset uploaded image
+			if (!store) {
+				createLocal.setItem("fpng-user", data);
+				uploadedImage.current = null; // reset uploaded image
+				// userInfoRef.current = false; // allow userInfo to be set again if needed
+				toast.success('Account Update Successful!');
+				updatedFieldRef.current = null; // reset
+			} else {
+				console.log('Store update response:', data)
+				// update store info in local storage too
+				const updatedUser = {
+					...userInfo,
+					store: data.store   // overwrite with the new array
+				};
+				createLocal.setItem("fpng-user", updatedUser);
+				toast.success('Store Update Successful!');
+				updatedStoreFieldRef.current = {}; // reset
+			}
 			userInfoRef.current = false; // allow userInfo to be set again if needed
-			toast.success('Account Update Successful!');
 			return data;
 		} catch (error) {
 			console.error("Error during update:", error);
@@ -734,7 +772,7 @@ function Profile() {
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
-	// console.log({userInfo})
+	console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})
@@ -749,7 +787,12 @@ function Profile() {
 	// console.log({ch: ch['15']?.store_phone_number})
 	// console.log({editStore})
 	// console.log({editFields})
-	console.log({showStores})
+	// console.log({showStores})
+	// console.log({updatedFieldRef: updatedFieldRef.current})
+	// console.log({updatedStoreFieldRef: updatedStoreFieldRef.current})
+	// console.log({storeFormData})
+	const temp = createLocal.getItem('fpng1-user')
+	console.log({temp})
 	return (
 		<>
 			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
@@ -972,6 +1015,7 @@ function Profile() {
 														.flat().some((val)=>val)
 								
 								const fieldSelected = Object.entries(editFields).filter(([key, value])=>value).map(([key])=>key)
+								// console.log({fieldSelected})
 								
 								// const storeFieldSelected = Object.entries(editStore).filter(([key, value])=>value).map(([key])=>key)
 								
@@ -1024,16 +1068,17 @@ function Profile() {
 														</span>
 														{/* Toggle Switch */}
 														{userKey==='store'&&
-														<span className="d-flex align-items-center justify-content-end">
-															<label className="toggle-switch mb-0">
-																<input
-																type="checkbox"
-																// checked={allFieldsLocked}
-																onClick={toggleStores}
-																/>
-																<span className="slider"></span>
-															</label>
-														</span>}
+														<ToggleButton onClick={toggleStores} miniStyle={'justify-content-end'}/>
+														// <span className="d-flex align-items-center justify-content-end">
+														// 	<label className="toggle-switch mb-0">
+														// 		<input
+														// 		type="checkbox"
+														// 		onClick={toggleStores}
+														// 		/>
+														// 		<span className="slider"></span>
+														// 	</label>
+														// </span>
+														}
 													</span>
 
 													{/* paragraph text and phone code span */}
@@ -1065,6 +1110,15 @@ function Profile() {
 																				{Object.entries(store).map(([sKey, sVal], sIdx) => {
 																					// console.log({sKey, sVal})
 																					// console.log('rendering phone code for store phone number:', userInfo.phoneCode)
+																					const editingStoreField = editStore[store.id]?.[sKey]
+																					if (editingStoreField) {
+																						// console.log('adding', sKey)
+																						updatedStoreFieldRef.current = {id: store.id, field: sKey}
+																					} else  if (updatedStoreFieldRef.current[store.id]===sKey&&
+																						!editingStoreField) {
+																						// console.log('clearing', updatedStoreFieldRef.current[store.id])
+																						updatedStoreFieldRef.current = {}
+																					}
 																					if (sKey==='id'||
 																						sKey==='rating'||
 																						// sKey==='store_status'||
@@ -1072,8 +1126,15 @@ function Profile() {
 																					const storeFieldsToRender = ['store_phone_number', 'store_address', 'nearest_bus_stop', 'description', 'verified', 'store_status']
 																					// console.log({sKey, sVal})
 																					const phone = sKey==='store_phone_number'
-																					const editingStoreField = editStore[store.id]?.[sKey]
-																					// console.log({editingStoreField, storeID: store.id, sKey})
+																					
+																					// if (editingStoreField) {
+																					// 		console.log({
+																					// 		editingStoreField,
+																					// 		storeID: store.id,
+																					// 		sKey,
+																					// 	})
+																					// }
+																					
 																					const isStoreTextArea = toTextArea(sKey, textAreaFieldsArr)
 																					// console.log({sKey, isStoreTextArea})
 																					// console.log({storelen: store.length})
@@ -1205,9 +1266,10 @@ function Profile() {
 																										<span className={`${(isStoreTextArea?(!fieldStats[store?.id]?.[sKey]?.charCount?'pb-0':'pb-4'):(!fieldStats[store?.id]?.[sKey]?.charCount?'pb-0':'pb-3'))}`}>
 																											{storeVariables.includes(sKey)&&
 																											<EditFieldButton
-																											store={{id: store.id, field: sKey}}
+																											store={{id: store.id, field: sKey, parentField: userKey}}
 																											setEditFields={setEditStore}
 																											userKey={sKey}
+																											onSubmitHandler={onSubmitHandler}
 																											editField={editingStoreField}
 																											isDisabled={isDisabled} />}
 																										</span>
@@ -1508,6 +1570,7 @@ function Profile() {
 								>
 									Become a Seller
 								</button>
+								
 								<button
 									type="button"
 									// disabled
@@ -1621,8 +1684,15 @@ function EditFieldButton({
 				padding: '0.2.5rem 0.7rem'
 			}}
 			onClick={(e)=> {
-				if (userKey==='image_url') handleUpload(e);
-				else onSubmitHandler(e);
+				console.log({store, userKey})
+				if (store?.parentField==='store') {
+					console.log('submitting store changes');
+					onSubmitHandler(e, true);
+				} else if (userKey==='image_url') {
+					handleUpload(e);
+				} else {
+					onSubmitHandler(e);
+				}
 			}}
 			disabled={loading}>
 				{loading?<BouncingDots size="ts" color="#475569" p="0" />:
