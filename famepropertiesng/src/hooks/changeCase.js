@@ -22,29 +22,18 @@ function formatPhoneNumber(num) {
 	return str.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
 }
 
-const ignoreArr = [
-	'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'if', 'in', 'nor',
-	'of', 'on', 'or', 'so', 'the', 'to', 'up', 'yet'
-]
+// const ignoreArr = [
+// 	'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'if', 'in', 'nor',
+// 	'of', 'on', 'or', 'so', 'the', 'to', 'up', 'yet'
+// ]
 function sentenceCase(str) {
-	if (typeof str!=='string'||str==='') return
+	if (typeof str !== 'string' || str.trim() === '') return '';
 
-	// Replace underscores and hyphens with spaces, convert to lowercase, and trim whitespaces
+	// Replace underscores and hyphens with spaces, then lowercase everything
 	str = str.replace(/[_-]/g, ' ').toLowerCase().trim();
 
-	// Split the string into words
-	const words = str.split(/\s+/);
-
-	// Capitalize the first word and any word not in the ignore list
-	const capitalizedWords = words.map((word, index) => {
-		if (index === 0 || !ignoreArr.includes(word.toLowerCase())) {
-			return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-		}
-		return word.toLowerCase();
-	});
-
-	// Join the words back into a single string
-	return capitalizedWords.join(' ');
+	// Capitalize the first letter at the start or after a period, exclamation, or question mark
+	return str.replace(/(^\s*\w|[.!?]\s*\w)/g, match => match.toUpperCase());
 }
 
 export { digitSeparator, titleCase, formatPhoneNumber, sentenceCase };
