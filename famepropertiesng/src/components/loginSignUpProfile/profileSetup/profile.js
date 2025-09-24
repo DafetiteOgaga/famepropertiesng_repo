@@ -71,8 +71,21 @@ function Profile() {
 	const [imgPreview, setImgPreview] = useState(null);
 	const [fieldStats, setFieldStats] = useState({})
 	const [isMounting, setIsMounting] = useState(true);
+	const [showStores, setShowStores] = useState(false);
+	const [animating, setAnimating] = useState("slideUp");
 	const navigate = useNavigate();
 	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
+
+	// const toggleStores = () => setShowStores(prev => !prev);
+	const toggleStores = () => {
+		if (showStores) {
+			setAnimating("slideUp");
+			setTimeout(() => setShowStores(false), 400); // wait for animation
+		} else {
+			setShowStores(true);
+			setAnimating("slideDown");
+		}
+	};
 
 	// get user info from local storage if any
 	const userInfo = createLocal.getItem('fpng-user');
@@ -99,6 +112,11 @@ function Profile() {
 	const storeVariables = [
 		'nearest_bus_stop',
 		'store_phone_number',
+		'store_address',
+		'description',
+	]
+	const storeVariablesMobileNoPad = [
+		'nearest_bus_stop',
 		'store_address',
 		'description',
 	]
@@ -731,6 +749,7 @@ function Profile() {
 	// console.log({ch: ch['15']?.store_phone_number})
 	// console.log({editStore})
 	// console.log({editFields})
+	console.log({showStores})
 	return (
 		<>
 			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
@@ -748,7 +767,7 @@ function Profile() {
 					width: deviceType?'90%':'60%',
 				}}>
 					<div
-					className={`${deviceType?'p-18':'p-30'} mb-5`}
+					className={`${deviceType?'p-18':'p-30'} mb-0 pb-0`}
 					style={{
 						borderRadius: '10px',
 						}}
@@ -998,9 +1017,23 @@ function Profile() {
 												className="profile-control mb-0 d-flex flex-column">
 
 													{/* title label */}
-													<span
-													className="bold-text"
-													style={{textDecoration: userKey==='store'?'underline':''}}>{titleCase((userKey==='store'&&userValue.length>=1)?userKey+'s':userKey)}:
+													<span className="d-flex flex-row align-items-center justify-content-between">
+														<span
+														className="bold-text"
+														style={{textDecoration: userKey==='store'?'underline':''}}>{titleCase((userKey==='store'&&userValue.length>=1)?userKey+'s':userKey)}:
+														</span>
+														{/* Toggle Switch */}
+														{userKey==='store'&&
+														<span className="d-flex align-items-center justify-content-end">
+															<label className="toggle-switch mb-0">
+																<input
+																type="checkbox"
+																// checked={allFieldsLocked}
+																onClick={toggleStores}
+																/>
+																<span className="slider"></span>
+															</label>
+														</span>}
 													</span>
 
 													{/* paragraph text and phone code span */}
@@ -1023,12 +1056,12 @@ function Profile() {
 																		(userKey==='city'&&(!userInfo.hasCities)))?'N/A':
 																		'Not Provided.'}
 																	</span>):
-																	stores?(userValue.map((store, storeIdx) => {
+																	(showStores&&stores)?(userValue.map((store, storeIdx) => {
 																		// console.log({store, storeIdx})
 																		// console.log({charCount: fieldStats[store?.id]?.store_phone_number?.charCount, id: store.id})
 																		// console.log({userValue})
 																		return (
-																			<Fragment key={storeIdx}>
+																			<span className={`store-container ${animating}`} key={storeIdx}>
 																				{Object.entries(store).map(([sKey, sVal], sIdx) => {
 																					// console.log({sKey, sVal})
 																					// console.log('rendering phone code for store phone number:', userInfo.phoneCode)
@@ -1127,7 +1160,7 @@ function Profile() {
 
 																													<span
 																													style={{
-																														paddingLeft: phone?'':'5%',
+																														paddingLeft: phone?'':((deviceType&&storeVariablesMobileNoPad.includes(sKey))?'':'5%'),
 																														// display: 'inline-block',
 																														whiteSpace: 'pre-wrap',
 																														wordBreak: 'break-word',
@@ -1208,7 +1241,7 @@ function Profile() {
 																					)
 																				})}
 																				<br />
-																			</Fragment>
+																			</span>
 																		)
 																	})):
 																	<span>
@@ -1449,7 +1482,72 @@ function Profile() {
 						:
 						<BouncingDots size="lg" color="#475569" p="8" />}
 					</div>
+					<>
+						<hr
+						style={{
+							marginTop: '0.5rem',
+							marginBottom: '0.5rem',
+							// backgroundColor: 'yellow',
+							// height: '5rem',
+							}} />
+							<div className={`d-flex ${deviceType?'flex-column':'flex-row'} align-items-center justify-content-around`}>
+								
+								<button
+								type="button"
+								// disabled
+								onClick={() => {
+									// setSelectedFile(null);
+									// setPreviewURL(null);
+									// setFileName('No file chosen');
+									// setFormData(prev => ({
+									// 	...prev,
+									// 	previewURL: ''
+									// }))
+								}}
+								className="btn btn-sm btn-secondary d-block mt-2"
+								>
+									Become a Seller
+								</button>
+								<button
+									type="button"
+									// disabled
+									onClick={() => {
+										// setSelectedFile(null);
+										// setPreviewURL(null);
+										// setFileName('No file chosen');
+										// setFormData(prev => ({
+										// 	...prev,
+										// 	previewURL: ''
+										// }))
+									}}
+									className="btn btn-sm btn-danger d-block mt-2"
+									>
+										Delete Account
+								</button>
+								{/* <button
+								type="submit"
+								className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
+								// disabled={
+								// 	!checkFields||
+								// 	// isEmailValid?.color!=='green'||
+								// 	loading||
+								// 	!previewURL||
+								// 	isStoreNameAvailable?.color!=='green'
+								// }
+								>
+									Become a Seller
+								</button> */}
+							</div>
+						<hr
+						style={{
+							marginTop: '0.5rem',
+							marginBottom: '0.5rem',
+							// backgroundColor: 'yellow',
+							// height: '5rem',
+							}} />
+					</>
 				</div>
+				
 			</div>
 			:
 			<BouncingDots size={deviceType?"sm":"lg"} color="#475569" p={deviceType?"10":"14"} />}
