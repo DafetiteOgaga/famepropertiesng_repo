@@ -9,7 +9,7 @@ import { BouncingDots } from '../../spinners/spinner';
 import { toast } from 'react-toastify';
 import { useOutletContext } from 'react-router-dom';
 import { StarRating, convertLikesToStars } from '../../hooks/handleStars';
-import Pagination from '../../hooks/pagination';
+import { Pagination } from '../../hooks/pagination';
 
 const baseURL = getBaseURL();
 const productsActionArr = [
@@ -72,7 +72,6 @@ function Products() {
 	const [productItemArr, setProductItemArr] = useState([]);
 	const [isLike, setIsLike] = useState(null);
 	const [load, setLoad] = useState(0);
-	// const [isImageLoading, setIsImageLoading] = useState(true);
 	const [loadingImages, setLoadingImages] = useState({});
 	const [pagination, setPagination] = useState({
 		prev: null,
@@ -87,18 +86,10 @@ function Products() {
 	const userInfo = createLocal.getItem('fpng-user');
 	const isNotLoggedIn = !userInfo;
 
-	useEffect(() => {
-		sessionStorage.removeItem('fpng-prod'); // to force re-fetch of total users on next login
-	}, []);
-	// console.log({userInfo})
-	// if (userInfo) {
-	// 	setProductRatingArr(userInfo.product_ratings);
-	// }
-	// console.log('parameters:', parameters);
 	// useEffect(() => {
-	// 	// whenever transition changes → new image starts loading
-	// 	setIsImageLoading(true);
-	// }, []); // set the dependency array if more images is to be rendered per product
+	// 	sessionStorage.removeItem('fpng-prod'); // to force re-fetch of total users on next login
+	// }, []);
+	// console.log({userInfo})
 
 	// handles image loading state
 	const handleImageLoad = (id) => {
@@ -152,7 +143,7 @@ function Products() {
 				})
 
 				// Update session storage products too
-				const sessionProducts = createSession.getItem('fpng-prod');
+				const sessionProducts = createLocal.getItem('fpng-prod');
 				if (sessionProducts) {
 					const updatedSession = sessionProducts.map(item => {
 						if (item.id === prodData.product) {
@@ -165,8 +156,8 @@ function Products() {
 						}
 						return item;
 					});
-					createSession.setItem('fpng-prod', updatedSession);
-					createSession.setItemRaw('fpng-tprd', updatedSession.length);
+					createLocal.setItem('fpng-prod', updatedSession);
+					createLocal.setItemRaw('fpng-tprd', updatedSession.length);
 				}
 
 				setProductRatingArr(prevArr);
@@ -185,7 +176,7 @@ function Products() {
 			setProductItemArr(prodData?.results);
 			// check if item exists in session storage, if not or updates available,
 			// save/update else pass
-			const sessionProducts = createSession.getItem('fpng-prod'); // already parsed for you
+			const sessionProducts = createLocal.getItem('fpng-prod'); // already parsed for you
 
 			if (sessionProducts) {
 				// console.log('Session products exist, checking for new products to add...');
@@ -198,16 +189,16 @@ function Products() {
 				if (newProducts.length > 0) {
 					// console.log(`Found ${newProducts.length} new products, updating session...`);
 					const updatedSession = [...sessionProducts, ...newProducts];
-					createSession.setItem('fpng-prod', updatedSession);
-					createSession.setItemRaw('fpng-tprd', updatedSession.length);
+					createLocal.setItem('fpng-prod', updatedSession);
+					createLocal.setItemRaw('fpng-tprd', updatedSession.length);
 				}
 			} else {
 				// First time, just save all
 				// console.log('Saving products to session for the first time...');
 				// const totalProds = prodData.results.length;
 				// console.log({totalProds})
-				createSession.setItem('fpng-prod', prodData.results);
-				createSession.setItemRaw('fpng-tprd', prodData.results.length);
+				createLocal.setItem('fpng-prod', prodData.results);
+				createLocal.setItemRaw('fpng-tprd', prodData.results.length);
 			}
 			// console.log({sessionProducts, prodData})
 			// setProductRatingArr(prodData.product_ratings);
@@ -263,7 +254,7 @@ function Products() {
 	// 	'\ncount:', pagination?.count,
 	// 	'\ntotal_pages:', pagination?.total_pages,
 	// )
-	console.log({userInfo})
+	// console.log({userInfo})
 	// console.log('totalUsers:', totalUsers);
 	// const editprod = productsActionArr[3].url.split('-').join(' ');
 	// console.log({editprod})
@@ -278,7 +269,7 @@ function Products() {
 						// const no = totalNoOfReviewers(productRatingArr);
 						// const numberOfLikes = convertLikesToStars(productObjItem.total_liked, 10)
 						// console.log({productObjItem, userInfo})
-						console.log({id:productObjItem.id, productObjItem})
+						// console.log({id:productObjItem.id, productObjItem})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
 						const imageLoading = loadingImages[productObjItem?.id]
@@ -345,7 +336,7 @@ function Products() {
 												const isAddedToCart = handleProductPrevAddedToCart(productObjItem)&&
 																	action.click==='cart';
 												if (isAddedToCart) return null;
-												const canEdit = productObjItem?.store?.user?.id === userInfo?.id&&userInfo?.is_seller
+												const canEdit = productObjItem?.store?.user?.id===userInfo?.id && userInfo?.is_seller
 												// const nl = '\n'
 												// console.log({
 												// 	canEdit,
