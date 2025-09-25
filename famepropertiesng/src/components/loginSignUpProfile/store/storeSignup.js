@@ -474,12 +474,14 @@ function StoreSignUp() {
 					padding: deviceType?'0 1rem':'0 1rem',
 					width: deviceType?'':'70%',
 				}}>
-					<h5 className="text-uppercase mb-3">
-						{/* <span className="bg-secondary pr-3"
+					{/* <div className=""> */}
+					<h2 className="section-title position-relative text-uppercase mt-3 text-uppercase">
+						<span className="bg-secondary"
 						style={{color: '#475569'}}>
-							Register Store
-						</span> */}
-					</h5>
+							Become a seller
+						</span>
+					</h2>
+					{/* </div> */}
 					<div className={`bg-light ${deviceType?'p-18':'p-30'} mb-5`}
 					style={{borderRadius: '10px'}}>
 						<div className="row">
