@@ -5292,6 +5292,26 @@ button.bg-dark:focus {
   padding-top: 100%;
 }
 
+.flex-gap-1 {
+  gap: 0.25rem !important;
+}
+
+.flex-gap-2 {
+  gap: 0.5rem !important;
+}
+
+.flex-gap-3 {
+  gap: 1rem !important;
+}
+
+.flex-gap-4 {
+  gap: 1.5rem !important;
+}
+
+.flex-gap-5 {
+  gap: 3rem !important;
+}
+
 .flex-row {
   flex-direction: row !important;
 }
@@ -6718,6 +6738,18 @@ button:disabled,
   opacity: 1;
 }
 
+.store-name {
+  text-decoration: none;
+  color: #475569;
+  border: 1px solid #475569;
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+}
+.store-name:hover {
+  color: #fff;
+  /* border: 1px solid #fff; */
+  background-color: #475569;
+}
 
 
 
