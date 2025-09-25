@@ -1,147 +1,121 @@
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "../../sections/breadcrumb";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDeviceType } from "../../../hooks/deviceType";
 import { useCreateStorage } from "../../../hooks/setupLocalStorage";
 import { BouncingDots } from "../../../spinners/spinner";
 import { digitSeparator, titleCase } from "../../../hooks/changeCase";
 import { useOutletContext } from 'react-router-dom';
+import { toast } from "react-toastify";
+import { getBaseURL } from "../../../hooks/fetchAPIs";
+import { Pagination } from "../../../hooks/pagination";
 
 const tableHeadArr = [
 	"Products",
 	"Name",
-	"Price",
-	"Quantity",
-	"X"
+	"Discount Price",
+	"Market Price",
+	"Quantity Remaining",
 ]
 
-const shipping = 1500
+const baseURL = getBaseURL();
 
 function StoreProducts() {
+	const parameters = useParams()
 	const navigate = useNavigate();
-	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage()
 	const deviceType = useDeviceType().width <= 576;
-	// const [isImageLoading, setIsImageLoading] = useState({});
 	const [loadingImages, setLoadingImages] = useState({});
-	// const cartInStorage = createLocal.getItemRaw('fpng-cart')||[]
 	const userInfo = createLocal.getItem('fpng-user');
-	const [inputValue, setInputValue] = useState([]);
-	const [totalAmount, setTotalAmount] = useState(0);
-	const [reload, setReload] = useState(false);
-	const [isMounting, setIsMounting] = useState(true);
+	const lStore = createLocal.getItem('fpng-stor')||[];
+	const [loading, setLoading] = useState(false)
+	const [load, setLoad] = useState(0);
+	const [storeProductsArr, setStoreProductsArr] = useState(null)
+	const [pagination, setPagination] = useState({
+		prev: null,
+		next: null,
+		count: null,
+		total_pages: null,
+	});
+	const lStoreDetails = lStore.find(store=>store.id?.toString()===parameters?.storeID?.toString())
 
-	// console.log({cartInStorage})
-	useEffect(() => {
-		const cartInStorage = createLocal.getItemRaw('fpng-cart')||[]
-		console.log({cartInStorage})
-		setInputValue(cartInStorage);
-	}, [reload]);
-
-	const handleInputChange = (e, cart, index) => {
-		e.preventDefault();
-		let value = e.target.value;
-
-		// only allow digits
-		if (!/^\d*$/.test(value)) return;
-
-		// handle empty string (let user clear before typing a new number)
-		if (value === "") {
-			setInputValue(prev => {
-				const updated = [...prev];
-				updated[index] = { ...updated[index], nop: "" };
-				createLocal.setItemRaw("fpng-cart", updated);
-				return updated;
-			});
-			return;
-		}
-
-		// parse number and auto-correct 0 → 1
-		let newValue = Math.max(1, parseInt(value, 10));
-
-		// update state and localStorage with typed value
-		setInputValue(prev => {
-			const updated = [...prev];
-			updated[index] = { ...updated[index], nop: newValue };
-			createLocal.setItemRaw("fpng-cart", updated);
-			return updated;
-		});
-	};
-
-	// on input blur, if empty reset to 1
-	const handleInputBlur = (cart, index) => {
-		setInputValue(prev => {
-			const updated = [...prev];
-			let currentValue = updated[index].nop;
-
-			// if user left it empty, reset to 1
-			if (currentValue === "" || currentValue === undefined) {
-				updated[index] = { ...updated[index], nop: 1 };
-				createLocal.setItemRaw("fpng-cart", updated);
+	const fetchStoreProducts = async (endpoint=`store-products/${parameters?.storeID}/`) => {
+		try {
+			const response = await fetch(`${baseURL}/${endpoint}`);
+	
+			if (!response.ok) {
+				const errorData = await response.json();
+				console.warn('Error:', errorData);
+				toast.error(errorData?.error);
+				setLoading(false);
+				return;
 			}
+			const data = await response.json();
+			console.log('Response data from server',data)
+			setPagination({
+				prev: data?.previous,
+				next: data?.next,
+				count: data?.count,
+				total_pages: data?.total_pages,
+				load: load,
+			});
+			setLoad(prev=>prev+1);
+			setStoreProductsArr(data?.results||[]);
+			return data;
+		} catch (error) {
+			console.error("Error during update:", error);
+			toast.error('Error! Update Failed. Please try again.');
+			return null;
+		} finally {
+			setLoading(false);
+			// console.log('setting loading to false...')
+		}
+	}
 
-			return updated;
-		});
-	};
+	useEffect(() => {
+		// console.log({parameters: parameters.storeID})
+		if (parameters?.storeID) {
+			fetchStoreProducts()
+		}
+	}, [])
+
+	const handlePagination = (page) => {
+		console.log('Pagination to:', page);
+		if (!page) return;
+		console.log({page})
+		fetchStoreProducts(`store-products/${parameters?.storeID}/?page=${page}`);
+	}
 
 	// handles image loading state
-	const handleImageLoad = (prdId) => {
-		setLoadingImages(prev => ({ ...prev, [prdId]: false }));
+	const handleImageLoad = (id) => {
+		setLoadingImages(prev => ({ ...prev, [id]: false }));
 	};
 
-	const handleImageStart = (prdId) => {
-		setLoadingImages(prev => ({ ...prev, [prdId]: true }));
+	const handleImageStart = (id) => {
+		setLoadingImages(prev => ({ ...prev, [id]: true }));
 	};
 
-	const handleStateFuncOnClicks = (prev, index, mode) => {
-		let computedCurrVal
-		const updated = [...prev];
-		if (mode === 'x') {
-			// remove item from cart
-			updated.splice(index, 1);
-		} else {
-			const currentValue = updated[index].nop || 1;
-			if (mode === '+') {
-				computedCurrVal = currentValue + 1;
-			} else if (mode === '-') {
-				computedCurrVal = currentValue - 1;
-			}
-			const newValue = Math.max(1, computedCurrVal);
-			updated[index] = { ...updated[index], nop: newValue };
-		}
-		// createLocal.setItemRaw("fpng-cart", updated);
-		return updated;
-	}
 	const currencySym = userInfo?.currencySymbol||'₦'
-
-	// calculate total amount whenever inputValue changes
-	useEffect(() => {
-		const total = inputValue.reduce((sum, item) => {
-			const price = parseFloat(item.price) || 0;
-			const quantity = parseInt(item.nop) || 1;
-			return sum + price * quantity;
-		}, 0);
-		setTotalAmount(total);
-	}, [inputValue]);
 
 	// console.log({inputValue});
 	// console.log({userInfo})
 	// console.log({totalAmount})
-	useEffect(() => {
-		// flip loading off immediately after mount
-		setIsMounting(false);
-	}, []);
+	// console.log({parameters: parameters.storeID})
+	// console.log({storeProductsArr})
+	// console.log({lStore})
+	// console.log({lStoreDetails})
 	return (
 		<>
-			<Breadcrumb page={'Shopping Cart'} />
+			<Breadcrumb page={titleCase(lStoreDetails?.store_name)} />
 
-			{/* <!-- Cart Start --> */}
-			{!isMounting ?
+			{!loading ?
 			<div className="container-fluid mt-3"style={{
 				paddingLeft: deviceType ? 0 : '',
 				paddingRight: deviceType ? 0 : '',
 			}}>
-				<div className="row px-xl-5">
+				{/* <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4"><span className="bg-secondary pr-3"
+				style={{color: '#475569'}}>store name here</span></h2> */}
+				<div className="row px-xl-5 justify-content-center">
 					<div className="col-lg-8 table-responsive mb-5">
 						<table className="table table-light table-borderless table-hover text-center mb-0">
 							<thead className="thead-dark">
@@ -170,162 +144,81 @@ function StoreProducts() {
 									})}
 								</tr>
 							</thead>
-							{inputValue.length!==0?
-							<tbody className="align-middle">
-								{inputValue.map((cart, index) => {
-									const isLoading = loadingImages[cart?.prdId]
-									console.log({cart})
-									const productMiniDetails = {
-										id: inputValue?.[index]?.prdId,
-										name: inputValue?.[index]?.name,
-									}
+							{storeProductsArr &&
+							<tbody className="align-middle opacy">
+								{storeProductsArr.map((product, index) => {
+									const isLoading = loadingImages[product?.id]
+									const available = !!product?.numberOfItems
+									console.log({product, available})
 									return (
-										<tr key={index}>
+										<tr key={index}
+										onClick={()=>navigate(`/detail/${product?.id}`)}
+										style={{
+											cursor: available?'pointer':'not-allowed',
+											pointerEvents: available?'auto':'none',
+											backgroundColor: available?'':'#99919126',
+										}}>
 
 											{/* image */}
 											<td className="align-middle"
-											onClick={() => navigate(`/detail/${cart?.prdId}`)}
 											style={{
 												...deviceType?styles.mobilePadding:{},
-												cursor: 'pointer',
 												}}>
 												{isLoading && (
 													<BouncingDots size="ts" color="#475569" p="1" />)}
 													<img
-													key={cart?.prdId}
-													src={cart?.thumbnail||cart?.image}
-													alt={cart?.name}
+													key={product?.id}
+													src={product?.thumbnail_url_0||product?.image_url_0}
+													alt={product?.name}
 													className={`cart-image-img ${isLoading ? 'd-none' : ''}`}
-													onLoad={() => handleImageLoad(cart?.prdId)}
-													onError={() => handleImageLoad(cart?.prdId)} // stop loader on error too
-													onLoadStart={() => handleImageStart(cart?.prdId)}
+													onLoad={() => handleImageLoad(product?.id)}
+													onError={() => handleImageLoad(product?.id)} // stop loader on error too
+													onLoadStart={() => handleImageStart(product?.id)}
 												/>
 											</td>
 
 											{/* product name */}
 											<td className="align-middle text-wrap" // text-left"
-											onClick={() => navigate(`/detail/${cart?.prdId}`)}
 											style={{
 												...deviceType?styles.mobilePadding:{},
-												cursor: 'pointer',
-												}}>{titleCase(cart?.name||'')}</td>
+												}}>{titleCase(product?.name||'')}</td>
 
-											{/* price */}
+											{/* discount price */}
 											<td className="align-middle text-bg-color text-nowrap"
 											style={deviceType?styles.mobilePadding:{}}>
-												{currencySym} {digitSeparator(cart?.price?.split('.')[0])}
+												{currencySym} {digitSeparator(product?.discountPrice?.split('.')[0])}
 											</td>
 
-											{/* number of product items with controls */}
-											<td className="align-middle"
-											style={deviceType?styles.mobilePadding:{}}>
-												<div className="input-group quantity mx-auto cart-td-table"
-												style={deviceType?styles.mobileQtyWidth:styles.pCQtyWidth}>
-													<div className="input-group-btn">
-														<button className="btn btn-sm btn-primary btn-minus"
-														onClick={() => {
-															setInputValue(prev => handleStateFuncOnClicks(prev, index, '-'));
-															handleAddToCart(productMiniDetails, '-')
-															setReload(prev => !prev)}}>
-															<span className="fa fa-minus"></span>
-														</button>
-													</div>
-													<input
-													type="text"
-													className={`form-control form-control-sm bg-secondary ${deviceType?'':'border-0'} text-center ${deviceType?'w-75 rounded-lg':''}`}
-													onChange={(e) => handleInputChange(e, cart, index)}
-													onBlur={() => handleInputBlur(cart, index)} // to reset 0 to 1 when click is focused away
-													value={inputValue?.[index]?.nop ?? ""}
-													/>
-													<div className="input-group-btn">
-														<button className="btn btn-sm btn-primary btn-plus"
-														onClick={() => {
-															setInputValue(prev => handleStateFuncOnClicks(prev, index, '+'));
-															handleAddToCart(productMiniDetails, '+');
-															setReload(prev => !prev)}}>
-															<span className="fa fa-plus"></span>
-														</button>
-													</div>
-												</div>
+											{/* market price */}
+											<td className="align-middle text-bg-color text-nowrap"
+											style={{
+												...deviceType?
+												styles.mobilePadding:{},
+												fontSize: 14,
+												}}>
+												<del>{currencySym} {digitSeparator(product?.marketPrice?.split('.')[0])}</del>
 											</td>
-											{/* <td className="align-middle">₦{item.total}</td> */}
 
-											{/* delete item button */}
-											<td className="align-middle"
-											style={deviceType?styles.mobilePadding:{}}>
-												<button
-												onClick={() => {
-													setInputValue(prev => handleStateFuncOnClicks(prev, index, 'x'));
-													handleAddToCart(productMiniDetails, 'x');
-													setReload(prev => !prev)}}
-												className="btn btn-sm btn-danger">
-													<i className="fa fa-times"></i>
-												</button>
+											{/* number of products left */}
+											<td className="align-middle text-nowrap"
+											style={{
+												...deviceType?styles.mobilePadding:{},
+												color: available?'#475569':'grey',}}>
+												{available?product?.numberOfItems:'Sold Out'}
 											</td>
 										</tr>
 									)
 								})}
-							</tbody>
-							:
-							<tbody>
-								<tr>
-									<td colSpan="5" className="text-center font-italic">
-										Cart is Empty
-									</td>
-								</tr>
 							</tbody>}
 						</table>
 					</div>
-					<div className="col-lg-4">
-						{/* <form className="mb-30" action="">
-							<div className="input-group">
-								<input type="text" className="form-control border-0 p-4" placeholder="Coupon Code"/>
-								<div className="input-group-append">
-									<button className="btn btn-primary">Apply Coupon</button>
-								</div>
-							</div>
-						</form> */}
-						<h5 className="section-title position-relative text-uppercase mb-3">
-							<span className="bg-secondary pr-3"
-							style={{color: '#475569'}}>
-								Cart Summary
-							</span>
-						</h5>
-						<div className="bg-light p-30 mb-5"
-						style={{borderRadius: '10px'}}>
-							<div className="border-bottom pb-2">
-								<div className="d-flex justify-content-between mb-3">
-									<h6>Subtotal</h6>
-									<h6>{currencySym} {totalAmount?digitSeparator(totalAmount):'0'}</h6>
-								</div>
-								<div className="d-flex justify-content-between">
-									<h6 className="font-weight-medium">Shipping</h6>
-									<h6 className="font-weight-medium">{currencySym} {totalAmount?digitSeparator(shipping):'0'}</h6>
-								</div>
-							</div>
-							<div className="pt-2">
-								<div className="d-flex justify-content-between mt-2">
-									<h5>Total</h5>
-									<h5>{currencySym} {totalAmount?digitSeparator(parseInt(totalAmount)+parseInt(shipping)):'0'}</h5>
-								</div>
-								<button
-								className="btn btn-block btn-primary font-weight-bold my-3 py-3"
-								onClick={() => navigate('checkout')}
-								disabled={inputValue.length===0}
-								>
-									Proceed To Checkout
-									{/* <Link
-									type="button"
-									
-									to={"checkout"}
-									className="btn btn-block btn-primary font-weight-bold my-3 py-3"
-									>
-										Proceed To Checkout
-									</Link> */}
-								</button>
-							</div>
-						</div>
-					</div>
+				</div>
+				<div className="col-12">
+					<nav>
+						<ul className="pagination justify-content-center">
+							<Pagination pagination={pagination} onPageChange={handlePagination} />
+						</ul>
+					</nav>
 				</div>
 			</div>
 			:
