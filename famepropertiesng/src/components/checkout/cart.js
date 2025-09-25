@@ -131,6 +131,7 @@ function Cart() {
 		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
+	const isInputReady = inputValue.length!==0
 	return (
 		<>
 			<Breadcrumb page={'Shopping Cart'} />
@@ -143,7 +144,7 @@ function Cart() {
 			}}>
 				<div className="row px-xl-5">
 					<div className="col-lg-8 table-responsive mb-5">
-						<table className="table table-light table-borderless table-hover text-center mb-0">
+						<table className={`table ${isInputReady?'table-light':''} table-borderless table-hover text-center mb-0`}>
 							<thead className="thead-dark">
 								<tr>
 									{tableHeadArr.map((head, index) => {
@@ -170,7 +171,7 @@ function Cart() {
 									})}
 								</tr>
 							</thead>
-							{inputValue.length!==0?
+							{isInputReady?
 							<tbody className="align-middle">
 								{inputValue.map((cart, index) => {
 									const isLoading = loadingImages[cart?.prdId]
