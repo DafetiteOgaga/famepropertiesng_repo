@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useDeviceType } from '../../hooks/deviceType';
 
 function Breadcrumb({page, slash=true}) {
-	console.log({page});
+	// console.log({page});
 	const checkPage = page?.includes("/")&&slash
 	const deviceType = useDeviceType()?.width <= 576
 	// console.log({page, checkPage});
