@@ -102,7 +102,7 @@ function StoreProducts() {
 	// console.log({userInfo})
 	// console.log({totalAmount})
 	// console.log({parameters: parameters.storeID})
-	console.log({storeProductsArr})
+	// console.log({storeProductsArr})
 	// console.log({lStore})
 	// console.log({lStoreDetails})
 	return (
