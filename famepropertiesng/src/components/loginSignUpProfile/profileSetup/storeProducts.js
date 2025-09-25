@@ -96,6 +96,7 @@ function StoreProducts() {
 	};
 
 	const currencySym = userInfo?.currencySymbol||'₦'
+	const isProductAvailable = storeProductsArr?.length
 
 	// console.log({inputValue});
 	// console.log({userInfo})
@@ -117,7 +118,7 @@ function StoreProducts() {
 				style={{color: '#475569'}}>store name here</span></h2> */}
 				<div className="row px-xl-5 justify-content-center">
 					<div className="col-lg-8 table-responsive mb-5">
-						<table className="table table-light table-borderless table-hover text-center mb-0">
+						<table className={`table ${isProductAvailable?'table-light':''} table-borderless table-hover text-center mb-0`}>
 							<thead className="thead-dark">
 								<tr>
 									{tableHeadArr.map((head, index) => {
@@ -144,7 +145,7 @@ function StoreProducts() {
 									})}
 								</tr>
 							</thead>
-							{storeProductsArr &&
+							{isProductAvailable?
 							<tbody className="align-middle opacy">
 								{storeProductsArr.map((product, index) => {
 									const isLoading = loadingImages[product?.id]
@@ -209,6 +210,14 @@ function StoreProducts() {
 										</tr>
 									)
 								})}
+							</tbody>
+							:
+							<tbody>
+								<tr>
+									<td colSpan="5" className="text-center font-italic">
+										You have no products in this store yet.
+									</td>
+								</tr>
 							</tbody>}
 						</table>
 					</div>

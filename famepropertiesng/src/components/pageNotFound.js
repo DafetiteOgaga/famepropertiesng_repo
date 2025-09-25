@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useDeviceInfo } from '../hooks/deviceType';
+import { useCheckLoginValidity } from '../hooks/checkLoginValidity';
 // import { TestSpinners } from '../spinners/spinner';
 // import { StarRating } from '../hooks/handleStars';
 
 function PageNotFound() {
 	const deviceInfo = useDeviceInfo()
+	const checkLoginValidity = useCheckLoginValidity()
 	// console.log({deviceInfo})
 	// const location = useLocation().pathname.split("/").pop();
 	// const [products, setProducts] = useState([]);
@@ -57,6 +59,15 @@ function PageNotFound() {
 				}}>
 				<h3 style={{color: '#475569', fontSize: 16}}>{`Device type: ${deviceInfo.deviceInfo}`}</h3>
 				<h3 style={{color: '#475569', fontSize: 16}}>{`Device width: ${deviceInfo.width}px`}</h3>
+			</div>
+			<div className="container-fluid"
+			style={{
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				flexDirection: 'column',
+				}}>
+				<h3 style={{color: '#475569', fontSize: 16}}>{checkLoginValidity}</h3>
 			</div>
 			{/* <div className="container-fluid"
 			style={{
