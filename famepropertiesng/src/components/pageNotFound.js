@@ -67,7 +67,7 @@ function PageNotFound() {
 				alignItems: 'center',
 				flexDirection: 'column',
 				}}>
-				<h3 style={{color: '#475569', fontSize: 16}}>{checkLoginValidity}</h3>
+				<h3 style={{color: '#475569', fontSize: 16, textAlign: 'center'}}>{checkLoginValidity}</h3>
 			</div>
 			{/* <div className="container-fluid"
 			style={{
