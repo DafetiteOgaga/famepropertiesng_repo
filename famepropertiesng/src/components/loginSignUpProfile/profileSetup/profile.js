@@ -410,6 +410,7 @@ function Profile() {
 		if (e) e.preventDefault();
 
 		setLoading(true);
+		// console.log('setting loading to true...')
 
 		if (!updatedFieldRef.current&&!updatedStoreFieldRef.current) {
 			console.warn('Empty form is invalid');
@@ -621,6 +622,7 @@ function Profile() {
 			return null;
 		} finally {
 			setLoading(false);
+			// console.log('setting loading to false...')
 		}
 	}
 
@@ -1109,6 +1111,7 @@ function Profile() {
 																			<span className={`store-container ${animating}`} key={storeIdx}>
 																				{Object.entries(store).map(([sKey, sVal], sIdx) => {
 																					// console.log({sKey, sVal})
+																					// console.log({store})
 																					// console.log('rendering phone code for store phone number:', userInfo.phoneCode)
 																					const editingStoreField = editStore[store.id]?.[sKey]
 																					if (editingStoreField) {
@@ -1145,10 +1148,18 @@ function Profile() {
 																						<Fragment key={sKey}>
 																							<>
 																								{sKey==="store_name"&&
-																								<span
-																								className="bold-text"
-																								style={{textDecoration: 'underline'}}>{titleCase(sKey)}: {titleCase(sVal)}
-																								</span>}
+																								<Link
+																								className="bold-text store-name"
+																								to={`store-products/${store.id}`}
+																								// onClick={()=>navigate('/cart')}
+																								style={{
+																									// textDecoration: 'none',
+																									// color: '#475569',
+																									// border: '1px solid #475569',
+																									// padding: '0.3rem 0.5rem',
+																									// borderRadius: '5%'
+																									}}>{titleCase(sKey)}: {titleCase(sVal)}
+																								</Link>}
 
 																								{/* {<hr className="my-1" />} */}
 																								{storeFieldsToRender.includes(sKey) &&
@@ -1273,6 +1284,7 @@ function Profile() {
 																											store={{id: store.id, field: sKey, parentField: userKey}}
 																											setEditFields={setEditStore}
 																											userKey={sKey}
+																											loading={loading}
 																											onSubmitHandler={onSubmitHandler}
 																											editField={editingStoreField}
 																											isDisabled={isDisabled} />}
@@ -1561,15 +1573,7 @@ function Profile() {
 								<button
 								type="button"
 								// disabled
-								onClick={() => {
-									// setSelectedFile(null);
-									// setPreviewURL(null);
-									// setFileName('No file chosen');
-									// setFormData(prev => ({
-									// 	...prev,
-									// 	previewURL: ''
-									// }))
-								}}
+								onClick={() => {navigate(`register-store/${userInfo?.id}`)}}
 								className="btn btn-sm btn-secondary d-block mt-2"
 								>
 									Become a Seller
@@ -1626,6 +1630,7 @@ function EditFieldButton({
 	userKey, editField, setEditFields, isDisabled,
 	onSubmitHandler, loading, handleUpload,
 	store=null}) {
+	// console.log('loading:', loading)
 	const deviceType = useDeviceType().width <= 576;
 	if (!userKey) return null;
 	if (userKey==='email') return null; // can't edit email for now

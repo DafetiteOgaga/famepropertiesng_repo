@@ -10,7 +10,7 @@ import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { useAuth } from '../../hooks/allAuth/authContext';
 import { titleCase } from '../../hooks/changeCase';
 
-const headerMenuArr = [
+let headerMenuArr = [
 	// {
 	// 	menu: "auth",
 	// 	type: "button",
@@ -53,14 +53,14 @@ const headerMenuArr = [
 	// 	menu: "Account Settings",
 	// 	link: "/settings"
 	// },
-	{
-		menu: "Admin Page",
-		link: "/admin-page",
-		type: "link",
-	},
+	// {
+	// 	menu: "Admin Page",
+	// 	link: "/admin-page",
+	// 	type: "link",
+	// },
 	{
 		menu: "Register Store",
-		link: "/store-sign-up/id",
+		link: "/register-store/id",
 		type: "link",
 	},
 	{
@@ -320,6 +320,11 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	// usage;
 	// const reordered = moveItem(menuArrItems, 2, 1);
 	// console.log({headerMenuArr})
+	// console.log({
+	// 	seller: userInfo?.is_seller,
+	// 	postProd: headerMenuArr?.some(obj=>obj?.menu.toLowerCase()==='post products'),
+	// })
+	if (!userInfo?.is_seller) headerMenuArr = headerMenuArr.filter(header => header?.menu.toLowerCase()!=='post products')
 	let resortedMobile = moveItem(headerMenuArr, 'clear cart', 3);
 	let resortedPc
 	// console.log({headerMenuArr})
@@ -354,7 +359,10 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
 				// console.log('link after:', obj.link)
 			}
-			return obj.menu.toLowerCase() !== 'login'
+			return (obj.menu.toLowerCase() !== 'login'&&
+					obj.menu.toLowerCase() !== 'register store'
+					// &&(obj.menu.toLowerCase() !== 'post products'&&!userInfo?.is_seller)
+					)
 		});
 		resortedPc = headerMenuArr.filter(obj => {
 			if (obj?.menu.toLowerCase() === 'register store'||
@@ -364,7 +372,10 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
 				// console.log('link after:', obj.link)
 			}
-			return obj.menu.toLowerCase() !== 'login'
+			return (obj.menu.toLowerCase() !== 'login'&&
+					obj.menu.toLowerCase() !== 'register store'
+					// &&(obj.menu.toLowerCase() !== 'post products'&&!userInfo?.is_seller)
+					)
 		});
 	}
 	const page = currentPage.split('/')[1].toLowerCase();
@@ -375,6 +386,13 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 		resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 	}
+	// if (userInfo) {
+	// 	// 
+	// 	// if (userInfo.)
+	// 	// resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
+	// 	// resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
+	// 	console.log({userInfo})
+	// }
 	// console.log({resortedMobile, resortedPc})
 	const handleIsActive = (menu) => {
 		const page = currentPage.split('/')[1];

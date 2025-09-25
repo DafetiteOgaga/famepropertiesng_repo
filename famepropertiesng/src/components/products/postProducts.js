@@ -349,7 +349,7 @@ function PostProduct() {
 	}, []);
 	return (
 		<>
-			<Breadcrumb page={'Add-Product(s)'} />
+			<Breadcrumb page={'Post-Product(s)'} />
 
 			{!isMounting ?
 			<form

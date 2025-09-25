@@ -46,10 +46,10 @@ const tabPane = [
 const randomNumber = Math.floor(Math.random() * 6);
 const productStar = "fa fa-star"
 function Detail() {
+	const { createLocal, createSession } = useCreateStorage();
 	const navigate = useNavigate();
 	const imgRef = useRef(null);
 	const { handleAddToCart } = useOutletContext();
-	const { createLocal } = useCreateStorage()
 	const [inputValue, setInputValue] = useState([]);
 	const [reload, setReload] = useState(false);
 	// const [imageIdx, setImageIdx] = useState(0);
@@ -64,8 +64,9 @@ function Detail() {
 	const deviceWidth = deviceSpec.width;
 	const [selectedTab, setSelectecTab] = useState('description');
 	const [transition, setTransition] = useState(0)
-	// const userInfo = createLocal.getItem('fpng-user');
-	// console.log({userInfo})
+	const userInfo = createLocal.getItem('fpng-user');
+	
+
 	const fetchServerData = async () => {
 		console.log("Fetching product data from server...");
 		try {
@@ -79,6 +80,35 @@ function Detail() {
 			const prodData = await prodRes.json();
 			console.log("Product data fetched:", prodData);
 			setProductItem(prodData);
+
+			const sessionProducts = createLocal.getItem('fpng-prod'); // already parsed for you
+
+			if (prodData) {
+				if (sessionProducts) {
+					console.log('Session products exist, checking for new products to add...');
+					// Extract product IDs already in session
+					const existingIds = new Set(sessionProducts.map(p => p.id));
+					console.log('Existing product IDs in session:', existingIds);
+	
+					// Filter new products (those not in session)
+					const newProduct = existingIds.has(prodData.id) ? [] : [prodData];
+					console.log('New products to add:', newProduct?.[0]?.id);
+	
+					if (newProduct.length > 0) {
+						console.log(`Found ${newProduct.length} new products, updating session...`);
+						const updatedSession = [...sessionProducts, ...newProduct];
+						createLocal.setItem('fpng-prod', updatedSession);
+						createLocal.setItemRaw('fpng-tprd', updatedSession.length);
+					}
+				} else {
+					// First time, just save all
+					console.log('Saving products to session for the first time...');
+					// const totalProds = prodData.results.length;
+					// console.log({totalProds})
+					createLocal.setItem('fpng-prod', [prodData]);
+					createLocal.setItemRaw('fpng-tprd', [prodData]?.length);
+				}
+			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
@@ -250,6 +280,8 @@ function Detail() {
 	// console.log({isMobile})
 	// console.log({loadingImg})
 	// console.log({deviceWidth})
+	// console.log({userInfo})
+	// console.log('id:', id);
 	return (
 		<>
 			<Breadcrumb page={`Product / ${titleCase(productItem?.name)}`} slash={false} />
@@ -434,15 +466,27 @@ function Detail() {
 									<span className="fa fa-shopping-cart mr-1"/>{` ${Boolean(isItemAdded)?'Added to Cart':'Add To Cart'}`}
 								</button>
 							</div>
-							{(cartItems?.length>0)&&
-							<div className="d-flex align-items-center mb-4 pt-2">
-								<button
-								onClick={()=>navigate('/cart')}
-								disabled={!cartItems?.length}
-								className="btn btn-primary px-3">
-									<span className="fa fa-shopping-cart mr-1"/>{` Go to Cart (${cartItems?.length||0})`}
-								</button>
-							</div>}
+							<div className="d-flex flex-row flex-gap-2">
+								{(cartItems?.length>0)&&
+								<div className="d-flex align-items-center mb-4 pt-2">
+									<button
+									onClick={()=>navigate('/cart')}
+									disabled={!cartItems?.length}
+									className="btn btn-primary px-3">
+										<span className="fa fa-shopping-cart mr-1"/>{` Go to Cart (${cartItems?.length||0})`}
+									</button>
+								</div>}
+
+								{(productItem?.store?.user?.id===userInfo?.id && userInfo?.is_seller)&&
+								<div className="d-flex align-items-center mb-4 pt-2">
+									<button
+									onClick={()=>navigate(`/${userInfo?.id}/product/${id}`)}
+									disabled={!cartItems?.length}
+									className="btn btn-primary px-3">
+										<span className="fa fa-pen mr-1"/>{` Update Product`}
+									</button>
+								</div>}
+							</div>
 							<div className="d-flex pt-2">
 								<strong className="text-dark mr-2">Share on:</strong>
 								<div className="d-inline-flex">

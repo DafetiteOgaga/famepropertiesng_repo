@@ -69,6 +69,7 @@ async function refreshToken(
 	  	// refresh expired too → user must log in again
 		createLocal.removeItem("fpng-acc");
 		createLocal.removeItem("fpng-ref");
+		createLocal.removeAllItems();
 		// updateToken(null);
 		// updateRefreshToken(null);
 		// createLocal.removeItem("fpng-refresh");
@@ -151,8 +152,9 @@ function useAuthFetch() {
 				// 🔴 Refresh failed → log out
 				createLocal.removeItem("fpng-acc");
 				createLocal.removeItem("fpng-ref");
+				createLocal.removeAllItems();
 				// createLocal.removeItem("fpng-rot");
-				createLocal.removeItem("fpng-user");
+				// createLocal.removeItem("fpng-user");
 				// updateToken(null);
 				// updateRefreshToken(null);
 				// updateUserInfo(null);
@@ -176,6 +178,8 @@ function useAuthFetch() {
 			createLocal.setItem("fpng-acc", data.access);
 			createLocal.setItem("fpng-ref", data.refresh);
 			createLocal.setItem("fpng-user", data.user);
+			createLocal.setItem("fpng-stor", data.user.store);
+			createLocal.setItem("fpng-ctdw", Date.now());
 		} else if (data?.error) {
 			// createLocal.removeItem("fpng-rot");
 		}
