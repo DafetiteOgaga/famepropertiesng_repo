@@ -1111,6 +1111,7 @@ function Profile() {
 																			<span className={`store-container ${animating}`} key={storeIdx}>
 																				{Object.entries(store).map(([sKey, sVal], sIdx) => {
 																					// console.log({sKey, sVal})
+																					// console.log({store})
 																					// console.log('rendering phone code for store phone number:', userInfo.phoneCode)
 																					const editingStoreField = editStore[store.id]?.[sKey]
 																					if (editingStoreField) {
@@ -1148,13 +1149,15 @@ function Profile() {
 																							<>
 																								{sKey==="store_name"&&
 																								<Link
-																								className="bold-text"
+																								className="bold-text store-name"
 																								to={`store-products/${store.id}`}
 																								// onClick={()=>navigate('/cart')}
 																								style={{
-																									textDecoration: 'underline',
-																									// cursor: 'pointer',
-																									color: '#475569'
+																									// textDecoration: 'none',
+																									// color: '#475569',
+																									// border: '1px solid #475569',
+																									// padding: '0.3rem 0.5rem',
+																									// borderRadius: '5%'
 																									}}>{titleCase(sKey)}: {titleCase(sVal)}
 																								</Link>}
 
@@ -1570,15 +1573,7 @@ function Profile() {
 								<button
 								type="button"
 								// disabled
-								onClick={() => {
-									// setSelectedFile(null);
-									// setPreviewURL(null);
-									// setFileName('No file chosen');
-									// setFormData(prev => ({
-									// 	...prev,
-									// 	previewURL: ''
-									// }))
-								}}
+								onClick={() => {navigate(`register-store/${userInfo?.id}`)}}
 								className="btn btn-sm btn-secondary d-block mt-2"
 								>
 									Become a Seller
