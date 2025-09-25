@@ -48,7 +48,7 @@ function AppRoutes() {
 				{/* cart */}
 				<Route path="cart" element={<Cart />} />
 				{/* store sign up */}
-				<Route path="store-sign-up/:id" element={<StoreSignUp />} />
+				<Route path="profile/register-store/:id" element={<StoreSignUp />} />
 				{/* welcome */}
 				<Route path="welcome" element={<Welcome />} />
 				{/* post product from store */}
