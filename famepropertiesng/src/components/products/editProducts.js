@@ -52,7 +52,9 @@ const isEmpty =  (formObj, ignoreID=true) => {
 };
 
 function EditProduct() {
-	const productID = useParams().productID;
+	const parameter = useParams()
+	console.log({parameter})
+	const productID = parameter.productID;
 	const reloadRef = useRef(1);
 	const baseAPIURL = useImageKitAPIs()?.data;
 	const formImageCountRef = useRef(null);
@@ -71,10 +73,12 @@ function EditProduct() {
 	const [isMounting, setIsMounting] = useState(true);
 	const deviceType = useDeviceType().width <= 576;
 
+	const lStore = createLocal.getItem('fpng-stor')||[];
 	const userInfo = createLocal.getItem('fpng-user')
+	// const lStoreDetails = lStore.find(store=>store.id?.toString()===parameters?.storeID?.toString())
 	const storesArr = userInfo?.store
 
-	const sessionProducts = createSession.getItem('fpng-prod');
+	const sessionProducts = createLocal.getItem('fpng-prod');
 	console.log({sessionProducts})
 	// console.log({productID})
 	const productToEdit = sessionProducts?.find(prod => String(prod.id) === String(productID));
@@ -538,7 +542,7 @@ function EditProduct() {
 	// console.log({hasImage})
 	return (
 		<>
-			<Breadcrumb page={`Fix-Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
+			<Breadcrumb page={`Update Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
 
 			{!isMounting ?
 			<form
