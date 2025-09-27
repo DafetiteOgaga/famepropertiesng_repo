@@ -387,7 +387,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 	}
 	// if (userInfo) {
-	// 	// 
+	// 	//
 	// 	// if (userInfo.)
 	// 	// resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 	// 	// resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
@@ -444,7 +444,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						<span
 						style={{
 							position: 'relative',
-							top: '0rem',
+							top: '-3rem',
 						}}><Sidebar mobileStyle={'rgba(0, 0, 0, 0.71)'} categoryMenuRef={categoryMenuRef} />
 						</span>}
 						<div className="w-35 pt-0"
