@@ -3,6 +3,7 @@ import { getBaseURL } from '../../hooks/fetchAPIs';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { BouncingDots } from '../../spinners/spinner';
+import { titleCase } from '../../hooks/changeCase';
 
 const baseURL = getBaseURL();
 
@@ -108,7 +109,19 @@ function CategoryItem({ category, mobileStyle, level = 0 }) {
 	const navigate = useNavigate()
 	const [isOpen, setIsOpen] = useState(false);
 	const hasChildren = (category?.subcategories?.length ?? 0) > 0;
-	const navigateTo = `products/${encodeURIComponent(category.name)}`
+	const categoryName = category?.name
+	// ?.split()?.map(cname => {
+	// 	let nname = cname;
+	// 	// console.log({nname})
+	// 	if (nname.includes(' ')||nname.includes('&')) {
+	// 		nname = nname.split(' ').join('-');
+	// 		nname = nname.split('-&-').join('-');
+	// 	}
+	// 	return nname.toLowerCase();
+	// })?.join('-')
+	// console.log({categoryName})
+	const navigateTo = `products/${categoryName}`
+	// const navigateTo = `products/${category.name}`
 
 	return (
 		<div style={{ marginLeft: `${level * 8}px` }}>
@@ -136,7 +149,7 @@ function CategoryItem({ category, mobileStyle, level = 0 }) {
 
 				{/* when no children, render a Link so clicking navigates */}
 				{hasChildren ?
-					(<span>{category.name}</span>)
+					(<span>{titleCase(category.name)}</span>)
 					:
 					(
 						<Link
@@ -148,7 +161,7 @@ function CategoryItem({ category, mobileStyle, level = 0 }) {
 							textWrap: "nowrap"
 						}}
 						>
-						{category.name}
+						{titleCase(category.name)}
 						</Link>
 					)}
 
