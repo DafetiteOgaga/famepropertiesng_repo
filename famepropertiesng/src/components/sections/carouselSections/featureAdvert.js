@@ -18,36 +18,48 @@ function FeatureAdvert({featureSelector, featuresArr}) {
 						const isActive = featuresArr[featureSelector].id===featureItem.id
 						const evenIndex = index % 2 === 0;
 						return (
-							<div key={index} className="product-offer mb-30 carousel-div2"
+							<div key={index} className={`feat-x col-lg-6 product-offer ${isMobile?'':'carousel-div2'}`}
 							style={{
 								...{display: isActive?'block':'none'},
 								...isMobile?{
-									position: 'absolute',
+									// position: 'absolute',
 									height: 70,
-									width: 120,
-									left: '-3%',
-									top: '0%',
-									borderTopRightRadius: 0,
-									borderBottomLeftRadius: 0,
-									zIndex: 1,
+									padding: 0,
+									// width: 'auto%',
+									// left: '',
+									// top: '0%',
+									// borderTopRightRadius: 0,
+									// borderBottomLeftRadius: 0,
+									// zIndex: 1,
+									// background: 'green',
 									// backgroundColor: 'rgba(0, 0, 0, 0)',
 								}:{}
 								}}>
-								{!isMobile &&
+								{/* {!isMobile && */}
 								<img className="img-fluid" alt=""
-								src={getImage("story-bg-1.jpg", 'img')}/>}
-								<div className={`d-flex align-items-center mb-4 feature-div justify-content-center`}
+								style={isMobile?{
+									zIndex: 0,
+									position: 'absolute',
+								}:{}}
+								src={getImage("story-bg-1.jpg", 'img')}/>
+								{/* } */}
+								<div className={`d-flex align-items-${isMobile?'end':'center'} ${isMobile?'':'mt-2'} justify-content-center`}
 								style={{
 									// position: isMobile?'absolute':'',
-									flexDirection: 'column',
+									// flexDirection: 'column',
+									// zIndex: 900,
+									// background: isMobile?'green':'',
+									position: isMobile?'':'absolute',
+									top: isMobile?'':0,
+									left: isMobile?'':'30%',
 									}}>
-									<span className={`${featureItem.heading} fa-7x ${isActive?evenIndex?'fadeInLeftIcon':'fadeInRightIcon':''} ${isMobile?'mb-1 ml-3':'m-0'} mr-3 text-white`}
+									<span className={`${featureItem.heading} fa-5x ${isActive?evenIndex?'fadeInLeftIcon':'fadeInRightIcon':''} ${isMobile?'':'m-0'} mr-3 text-white`}
 									style={{
 										fontSize: isMobile?'2rem':'',
-										marginTop: '-1.5rem',
+										marginTop: isMobile?'1rem':'-1.5rem',
 										// color: isMobile?'whitesmoke':''
 									}}> </span>
-									<h5 className={`font-weight-semi-bold m-0 ${isActive?'bounceInDown':''}`}
+									<h5 className={`font-weight-semi-bold ${isActive?'bounceInDown':''}`}
 									style={{
 										zIndex: 1,
 										color: '#fff',
