@@ -81,6 +81,13 @@
 }
 
 @media (max-width: 767.98px) {
+	.mobile-item {
+		flex: 0 0 50%;   /* always take 50% of row */
+		max-width: 50%;
+		padding: 0 3px;
+		/* box-sizing: border-box; */
+	}
+
 	.table-responsive-md {
 		display: block;
 		width: 100%;
