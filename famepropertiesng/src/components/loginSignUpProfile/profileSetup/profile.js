@@ -207,7 +207,7 @@ function Profile() {
 		// console.log('userInfo effect triggered');
 		if (userInfo) {
 			// console.log('setting formData from userInfo...')
-			console.log({userInfo})
+			// console.log({userInfo})
 			setFormData(prev => ({
 				...prev,
 				...userInfo,
@@ -774,7 +774,7 @@ function Profile() {
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
-	console.log({userInfo})
+	// console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})
@@ -793,8 +793,8 @@ function Profile() {
 	// console.log({updatedFieldRef: updatedFieldRef.current})
 	// console.log({updatedStoreFieldRef: updatedStoreFieldRef.current})
 	// console.log({storeFormData})
-	const temp = createLocal.getItem('fpng1-user')
-	console.log({temp})
+	// const temp = createLocal.getItem('fpng1-user')
+	// console.log({temp})
 	return (
 		<>
 			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
