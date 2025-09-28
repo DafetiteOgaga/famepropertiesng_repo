@@ -3,11 +3,11 @@ import { useCreateStorage } from "./setupLocalStorage";
 import { toast } from "react-toastify";
 
 function useCheckLoginValidity() {
-	console.log('Checking login validity...');
+	// console.log('Checking login validity...');
 	const { createLocal } = useCreateStorage()
 	const [daysRemaining, setDaysRemaining] = useState(null);
 	useEffect(() => {
-		console.log('useEffect triggered for login validity check');
+		// console.log('useEffect triggered for login validity check');
 		const lastLogin = createLocal.getItem("fpng-ctdw"); // time at login
 		if (!lastLogin) return;
 

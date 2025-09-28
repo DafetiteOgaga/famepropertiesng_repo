@@ -120,7 +120,7 @@ function Index() {
 				// Save updated cart back to localStorage and state
 				setNumberOfProductsInCart(cart.length)
 				createLocal.setItemRaw('fpng-cart', cart);
-				toast.success(`${titleCase(product.name)} has been ${event} your cart.`);
+				// toast.success(`${titleCase(product.name)} has been ${event} your cart.`);
 				return;
 			} else {
 				console.log('Invalid mode provided. Use "add", "x", "+", or "-".');
@@ -136,7 +136,7 @@ function Index() {
 		// Save updated cart back to localStorage and state
 		setNumberOfProductsInCart(cart.length)
 		createLocal.setItemRaw('fpng-cart', cart);
-		toast.success(`${titleCase(product.name)} has been ${event} your cart.`);
+		// toast.success(`${titleCase(product.name)} has been ${event} your cart.`);
 		// Optionally, you can provide feedback to the user
 		// alert(`${product.name} has been added to your cart.`);
 	}

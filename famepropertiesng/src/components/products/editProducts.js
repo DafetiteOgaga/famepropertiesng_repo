@@ -53,7 +53,7 @@ const isEmpty =  (formObj, ignoreID=true) => {
 
 function EditProduct() {
 	const parameter = useParams()
-	console.log({parameter})
+	// console.log({parameter})
 	const productID = parameter.productID;
 	const reloadRef = useRef(1);
 	const baseAPIURL = useImageKitAPIs()?.data;
@@ -79,10 +79,10 @@ function EditProduct() {
 	const storesArr = userInfo?.store
 
 	const sessionProducts = createLocal.getItem('fpng-prod');
-	console.log({sessionProducts})
+	// console.log({sessionProducts})
 	// console.log({productID})
 	const productToEdit = sessionProducts?.find(prod => String(prod.id) === String(productID));
-	console.log({productToEdit})
+	// console.log({productToEdit})
 	const productImgs = {}
 
 	// change this from image_url_x to thumbnail_url_x later
@@ -96,7 +96,7 @@ function EditProduct() {
 	}
 	// :
 	// 					[]
-	console.log({productImgs})
+	// console.log({productImgs})
 
 	// array of fields that should be text areas instead of input fields
 	const textAreaFieldsArr = [
@@ -299,9 +299,9 @@ function EditProduct() {
 	// auto submit form when formData has url and fileID filled
 	// (i.e when image has been uploded to cloud)
 	useEffect(() => {
-		console.log('#####'.repeat(14));
+		// console.log('#####'.repeat(14));
 		// console.log('formData:', submittedForm);
-		console.log('formimageCountRef:', formImageCountRef.current);
+		// console.log('formimageCountRef:', formImageCountRef.current);
 		// if (submittedForm.length===formImageCountRef?.current?.length) {
 			const allUploadedImagesReady = formImageCountRef?.current?.every(formEntry => {
 				// const formObj = submittedForm.find(f => f.id === formEntry.id);
@@ -316,8 +316,8 @@ function EditProduct() {
 					return bValue;
 				});
 			});
-			console.log('#####'.repeat(10));
-			console.log('All uploaded images ready:', allUploadedImagesReady);
+			// console.log('#####'.repeat(10));
+			// console.log('All uploaded images ready:', allUploadedImagesReady);
 			if (allUploadedImagesReady) {
 				onSubmitToServerHandler(); // auto submit on image upload
 				formImageCountRef.current = null; // reset
@@ -325,10 +325,10 @@ function EditProduct() {
 			} else if (!allUploadedImagesReady && reloadRef.current <= 5) {
 				reloadRef.current += 1;
 				setCheckReadiness(prev => !prev); // re-check readiness
-				console.log(`Not all images are ready yet, reloading (${reloadRef.current})...`);
+				// console.log(`Not all images are ready yet, reloading (${reloadRef.current})...`);
 			}
 		// } else console.log('waiting for other forms to upload images ...');
-		console.log('#####'.repeat(14));
+		// console.log('#####'.repeat(14));
 	}, [checkReadiness]);
 
 	// handle image upload to imagekit cloud before finally submit form
@@ -534,10 +534,10 @@ function EditProduct() {
 		})
 	}, [uploadedImages, selectedFiles])
 
-	console.log({formData})
-	console.log({selectedFiles})
-	console.log({uploadedImages})
-	console.log({imagePreviews})
+	// console.log({formData})
+	// console.log({selectedFiles})
+	// console.log({uploadedImages})
+	// console.log({imagePreviews})
 	
 	// console.log({hasImage})
 	return (

@@ -455,8 +455,8 @@ function StoreSignUp() {
 		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
-	console.log('csc =', {country, state, city, hasStates, hasCities})
-	console.log({cscFormData})
+	// console.log('csc =', {country, state, city, hasStates, hasCities})
+	// console.log({cscFormData})
 	return (
 		<>
 			<Breadcrumb page={'Register Store'} />

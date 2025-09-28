@@ -73,6 +73,7 @@ function Products() {
 	const [isLike, setIsLike] = useState(null);
 	const [load, setLoad] = useState(0);
 	const [loadingImages, setLoadingImages] = useState({});
+	const [categoryArr, setCategoryArr] = useState([]);
 	const [pagination, setPagination] = useState({
 		prev: null,
 		next: null,
@@ -85,6 +86,8 @@ function Products() {
 	const isMobile = deviceType.width<=576
 	const userInfo = createLocal.getItem('fpng-user');
 	const isNotLoggedIn = !userInfo;
+	const categoryName = parameters?.productname
+	// ?.split('-').join(' ');
 
 	// useEffect(() => {
 	// 	sessionStorage.removeItem('fpng-prod'); // to force re-fetch of total users on next login
@@ -101,6 +104,9 @@ function Products() {
 	};
 
 	const fetchServerData = async (endpoint="products") => {
+		// console.log({endpoint})
+		if (!endpoint||(!categoryName&&endpoint?.split('/')?.includes('category'))) return
+		if (categoryName&&endpoint?.split('/')?.includes('products')) return
 		// console.log(`Fetching data from endpoint: ${endpoint}`);
 		const config = {
 			method: isLike?'POST':'GET',
@@ -173,33 +179,39 @@ function Products() {
 				load: load,
 			});
 			setLoad(prev=>prev+1);
-			setProductItemArr(prodData?.results);
-			// check if item exists in session storage, if not or updates available,
-			// save/update else pass
-			const sessionProducts = createLocal.getItem('fpng-prod'); // already parsed for you
-
-			if (sessionProducts) {
-				// console.log('Session products exist, checking for new products to add...');
-				// Extract product IDs already in session
-				const existingIds = new Set(sessionProducts.map(p => p.id));
-
-				// Filter new products (those not in session)
-				const newProducts = prodData.results.filter(p => !existingIds.has(p.id));
-
-				if (newProducts.length > 0) {
-					// console.log(`Found ${newProducts.length} new products, updating session...`);
-					const updatedSession = [...sessionProducts, ...newProducts];
-					createLocal.setItem('fpng-prod', updatedSession);
-					createLocal.setItemRaw('fpng-tprd', updatedSession.length);
-				}
+			if (categoryName) {
+				// console.log('response from server', prodData)
+				setCategoryArr(prodData?.results);
 			} else {
-				// First time, just save all
-				// console.log('Saving products to session for the first time...');
-				// const totalProds = prodData.results.length;
-				// console.log({totalProds})
-				createLocal.setItem('fpng-prod', prodData.results);
-				createLocal.setItemRaw('fpng-tprd', prodData.results.length);
+				setProductItemArr(prodData?.results);
+				// check if item exists in session storage, if not or updates available,
+				// save/update else pass
+				const sessionProducts = createLocal.getItem('fpng-prod'); // already parsed for you
+
+				if (sessionProducts) {
+					// console.log('Session products exist, checking for new products to add...');
+					// Extract product IDs already in session
+					const existingIds = new Set(sessionProducts.map(p => p.id));
+
+					// Filter new products (those not in session)
+					const newProducts = prodData.results.filter(p => !existingIds.has(p.id));
+
+					if (newProducts.length > 0) {
+						// console.log(`Found ${newProducts.length} new products, updating session...`);
+						const updatedSession = [...sessionProducts, ...newProducts];
+						createLocal.setItem('fpng-prod', updatedSession);
+						createLocal.setItemRaw('fpng-tprd', updatedSession.length);
+					}
+				} else {
+					// First time, just save all
+					// console.log('Saving products to session for the first time...');
+					// const totalProds = prodData.results.length;
+					// console.log({totalProds})
+					createLocal.setItem('fpng-prod', prodData.results);
+					createLocal.setItemRaw('fpng-tprd', prodData.results.length);
+				}
 			}
+			
 			// console.log({sessionProducts, prodData})
 			// setProductRatingArr(prodData.product_ratings);
 		} catch (error) {
@@ -211,6 +223,11 @@ function Products() {
 		fetchServerData();
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
+	useEffect(() => {
+		// console.log("Fetching data from server on mount...");
+		fetchServerData(`category/${parameters?.productname}`);
+		// console.log("productItemArr:", productItemArr, productItemArr.length);
+	}, [parameters?.productname]);
 	useEffect(() => {
 		// if (isLike) {
 		// 	// console.log("Fetching like-product data...");
@@ -233,7 +250,8 @@ function Products() {
 		console.log('Pagination to:', page);
 		if (!page) return;
 		console.log({page})
-		fetchServerData(`products/?page=${page}`);
+		const appEndpoint = categoryName?`category/${categoryName}`:'products';
+		fetchServerData(`${appEndpoint}/?page=${page}`);
 	}
 	const handleProductPrevAddedToCart = (product) => {
 		// toast.info('Please login to add products to cart.');
@@ -247,6 +265,9 @@ function Products() {
 		}
 		return false;
 	}
+
+	// console.log({productItemArr, categoryArr})
+	const productArray = categoryName ? categoryArr : productItemArr
 	// console.log({productItemArr, pagination})
 	// console.log(
 	// 	'\nprev:', pagination?.prev,
@@ -258,13 +279,15 @@ function Products() {
 	// console.log('totalUsers:', totalUsers);
 	// const editprod = productsActionArr[3].url.split('-').join(' ');
 	// console.log({editprod})
+	// console.log({productArray})
+	// console.log({categoryName})
 	return (
 		<div className="container-fluid pb-3">
 			<h2 className="section-title position-relative text-uppercase mb-4"><span className="bg-secondary pr-3"
-			style={{color: '#475569'}}>{parameters?.productname?parameters.productname:'Products'}</span></h2>
-			{productItemArr.length ?
+			style={{color: '#475569'}}>{categoryName??'Products'}</span></h2>
+			{productArray.length ?
 				<div className="row">
-					{productItemArr&&productItemArr.map((productObjItem, index) => {
+					{productArray&&productArray.map((productObjItem, index) => {
 						// const randomNumber = Math.floor(Math.random() * 6);
 						// const no = totalNoOfReviewers(productRatingArr);
 						// const numberOfLikes = convertLikesToStars(productObjItem.total_liked, 10)
@@ -272,6 +295,7 @@ function Products() {
 						// console.log({id:productObjItem.id, productObjItem})
 						// console.log('numberOfLikes:', numberOfLikes, productObjItem.id);
 						// console.log({randomNumber})
+						// console.log({productObjItem})
 						const imageLoading = loadingImages[productObjItem?.id]
 						const isProductActive = activeProductId === productObjItem.id;
 						// console.log({isProductActive, id: productObjItem.id, activeProductId})

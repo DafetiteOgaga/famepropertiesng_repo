@@ -51,7 +51,7 @@ function StoreProducts() {
 				return;
 			}
 			const data = await response.json();
-			console.log('Response data from server',data)
+			// console.log('Response data from server',data)
 			setPagination({
 				prev: data?.previous,
 				next: data?.next,
@@ -150,7 +150,7 @@ function StoreProducts() {
 								{storeProductsArr.map((product, index) => {
 									const isLoading = loadingImages[product?.id]
 									const available = !!product?.numberOfItems
-									console.log({product, available})
+									// console.log({product, available})
 									return (
 										<tr key={index}
 										onClick={()=>navigate(`/detail/${product?.id}`)}
