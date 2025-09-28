@@ -34,7 +34,7 @@ function Cart() {
 	// console.log({cartInStorage})
 	useEffect(() => {
 		const cartInStorage = createLocal.getItemRaw('fpng-cart')||[]
-		console.log({cartInStorage})
+		// console.log({cartInStorage})
 		setInputValue(cartInStorage);
 	}, [reload]);
 
