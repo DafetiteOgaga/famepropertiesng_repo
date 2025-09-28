@@ -68,34 +68,34 @@ function Detail() {
 	
 
 	const fetchServerData = async () => {
-		console.log("Fetching product data from server...");
+		// console.log("Fetching product data from server...");
 		try {
 			const url = `${baseURL}/products/${id}/`;
-			console.log("Fetching product data from:", url);
+			// console.log("Fetching product data from:", url);
 			const prodRes = await (fetch(url));
 			if (!prodRes.ok) {
-				console.log("Response not ok:", prodRes);
+				// console.log("Response not ok:", prodRes);
 				throw new Error("Network response was not ok");
 			}
 			const prodData = await prodRes.json();
-			console.log("Product data fetched:", prodData);
+			// console.log("Product data fetched:", prodData);
 			setProductItem(prodData);
 
 			const sessionProducts = createLocal.getItem('fpng-prod'); // already parsed for you
 
 			if (prodData) {
 				if (sessionProducts) {
-					console.log('Session products exist, checking for new products to add...');
+					// console.log('Session products exist, checking for new products to add...');
 					// Extract product IDs already in session
 					const existingIds = new Set(sessionProducts.map(p => p.id));
-					console.log('Existing product IDs in session:', existingIds);
+					// console.log('Existing product IDs in session:', existingIds);
 	
 					// Filter new products (those not in session)
 					const newProduct = existingIds.has(prodData.id) ? [] : [prodData];
-					console.log('New products to add:', newProduct?.[0]?.id);
+					// console.log('New products to add:', newProduct?.[0]?.id);
 	
 					if (newProduct.length > 0) {
-						console.log(`Found ${newProduct.length} new products, updating session...`);
+						// console.log(`Found ${newProduct.length} new products, updating session...`);
 						const updatedSession = [...sessionProducts, ...newProduct];
 						createLocal.setItem('fpng-prod', updatedSession);
 						createLocal.setItemRaw('fpng-tprd', updatedSession.length);
@@ -114,14 +114,14 @@ function Detail() {
 		}
 	}
 	useEffect(() => {
-		console.log("Fetching server data...");
+		// console.log("Fetching server data...");
 		fetchServerData();
 		// console.log("productItem:", productItem);
 	}, []);
 
 	useEffect(() => {
 		const cartInStorage = createLocal.getItemRaw('fpng-cart')||[]
-		console.log({cartInStorage})
+		// console.log({cartInStorage})
 		// console.log('11111'.repeat(10))
 		setInputValue(cartInStorage);
 	}, [reload]);
@@ -229,8 +229,8 @@ function Detail() {
 			.map(([_, url]) => url):null
 
 	const handleImageTransition = (mode) => {
-		console.log("Transitioning image:", mode);
-		console.log('this transition index calc may not be accurate')
+		// console.log("Transitioning image:", mode);
+		// console.log('this transition index calc may not be accurate')
 		if (mode === '+') {
 			console.log("transitioning index from:", transition, "to", transition + 1);
 			setTransition(prev => prev < (productImages.length-1) ? prev + 1 : productImages.length - 1)
@@ -252,7 +252,7 @@ function Detail() {
 
 		const observer = new ResizeObserver((entries) => {
 			for (let entry of entries) {
-				console.log("Observed size:", entry.contentRect.width, entry.contentRect.height);
+				// console.log("Observed size:", entry.contentRect.width, entry.contentRect.height);
 			}
 		});
 		observer.observe(imgRef.current);
@@ -340,10 +340,10 @@ function Detail() {
 												setIsImageLoading(false);
 
 												// Natural size of the image file
-												console.log("natural size:", e.target.naturalWidth, e.target.naturalHeight);
+												// console.log("natural size:", e.target.naturalWidth, e.target.naturalHeight);
 
-												// Rendered size in the DOM (after CSS scaling)
-												console.log("rendered size:", e.target.offsetWidth, e.target.offsetHeight);
+												// // Rendered size in the DOM (after CSS scaling)
+												// console.log("rendered size:", e.target.offsetWidth, e.target.offsetHeight);
 											}}
 											/>
 										</div>
@@ -481,7 +481,7 @@ function Detail() {
 								<div className="d-flex align-items-center mb-4 pt-2">
 									<button
 									onClick={()=>navigate(`/${userInfo?.id}/product/${id}`)}
-									disabled={!cartItems?.length}
+									// disabled={!cartItems?.length}
 									className="btn btn-primary px-3">
 										<span className="fa fa-pen mr-1"/>{` Update Product`}
 									</button>
