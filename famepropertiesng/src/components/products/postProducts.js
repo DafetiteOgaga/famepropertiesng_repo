@@ -45,7 +45,7 @@ const isEmpty =  (formObj, ignoreID=true) => {
 		return fieldsBool // returns every() value to isEmpty fxn
 	})
 	if (emptyCheck) {
-		console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
+		// console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
 	}
 	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
 };
@@ -167,9 +167,9 @@ function PostProduct() {
 	// auto submit form when formData has url and fileID filled
 	// (i.e when image has been uploded to cloud)
 	useEffect(() => {
-		console.log('#####'.repeat(14));
-		console.log('formData:', submittedForm);
-		console.log('formimageCountRef:', formImageCountRef.current);
+		// console.log('#####'.repeat(14));
+		// console.log('formData:', submittedForm);
+		// console.log('formimageCountRef:', formImageCountRef.current);
 		if (submittedForm.length===formImageCountRef?.current?.length) {
 			const allUploadedImagesReady = formImageCountRef?.current?.every(formEntry => {
 				const formObj = submittedForm.find(f => f.id === formEntry.id);
@@ -178,20 +178,22 @@ function PostProduct() {
 				return formEntry.uploadedImgIdx.every(idx => {
 					const imageUrlVal = formObj[`image_url${idx}`];
 					const fileIdVal = formObj[`fileId${idx}`];
-					console.log(`Checking image url and file id at index ${idx} for form ${formObj.id}:`, !!imageUrlVal, !!fileIdVal);
+					// console.log(`Checking image url and file id at index ${idx} for form ${formObj.id}:`, !!imageUrlVal, !!fileIdVal);
 					const bValue = Boolean(imageUrlVal && fileIdVal);
-					console.log(`Image at index ${idx} is ready for form ${formObj.id}:`, bValue);
+					// console.log(`Image at index ${idx} is ready for form ${formObj.id}:`, bValue);
 					return bValue;
 				});
 			});
-			console.log('#####'.repeat(10));
-			console.log('All uploaded images ready:', allUploadedImagesReady);
+			// console.log('#####'.repeat(10));
+			// console.log('All uploaded images ready:', allUploadedImagesReady);
 			if (allUploadedImagesReady) {
 				onSubmitToServerHandler(); // auto submit on image upload
 				formImageCountRef.current = null; // reset
-			} else console.log('Not all images are ready yet, waiting...');
-		} else console.log('waiting for other forms to upload images ...');
-		console.log('#####'.repeat(14));
+			}
+			// else console.log('Not all images are ready yet, waiting...');
+		}
+		// else console.log('waiting for other forms to upload images ...');
+		// console.log('#####'.repeat(14));
 	}, [checkReadiness]);
 
 	// handle form submission on button click
@@ -308,7 +310,7 @@ function PostProduct() {
 		const allFormsFirstImageSelected = firstImages.current.every(obj => obj.selected)&&
 											// or maybe i should use renderedFormIDs.length (its still consistent with instant updates)
 											sections.length===firstImages.current.length;
-		console.log({allFormsFirstImageSelected, selectData: selectData.storeID, submittedForm: submittedForm.length})
+		// console.log({allFormsFirstImageSelected, selectData: selectData.storeID, submittedForm: submittedForm.length})
 		return submittedForm.length&&
 				// allValid&&
 				selectData.storeID&&
@@ -318,9 +320,9 @@ function PostProduct() {
 
 	useEffect(() => {
 		const renderedFormsIDs = renderedFormIDs?.current?.map(form=>form.id)||[];
-		console.log('Rendered form IDs changed, checking first images selected ...', renderedFormsIDs);
+		// console.log('Rendered form IDs changed, checking first images selected ...', renderedFormsIDs);
 		firstImages.current = firstImages.current.filter(obj => renderedFormsIDs.includes(obj.id));
-		console.log('Tracking first images selected for forms:', firstImages.current);
+		// console.log('Tracking first images selected for forms:', firstImages.current);
 	}, [renderedFormIDChanged])
 	// // track current form ID
 	// const handleCurrentFormID = (id) => {
@@ -330,18 +332,18 @@ function PostProduct() {
 	// console.log('formdata from child:\n'.repeat(5), submittedForm)
 	// console.log('renderedFormIDs', renderedFormIDs.current)
 	// console.log('productSectionRefs:', productSectionRefs.current)
-	console.log({sections: sections.length, submittedForm: submittedForm.length})
+	// console.log({sections: sections.length, submittedForm: submittedForm.length})
 	// console.log('sections length:', sections.length)
 	// console.log('trackEmptyFormsRef:\n'.repeat(2), trackEmptyFormsRef.current)
 	// console.log({checkFields})
-	console.log(
-		'\nfirstImages:', firstImages,
-		'\nall', `(${firstImages.current.length})`,
-		'true:', firstImages.current.every(obj => obj.selected),
-		`\nsections(${sections.length}) = firstImages(${firstImages.current.length}):`, sections.length===firstImages.current.length,
-		'\ncheckFields:', checkFields,
-		'\nrenderedFormIDs:', renderedFormIDs.current,
-	)
+	// console.log(
+	// 	'\nfirstImages:', firstImages,
+	// 	'\nall', `(${firstImages.current.length})`,
+	// 	'true:', firstImages.current.every(obj => obj.selected),
+	// 	`\nsections(${sections.length}) = firstImages(${firstImages.current.length}):`, sections.length===firstImages.current.length,
+	// 	'\ncheckFields:', checkFields,
+	// 	'\nrenderedFormIDs:', renderedFormIDs.current,
+	// )
 	// console.log({userInfo})
 	useEffect(() => {
 		// flip loading off immediately after mount
