@@ -23,51 +23,41 @@ function ProductAdvert({productSelector, productsArr}) {
 					// 	'productItem:', productItem, 'isActive:', isActive, 'index:', index, 'evenIndex:', evenIndex
 					// )
 					return (
-						<div key={index} className="product-offer mb-30 carousel-div2"
+						<div key={index} className="prod-y col-lg-6 product-offer carousel-div2"
 						style={{
 							...{display: isActive?'block':'none'},
 							...isMobile?{
-								position: 'absolute',
+								// position: '',
 								// top: isVeryVerySmallMobile?'70%':(isVerySmallMobile?'40%':'70%'),
-								top: '70%',
+								// top: '70%',
 								maxHeight: 300,
-								height: 150,
-								width: 170,
-								left: isVerySmallMobile?'45%':'55%',
-								bottom: '-7%',
-								borderTopRightRadius: 0,
-								borderBottomLeftRadius: 0,
+								height: 70,
+								padding: 0,
+								// width: 'auto%',
+								// left: '',
+								// bottom: '-7%',
+								// borderTopRightRadius: 0,
+								// borderBottomLeftRadius: 0,
+								// background: 'yellow',
 							}:{}
 							}}>
-							{!isMobile&&
-							<img className="img-fluid" alt="" src={
-								productItem.image_url
-								// getImage(
-								// productItem.image, 'img'
-								// 'carousel-1.jpg', 'img'
-								// )
-								}/>}
+							{/* {!isMobile&& */}
+							<img className="img-fluid" alt="" src={productItem.image_url}/>
+								{/* } */}
 							<div className="offer-text"
 							style={
-								isMobile?{
-								background: 'transparent',
-								padding: '0.5rem 0.5rem',
-								// top: '0%',
-								// bottom: '0%',
-								}:{}}>
+								isMobile?{}:{}}>
 								<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}
 								style={{
 									fontSize: isVerySmallMobile?'1rem':isSmallMobile?'1.1rem':'',
 									// color: '#fff',
 									zIndex: 1,
 									}}>{productItem.discount}</h6>
-								<h3 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}
+								<h5 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}
 								style={{
-									fontSize: isVerySmallMobile?'1rem':isSmallMobile?'1.1rem':'',
-									textAlign: 'center',
-									zIndex: 1,
+									fontSize: isMobile?'0.7rem':'',
 									// textWrap: productItem.paragraph.length<=10?'nowrap':'wrap',
-									}}>{titleCase(productItem.paragraph)}</h3>
+									}}>{titleCase(productItem.paragraph)}</h5>
 								{/* button */}
 								{/* <span className="productbtn btn btn-primary">{productItem.anchor}</span> */}
 							</div>

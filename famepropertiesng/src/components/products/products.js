@@ -247,9 +247,9 @@ function Products() {
 	const totalUsers = sessionStorage.getItem('fpng-tot');
 	if (totalUsers) parseInt(totalUsers, 10);
 	const handlePagination = (page) => {
-		console.log('Pagination to:', page);
+		// console.log('Pagination to:', page);
 		if (!page) return;
-		console.log({page})
+		// console.log({page})
 		const appEndpoint = categoryName?`category/${categoryName}`:'products';
 		fetchServerData(`${appEndpoint}/?page=${page}`);
 	}
@@ -300,13 +300,13 @@ function Products() {
 						const isProductActive = activeProductId === productObjItem.id;
 						// console.log({isProductActive, id: productObjItem.id, activeProductId})
 						return (
-							<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
+							<div to={"detail"} key={index} className={`col-lg-3 col-md-4 col-sm-6 ${isMobile?'':'pb-1'} mobile-item`}
 							style={isMobile ?
 								{
-									paddingLeft: 0,
-									paddingRight: 0,
+									// paddingLeft: 0,
+									// paddingRight: 0,
 								}:{}}>
-								<div className={`${(productObjItem.numberOfItems<1)?'':'product-item'} ${isProductActive ? 'active' : ''} bg-light mb-4`}
+								<div className={`${(productObjItem.numberOfItems<1)?'':'product-item'} ${isProductActive ? 'active' : ''} bg-light ${isMobile?'mb-2':'mb-4'}`}
 								style={{borderRadius: '10px'}}
 								onClick={() => {
 									setActiveProductId(prev => prev === productObjItem.id ? null : productObjItem.id);

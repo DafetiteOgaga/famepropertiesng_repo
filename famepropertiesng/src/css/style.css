@@ -342,7 +342,7 @@ legend {
   padding-bottom: 2px;
 }
 .carousel-div1 {
-  height: 430px;
+  height: 300px;
 }
 .carousel-div1-image {
   object-fit: cover;
@@ -351,7 +351,7 @@ legend {
   max-width: 700px;
 }
 .carousel-div2 {
-  height: 200px;
+  height: 100px;
 }
 .feature-div {
   padding: 30px;
@@ -5653,6 +5653,19 @@ button.bg-dark:focus {
   width: auto !important;
 }
 
+.h-1 {
+  height: 1% !important;
+}
+
+.h-2 {
+  height: 2% !important;
+}
+.h-3 {
+  height: 3% !important;
+}
+.h-4 {
+  height: 4% !important;
+}
 .h-5 {
   height: 5% !important;
 }
@@ -6504,22 +6517,27 @@ a.text-dark:hover, a.text-dark:focus {
 }
 
 .product-offer img {
-  position: absolute;
+  /* position: absolute; */
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: .5s;
+  border-radius: 10px;
+  /* margin-left: 15px;
+  margin-right: 15px; */
 }
 
 .product-offer:hover img {
-  transform: scale(1.2) rotate(5deg);
+  transform: scale(1.01) rotate(0.5deg);
+  /* margin-left: 15px;
+  margin-right: 15px; */
 }
 
 .product-offer .offer-text {
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 15px;
+  right: 15px;
   bottom: 0;
   display: flex;
   flex-direction: column;
@@ -6527,6 +6545,7 @@ a.text-dark:hover, a.text-dark:focus {
   justify-content: center;
   background: rgba(61, 70, 77, 0.5);
   z-index: 1;
+  border-radius: 10px;
 }
 
 .cat-item {
