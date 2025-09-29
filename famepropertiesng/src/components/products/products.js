@@ -224,7 +224,8 @@ function Products() {
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
 	useEffect(() => {
-		// console.log("Fetching data from server on mount...");
+		console.log(`Fetching data for ${parameters?.productname}...`);
+		setCategoryArr([]); // reset category array when category changes
 		fetchServerData(`category/${parameters?.productname}`);
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, [parameters?.productname]);

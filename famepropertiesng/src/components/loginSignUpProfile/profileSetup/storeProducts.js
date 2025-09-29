@@ -145,7 +145,7 @@ function StoreProducts() {
 									})}
 								</tr>
 							</thead>
-							{isProductAvailable?
+							{(storeProductsArr?.length) ?
 							<tbody className="align-middle opacy">
 								{storeProductsArr.map((product, index) => {
 									const isLoading = loadingImages[product?.id]
@@ -215,7 +215,11 @@ function StoreProducts() {
 							<tbody>
 								<tr>
 									<td colSpan="5" className="text-center font-italic">
-										You have no products in this store yet.
+										{storeProductsArr?.length===0?
+										'No products in this store yet.'
+										:
+										<BouncingDots size={"sm"} color="#475569" p={"0"} />}
+										{/* You have no products in this store yet. */}
 									</td>
 								</tr>
 							</tbody>}
