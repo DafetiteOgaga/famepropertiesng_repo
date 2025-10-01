@@ -83,11 +83,6 @@ let headerMenuArr = [
 		type: "button",
 	},
 ]
-const dressesArr = [
-	"men's dresses",
-	"women's dresses",
-	"baby's dresses"
-]
 
 function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	// console.log({numberOfProductsInCart})
@@ -423,6 +418,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 				style={{
 					position: 'fixed',
 					top: `${30-mTop}%`,
+					// top: `${mTop-1}%`,
 					left: 0,
 					backgroundColor: 'rgba(0, 0, 0, 0.51)',
 					zIndex: 20,
