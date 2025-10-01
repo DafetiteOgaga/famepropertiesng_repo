@@ -245,7 +245,7 @@ function StoreSignUp() {
 				</div>
 			);
 			setFormData(initialFormData); // reset form
-			navigate('/') // go to home page after registration
+			navigate('/profile') // go to home page after registration
 			return data;
 		} catch (error) {
 			console.error("Error during registration:", error);
