@@ -12,7 +12,9 @@ import { BouncingDots } from "../../spinners/spinner";
 import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { inputArr, isFieldsValid } from "./productFormInfo";
-import { toTextArea, limitInput } from "../loginSignUpProfile/profileSetup/formsMethods";
+import { toTextArea, limitInput, isEmpty, getCategories,
+			onlyNumbers
+} from "../../hooks/formMethods/formMethods";
 
 const baseURL = getBaseURL();
 
@@ -33,37 +35,6 @@ const initialFormData = () => ({
 	storeID: '',
 	id: crypto.randomUUID(),
 })
-
-const isEmpty =  (formObj, ignoreID=true) => {
-	const emptyCheck = Object.entries(formObj).every(([key, value]) => {
-		if (ignoreID && key==='id') return true; // ignore ID field
-		const fieldsBool = value === null ||
-							value === undefined ||
-							(typeof value === 'string' && value.trim() === '') ||
-							(Array.isArray(value) && value.length === 0) ||
-							(typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
-		return fieldsBool // returns every() value to isEmpty fxn
-	})
-	if (emptyCheck) {
-		// console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
-	}
-	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
-};
-
-const getCategories = (categoriesArr) => {
-	if (!categoriesArr?.length) return null;
-	const categories = categoriesArr.reduce((acc, currVal) => {
-		let updated
-		if (currVal.subcategories?.length) {
-			// console.log('skipping:', currVal.name)
-			updated = acc.concat(getCategories(currVal.subcategories))
-		} else {
-			updated  = acc.concat(currVal.name)
-		}
-		return updated;
-	}, [])
-	return categories;
-}
 
 function PostProduct() {
 	const trackEmptyFormsRef = useRef([]);
@@ -104,16 +75,6 @@ function PostProduct() {
 			.map(formObj => {
 				// check and track empty forms
 				if (isEmpty(formObj)) return null; // skip empty forms
-
-				// if (isEmpty) {
-				// 	if (!trackEmptyFormsRef.current.includes(formObj.id)) {
-				// 		trackEmptyFormsRef.current.push(formObj.id);
-				// 	}
-				// } else {
-				// 	// remove from empty forms tracking if it exists
-				// 	trackEmptyFormsRef.current = trackEmptyFormsRef.current.filter(id => id !== formObj.id);
-				// }
-				// // console.log(`Form ID ${formObj.id} is empty:`, isEmpty);
 
 				// clean data
 				const cleanedData = {};
@@ -643,10 +604,12 @@ const ProductSection = forwardRef(({renderedFormIDs,
 		'full_descriptions', 'technical_descriptions',
 		'marketing_descriptions',
 	]
+
 	// handle input changes
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='product_name') {
 			maxChars = 60;
@@ -658,8 +621,10 @@ const ProductSection = forwardRef(({renderedFormIDs,
 					name==='technical_feature_5') {
 			maxChars = 150;
 		} else if (name==='market_price'||
-			name==='discount_price'||
-			name==='number_of_items_available') {
+					name==='discount_price'||
+					name==='number_of_items_available') {
+			// only allow numbers and dot for prices
+			cleanedValue = onlyNumbers(value)
 			maxChars = 10;
 		}
 		// auto-detect textarea
@@ -673,7 +638,7 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			colorIndicator,
 			maxCharsLimit,
 			maxWords,
-		} = limitInput(value, maxChars, undefined, isTextArea);
+		} = limitInput(cleanedValue, maxChars, undefined, isTextArea);
 
 		setFormData(prev => ({
 			...prev,
