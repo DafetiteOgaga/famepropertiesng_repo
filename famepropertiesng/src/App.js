@@ -22,6 +22,18 @@ function App() {
       getTotalUsers();
     }
   }, [totalU])
+  useEffect(() => {
+		const handleBeforeUnload = (event) => {
+			console.log('Cleaning up local storage before unload...');
+			localStorage.removeItem('fpng-prod');
+			localStorage.removeItem('fpng-tprd');
+		};
+		window.addEventListener("beforeunload", handleBeforeUnload);
+    console.log('product data cleared on mount');
+		return () => {
+			window.removeEventListener("beforeunload", handleBeforeUnload);
+		};
+	}, []);
   const deviceType = useDeviceType().width <= 576;
   return (
     <>
