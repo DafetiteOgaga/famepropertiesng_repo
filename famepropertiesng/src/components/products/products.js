@@ -43,7 +43,7 @@ const productsActionArr = [
 	},
 	{
 		icon: "fa fa-pen",
-		url: "id-product",
+		url: "id#update-product",
 		click: 'editProduct',
 		type: 'link'
 	}
@@ -375,7 +375,7 @@ function Products() {
 
 												let productActionUrl = action.url;
 												if (action.click==='editProduct') {
-													productActionUrl = userInfo?.id+'/'+action.url.split('-')[1]
+													productActionUrl = userInfo?.id+'/'+action.url.split('#')[1]
 													// productActionUrl = `${userInfo?.id}/${productActionUrl}`;
 												}
 												// console.log({productActionUrl})
