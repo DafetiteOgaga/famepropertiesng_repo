@@ -8,37 +8,49 @@ import { titleCase } from '../../hooks/changeCase';
 const baseURL = getBaseURL();
 
 function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
+	const [reload, setReload] = useState(false);
 	const [categoriesOptions, setCategoriesOptions] = useState(null);
 	const [isSubMenu1Open, setIsSubMenu1Open] = useState([]);
 	const { createLocal, createSession } = useCreateStorage()
-	const fetchCategories = async (endpoint="categories") => {
-		try {
-			const categoriesRes = await (fetch(`${baseURL}/${endpoint}/`));
-			if (!categoriesRes.ok) {
-				throw new Error("Network response was not ok");
-			}
-			const categoriesData = await categoriesRes.json();
-			setCategoriesOptions(categoriesData);
-			createSession.setItem('fpng-catg', categoriesData);
-		} catch (error) {
-			console.error("Error fetching data:", error);
-		}
-	}
+	// const fetchCategories = async (endpoint="categories") => {
+	// 	try {
+	// 		const categoriesRes = await (fetch(`${baseURL}/${endpoint}/`));
+	// 		if (!categoriesRes.ok) {
+	// 			throw new Error("Network response was not ok");
+	// 		}
+	// 		const categoriesData = await categoriesRes.json();
+	// 		setCategoriesOptions(categoriesData);
+	// 		createSession.setItem('fpng-catg', categoriesData);
+	// 	} catch (error) {
+	// 		console.error("Error fetching data:", error);
+	// 	}
+	// }
 	useEffect(() => {
 		if (categoriesOptions?.length) {
 			setIsSubMenu1Open(Array.from({length: categoriesOptions.length}).map(() => false));
 		}
 	}, [categoriesOptions])
+	
+	// useEffect(() => {
+	// 	const localCategories = createSession.getItem('fpng-catg');
+	// 	if (localCategories?.length) {
+	// 		// console.log('Using local categories:', localCategories)
+	// 		setCategoriesOptions(localCategories);
+	// 	} else {
+	// 		console.log('Fetching categories')
+	// 		setReload();
+	// 	}
+	// }, [reload])
 	useEffect(() => {
-		const localCategories = createSession.getItem('fpng-catg');
-		if (localCategories?.length) {
-			// console.log('Using local categories:', localCategories)
-			setCategoriesOptions(localCategories);
-		} else {
-			console.log('Fetching categories')
-			fetchCategories();
-		}
-	}, [])
+		const interval = setInterval(() => {
+			const saved = createSession.getItem('fpng-catg');
+			if (saved?.length) {
+				setCategoriesOptions(saved);
+				clearInterval(interval);
+			}
+		}, 500);
+		return () => clearInterval(interval);
+	}, []);
 	// console.log({categoriesOptions})
 	// console.log('Sidebar Rendered')
 	// console.log({isSubMenu1Open})
