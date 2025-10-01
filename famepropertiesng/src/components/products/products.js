@@ -43,7 +43,7 @@ const productsActionArr = [
 	},
 	{
 		icon: "fa fa-pen",
-		url: "id-product",
+		url: "id#update-product",
 		click: 'editProduct',
 		type: 'link'
 	}
@@ -224,7 +224,7 @@ function Products() {
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
 	}, []);
 	useEffect(() => {
-		console.log(`Fetching data for ${parameters?.productname}...`);
+		// console.log(`Fetching data for ${parameters?.productname}...`);
 		setCategoryArr([]); // reset category array when category changes
 		fetchServerData(`category/${parameters?.productname}`);
 		// console.log("productItemArr:", productItemArr, productItemArr.length);
@@ -267,6 +267,18 @@ function Products() {
 		return false;
 	}
 
+	// useEffect(() => {
+	// 	const handleBeforeUnload = (event) => {
+	// 		console.log('Cleaning up local storage before unload...');
+	// 		createLocal.removeItem('fpng-prod');
+	// 		createLocal.removeItem('fpng-tprd');
+	// 	};
+	// 	window.addEventListener("beforeunload", handleBeforeUnload);
+	// 	return () => {
+	// 		window.removeEventListener("beforeunload", handleBeforeUnload);
+	// 	};
+	// }, []);
+
 	// console.log({productItemArr, categoryArr})
 	const productArray = categoryName ? categoryArr : productItemArr
 	// console.log({productItemArr, pagination})
@@ -307,7 +319,7 @@ function Products() {
 									// paddingLeft: 0,
 									// paddingRight: 0,
 								}:{}}>
-								<div className={`${(productObjItem.numberOfItems<1)?'':'product-item'} ${isProductActive ? 'active' : ''} bg-light ${isMobile?'mb-2':'mb-4'}`}
+								<div className={`${(productObjItem.numberOfItemsAvailable<1)?'':'product-item'} ${isProductActive ? 'active' : ''} bg-light ${isMobile?'mb-2':'mb-4'}`}
 								style={{borderRadius: '10px'}}
 								onClick={() => {
 									setActiveProductId(prev => prev === productObjItem.id ? null : productObjItem.id);
@@ -328,7 +340,7 @@ function Products() {
 										</>
 
 										{/* SOLD Overlay */}
-										{((productObjItem.numberOfItems<1)&&!imageLoading) && (
+										{((productObjItem.numberOfItemsAvailable<1)&&!imageLoading) && (
 											<div
 											style={{
 												position: "absolute",
@@ -351,7 +363,7 @@ function Products() {
 											</div>
 										)}
 
-										{((productObjItem.numberOfItems>=1)&&!imageLoading)&&
+										{((productObjItem.numberOfItemsAvailable>=1)&&!imageLoading)&&
 										<div className="product-action">
 											{productsActionArr.map((action, actionIndex) => {
 												// console.log({productObjItem})
@@ -375,7 +387,7 @@ function Products() {
 
 												let productActionUrl = action.url;
 												if (action.click==='editProduct') {
-													productActionUrl = userInfo?.id+'/'+action.url.split('-')[1]
+													productActionUrl = userInfo?.id+'/'+action.url.split('#')[1]
 													// productActionUrl = `${userInfo?.id}/${productActionUrl}`;
 												}
 												// console.log({productActionUrl})
@@ -438,7 +450,7 @@ function Products() {
 										}}>
 											<div className="d-flex align-items-center justify-content-center">
 												<h5>₦{digitSeparator(productObjItem.discountPrice)}</h5>
-												{productObjItem.numberOfItems?<sub style={{whiteSpace: 'pre'}}> ({productObjItem.numberOfItems})</sub>:undefined}
+												{productObjItem.numberOfItemsAvailable?<sub style={{whiteSpace: 'pre'}}> ({productObjItem.numberOfItemsAvailable})</sub>:undefined}
 											</div>
 											<h6 className="text-muted ml-0"
 											style={{fontSize: '0.9rem'}}>

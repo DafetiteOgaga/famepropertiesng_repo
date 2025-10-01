@@ -88,6 +88,13 @@
 		/* box-sizing: border-box; */
 	}
 
+	.mobile-checkbox {
+		flex: 0 0 50%;   /* always take 50% of row */
+		max-width: 50%;
+		/* padding: 0 3px; */
+		/* box-sizing: border-box; */
+	}
+
 	.table-responsive-md {
 		display: block;
 		width: 100%;

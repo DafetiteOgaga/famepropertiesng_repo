@@ -1,5 +1,6 @@
 import { getBaseURL } from "../../../hooks/fetchAPIs";
 import { toast } from "react-toastify";
+import { emailRegex } from "../../../hooks/formMethods/formMethods";
 
 const baseURL = getBaseURL();
 const inputArr = [
@@ -135,8 +136,6 @@ const validatePassword = ({formData, setPasswordErrorMessage}) => {
 	}
 }
 
-// basic format check
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const validateEmail = ({email, setIsEmailLoading}) => {
 	// console.log('Email changed:', email);
 	// validate email field whenever it changes

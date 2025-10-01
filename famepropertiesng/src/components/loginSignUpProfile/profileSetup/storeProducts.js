@@ -149,7 +149,7 @@ function StoreProducts() {
 							<tbody className="align-middle opacy">
 								{storeProductsArr.map((product, index) => {
 									const isLoading = loadingImages[product?.id]
-									const available = !!product?.numberOfItems
+									const available = !!product?.numberOfItemsAvailable
 									// console.log({product, available})
 									return (
 										<tr key={index}
@@ -205,7 +205,7 @@ function StoreProducts() {
 											style={{
 												...deviceType?styles.mobilePadding:{},
 												color: available?'#475569':'grey',}}>
-												{available?product?.numberOfItems:'Sold Out'}
+												{available?product?.numberOfItemsAvailable:'Sold Out'}
 											</td>
 										</tr>
 									)

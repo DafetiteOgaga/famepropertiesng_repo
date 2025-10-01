@@ -229,9 +229,54 @@ const limitInput = (value, maxChars = 80, maxWords = 200, isTextArea = false) =>
 		maxWords,
 	};
 };
+
+const isEmpty =  (formObj, ignoreID=true) => {
+	const emptyCheck = Object.entries(formObj).every(([key, value]) => {
+		if (ignoreID && key==='id') return true; // ignore ID field
+		const fieldsBool = value === null ||
+							value === undefined ||
+							(typeof value === 'string' && value.trim() === '') ||
+							(Array.isArray(value) && value.length === 0) ||
+							(typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
+		return fieldsBool // returns every() value to isEmpty fxn
+	})
+	if (emptyCheck) {
+		// console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
+	}
+	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
+};
+
+const getCategories = (categoriesArr) => {
+	if (!categoriesArr?.length) return null;
+	const categories = categoriesArr.reduce((acc, currVal) => {
+		let updated
+		if (currVal.subcategories?.length) {
+			// console.log('skipping:', currVal.name)
+			updated = acc.concat(getCategories(currVal.subcategories))
+		} else {
+			updated  = acc.concat(currVal.name)
+		}
+		return updated;
+	}, [])
+	return categories;
+}
+
+const onlyNumbers = (input) => {
+	return input.replace(/[^0-9.]/g, '');
+}
+
+// basic format check
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+// export all functions
 export {
 	reOrderFields,
 	toTextArea,
 	limitInput,
 	useCountryStateCity,
+	isEmpty,
+	getCategories,
+	onlyNumbers,
+	emailRegex,
 };

@@ -12,7 +12,9 @@ import { BouncingDots } from "../../spinners/spinner";
 import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { inputArr, isFieldsValid } from "./productFormInfo";
-import { toTextArea, limitInput } from "../loginSignUpProfile/profileSetup/formsMethods";
+import { toTextArea, limitInput, isEmpty, getCategories,
+			onlyNumbers
+} from "../../hooks/formMethods/formMethods";
 
 const baseURL = getBaseURL();
 
@@ -29,32 +31,16 @@ const initialFormData = () => ({
 	marketing_descriptions: '',
 	market_price: '',
 	discount_price: '',
-	number_of_items: '',
+	number_of_items_available: '',
 	storeID: '',
 	id: crypto.randomUUID(),
 })
-
-const isEmpty =  (formObj, ignoreID=true) => {
-	const emptyCheck = Object.entries(formObj).every(([key, value]) => {
-		if (ignoreID && key==='id') return true; // ignore ID field
-		const fieldsBool = value === null ||
-							value === undefined ||
-							(typeof value === 'string' && value.trim() === '') ||
-							(Array.isArray(value) && value.length === 0) ||
-							(typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
-		return fieldsBool // returns every() value to isEmpty fxn
-	})
-	if (emptyCheck) {
-		// console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
-	}
-	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
-};
 
 function PostProduct() {
 	const trackEmptyFormsRef = useRef([]);
 	const formImageCountRef = useRef(null);
 	const [checkReadiness, setCheckReadiness] = useState(false);
-	const { createLocal } = useCreateStorage()
+	const { createLocal, createSession } = useCreateStorage()
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
 	const navigate = useNavigate();
@@ -67,9 +53,14 @@ function PostProduct() {
 	const [renderedFormIDChanged, setRenderedFormIDChanged] = useState(false)
 	const [isMounting, setIsMounting] = useState(true);
 	const deviceType = useDeviceType().width <= 576;
+	const [checkCategory, setCheckCategory] = useState({});
 
 	const userInfo = createLocal.getItem('fpng-user')
 	const storesArr = userInfo?.store
+	const categoriesArr = createSession.getItem('fpng-catg')
+	// console.log({categoriesArr})
+	const categories = getCategories(categoriesArr);
+	// console.log({categories})
 
 	// handles final form submission
 	const onSubmitToServerHandler = async (e=null) => {
@@ -85,16 +76,6 @@ function PostProduct() {
 				// check and track empty forms
 				if (isEmpty(formObj)) return null; // skip empty forms
 
-				// if (isEmpty) {
-				// 	if (!trackEmptyFormsRef.current.includes(formObj.id)) {
-				// 		trackEmptyFormsRef.current.push(formObj.id);
-				// 	}
-				// } else {
-				// 	// remove from empty forms tracking if it exists
-				// 	trackEmptyFormsRef.current = trackEmptyFormsRef.current.filter(id => id !== formObj.id);
-				// }
-				// // console.log(`Form ID ${formObj.id} is empty:`, isEmpty);
-
 				// clean data
 				const cleanedData = {};
 				Object.entries(formObj)
@@ -105,7 +86,7 @@ function PostProduct() {
 							key.startsWith('thumbnail_url')||
 							key==='market_price'||
 							key==='discount_price'||
-							key==='number_of_items'||
+							key==='number_of_items_available'||
 							// key==='storeID'||
 							typeof value === 'number'
 						)?value:value.trim().toLowerCase();
@@ -113,9 +94,15 @@ function PostProduct() {
 
 				// add select data
 				cleanedData['storeID'] = selectData['storeID'];
+				// add categories
+				const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
+					if (value) acc[key] = value
+					return acc
+				}, {})
+				cleanedData['productCategories'] = checkedCat;
 				// setSelectData({storeID: ''}) // reset select data after transferring to cleaned data
 
-				console.log('Submitting form with cleaned data:', cleanedData);
+				// console.log('Submitting form with cleaned data:', cleanedData);
 				return cleanedData;
 			}).filter(item => item !== null);;
 
@@ -147,12 +134,48 @@ function PostProduct() {
 					<strong>{titleCase('')} Product Created!</strong>
 				</div>
 			);
-			console.log('Product Created Successfully:', data);
-			// use a transparent background to refresh this page
-			// reset to one section
-			// productSectionRefs.current[0].resetForm();
-			// setFormData(initialFormData); // reset form
-			// // navigate('/') // go to home page after registration
+			// console.log('Product Created Successfully:', data);
+			////// clear all values ////////
+			// clear all child forms
+			trackEmptyFormsRef.current = []; // reset empty forms tracking
+			formImageCountRef.current = null; // reset form image tracking
+			setSubmittedForm([]); // reset submitted form data
+			renderedFormIDs.current = []; // reset rendered form IDs tracking
+			// setRenderedFormIDChanged(prev => !prev) // trigger re-render
+			setSections([0]); // reset to one section
+			// reset first images tracking
+			firstImages.current = [];
+
+			// reset all child forms via refs
+			productSectionRefs.current.forEach(ref => {
+				// console.log('Resetting child form via ref ...')
+				if (ref && ref.resetForm) {
+					// console.log('Calling resetForm on child ref ...')
+					ref.resetForm();
+				}
+			});
+			// clear refs array and reset to one ref for single section
+			productSectionRefs.current = [];
+
+			setCheckReadiness(false);
+			// reset select data
+			setSelectData({storeID: ''})
+			// reset category checks
+			setCheckCategory({});
+			setRenderedFormIDChanged(prev => !prev) // trigger re-render
+
+			setTimeout(() => {
+				window.location.reload();
+			}, 100);
+			// clear timeout if component unmounts before reload
+			// return () => clearTimeout(reload), data;
+
+			// Note: don’t reset formData state here as its managed in each child
+			// instance instead,
+			// and we already reset each child via its ref above
+			// if you set formData here,
+			// it will override the child state on next render
+			// navigate to products page after short delay
 			return data;
 		} catch (error) {
 			console.error("Error during Product Creation:", error);
@@ -349,6 +372,13 @@ function PostProduct() {
 		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
+	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
+	// console.log({checkCategory, isCategoryEmpty})
+	// const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
+	// 	if (value) acc[key] = value
+	// 	return acc
+	// }, {})
+	// console.log({checkedCat})
 	return (
 		<>
 			<Breadcrumb page={'Post-Product(s)'} />
@@ -448,6 +478,56 @@ function PostProduct() {
 						{(!storesArr?.length)&&
 						<StoreNameAndNoteValidText />}
 
+						{categories &&
+						<>
+							{/* categories checkboxes */}
+							<div className="d-flex flex-column mb-2">
+								<label
+								className="col-md-6 form-group px-0 mb-0 mt-4"
+								>Categories<span>*</span></label>
+								<Note />
+							</div>
+						
+							<div className="row mt-1 mb-2"
+							style={{
+								marginLeft: deviceType?'0':'',
+								marginRight: deviceType?'0':'',
+								// maxHeight: 200,
+								// overflowY: 'auto',
+								// border: '1px solid #ccc',
+								// padding: deviceType?'0.5rem':'1rem',
+								// borderRadius: 10,
+							}}>
+								{categories.map((cat, catIdx) => {
+									return (
+										<Fragment key={cat}>
+											<div className={`col-md-3 mobile-item ${deviceType?'mb-2':'mb-1'}`}
+											style={{
+												fontSize: 14,
+												textWrap: deviceType?'':'nowrap'
+												}}>
+												<label className="hover-checkbox mb-0"
+												style={{ cursor: "pointer" }}>
+													<input
+													// style={{fontSize: 20}}
+													type="checkbox"
+													checked={!!checkCategory[cat]} // check if this category is true
+													onChange={() =>
+														setCheckCategory((prev) => ({
+															...prev,
+															[cat]: !prev[cat], // toggle the value
+														}))
+													}
+													/><span>{' '}{titleCase(cat)}</span>
+												</label>
+											</div>
+											{/* <br /> */}
+										</Fragment>
+									)
+								})}
+							</div>
+						</>}
+
 						{/* add and remove form section buttons */}
 						<div className={`d-flex flex-${deviceType?'column':'row'} justify-content-${deviceType?'between':'around'} my-4`}>
 							{/* add form button */}
@@ -475,7 +555,8 @@ function PostProduct() {
 						className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
 						disabled={
 							!checkFields||
-							loading}>
+							loading||
+							isCategoryEmpty}>
 							{!loading?`Post ${sections.length>1?`All (${sections.length}) Products`:'Product'}`:
 							<BouncingDots size="sm" color="#fff" p="1" />}
 						</button>
@@ -513,10 +594,9 @@ const ProductSection = forwardRef(({renderedFormIDs,
 
 	// reset form data
 	const resetForm = () => {
-		setFormData(prev => ({
-			...initialFormData,
-		  id: prev.id   // keep old id
-		}));
+		setFormData(initialFormData)
+		// console.log('Form reset to initial state ...');
+		handleSendFormToParent()
 	};
 
 	// array of fields that should be text areas instead of input fields
@@ -524,10 +604,12 @@ const ProductSection = forwardRef(({renderedFormIDs,
 		'full_descriptions', 'technical_descriptions',
 		'marketing_descriptions',
 	]
+
 	// handle input changes
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='product_name') {
 			maxChars = 60;
@@ -539,8 +621,10 @@ const ProductSection = forwardRef(({renderedFormIDs,
 					name==='technical_feature_5') {
 			maxChars = 150;
 		} else if (name==='market_price'||
-			name==='discount_price'||
-			name==='number_of_items') {
+					name==='discount_price'||
+					name==='number_of_items_available') {
+			// only allow numbers and dot for prices
+			cleanedValue = onlyNumbers(value)
 			maxChars = 10;
 		}
 		// auto-detect textarea
@@ -554,7 +638,7 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			colorIndicator,
 			maxCharsLimit,
 			maxWords,
-		} = limitInput(value, maxChars, undefined, isTextArea);
+		} = limitInput(cleanedValue, maxChars, undefined, isTextArea);
 
 		setFormData(prev => ({
 			...prev,
@@ -1005,6 +1089,19 @@ function BouncingSpinner() {
 		</>
 	)
 }
+function Note() {
+	return (
+		<>
+			<span
+			style={{
+				fontSize: '0.75rem',
+				display: 'inline-block',
+				transform: 'skewX(-17deg)',
+			}}>*You must select atleast one category</span>
+		</>
+	)
+}
+
 function StoreNameAndNoteValidText({
 	isStoreNameAvailable, isStoreLoading}) {
 	return (

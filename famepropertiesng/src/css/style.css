@@ -2647,6 +2647,16 @@ input[type="button"].btn-block {
   pointer-events: none;
 }
 
+input[type="checkbox"]:checked {
+  accent-color: #475569;
+}
+.hover-checkbox {
+  
+}
+.hover-checkbox:hover {
+  color: #475569;
+}
+
 .input-group {
   position: relative;
   display: flex;

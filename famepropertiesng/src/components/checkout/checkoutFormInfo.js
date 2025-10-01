@@ -1,3 +1,4 @@
+import { emailRegex } from "../../hooks/formMethods/formMethods"
 
 const inputArr = [
 	{
@@ -65,8 +66,6 @@ const inputArr = [
 	},
 ]
 
-// basic format check
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const validateEmail = ({email, setIsEmailLoading}) => {
 	// validate email field whenever it changes
 	if (email) {

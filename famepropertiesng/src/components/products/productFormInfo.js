@@ -32,7 +32,7 @@ const inputArr = [
 		autoComplete: true,
 	},
 	{
-		name: 'number_of_items',
+		name: 'number_of_items_available',
 		placeholder: 200,
 		type: 'text',
 		important: true,

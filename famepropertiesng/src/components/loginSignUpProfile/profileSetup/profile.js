@@ -11,8 +11,8 @@ import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCom
 import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
 import { isFieldsValid, validatePassword } from "../signUpSetup/signUpFormInfo";
-import { reOrderFields, toTextArea } from "./formsMethods";
-import { limitInput, useCountryStateCity } from "./formsMethods";
+import { reOrderFields, toTextArea } from "../../../hooks/formMethods/formMethods";
+import { limitInput, useCountryStateCity, onlyNumbers } from "../../../hooks/formMethods/formMethods";
 import { ToggleButton } from "../../../hooks/buttons";
 // import { NavigateToComp } from "../../../hooks/navigateToComp";
 
@@ -41,9 +41,6 @@ const initialFormData = {
 	hasStates: false,
 	hasCities: false,
 }
-
-// basic format check
-// const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function Profile() {
 	// const allFields = useRef([])
@@ -294,12 +291,14 @@ function Profile() {
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='first_name'||name==='last_name'||name==='username') {
 			maxChars = 50;
 		} else if (name==='email') {
 			maxChars = 100;
 		} else if (name==='mobile_no') {
+			cleanedValue = onlyNumbers(value);
 			maxChars = 20;
 		} else if (name==='password'||name==='password_confirmation') {
 			maxChars = 64;
@@ -319,7 +318,7 @@ function Profile() {
 			maxCharsLimit,
 			maxWords,
 		} =
-			limitInput(value, maxChars, undefined, isTextArea);
+			limitInput(cleanedValue, maxChars, undefined, isTextArea);
 		// console.log({name})
 		setFormData(prev => ({
 			...prev,
@@ -339,6 +338,7 @@ function Profile() {
 		// console.log('in onChangeStoreHandler for storeID:', storeID)
 		const { name, value, tagName } = e.target
 		// console.log({ name, value, tagName })
+		let cleanedValue = value;
 		let maxChars;
 		// if (name==='first_name'||name==='last_name'||name==='username') {
 		// 	maxChars = 50;
@@ -346,6 +346,7 @@ function Profile() {
 		// 	maxChars = 100;
 		// } else
 		if (name==='store_phone_number') {
+			cleanedValue = onlyNumbers(value);
 			maxChars = 20;
 		}
 		// else if (name==='password'||name==='password_confirmation') {
@@ -367,7 +368,7 @@ function Profile() {
 			maxCharsLimit,
 			maxWords,
 		} =
-			limitInput(value, maxChars, undefined, isTextArea);
+			limitInput(cleanedValue, maxChars, undefined, isTextArea);
 		// console.log({name})
 		setStoreFormData(prev => ({
 			...prev,
@@ -1576,7 +1577,7 @@ function Profile() {
 								onClick={() => {navigate(`register-store/${userInfo?.id}`)}}
 								className="btn btn-sm btn-secondary d-block mt-2"
 								>
-									Become a Seller
+									{userInfo?.is_seller?'Add Another Store':'Become a Seller'}
 								</button>
 								
 								<button

@@ -12,7 +12,9 @@ import { BouncingDots } from "../../spinners/spinner";
 import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { inputArr, isFieldsValid } from "./productFormInfo";
-import { toTextArea, limitInput } from "../loginSignUpProfile/profileSetup/formsMethods";
+import { toTextArea, limitInput, isEmpty, getCategories,
+			onlyNumbers
+} from "../../hooks/formMethods/formMethods";
 import { ToggleButton } from "../../hooks/buttons";
 
 const baseURL = getBaseURL();
@@ -30,28 +32,14 @@ const initialFormData = () => ({
 	marketing_descriptions: '',
 	market_price: '',
 	discount_price: '',
-	number_of_items: '',
+	number_of_items_available: '',
 	storeID: '',
 	// id: crypto.randomUUID(),
 })
 
-const isEmpty =  (formObj, ignoreID=true) => {
-	const emptyCheck = Object.entries(formObj).every(([key, value]) => {
-		if (ignoreID && key==='id') return true; // ignore ID field
-		const fieldsBool = value === null ||
-							value === undefined ||
-							(typeof value === 'string' && value.trim() === '') ||
-							(Array.isArray(value) && value.length === 0) ||
-							(typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
-		return fieldsBool // returns every() value to isEmpty fxn
-	})
-	if (emptyCheck) {
-		console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
-	}
-	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
-};
-
 function EditProduct() {
+	const imgRefs = useRef([]);
+	const [imageDimensions, setImageDimensions] = useState([]);
 	const parameter = useParams()
 	// console.log({parameter})
 	const productID = parameter.productID;
@@ -60,6 +48,7 @@ function EditProduct() {
 	const formImageCountRef = useRef(null);
 	const [checkReadiness, setCheckReadiness] = useState(false);
 	const { createLocal, createSession } = useCreateStorage()
+	const [checkCategory, setCheckCategory] = useState({});
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
 	const [allFieldsLocked, setAllFieldsLocked] = useState(true);
@@ -84,6 +73,12 @@ function EditProduct() {
 	const productToEdit = sessionProducts?.find(prod => String(prod.id) === String(productID));
 	// console.log({productToEdit})
 	const productImgs = {}
+	let currentCateories
+
+	const categoriesArr = createSession.getItem('fpng-catg')
+	// console.log({categoriesArr})
+	const categories = getCategories(categoriesArr);
+	// console.log({categories})
 
 	// change this from image_url_x to thumbnail_url_x later
 	if (productToEdit) {
@@ -93,7 +88,17 @@ function EditProduct() {
 				productImgs[field] = value
 			}
 		})
+		currentCateories = productToEdit?.category?.map(cat => cat.name)
 	}
+	useEffect(() => {
+		if (currentCateories?.length) {
+			const initialCategories = currentCateories.reduce((acc, cat) => {
+				acc[cat] = true
+				return acc
+			}, {})
+			setCheckCategory(initialCategories)
+		}
+	}, [])
 	// :
 	// 					[]
 	// console.log({productImgs})
@@ -146,25 +151,10 @@ function EditProduct() {
 				marketing_descriptions: productToEdit.marketingDescription || '',
 				market_price: productToEdit.marketPrice || '',
 				discount_price: productToEdit.discountPrice || '',
-				number_of_items: productToEdit.numberOfItems || '',
+				number_of_items_available: productToEdit.numberOfItemsAvailable || '',
 				storeID: productToEdit.store.id || '',
 				storeName: productToEdit.store.store_name || '',
 				id: productToEdit.id || productID,
-				// image_url0: productToEdit.image_url_0 || '',
-				// fileId0: productToEdit.fileId_0 || '',
-				// thumbnail_url0: productToEdit.thumbnail_url_0 || '',
-				// image_url1: productToEdit.image_url_1 || '',
-				// fileId1: productToEdit.fileId_1 || '',
-				// thumbnail_url1: productToEdit.thumbnail_url_1 || '',
-				// image_url2: productToEdit.image_url_2 || '',
-				// fileId2: productToEdit.fileId_2 || '',
-				// thumbnail_url2: productToEdit.thumbnail_url_2 || '',
-				// image_url3: productToEdit.image_url3 || '',
-				// fileId3: productToEdit.fileId3 || '',
-				// thumbnail_url3: productToEdit.thumbnail_url3 || '',
-				// image_url4: productToEdit.image_url4 || '',
-				// fileId4: productToEdit.fileId4 || '',
-				// thumbnail_url4: productToEdit.thumbnail_url4 || '',
 			}))
 		}
 	}, [])
@@ -173,6 +163,7 @@ function EditProduct() {
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='product_name') {
 			maxChars = 60;
@@ -185,7 +176,8 @@ function EditProduct() {
 			maxChars = 150;
 		} else if (name==='market_price'||
 					name==='discount_price'||
-					name==='number_of_items') {
+					name==='number_of_items_available') {
+			cleanedValue = onlyNumbers(value);
 			maxChars = 10;
 		}
 		// auto-detect textarea
@@ -199,7 +191,7 @@ function EditProduct() {
 			colorIndicator,
 			maxCharsLimit,
 			maxWords,
-		} = limitInput(value, maxChars, undefined, isTextArea);
+		} = limitInput(cleanedValue, maxChars, undefined, isTextArea);
 
 		setFormData(prev => ({
 			...prev,
@@ -238,7 +230,7 @@ function EditProduct() {
 					key.startsWith('thumbnail_url')||
 					key==='market_price'||
 					key==='discount_price'||
-					key==='number_of_items'||
+					key==='number_of_items_available'||
 					// key==='storeID'||
 					typeof value === 'number'
 				)?value:value.trim().toLowerCase();
@@ -246,6 +238,12 @@ function EditProduct() {
 
 		// add select data
 		// cleanedData['storeID'] = selectStoreData['storeID'];
+		// add categories
+		const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
+			if (value) acc[key] = value
+			return acc
+		}, {})
+		cleanedData['productCategories'] = checkedCat;
 
 		console.log('Submitting form with cleaned data:', cleanedData);
 
@@ -272,6 +270,12 @@ function EditProduct() {
 			}
 			const data = await response.json();
 			// console.log('Response data from server',data)
+			// const sessionProducts = createLocal.getItem('fpng-prod');
+			const updated = sessionProducts?.map(prod => {
+				return String(prod.id) === String(data?.id) ? data : prod
+			});
+			createLocal.setItem('fpng-prod', updated);
+
 			toast.success(
 				<div>
 					Successful.<br />
@@ -283,7 +287,8 @@ function EditProduct() {
 			// reset to one section
 			// productSectionRefs.current[0].resetForm();
 			// setFormData(initialFormData); // reset form
-			// // navigate('/') // go to home page after registration
+			/////// navigate('/') ///////// go to home page after registration
+			navigate(`/detail/${data.id}`);
 			return data;
 		} catch (error) {
 			console.error("Error during Product Update:", error);
@@ -540,6 +545,40 @@ function EditProduct() {
 	// console.log({imagePreviews})
 	
 	// console.log({hasImage})
+	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
+	// console.log({checkCategory, isCategoryEmpty})
+	// const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
+	// 	if (value) acc[key] = value
+	// 	return acc
+	// }, {})
+	// console.log({checkedCat})
+	// console.log({productToEdit, currentCateories})
+	useEffect(() => {
+		if (!imgRefs.current.length) return;
+		const observer = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				const idx = imgRefs.current.findIndex(el => el === entry.target);
+				if (idx !== -1) {
+					setImageDimensions(prev => {
+						const updated = [...prev];
+						updated[idx] = {
+						width: Math.floor(entry.contentRect.width),
+						height: Math.floor(entry.contentRect.height),
+						};
+						return updated;
+					});
+				}
+		}
+		});
+		imgRefs.current.forEach(img => img && observer.observe(img));
+		return () => observer.disconnect();
+	}, [productImgs]);
+
+	// useEffect(() => {
+	// 	const [imageDimensions, setImageDimensions] = useState(
+	// 		Array.from({ length: productImgs.length }, () => ({ width: 210, height: 210 }))
+	// 	);
+	// }, [productImgs])
 	return (
 		<>
 			<Breadcrumb page={`Update Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
@@ -690,19 +729,30 @@ function EditProduct() {
 													disableBtn={allFieldsLocked}
 													isImagePreview={(preview) => handlePreviewImage(idx, preview)}
 													/>
-													{/* change this from image_url_x to thumbnail_url_x later */}
+
 													{(!selectedFiles[idx]&&productImgs[`image_url_${idx}`]) &&
-													<img
-													style={{
-														// marginTop: '0.5rem',
-														maxWidth: '210px',
-														maxHeight: '210px',
-														objectFit: 'contain',
+													<>
+														<div style={{
+														backgroundColor: '#3d464d80',
+														width: imageDimensions?.[idx]?.width || 210,
+														height: imageDimensions?.[idx]?.height || 210,
+														position: 'absolute',
 														borderRadius: '3%',
-														// border: '1px solid #ccc',
-													}}
-													src={productImgs[`image_url_${idx}`]}
-													alt={`Product ${idx+1}`} />}
+														zIndex: 10,
+														}}></div>
+														<img
+														ref={el => imgRefs.current[idx] = el}
+														style={{
+															// marginTop: '0.5rem',
+															maxWidth: '210px',
+															maxHeight: '210px',
+															objectFit: 'contain',
+															borderRadius: '3%',
+															// border: '1px solid #ccc',
+														}}
+														src={productImgs[`image_url_${idx}`]}
+														alt={`Product ${idx+1}`} />
+													</>}
 												</>
 											</div>
 										)
@@ -740,6 +790,57 @@ function EditProduct() {
 						{(!storesArr?.length)&&
 						<StoreNameAndNoteValidText />}
 
+						{categories &&
+						<>
+							{/* categories checkboxes */}
+							<div className="d-flex flex-column mb-2">
+								<label
+								className="col-md-6 form-group px-0 mb-0 mt-4"
+								>Categories<span>*</span></label>
+								<Note />
+							</div>
+						
+							<div className="row mt-1 mb-2"
+							style={{
+								marginLeft: deviceType?'0':'',
+								marginRight: deviceType?'0':'',
+								// maxHeight: 200,
+								// overflowY: 'auto',
+								// border: '1px solid #ccc',
+								// padding: deviceType?'0.5rem':'1rem',
+								// borderRadius: 10,
+							}}>
+								{categories.map((cat, catIdx) => {
+									return (
+										<Fragment key={cat}>
+											<div className={`col-md-3 mobile-item ${deviceType?'mb-2':'mb-1'}`}
+											style={{
+												fontSize: 14,
+												textWrap: deviceType?'':'nowrap'
+												}}>
+												<label className="hover-checkbox mb-0"
+												style={{ cursor: "pointer" }}>
+													<input
+													// style={{fontSize: 20}}
+													type="checkbox"
+													checked={!!checkCategory[cat]} // check if this category is true
+													onChange={() =>
+														setCheckCategory((prev) => ({
+															...prev,
+															[cat]: !prev[cat], // toggle the value
+														}))
+													}
+													disabled={allFieldsLocked}
+													/><span>{' '}{titleCase(cat)}</span>
+												</label>
+											</div>
+											{/* <br /> */}
+										</Fragment>
+									)
+								})}
+							</div>
+						</>}
+
 						<div className={'mt-4'}>
 							{/* post button */}
 							<button
@@ -747,7 +848,8 @@ function EditProduct() {
 							className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
 							disabled={
 								allFieldsLocked||
-								loading}>
+								loading||
+								isCategoryEmpty}>
 								{!loading?`Post`:
 								<BouncingDots size="sm" color="#fff" p="1" />}
 							</button>
@@ -802,6 +904,18 @@ function NoteOnNumOfPosts() {
 				transform: 'skewX(-10deg)',
 				textAlign: 'center',
 			}}>*Note: You can only submit 5 products in one post. To post more, make multiple posts</span>
+		</>
+	)
+}
+function Note() {
+	return (
+		<>
+			<span
+			style={{
+				fontSize: '0.75rem',
+				display: 'inline-block',
+				transform: 'skewX(-17deg)',
+			}}>*You must select atleast one category</span>
 		</>
 	)
 }

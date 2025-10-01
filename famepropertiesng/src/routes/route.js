@@ -40,7 +40,7 @@ function AppRoutes() {
 				{/* detail */}
 				<Route path="detail/:id" element={<Detail />} />
 				{/* edit product */}
-				<Route path=":userID/product/:productID" element={<EditProduct />} />
+				<Route path=":userID/update-product/:productID" element={<EditProduct />} />
 				{/* AddProduct */}
 				<Route path="admin-page" element={<AdminPage />} />
 				{/* process image page */}
