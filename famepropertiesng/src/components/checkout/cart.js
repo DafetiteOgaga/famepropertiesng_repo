@@ -7,6 +7,8 @@ import { BouncingDots } from "../../spinners/spinner";
 import { digitSeparator, titleCase } from "../../hooks/changeCase";
 import { useOutletContext } from 'react-router-dom';
 import { toast } from "react-toastify";
+import { getBaseURL } from "../../hooks/fetchAPIs";
+import { useConfirmTotals } from "../../hooks/formMethods/formMethods";
 
 const tableHeadArr = [
 	"Products",
@@ -16,6 +18,7 @@ const tableHeadArr = [
 	"X"
 ]
 
+const baseURL = getBaseURL()
 const shipping = 1500
 
 function Cart() {
@@ -30,6 +33,7 @@ function Cart() {
 	const [totalAmount, setTotalAmount] = useState(0);
 	const [reload, setReload] = useState(false);
 	const [isMounting, setIsMounting] = useState(true);
+	
 
 	// console.log({cartInStorage})
 	useEffect(() => {
@@ -143,7 +147,10 @@ function Cart() {
 		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
-	const isInputReady = inputValue.length!==0
+	const isInputReady = inputValue?.length
+	// console.log({currentTotalsAvailable})
+	const updatedTotalsAllGood = useConfirmTotals(inputValue)
+	console.log({updatedTotalsAllGood})
 	return (
 		<>
 			<Breadcrumb page={'Shopping Cart'} />
@@ -183,7 +190,7 @@ function Cart() {
 									})}
 								</tr>
 							</thead>
-							{isInputReady?
+							{inputValue?.length?
 							<tbody className="align-middle">
 								{inputValue.map((cart, index) => {
 									const isLoading = loadingImages[cart?.prdId]
@@ -298,7 +305,10 @@ function Cart() {
 							<tbody>
 								<tr>
 									<td colSpan="5" className="text-center font-italic">
-										Cart is Empty
+										{(inputValue?.length===0)?
+										'Cart is Empty'
+										:
+										<BouncingDots size={"vm"} color="#475569" p={"0"} />}
 									</td>
 								</tr>
 							</tbody>}
