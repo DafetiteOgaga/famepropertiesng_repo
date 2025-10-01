@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
 import 'react-country-state-city/dist/react-country-state-city.css';
 import { useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { getBaseURL } from '../fetchAPIs';
+
+const baseURL = getBaseURL();
 
 const useCountryStateCity = () => {
 	const profilePage = useLocation().pathname.split('/')[1].toLowerCase()==='profile'; // to differentiate between profile and signup forms
@@ -268,6 +272,56 @@ const onlyNumbers = (input) => {
 // basic format check
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const useConfirmTotals = (inputValue) => {
+	const [currentTotalsAvailable, setCurrentTotalsAvailable] = useState({});
+	const [allGood, setAllGood] = useState(null);
+
+	useEffect(() => {
+		if (!inputValue?.length) {
+			setAllGood(null);
+			return;
+		}
+
+		const productIds = inputValue.map(item => item.prdId);
+
+		const getUpdatedTotalAvailableItemsFromServer = async () => {
+			try {
+				const response = await fetch(`${baseURL}/available-totals/`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ productIds }),
+				});
+
+				if (!response.ok) throw new Error("Network response was not ok");
+
+				const data = await response.json();
+				console.log("Available totals from server:", data);
+
+				setCurrentTotalsAvailable(data);
+
+				const match = inputValue.every(item =>
+				item?.totalAvailable === data?.[item?.prdId]
+				);
+				setAllGood(match);
+
+				if (!match) {
+					toast.error(
+						"Some items in your cart have updated their available quantities. Please review your cart before proceeding to checkout."
+					);
+					// TODO: fetch updated products and update localStorage here
+				}
+			} catch (error) {
+				console.error("Error fetching available items:", error);
+				setAllGood(false);
+			}
+		};
+
+		getUpdatedTotalAvailableItemsFromServer();
+	}, [inputValue]);
+
+	console.log({ currentTotalsAvailable, allGood });
+	return allGood; // null = still checking, true/false = result
+};
 
 // export all functions
 export {
@@ -279,4 +333,5 @@ export {
 	getCategories,
 	onlyNumbers,
 	emailRegex,
+	useConfirmTotals,
 };
