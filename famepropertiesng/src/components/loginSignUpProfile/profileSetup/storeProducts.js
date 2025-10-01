@@ -27,7 +27,7 @@ function StoreProducts() {
 	const deviceType = useDeviceType().width <= 576;
 	const [loadingImages, setLoadingImages] = useState({});
 	const userInfo = createLocal.getItem('fpng-user');
-	const lStore = createLocal.getItem('fpng-stor')||[];
+	const lStore = userInfo?.store||createLocal.getItem('fpng-stor')||[];
 	const [loading, setLoading] = useState(false)
 	const [load, setLoad] = useState(0);
 	const [storeProductsArr, setStoreProductsArr] = useState(null)
@@ -100,11 +100,12 @@ function StoreProducts() {
 
 	// console.log({inputValue});
 	// console.log({userInfo})
+	// console.log({store: userInfo?.store})
 	// console.log({totalAmount})
 	// console.log({parameters: parameters.storeID})
 	// console.log({storeProductsArr})
 	// console.log({lStore})
-	// console.log({lStoreDetails})
+	// console.log({lStore, lStoreDetails, paraid: parameters?.storeID})
 	return (
 		<>
 			<Breadcrumb page={titleCase(lStoreDetails?.store_name)} />
