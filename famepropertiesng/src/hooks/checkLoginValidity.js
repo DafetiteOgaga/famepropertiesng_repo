@@ -27,7 +27,7 @@ function useCheckLoginValidity() {
 		} else {
 			const remaining = fiveDaysMs - diffMs;
 			const days = Math.ceil(remaining / (1000 * 60 * 60 * 24))
-			const message = `${days===1?'A':days} day${days===1?'':'s'} left before session expires and login required.`;
+			const message = `${days===1?'A':days} day${days===1?'':'s'} left before session expires and re-login required.`;
 			setDaysRemaining(message)
 			console.log(message);
 		}
