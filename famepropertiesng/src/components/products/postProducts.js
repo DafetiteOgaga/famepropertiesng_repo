@@ -506,8 +506,8 @@ function PostProduct() {
 												fontSize: 14,
 												textWrap: deviceType?'':'nowrap'
 												}}>
-												<label className="hover-checkbox mb-0"
-												style={{ cursor: "pointer" }}>
+												<label className="d-flex hover-checkbox mb-0"
+												style={{ cursor: "pointer", gap: 3 }}>
 													<input
 													// style={{fontSize: 20}}
 													type="checkbox"
