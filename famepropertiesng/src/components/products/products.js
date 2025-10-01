@@ -267,6 +267,18 @@ function Products() {
 		return false;
 	}
 
+	// useEffect(() => {
+	// 	const handleBeforeUnload = (event) => {
+	// 		console.log('Cleaning up local storage before unload...');
+	// 		createLocal.removeItem('fpng-prod');
+	// 		createLocal.removeItem('fpng-tprd');
+	// 	};
+	// 	window.addEventListener("beforeunload", handleBeforeUnload);
+	// 	return () => {
+	// 		window.removeEventListener("beforeunload", handleBeforeUnload);
+	// 	};
+	// }, []);
+
 	// console.log({productItemArr, categoryArr})
 	const productArray = categoryName ? categoryArr : productItemArr
 	// console.log({productItemArr, pagination})
