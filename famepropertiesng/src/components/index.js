@@ -71,7 +71,7 @@ function Index() {
 					if (cart[productIndex].nop < cart[productIndex].totalAvailable) {
 						// If it exists and mode is +, increment the quantity
 						// console.log('Increasing quantity by 1');
-						toast.info(`Increased quantity of ${titleCase(cart[productIndex].name)} in your cart.`);
+						// toast.info(`Increased quantity of ${titleCase(cart[productIndex].name)} in your cart.`);
 						cart[productIndex].nop += 1;
 					}
 				} else if (mode === '-') {
