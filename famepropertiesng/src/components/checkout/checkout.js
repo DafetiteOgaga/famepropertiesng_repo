@@ -7,7 +7,7 @@ import { digitSeparator, formatPhoneNumber, sentenceCase, titleCase } from "../.
 import { inputArr, isFieldsValid } from "./checkoutFormInfo";
 // import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
 // import 'react-country-state-city/dist/react-country-state-city.css';
-import { limitInput, useCountryStateCity } from "../loginSignUpProfile/profileSetup/formsMethods";
+import { limitInput, useCountryStateCity, onlyNumbers } from "../../hooks/formMethods/formMethods";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../hooks/fetchAPIs";
 import { ToggleButton } from "../../hooks/buttons";
@@ -78,12 +78,14 @@ function Checkout() {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
 
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='first_name'||name==='last_name'||name==='username') {
 			maxChars = 50;
 		} else if (name==='email') {
 			maxChars = 100;
 		} else if (name==='mobile_no') {
+			cleanedValue = onlyNumbers(value);
 			maxChars = 20;
 		} else if (name==='password'||name==='password_confirmation') {
 			maxChars = 64;
@@ -103,7 +105,7 @@ function Checkout() {
 			maxCharsLimit,
 			maxWords,
 		} =
-			limitInput(value, maxChars, undefined, isTextArea);
+			limitInput(cleanedValue, maxChars, undefined, isTextArea);
 		setFormData(prev => ({
 			...prev,
 			[name]: limitedValue
