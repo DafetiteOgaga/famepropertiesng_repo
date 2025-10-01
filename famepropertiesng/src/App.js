@@ -13,8 +13,13 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceType } from './hooks/deviceType';
 import { getTotalUsers } from './hooks/getTotalUsers';
+import { getBaseURL } from './hooks/fetchAPIs';
+import { useCreateStorage } from './hooks/setupLocalStorage';
+
+const baseURL = getBaseURL();
 
 function App() {
+  const { createSession, createLocal } = useCreateStorage()
   const totalU = sessionStorage.getItem('fpng-tot');
   useEffect(() => {
     if (!totalU) {
@@ -25,8 +30,8 @@ function App() {
   useEffect(() => {
 		const handleBeforeUnload = (event) => {
 			console.log('Cleaning up local storage before unload...');
-			localStorage.removeItem('fpng-prod');
-			localStorage.removeItem('fpng-tprd');
+			createLocal.removeItem('fpng-prod');
+			createLocal.removeItem('fpng-tprd');
 		};
 		window.addEventListener("beforeunload", handleBeforeUnload);
     console.log('product data cleared on mount');
@@ -34,6 +39,29 @@ function App() {
 			window.removeEventListener("beforeunload", handleBeforeUnload);
 		};
 	}, []);
+  const fetchCategories = async (endpoint="categories") => {
+		try {
+			const categoriesRes = await (fetch(`${baseURL}/${endpoint}/`));
+			if (!categoriesRes.ok) {
+				throw new Error("Network response was not ok");
+			}
+			const categoriesData = await categoriesRes.json();
+			// setCategoriesOptions(categoriesData);
+      console.log('fetched categories:', categoriesData);
+			createSession.setItem('fpng-catg', categoriesData);
+      return categoriesData;
+		} catch (error) {
+			console.error("Error fetching data:", error);
+		}
+	}
+  useEffect(() => {
+		const localCategories = localStorage.getItem('fpng-catg');
+    console.log({localCategories})
+		if (!localCategories?.length) {
+			console.log('Fetching categories')
+			fetchCategories();
+		}
+	}, [])
   const deviceType = useDeviceType().width <= 576;
   return (
     <>
