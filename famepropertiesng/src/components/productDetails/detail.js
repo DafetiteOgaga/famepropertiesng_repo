@@ -8,6 +8,7 @@ import { getBaseURL } from "../../hooks/fetchAPIs";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { BouncingDots } from "../../spinners/spinner";
 import { useOutletContext } from 'react-router-dom';
+import { toast } from "react-toastify";
 
 const baseURL = getBaseURL();
 
@@ -124,6 +125,7 @@ function Detail() {
 		// console.log({cartInStorage})
 		// console.log('11111'.repeat(10))
 		setInputValue(cartInStorage);
+		// console.log('Input value set from localStorage:', cartInStorage);
 	}, [reload]);
 
 	const handleInputChange = (e, cart, id) => {
@@ -136,10 +138,13 @@ function Detail() {
 		console.log('Valid input:', value);
 
 		const index = inputValue?.findIndex(item=>item?.prdId===parseInt(id));
+		// console.log({index})
+
 		// handle empty string (let user clear before typing a new number)
 		if (value === "") {
 			console.log('Input cleared');
 			setInputValue(prev => {
+				// console.log('previous content', prev)
 				const updated = [...prev];
 				updated[index] = { ...updated[index], nop: "" };
 				createLocal.setItemRaw("fpng-cart", updated);
@@ -153,7 +158,8 @@ function Detail() {
 
 		// update state and localStorage with typed value
 		setInputValue(prev => {
-			console.log('Updating inputValue at index', index, 'to', newValue);
+			// console.log('previous content2', prev)
+			// console.log('Updating inputValue at index', index, 'to', newValue);
 			const updated = [...prev];
 			updated[index] = { ...updated[index], nop: newValue };
 			createLocal.setItemRaw("fpng-cart", updated);
@@ -163,52 +169,72 @@ function Detail() {
 
 	// on input blur, if empty reset to 1
 	const handleInputBlur = (cart, id) => {
+		// console.log({cart, id})
 		setInputValue(prev => {
+			// console.log('handle blur previous content', prev)
+			// console.log('Handling blur for id:', id);
 			const updated = [...prev];
 			const index = updated?.findIndex(item=>item?.prdId===parseInt(id));
-			let currentValue = updated[index].nop;
+			let currentValue = updated?.[index]?.nop;
+			// console.log({currentValue})
 
 			// if user left it empty, reset to 1
 			if (currentValue === "" || currentValue === undefined) {
+				// console.log('Input was empty on blur, resetting to 1');
 				updated[index] = { ...updated[index], nop: 1 };
-				createLocal.setItemRaw("fpng-cart", updated);
+				// createLocal.setItemRaw("fpng-cart", updated);
 			}
-
+			if (parseInt(currentValue) > parseInt(cart?.numberOfItemsAvailable)) {
+				// toast.error(`Only ${cart?.numberOfItemsAvailable} ${titleCase(cart?.name)} available in stock right now.`);
+				console.log('exceeding available stock')
+				// reset to total available if exceeding available stock
+				updated[index] = { ...updated[index], nop: cart?.numberOfItemsAvailable };
+				// createLocal.setItemRaw("fpng-cart", updated);
+			}
+			createLocal.setItemRaw("fpng-cart", updated);
 			return updated;
 		});
+		if (parseInt(inputValue?.[index]?.nop) > parseInt(cart?.numberOfItemsAvailable)) {
+			toast.error(`Only ${cart?.numberOfItemsAvailable} ${titleCase(cart?.name)} available in stock right now.`);
+		}
 	};
 
 	const handleStateFuncOnClicks = (prev, id, mode, product) => {
-		console.log("Handling state update for id:", id, "with mode:", mode);
+		// console.log("Handling state update for id:", id, "with mode:", mode);
 		console.log({prev})
 		let computedCurrVal
 		const updated = [...prev];
-		console.log({updated})
+		// console.log({updated})
 		// find index of item with matching id
 		let itemIndex = updated?.findIndex(item => item?.prdId === parseInt(id));
-		console.log({itemIndex})
+		// console.log({itemIndex})
 		if (mode === 'x') {
 			// remove item from cart
 			updated.splice(itemIndex, 1);
 		} else {
 			if (itemIndex === -1 && mode === '+') {
+				const totalIsGreaterThan1 = parseInt(product?.numberOfItemsAvailable)>1
 				// item not found, nothing to update
-				console.log("Item not found in cart for id:", id);
-				console.log('creating local copy of cart for this item')
+				// console.log("Item not found in cart for id:", id);
+				// console.log('creating local copy of cart for this item')
 				updated.push({
 					prdId: product?.id,
-					nop: 2,
+					nop: totalIsGreaterThan1? 2 : 1,
 					image: product?.image_url_0,
 					name: product?.name,
 					price: product?.discountPrice,
 				});
+				// console.log('added to input value: ', updated)
 				setInputValue(updated)
 				setReload(prev => !prev)
 				return updated;
 			}
 			const currentValue = updated[itemIndex]?.nop || 1;
 			if (mode === '+') {
-				computedCurrVal = currentValue + 1;
+				if (currentValue < product?.numberOfItemsAvailable) {
+					computedCurrVal = currentValue + 1;
+				}
+				// computedCurrVal = currentValue + 1;
 			} else if (mode === '-') {
 				computedCurrVal = currentValue - 1;
 			}
@@ -216,6 +242,7 @@ function Detail() {
 			updated[itemIndex] = { ...updated[itemIndex], nop: newValue };
 		}
 		// createLocal.setItemRaw("fpng-cart", updated);
+		// console.log('added to input value2:', updated)
 		setInputValue(updated)
 		return updated;
 	}
@@ -232,12 +259,12 @@ function Detail() {
 		// console.log("Transitioning image:", mode);
 		// console.log('this transition index calc may not be accurate')
 		if (mode === '+') {
-			console.log("transitioning index from:", transition, "to", transition + 1);
+			// console.log("transitioning index from:", transition, "to", transition + 1);
 			setTransition(prev => prev < (productImages.length-1) ? prev + 1 : productImages.length - 1)
 			setTransitionEffect('slideInRight')
 			// setTransitionEffect('slideInLeft')
 		} else if (mode === '-') {
-			console.log("transitioning index from:", transition, "to", transition - 1);
+			// console.log("transitioning index from:", transition, "to", transition - 1);
 			setTransition(prev => prev > 1?(prev - 1): 0)
 			setTransitionEffect('slideInLeft')
 			// setTransitionEffect('slideInRight')
@@ -274,6 +301,10 @@ function Detail() {
 	// console.log({transitionEffect})
 
 	const loadingImg = isImageLoading
+	const parsedId = parseInt(id);
+	const index = isNaN(parsedId)? -1
+	: inputValue?.findIndex(item => item?.prdId === parsedId);
+	const inputValToRender = inputValue?.[index]?.nop ?? "1";
 
 
 	// console.log({inputValue})
@@ -390,7 +421,7 @@ function Detail() {
 							<h3 className="mb-0"
 							style={{color: '#475569'}}>{titleCase(productItem.name)}</h3>
 							<small>
-								{productItem.numberOfItems} {productItem.numberOfItems>1?'quantities':'item'} {productItem.numberOfItems<=10?'remaining':'available'}
+								{productItem.numberOfItemsAvailable} {productItem.numberOfItemsAvailable>1?'quantities':'item'} {productItem.numberOfItemsAvailable<=10?'remaining':'available'}
 							</small>
 							<div className="d-flex mb-3 mt-1">
 								<div className="text-primary mr-2">
@@ -423,10 +454,10 @@ function Detail() {
 										// 	handleAddToCart(productItem, '-');
 										// }}>
 										onClick={() => {
-											console.log('clicked with id:', id)
-											console.log('inputValue before set:', inputValue)
+											// console.log('clicked with id:', id)
+											// console.log('inputValue before set:', inputValue)
 											handleStateFuncOnClicks(inputValue, id, '-', productItem);
-											console.log('inputValue after set:', inputValue)
+											// console.log('inputValue after set:', inputValue)
 											handleAddToCart(productItem, '-')
 											setReload(prev => !prev)}}>
 											<span className="fa fa-minus"></span>
@@ -439,7 +470,8 @@ function Detail() {
 									onChange={(e) => handleInputChange(e, productItem, id)}
 									onBlur={() => handleInputBlur(productItem, id)}
 									// value={quantity}/
-									value={inputValue?.[inputValue?.findIndex(item=>item?.prdId===parseInt(id))]?.nop ?? "1"}/>
+									value={inputValToRender}
+									/>
 									<div className="input-group-btn">
 										<button className="btn btn-primary btn-plus"
 										// onClick={()=>{
@@ -447,12 +479,26 @@ function Detail() {
 										// 	handleAddToCart(productItem, '+');
 										// }}>
 										onClick={() => {
-											console.log('clicked with id:', id)
-											console.log('inputValue before set:', inputValue)
-											handleStateFuncOnClicks(inputValue, id, '+', productItem);
-											handleAddToCart(productItem, '+');
-											console.log('inputValue after set:', inputValue)
-											setReload(prev => !prev)}}>
+											const currQty = inputValue?.find(item => parseInt(item?.prdId) === parseInt(id))?.nop
+											// console.log({
+											// 	inputValue,
+											// 	id,
+											// 	productItem,
+											// 	currentNop: currQty,
+											// 	available: productItem?.numberOfItemsAvailable,
+											// })
+											if (!currQty || (currQty < productItem?.numberOfItemsAvailable)) {
+												// console.log('clicked with id:', id)
+												// console.log('inputValue before set:', inputValue)
+												handleStateFuncOnClicks(inputValue, id, '+', productItem);
+												handleAddToCart(productItem, '+');
+												// console.log('inputValue after set:', inputValue)
+												setReload(prev => !prev)
+											} else {
+												// console.log('exceeding available stock')
+												toast.error(`Only ${productItem?.numberOfItemsAvailable} ${titleCase(productItem?.name)} available in stock right now.`);
+											}
+										}}>
 											<span className="fa fa-plus"></span>
 										</button>
 									</div>
