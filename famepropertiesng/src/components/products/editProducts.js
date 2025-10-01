@@ -309,7 +309,7 @@ function EditProduct() {
 				return;
 			}
 			const data = await response.json();
-			console.log('Response data from server',data)
+			// console.log('Response data from server',data)
 			// const sessionProducts = createLocal.getItem('fpng-prod');
 			const updated = sessionProducts?.map(prod => {
 				return String(prod.id) === String(data?.id) ? data : prod
@@ -586,13 +586,13 @@ function EditProduct() {
 	
 	// console.log({hasImage})
 	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
-	console.log({checkCategory, isCategoryEmpty})
-	const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
-		if (value) acc[key] = value
-		return acc
-	}, {})
-	console.log({checkedCat})
-	console.log({productToEdit, currentCateories})
+	// console.log({checkCategory, isCategoryEmpty})
+	// const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
+	// 	if (value) acc[key] = value
+	// 	return acc
+	// }, {})
+	// console.log({checkedCat})
+	// console.log({productToEdit, currentCateories})
 	return (
 		<>
 			<Breadcrumb page={`Update Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
@@ -793,7 +793,7 @@ function EditProduct() {
 						{(!storesArr?.length)&&
 						<StoreNameAndNoteValidText />}
 
-{categories &&
+						{categories &&
 						<>
 							{/* categories checkboxes */}
 							<div className="d-flex flex-column mb-2">
