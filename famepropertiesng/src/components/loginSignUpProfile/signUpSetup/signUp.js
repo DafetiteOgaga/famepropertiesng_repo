@@ -12,7 +12,9 @@ import { useImageKitAPIs } from "../../../hooks/fetchAPIs";
 import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCompress";
 import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
-import { limitInput, useCountryStateCity } from "../profileSetup/formsMethods";
+import { limitInput, useCountryStateCity, onlyNumbers,
+			emailRegex
+} from "../../../hooks/formMethods/formMethods";
 import {
 	inputArr, isFieldsValid, validatePassword,
 	checkEmailUniqueness, validateEmail,
@@ -43,9 +45,6 @@ const initialFormData = {
 	hasStates: false,
 	hasCities: false,
 }
-
-// basic format check
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function SignUp() {
 	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
@@ -96,12 +95,14 @@ function SignUp() {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
 
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='first_name'||name==='last_name'||name==='username') {
 			maxChars = 50;
 		} else if (name==='email') {
 			maxChars = 100;
 		} else if (name==='mobile_no') {
+			cleanedValue = onlyNumbers(value);
 			maxChars = 20;
 		} else if (name==='password'||name==='password_confirmation') {
 			maxChars = 64;
@@ -121,7 +122,7 @@ function SignUp() {
 			maxCharsLimit,
 			maxWords,
 		} =
-			limitInput(value, maxChars, undefined, isTextArea);
+			limitInput(cleanedValue, maxChars, undefined, isTextArea);
 		setFormData(prev => ({
 			...prev,
 			[name]: limitedValue
