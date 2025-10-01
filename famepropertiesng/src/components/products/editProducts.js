@@ -30,7 +30,7 @@ const initialFormData = () => ({
 	marketing_descriptions: '',
 	market_price: '',
 	discount_price: '',
-	number_of_items: '',
+	number_of_items_available: '',
 	storeID: '',
 	// id: crypto.randomUUID(),
 })
@@ -51,6 +51,21 @@ const isEmpty =  (formObj, ignoreID=true) => {
 	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
 };
 
+const getCategories = (categoriesArr) => {
+	if (!categoriesArr?.length) return null;
+	const categories = categoriesArr.reduce((acc, currVal) => {
+		let updated
+		if (currVal.subcategories?.length) {
+			// console.log('skipping:', currVal.name)
+			updated = acc.concat(getCategories(currVal.subcategories))
+		} else {
+			updated  = acc.concat(currVal.name)
+		}
+		return updated;
+	}, [])
+	return categories;
+}
+
 function EditProduct() {
 	const parameter = useParams()
 	// console.log({parameter})
@@ -60,6 +75,7 @@ function EditProduct() {
 	const formImageCountRef = useRef(null);
 	const [checkReadiness, setCheckReadiness] = useState(false);
 	const { createLocal, createSession } = useCreateStorage()
+	const [checkCategory, setCheckCategory] = useState({});
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
 	const [allFieldsLocked, setAllFieldsLocked] = useState(true);
@@ -84,6 +100,12 @@ function EditProduct() {
 	const productToEdit = sessionProducts?.find(prod => String(prod.id) === String(productID));
 	// console.log({productToEdit})
 	const productImgs = {}
+	let currentCateories
+
+	const categoriesArr = createSession.getItem('fpng-catg')
+	// console.log({categoriesArr})
+	const categories = getCategories(categoriesArr);
+	// console.log({categories})
 
 	// change this from image_url_x to thumbnail_url_x later
 	if (productToEdit) {
@@ -93,7 +115,17 @@ function EditProduct() {
 				productImgs[field] = value
 			}
 		})
+		currentCateories = productToEdit?.category?.map(cat => cat.name)
 	}
+	useEffect(() => {
+		if (currentCateories?.length) {
+			const initialCategories = currentCateories.reduce((acc, cat) => {
+				acc[cat] = true
+				return acc
+			}, {})
+			setCheckCategory(initialCategories)
+		}
+	}, [])
 	// :
 	// 					[]
 	// console.log({productImgs})
@@ -146,7 +178,7 @@ function EditProduct() {
 				marketing_descriptions: productToEdit.marketingDescription || '',
 				market_price: productToEdit.marketPrice || '',
 				discount_price: productToEdit.discountPrice || '',
-				number_of_items: productToEdit.numberOfItems || '',
+				number_of_items_available: productToEdit.numberOfItemsAvailable || '',
 				storeID: productToEdit.store.id || '',
 				storeName: productToEdit.store.store_name || '',
 				id: productToEdit.id || productID,
@@ -185,7 +217,7 @@ function EditProduct() {
 			maxChars = 150;
 		} else if (name==='market_price'||
 					name==='discount_price'||
-					name==='number_of_items') {
+					name==='number_of_items_available') {
 			maxChars = 10;
 		}
 		// auto-detect textarea
@@ -238,7 +270,7 @@ function EditProduct() {
 					key.startsWith('thumbnail_url')||
 					key==='market_price'||
 					key==='discount_price'||
-					key==='number_of_items'||
+					key==='number_of_items_available'||
 					// key==='storeID'||
 					typeof value === 'number'
 				)?value:value.trim().toLowerCase();
@@ -246,6 +278,12 @@ function EditProduct() {
 
 		// add select data
 		// cleanedData['storeID'] = selectStoreData['storeID'];
+		// add categories
+		const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
+			if (value) acc[key] = value
+			return acc
+		}, {})
+		cleanedData['productCategories'] = checkedCat;
 
 		console.log('Submitting form with cleaned data:', cleanedData);
 
@@ -271,7 +309,13 @@ function EditProduct() {
 				return;
 			}
 			const data = await response.json();
-			// console.log('Response data from server',data)
+			console.log('Response data from server',data)
+			// const sessionProducts = createLocal.getItem('fpng-prod');
+			const updated = sessionProducts?.map(prod => {
+				return String(prod.id) === String(data?.id) ? data : prod
+			});
+			createLocal.setItem('fpng-prod', updated);
+
 			toast.success(
 				<div>
 					Successful.<br />
@@ -283,7 +327,8 @@ function EditProduct() {
 			// reset to one section
 			// productSectionRefs.current[0].resetForm();
 			// setFormData(initialFormData); // reset form
-			// // navigate('/') // go to home page after registration
+			/////// navigate('/') ///////// go to home page after registration
+			navigate(`/detail/${data.id}`);
 			return data;
 		} catch (error) {
 			console.error("Error during Product Update:", error);
@@ -540,6 +585,14 @@ function EditProduct() {
 	// console.log({imagePreviews})
 	
 	// console.log({hasImage})
+	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
+	console.log({checkCategory, isCategoryEmpty})
+	const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
+		if (value) acc[key] = value
+		return acc
+	}, {})
+	console.log({checkedCat})
+	console.log({productToEdit, currentCateories})
 	return (
 		<>
 			<Breadcrumb page={`Update Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
@@ -740,6 +793,57 @@ function EditProduct() {
 						{(!storesArr?.length)&&
 						<StoreNameAndNoteValidText />}
 
+{categories &&
+						<>
+							{/* categories checkboxes */}
+							<div className="d-flex flex-column mb-2">
+								<label
+								className="col-md-6 form-group px-0 mb-0 mt-4"
+								>Categories<span>*</span></label>
+								<Note />
+							</div>
+						
+							<div className="row mt-1 mb-2"
+							style={{
+								marginLeft: deviceType?'0':'',
+								marginRight: deviceType?'0':'',
+								// maxHeight: 200,
+								// overflowY: 'auto',
+								// border: '1px solid #ccc',
+								// padding: deviceType?'0.5rem':'1rem',
+								// borderRadius: 10,
+							}}>
+								{categories.map((cat, catIdx) => {
+									return (
+										<Fragment key={cat}>
+											<div className={`col-md-3 mobile-item ${deviceType?'mb-2':'mb-1'}`}
+											style={{
+												fontSize: 14,
+												textWrap: deviceType?'':'nowrap'
+												}}>
+												<label className="hover-checkbox mb-0"
+												style={{ cursor: "pointer" }}>
+													<input
+													// style={{fontSize: 20}}
+													type="checkbox"
+													checked={!!checkCategory[cat]} // check if this category is true
+													onChange={() =>
+														setCheckCategory((prev) => ({
+															...prev,
+															[cat]: !prev[cat], // toggle the value
+														}))
+													}
+													disabled={allFieldsLocked}
+													/><span>{' '}{titleCase(cat)}</span>
+												</label>
+											</div>
+											{/* <br /> */}
+										</Fragment>
+									)
+								})}
+							</div>
+						</>}
+
 						<div className={'mt-4'}>
 							{/* post button */}
 							<button
@@ -747,7 +851,8 @@ function EditProduct() {
 							className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
 							disabled={
 								allFieldsLocked||
-								loading}>
+								loading||
+								isCategoryEmpty}>
 								{!loading?`Post`:
 								<BouncingDots size="sm" color="#fff" p="1" />}
 							</button>
@@ -802,6 +907,18 @@ function NoteOnNumOfPosts() {
 				transform: 'skewX(-10deg)',
 				textAlign: 'center',
 			}}>*Note: You can only submit 5 products in one post. To post more, make multiple posts</span>
+		</>
+	)
+}
+function Note() {
+	return (
+		<>
+			<span
+			style={{
+				fontSize: '0.75rem',
+				display: 'inline-block',
+				transform: 'skewX(-17deg)',
+			}}>*You must select atleast one category</span>
 		</>
 	)
 }
