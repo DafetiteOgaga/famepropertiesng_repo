@@ -112,7 +112,7 @@ function Index() {
 					cart.push({
 						prdId: product?.id,
 						nop: 1,
-						totalAvailable: product?.numberOfItems,
+						totalAvailable: product?.numberOfItemsAvailable,
 						image: product?.image_url_0,
 						name: product?.name,
 						price: product?.discountPrice,
@@ -120,17 +120,17 @@ function Index() {
 					});
 				} else if (mode === '+') {
 					// If it doesn't exist and mode is +, add it with quantity 2
-					const totalIsGreaterThan1 = parseInt(product?.numberOfItems)>1
+					const totalIsGreaterThan1 = parseInt(product?.numberOfItemsAvailable)>1
 					// console.log('Adding with quantity 2');
 					// console.log({
-					// 	total: product?.numberOfItems,
+					// 	total: product?.numberOfItemsAvailable,
 					// 	name: product?.name,
 					// 	totalIsGreaterThan1,
 					// });
 					cart.push({
 						prdId: product?.id,
 						nop: totalIsGreaterThan1? 2 : 1,
-						totalAvailable: product?.numberOfItems,
+						totalAvailable: product?.numberOfItemsAvailable,
 						image: product?.image_url_0,
 						name: product?.name,
 						price: product?.discountPrice,
