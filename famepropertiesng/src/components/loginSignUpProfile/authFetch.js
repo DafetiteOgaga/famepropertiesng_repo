@@ -9,7 +9,7 @@ const baseURL = getBaseURL();
 const apiBaseUrl = getBaseURL(true);
 function base64ToUtf8(str) {
 	return decodeURIComponent(escape(atob(str)));
-  }
+}
 
 async function getRandom(setRotNumber, setStoredrChars) {
 	// Check if rot number exists in localStorage
