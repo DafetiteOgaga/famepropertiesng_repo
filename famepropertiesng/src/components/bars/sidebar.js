@@ -31,8 +31,8 @@ function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 	}, [categoriesOptions])
 	useEffect(() => {
 		const localCategories = createSession.getItem('fpng-catg');
-		if (localCategories.length) {
-			console.log('Using local categories:', localCategories)
+		if (localCategories?.length) {
+			// console.log('Using local categories:', localCategories)
 			setCategoriesOptions(localCategories);
 		} else {
 			console.log('Fetching categories')
