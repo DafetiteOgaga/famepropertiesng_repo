@@ -220,9 +220,11 @@ function Detail() {
 				updated.push({
 					prdId: product?.id,
 					nop: totalIsGreaterThan1? 2 : 1,
+					totalAvailable: product?.numberOfItemsAvailable,
 					image: product?.image_url_0,
 					name: product?.name,
 					price: product?.discountPrice,
+					thumbnail: product?.thumbnail_url_0,
 				});
 				// console.log('added to input value: ', updated)
 				setInputValue(updated)
@@ -526,7 +528,7 @@ function Detail() {
 								{(productItem?.store?.user?.id===userInfo?.id && userInfo?.is_seller)&&
 								<div className="d-flex align-items-center mb-4 pt-2">
 									<button
-									onClick={()=>navigate(`/${userInfo?.id}/product/${id}`)}
+									onClick={()=>navigate(`/${userInfo?.id}/update-product/${id}`)}
 									// disabled={!cartItems?.length}
 									className="btn btn-primary px-3">
 										<span className="fa fa-pen mr-1"/>{` Update Product`}
