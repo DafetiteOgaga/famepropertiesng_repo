@@ -176,7 +176,12 @@ function CarouselAdverts({carouselsArr, carouselSelector, productSelector, featu
 						// )
 						const isActive = carouselSelector===(index)
 						return (
-							<li key={index} className={isActive?'active':''}>{caroSelector.index}</li>
+							<li key={index}
+							className={isActive?'active':''}
+							style={{
+								// width: isMobile?'10px':'',
+								height: isMobile?'10px':'',
+							}}>{caroSelector.index}</li>
 						)
 					})}
 				</ol>
@@ -200,7 +205,7 @@ function CarouselAdverts({carouselsArr, carouselSelector, productSelector, featu
 								>
 									<div className={`${isMobile?'':'p-3'} carousel-div1-inner`}>
 										<h1 className={`display-4 text-white ${isMobile?'mb-0':'mb-3'} ${isActive?'fadeInDown':''}`}>{titleCase(carouselItem.heading)}</h1>
-										<p className={`mx-md-5 px-5 ${isActive?'bounceIn':''}`}>{carouselItem.paragraph}</p>
+										<p className={`mx-md-5 px-5 ${isActive?'bounceIn':''}`}>{isMobile?carouselItem.paragraph.slice(0, 95):carouselItem.paragraph}</p>
 										{/* button */}
 										{/* <span className={`btn btn-outline-light py-2 px-4 mt-3 ${isActive?'fadeInUp':''}`}>{carouselItem.anchor}</span> */}
 									</div>
