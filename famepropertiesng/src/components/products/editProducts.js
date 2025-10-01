@@ -12,7 +12,9 @@ import { BouncingDots } from "../../spinners/spinner";
 import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { inputArr, isFieldsValid } from "./productFormInfo";
-import { toTextArea, limitInput } from "../loginSignUpProfile/profileSetup/formsMethods";
+import { toTextArea, limitInput, isEmpty, getCategories,
+			onlyNumbers
+} from "../../hooks/formMethods/formMethods";
 import { ToggleButton } from "../../hooks/buttons";
 
 const baseURL = getBaseURL();
@@ -35,38 +37,9 @@ const initialFormData = () => ({
 	// id: crypto.randomUUID(),
 })
 
-const isEmpty =  (formObj, ignoreID=true) => {
-	const emptyCheck = Object.entries(formObj).every(([key, value]) => {
-		if (ignoreID && key==='id') return true; // ignore ID field
-		const fieldsBool = value === null ||
-							value === undefined ||
-							(typeof value === 'string' && value.trim() === '') ||
-							(Array.isArray(value) && value.length === 0) ||
-							(typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
-		return fieldsBool // returns every() value to isEmpty fxn
-	})
-	if (emptyCheck) {
-		console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
-	}
-	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
-};
-
-const getCategories = (categoriesArr) => {
-	if (!categoriesArr?.length) return null;
-	const categories = categoriesArr.reduce((acc, currVal) => {
-		let updated
-		if (currVal.subcategories?.length) {
-			// console.log('skipping:', currVal.name)
-			updated = acc.concat(getCategories(currVal.subcategories))
-		} else {
-			updated  = acc.concat(currVal.name)
-		}
-		return updated;
-	}, [])
-	return categories;
-}
-
 function EditProduct() {
+	const imgRefs = useRef([]);
+	const [imageDimensions, setImageDimensions] = useState([]);
 	const parameter = useParams()
 	// console.log({parameter})
 	const productID = parameter.productID;
@@ -182,21 +155,6 @@ function EditProduct() {
 				storeID: productToEdit.store.id || '',
 				storeName: productToEdit.store.store_name || '',
 				id: productToEdit.id || productID,
-				// image_url0: productToEdit.image_url_0 || '',
-				// fileId0: productToEdit.fileId_0 || '',
-				// thumbnail_url0: productToEdit.thumbnail_url_0 || '',
-				// image_url1: productToEdit.image_url_1 || '',
-				// fileId1: productToEdit.fileId_1 || '',
-				// thumbnail_url1: productToEdit.thumbnail_url_1 || '',
-				// image_url2: productToEdit.image_url_2 || '',
-				// fileId2: productToEdit.fileId_2 || '',
-				// thumbnail_url2: productToEdit.thumbnail_url_2 || '',
-				// image_url3: productToEdit.image_url3 || '',
-				// fileId3: productToEdit.fileId3 || '',
-				// thumbnail_url3: productToEdit.thumbnail_url3 || '',
-				// image_url4: productToEdit.image_url4 || '',
-				// fileId4: productToEdit.fileId4 || '',
-				// thumbnail_url4: productToEdit.thumbnail_url4 || '',
 			}))
 		}
 	}, [])
@@ -205,6 +163,7 @@ function EditProduct() {
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='product_name') {
 			maxChars = 60;
@@ -218,6 +177,7 @@ function EditProduct() {
 		} else if (name==='market_price'||
 					name==='discount_price'||
 					name==='number_of_items_available') {
+			cleanedValue = onlyNumbers(value);
 			maxChars = 10;
 		}
 		// auto-detect textarea
@@ -231,7 +191,7 @@ function EditProduct() {
 			colorIndicator,
 			maxCharsLimit,
 			maxWords,
-		} = limitInput(value, maxChars, undefined, isTextArea);
+		} = limitInput(cleanedValue, maxChars, undefined, isTextArea);
 
 		setFormData(prev => ({
 			...prev,
@@ -593,6 +553,32 @@ function EditProduct() {
 	// }, {})
 	// console.log({checkedCat})
 	// console.log({productToEdit, currentCateories})
+	useEffect(() => {
+		if (!imgRefs.current.length) return;
+		const observer = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				const idx = imgRefs.current.findIndex(el => el === entry.target);
+				if (idx !== -1) {
+					setImageDimensions(prev => {
+						const updated = [...prev];
+						updated[idx] = {
+						width: Math.floor(entry.contentRect.width),
+						height: Math.floor(entry.contentRect.height),
+						};
+						return updated;
+					});
+				}
+		}
+		});
+		imgRefs.current.forEach(img => img && observer.observe(img));
+		return () => observer.disconnect();
+	}, [productImgs]);
+
+	// useEffect(() => {
+	// 	const [imageDimensions, setImageDimensions] = useState(
+	// 		Array.from({ length: productImgs.length }, () => ({ width: 210, height: 210 }))
+	// 	);
+	// }, [productImgs])
 	return (
 		<>
 			<Breadcrumb page={`Update Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
@@ -743,19 +729,30 @@ function EditProduct() {
 													disableBtn={allFieldsLocked}
 													isImagePreview={(preview) => handlePreviewImage(idx, preview)}
 													/>
-													{/* change this from image_url_x to thumbnail_url_x later */}
+
 													{(!selectedFiles[idx]&&productImgs[`image_url_${idx}`]) &&
-													<img
-													style={{
-														// marginTop: '0.5rem',
-														maxWidth: '210px',
-														maxHeight: '210px',
-														objectFit: 'contain',
+													<>
+														<div style={{
+														backgroundColor: '#3d464d80',
+														width: imageDimensions?.[idx]?.width || 210,
+														height: imageDimensions?.[idx]?.height || 210,
+														position: 'absolute',
 														borderRadius: '3%',
-														// border: '1px solid #ccc',
-													}}
-													src={productImgs[`image_url_${idx}`]}
-													alt={`Product ${idx+1}`} />}
+														zIndex: 10,
+														}}></div>
+														<img
+														ref={el => imgRefs.current[idx] = el}
+														style={{
+															// marginTop: '0.5rem',
+															maxWidth: '210px',
+															maxHeight: '210px',
+															objectFit: 'contain',
+															borderRadius: '3%',
+															// border: '1px solid #ccc',
+														}}
+														src={productImgs[`image_url_${idx}`]}
+														alt={`Product ${idx+1}`} />
+													</>}
 												</>
 											</div>
 										)
