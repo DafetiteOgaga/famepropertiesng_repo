@@ -13,7 +13,9 @@ import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCom
 import { BouncingDots } from "../../../spinners/spinner";
 import { authenticator } from "../dynamicFetchSetup";
 import { useCreateStorage } from "../../../hooks/setupLocalStorage";
-import { limitInput, useCountryStateCity } from "../profileSetup/formsMethods";
+import { limitInput, useCountryStateCity, onlyNumbers,
+			emailRegex,
+} from "../../../hooks/formMethods/formMethods";
 // import { inputArr } from "../signUpSetup/formInfo";
 import {
 	inputArr, isFieldsValid,
@@ -44,9 +46,6 @@ const initialFormData = {
 	// hasStates: false,
 	// hasCities: false,
 }
-
-// basic format check
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function StoreSignUp() {
 	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
@@ -109,10 +108,12 @@ function StoreSignUp() {
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		const { name, value, tagName } = e.target
+		let cleanedValue = value;
 		let maxChars;
 		if (name==='store_name'||name==='store_email_address') {
 			maxChars = 100;
 		} else if (name==='store_phone_number') {
+			cleanedValue = onlyNumbers(value);
 			maxChars = 20;
 		} else if (name==='description') {
 			maxChars = 200;
@@ -134,7 +135,7 @@ function StoreSignUp() {
 			maxCharsLimit,
 			maxWords,
 		} =
-			limitInput(value, maxChars, undefined, isTextArea);
+			limitInput(cleanedValue, maxChars, undefined, isTextArea);
 		// console.log({name})
 		setFormData(prev => ({
 			...prev,
