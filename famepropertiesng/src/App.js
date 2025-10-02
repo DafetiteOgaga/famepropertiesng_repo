@@ -27,18 +27,18 @@ function App() {
       getTotalUsers();
     }
   }, [totalU])
-  useEffect(() => {
-		const handleBeforeUnload = (event) => {
-			console.log('Cleaning up local storage before unload...');
-			createLocal.removeItem('fpng-prod');
-			createLocal.removeItem('fpng-tprd');
-		};
-		window.addEventListener("beforeunload", handleBeforeUnload);
-    console.log('product data cleared on mount');
-		return () => {
-			window.removeEventListener("beforeunload", handleBeforeUnload);
-		};
-	}, []);
+  // useEffect(() => {
+	// 	const handleBeforeUnload = (event) => {
+	// 		console.log('Cleaning up local storage before unload...');
+	// 		createLocal.removeItem('fpng-prod');
+	// 		createLocal.removeItem('fpng-tprd');
+	// 	};
+	// 	window.addEventListener("beforeunload", handleBeforeUnload);
+  //   console.log('product data cleared on mount');
+	// 	return () => {
+	// 		window.removeEventListener("beforeunload", handleBeforeUnload);
+	// 	};
+	// }, []);
   const fetchCategories = async (endpoint="categories") => {
 		try {
 			const categoriesRes = await (fetch(`${baseURL}/${endpoint}/`));
