@@ -579,6 +579,7 @@ function EditProduct() {
 	// 		Array.from({ length: productImgs.length }, () => ({ width: 210, height: 210 }))
 	// 	);
 	// }, [productImgs])
+	// console.log({productToEdit})
 	return (
 		<>
 			<Breadcrumb page={`Update Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
