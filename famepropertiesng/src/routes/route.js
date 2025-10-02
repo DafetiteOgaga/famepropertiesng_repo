@@ -39,6 +39,7 @@ function AppRoutes() {
 				<Route path="products/:productname/detail" element={<Detail />} />
 				{/* detail */}
 				<Route path="detail/:id" element={<Detail />} />
+				<Route path="products/:category/detail/:id" element={<Detail />} />
 				{/* edit product */}
 				<Route path=":userID/update-product/:productID" element={<EditProduct />} />
 				<Route path="products/:category/:userID/update-product/:productID" element={<EditProduct />} />
