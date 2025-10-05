@@ -72,6 +72,7 @@ function Profile() {
 	const [isMounting, setIsMounting] = useState(true);
 	const [showStores, setShowStores] = useState(false);
 	const [animating, setAnimating] = useState("slideUp");
+	const [hasUnfulfilledInstallments, setHasUnfulfilledInstallments] = useState(false);
 	const navigate = useNavigate();
 	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
 
@@ -102,6 +103,65 @@ function Profile() {
 		}
 	}, [userInfo])
 
+	useEffect(() => {
+		if (userInfo?.id) {
+			const fetchCheckoutIDs = async () => {
+				setLoading(true);
+				try {
+					const response = await fetch(`${baseURL}/has-unfulfilled-installments/${userInfo?.id}/`,
+						// {
+						// 	method: "POST",
+						// 	headers: { "Content-Type": "application/json" },
+						// 	body: JSON.stringify(cleanedData),
+						// }
+					);
+		
+					if (!response.ok) {
+						// Handle non-2xx HTTP responses
+						const errorData = await response.json();
+						// setIsError(errorData?.error||errorData?.message)
+						// setLoading(false);
+						console.warn('Error:', errorData);
+						toast.error(errorData?.error || errorData?.message || 'Error!');
+						// setIsFetchCheckout(false);
+						setLoading(false);
+						return;
+					}
+					const data = await response.json();
+					console.log('Response data from server',data)
+					console.log('has_unfulfilled_installments:', data)
+					console.log('updating user info in local storage...')
+					const updateUser = {...userInfo, has_unfulfilled_installments: data};
+					createLocal.setItem('fpng-user', updateUser);
+					console.log('updated user info:', updateUser)
+					setHasUnfulfilledInstallments(data);
+					// toast.success(
+					// 	<div>
+					// 		Successful.
+					// 		{/* <br /> */}
+					// 		{/* Welcome, <strong>{titleCase(data.first_name)}!</strong> */}
+					// 	</div>
+					// );
+					// toast.success(`Registration Successful.\nWelcome, ${data.first_name}!`);
+					// setFormData(initialFormData); // reset form
+					// setLoggedInFormData({});
+					// navigate('/welcome')
+					// navigate('/login') // go to login page after signup
+					// setIsFetchCheckout(false);
+					setLoading(false);
+					return data;
+				} catch (error) {
+					console.error("catch error:", error);
+					toast.error('catch error! Failed. Please try again.');
+					return null;
+				} finally {
+					setLoading(false);
+					// setIsFetchCheckout(false);
+				}
+			}
+			fetchCheckoutIDs()
+		}
+	}, [])
 
 	// Step 1: Load userInfo into state once (so it's stable)
 	// const [userInfo] = useState(() => {
@@ -775,7 +835,7 @@ function Profile() {
 	// const switchBool = () => setSwitchState(prev => !prev);
 	// console.log({country, state, city})
 	// console.log({formData})
-	// console.log({userInfo})
+	console.log({userInfo})
 	// console.log({formData, editFields, userInfo})
 	// console.log('updatedFieldRef:', updatedFieldRef.current)
 	// console.log({editFields})
@@ -1580,6 +1640,17 @@ function Profile() {
 									{userInfo?.is_seller?'Add Another Store':'Become a Seller'}
 								</button>
 								
+								{userInfo?.has_unfulfilled_installments &&
+								<button
+								type="button"
+								// disabled
+								onClick={() => {navigate(`installmental-payment`)}}
+								className="btn btn-sm btn-secondary d-block mt-2"
+								>
+									{/* {userInfo?.is_seller?'Add Another Store':'Become a Seller'} */}
+									Pay Installmental
+								</button>
+}
 								<button
 									type="button"
 									// disabled
