@@ -152,7 +152,9 @@ const isFieldsValid = ({formData, passwordErrorMessage}) => {
 	// get list of all required fields
 	const isRequiredArr = inputArr.filter(field => field.important);
 	// console.log({isRequiredArr})
-	const isFieldValid = isRequiredArr.every((field) => typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!=="");
+	const isFieldValid = isRequiredArr.every((field) => {
+		return typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!==""
+	});
 	return isFieldValid && !passwordErrorMessage
 };
 
