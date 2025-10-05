@@ -241,7 +241,7 @@ function Index() {
 						<Sidebar />
 					</div>}
 				<div>
-					<Outlet context={{ handleAddToCart }} />
+					<Outlet context={{ handleAddToCart, handleClearCart }} />
 				</div>
 			</main>
 			{/* Footer */}

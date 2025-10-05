@@ -11,6 +11,8 @@ import { limitInput, useCountryStateCity, onlyNumbers } from "../../hooks/formMe
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../hooks/fetchAPIs";
 import { ToggleButton } from "../../hooks/buttons";
+import { PaystackCheckout } from "./paystackCheckout";
+// import { onlyNumbers } from "../../hooks/formMethods/formMethods";
 
 const initialFormData = {
 	first_name: '',
@@ -40,17 +42,24 @@ const getField = (obj, field) => {
 	return obj.find(item => item.field === field)?.value
 }
 const baseURL = getBaseURL();
+const apiUrl = getBaseURL(true) + '/get-paystack-keys/pk/';
+console.log({baseURL, apiUrl})
 const shipping = 1500
 
 const paymentOptions = [
-	"card_payment",
-	"bank_transfer",
-	"pay_on_delivery"
+	"pay_now",
+	"pay_on_delivery",
+	"installmental_payment",
 ]
 
+const _15percent = 0.15
+
 function Checkout() {
+	const [typedInstallAmount, setTypedInstallAmount] = useState(0);
+	const [finalInstallmentAmount, setFinalInstallmentAmount] = useState(null);
+	const [isInstallPlan, setIsInstallPlan] = useState(false);
 	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
-	const { createLocal } = useCreateStorage()
+	const { createLocal, createSession } = useCreateStorage()
 	const deviceSpec = useDeviceType();
 	const [isMounting, setIsMounting] = useState(true);
 	const [shipToDifferent, setShipToDifferent] = useState(false);
@@ -61,6 +70,7 @@ function Checkout() {
 	const [loggedInFormData, setLoggedInFormData] = useState({});
 	const [subTotalAmount, setsubTotalAmount] = useState(0);
 	const [fieldStats, setFieldStats] = useState({})
+	const [checkoutResp, setCheckoutResp] = useState(null);
 	// const [payment, setPayment] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
@@ -71,7 +81,34 @@ function Checkout() {
 	const cartItems = createLocal.getItem('fpng-cart');
 
 	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
+	const isPK = createSession.getItem('fpng-pspk')
 	// console.log({cartItems})
+
+	useEffect(() => {
+		if (!isPK) {
+			const fetchPK = async () => {
+				try {
+					const response = await fetch(apiUrl);
+					if (!response.ok) {
+						// Handle non-2xx HTTP responses
+						const errorData = await response.json();
+						console.warn('Error:', errorData);
+						toast.error(errorData?.error || errorData?.message || 'Error!');
+						return;
+					}
+					const data = await response.json();
+					// console.log('Response data from server',data)
+					createSession.setItem('fpng-pspk', data?.pk);
+					return data;
+				} catch (error) {
+					console.error("catch error:", error);
+					toast.error('catch error! Failed. Please try again.');
+					return null;
+				} finally {}
+			}
+			fetchPK()
+		}
+	}, [])
 
 	// handle input changes
 	const onChangeHandler = (e) => {
@@ -125,8 +162,8 @@ function Checkout() {
 			const quantity = parseInt(item.nop) || 1;
 			return sum + price * quantity;
 		}, 0)||0;
-		setsubTotalAmount(total);
-	}, [cartItems]);
+		setsubTotalAmount(isInstallPlan?((total*_15percent)+total):total);
+	}, [cartItems, isInstallPlan]);
 
 	const shipToProfileAddress = () => {
 		setLoggedInFormData(prev => ({
@@ -342,7 +379,7 @@ function Checkout() {
 		})
 
 		// add user id if logged in
-		cleanedData['userID'] = userInfo?.id||'';
+		cleanedData['userID'] = userInfo?.id||null;
 		// cleanedData['storeID'] = selectData['storeID'];
 		// console.log('submitting form:', cleanedData);
 		// toast.success('Registration Successful!');
@@ -356,14 +393,19 @@ function Checkout() {
 			if (!response.ok) {
 				// Handle non-2xx HTTP responses
 				const errorData = await response.json();
-				setIsError(errorData?.error)
+				setIsError(errorData?.error||errorData?.message)
 				setLoading(false);
 				console.warn('Registration Error:', errorData);
-				toast.error(errorData?.error || 'Registration Error!');
+				toast.error(errorData?.error || errorData?.message || 'Registration Error!');
 				return;
 			}
 			const data = await response.json();
-			// console.log('Response data from server',data)
+			console.log('Response data from server',data)
+			setCheckoutResp(data);
+			// if (data?.payment_method==='installmental_payment') {
+			// 	const uData = {...data, addToUser: true}
+			// 	createLocal.setItem('fpng-chot', uData);
+			// }
 			toast.success(
 				<div>
 					Successful.
@@ -419,6 +461,19 @@ function Checkout() {
 		});
 	}, [formData, loggedInFormData])
 
+	useEffect(() => {
+		// reset installment fields if payment method changes away from installment plan
+		if (formData.paymentMethod === 'installmental_payment' ||
+			loggedInFormData.paymentMethod === 'installmental_payment') {
+			setIsInstallPlan(true)
+			toast.info('Enter First Inatallment amount.')
+		} else {
+			setIsInstallPlan(false)
+		}
+	}, [formData.paymentMethod, loggedInFormData.paymentMethod])
+
+	const _15percentField = parseInt(subTotalAmount) - parseInt((subTotalAmount/(1+_15percent)));
+
 	// useEffect(() => {
 	// 	if (hasStates) setMorePx(prev => {
 	// 		console.log('hasStates: adding 10 to', prev, '=', prev+10)
@@ -431,6 +486,10 @@ function Checkout() {
 	// 	})
 	// }, [hasStates, hasCities])
 
+	const updatedCheckoutResp = {
+		...checkoutResp,
+		amount: finalInstallmentAmount??(checkoutResp?.amount),
+	}
 	console.log({userInfo})
 	// console.log({isLoggedIn})
 	// console.log({allFieldsArr})
@@ -443,7 +502,7 @@ function Checkout() {
 	
 	// console.log('csc =', {country, state, city, hasStates, hasCities})
 	// console.log('fd =', {country: formData.country, state: formData.state, city: formData.city})
-	console.log({formData})
+	// console.log({formData})
 	// console.log({subTotalAmount})
 	// console.log({payment})
 	// console.log({checkFields})
@@ -451,6 +510,20 @@ function Checkout() {
 	// console.log({CountryCompSelect, StateCompSelect, CityCompSelect})
 	// console.log({cscFormData})
 	// console.log({morePx})
+	// console.log({checkoutResp})
+	// console.log({
+	// 	isInstallPlan,
+	// 	typedInstallAmount,
+	// 	finalInstallmentAmount,
+	// 	shipToDifferent,
+	// })
+	// console.log({
+	// 	formData,
+	// 	loggedInFormData,
+	// 	fm: formData.paymentMethod,
+	// 	lg: loggedInFormData.paymentMethod
+	// })
+	console.log({updatedCheckoutResp, amount: updatedCheckoutResp?.amount})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
@@ -489,7 +562,7 @@ function Checkout() {
 
 						{!isMounting ?
 						<>
-							<div className={`p-30 mb-5`}
+							<div className={`p-30 ${isInstallPlan?(shipToDifferent?'mb-0 pb-0':'mb-5'):'mb-5'}`}
 							style={{borderRadius: '10px'}}>
 								<div className={`flip-container ${shipToDifferent ? "flipped" : ""}`}>
 									<div className="flipper"
@@ -536,7 +609,7 @@ function Checkout() {
 													country==='') return null;
 												if (input?.name.toLowerCase()==='city'&&
 													state==='') return null;
-												console.log(input.name, '-', {hasStates, hasCities})
+												// console.log(input.name, '-', {hasStates, hasCities})
 												return (
 													<div key={index}
 													className="col-md-6 form-group">
@@ -626,11 +699,18 @@ function Checkout() {
 											})}
 										</div>
 									</div>
-									
 								</div>
-								
 							</div>
 							{<ShowErrorFromServer isError={isError} />}
+							{<EnterInstallmentalAmount
+							currencySym={currencySym}
+							isInstallPlan={isInstallPlan}
+							typedInstallAmount={typedInstallAmount}
+							subTotalAmount={subTotalAmount}
+							setTypedInstallAmount={setTypedInstallAmount}
+							finalInstallmentAmount={finalInstallmentAmount}
+							setFinalInstallmentAmount={setFinalInstallmentAmount}
+							shipToDifferent={shipToDifferent} />}
 						</>
 						:
 						<BouncingDots size={isMobile?"sm":"lg"} color="#475569" p={isMobile?"10":"14"} />}
@@ -663,8 +743,16 @@ function Checkout() {
 								})}
 							</div>
 							<div className="border-bottom pt-3 pb-2">
+								<div className={`installment-pay ${isInstallPlan?'show':''}`}>
+									<div className="d-flex justify-content-between mb-3">
+										<h6>Installmental fee (15%)</h6>
+										<h6>{currencySym} {digitSeparator(_15percentField)}</h6>
+									</div>
+								</div>
 								<div className="d-flex justify-content-between mb-3">
-									<h6>Subtotal</h6>
+									<h6>Subtotal
+										<span className={`installment-pay ${isInstallPlan?'show':''}`}>{isInstallPlan&&' + 15%'}</span>
+									</h6>
 									<h6>{currencySym} {digitSeparator(subTotalAmount)}</h6>
 								</div>
 								<div className="d-flex justify-content-between">
@@ -685,9 +773,6 @@ function Checkout() {
 						</div>
 						:
 						<BouncingDots size={isMobile?"sm":"sm"} color="#475569" p={isMobile?"10":"8"} />}
-
-
-
 
 						<div className="mb-5">
 							<h5 className="section-title position-relative text-uppercase mb-3">
@@ -715,9 +800,13 @@ function Checkout() {
 								{paymentOptions.map((option, index) => {
 									// const id = option.replaceAll('_', '');
 									// const label = option.replaceAll('_', ' ');
+									const pod = option==='pay_on_delivery'
+									const installmental = option==='installmental_payment'
+									if (pod&&!userInfo?.id) return null;
 									return (
 										<div key={option}
-										className="form-group">
+										className="form-group"
+										style={{cursor: 'pointer'}}>
 											<div className="custom-control custom-radio">
 												<input
 												type="radio"
@@ -725,15 +814,21 @@ function Checkout() {
 												name="payment"
 												id={option}
 												value={option}
-												onChange={(e)=>{
-													// setPayment(e.target.value);
+												disabled={pod}
+												onChange={
+													// handleRadio
+													// console.log('radio checked:', option)
+													(e) => {
+														console.log('radio checked:', option)
+													// const { value } = e.target.value
 													setFormData(prev=>({...prev, paymentMethod: e.target.value}));
 													setLoggedInFormData(prev=>({...prev, paymentMethod: e.target.value}))
-													}}/>
+												}
+												}/>
 												<label
 												className="custom-control-label"
 												htmlFor={option}>
-													{sentenceCase(option)}
+													{sentenceCase(option)}{installmental&&' + (15%)'}
 												</label>
 											</div>
 										</div>
@@ -751,10 +846,101 @@ function Checkout() {
 					</div>
 				</form>
 			</div>
+			{checkoutResp?.reference &&
+			<>
+				<PaystackCheckout
+				checkoutData={updatedCheckoutResp}
+				// installAmount={finalInstallmentAmount?parseInt(finalInstallmentAmount):null}
+				/>
+			</>}
 		</>
 	)
 }
 
+function EnterInstallmentalAmount({
+	currencySym,
+	isInstallPlan,
+	typedInstallAmount,
+	setTypedInstallAmount,
+	subTotalAmount,
+	finalInstallmentAmount,
+	setFinalInstallmentAmount,
+	shipToDifferent,
+}) {
+	const deviceSpec = useDeviceType();
+	const isMobile = deviceSpec.width <= 576
+	const _30Percent = Math.ceil(parseInt(subTotalAmount)*0.4);
+	let finalComputedInstallmentAmount = parseInt(typedInstallAmount||0) + parseInt(_30Percent) + parseInt(shipping);
+	if (finalComputedInstallmentAmount > subTotalAmount) {
+		setTypedInstallAmount(subTotalAmount - _30Percent)
+	}
+	useEffect(() => {
+		if (isInstallPlan) {
+			setFinalInstallmentAmount(finalComputedInstallmentAmount)
+		} else {
+			setFinalInstallmentAmount(null)
+			setTypedInstallAmount(0)
+		}
+	}, [finalComputedInstallmentAmount, isInstallPlan])
+	// console.log({
+	// 	subTotalAmount,
+	// 	_30Percent,
+	// 	typedInstallAmount,
+	// 	finalComputedInstallmentAmount,
+	// 	finalInstallmentAmount,
+	// })
+	if (!isInstallPlan) return null;
+	return (
+		<div className={`p-30 ${isMobile?(shipToDifferent?'pt-6':'pt-0'):'pt-0'}`}>
+			<div className="form-group">
+				<label className="mb-0"
+				htmlFor="installmentPayment">
+					{titleCase("installment amount")}<span>*</span>
+				</label>
+				{[
+					"(First installment must be at least 40% of the total amount).",
+					`Note that the total amount includes 15% installmental fee (and shipping fee of ${currencySym}${digitSeparator(shipping)} which is charged on first installment).`,
+					].map((text, textIndex) => {
+						return (
+						<p className="mb-1"
+						style={{
+							fontStyle: 'italic',
+							fontSize: '0.75rem',
+						}}>
+							{text}
+						</p>)
+					}
+				)}
+				<div className="d-flex align-items-baseline">
+					<p style={{whiteSpace: 'pre'}}>
+						{digitSeparator(_30Percent)} + {' '}
+					</p>
+					<input
+					// ref={input.type==='email'?emailRef:null}
+					id="installmentPayment"
+					name="installmentPayment"
+					onChange={(e)=> {
+						const val = onlyNumbers(e.target.value);
+						setTypedInstallAmount(val)
+					}}
+					value={typedInstallAmount||''}
+					style={{borderRadius: '5px'}}
+					className={`form-control ${isMobile?'w-40':'w-20'}`}
+					type="text"
+					// required={shipToDifferent?input.important:false}
+					autoComplete="on"
+					placeholder="0"/>
+					<p style={{whiteSpace: 'pre'}}>
+						{' + '}{digitSeparator(shipping)}
+					</p>
+					<p style={{whiteSpace: 'pre'}}>
+						{' '} = {digitSeparator(finalComputedInstallmentAmount)}
+					</p>
+				</div>
+			</div>
+		</div>
+	)
+}
 function ShowErrorFromServer({isError}) {
 	return (
 		<>

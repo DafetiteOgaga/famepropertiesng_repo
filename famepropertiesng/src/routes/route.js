@@ -20,6 +20,8 @@ import { SingleImageUploader } from '../hooks/backgroundRemover/singleBackground
 import { BulkImageUploader } from '../hooks/backgroundRemover/multipleBackgroundRemover';
 import { EditProduct } from '../components/products/editProducts';
 import { StoreProducts } from '../components/loginSignUpProfile/profileSetup/storeProducts';
+import { Success } from '../components/checkout/success';
+import { InstallmentalPayment } from '../components/loginSignUpProfile/profileSetup/installmental';
 
 function AppRoutes() {
 	return (
@@ -53,10 +55,16 @@ function AppRoutes() {
 				<Route path="profile/register-store/:id" element={<StoreSignUp />} />
 				{/* welcome */}
 				<Route path="welcome" element={<Welcome />} />
+				{/* checkout success */}
+				<Route path="cart/checkout/success" element={<Success />} />
 				{/* post product from store */}
 				<Route path="post-products/:id" element={<PostProduct />} />
 				{/* profile */}
 				<Route path="profile" element={<Profile />} />
+				{/* installment pay */}
+				<Route path="profile/installmental-payment" element={<InstallmentalPayment />} />
+				{/* installment pay success */}
+				<Route path="profile/installmental-payment/success" element={<Success />} />
 				{/* store products */}
 				<Route path="profile/store-products/:storeID" element={<StoreProducts />} />
 				{/* log in */}

@@ -356,3 +356,59 @@
 .store-container.slideUp {
 	animation: slideUp 0.4s ease forwards;
 }
+
+/* .emoji-explosion {
+	position: relative;
+}
+
+.emoji {
+	position: absolute;
+	font-size: 2rem;
+	animation: explode 1.5s ease-out forwards;
+}
+
+@keyframes explode {
+	0% {
+		opacity: 1;
+		transform: translate(0, 0) scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translate(
+			calc(-50px + 100px * var(--x)),
+			calc(-50px + 100px * var(--y))
+		) scale(1.8);
+	}
+} */
+
+@keyframes zoomInOut1 {
+	0% {
+	  transform: scale(1); /* normal size */
+	}
+	/* 25% {
+		transform: scale(0.9);
+	} */
+	50% {
+	  transform: scale(0.96); /* zoom in */
+	}
+	/* 75% {
+		transform: scale(0.9);
+	} */
+	100% {
+		transform: scale(1); /* zoom out back */
+	}
+}
+.zoomAnimation1Btn {
+	background-color: #475569;
+	color: #fff;
+	animation: zoomInOut1 2s ease-in-out infinite;
+	/*
+		4s = full duration (2s zoom in, 2s zoom out)
+		ease-in-out = smooth start and end
+		infinite = keeps repeating
+	*/
+}
+.zoomAnimation1Btn:hover {
+	animation-play-state: paused; /* pause on hover */
+	color: #fff;
+}

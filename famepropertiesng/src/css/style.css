@@ -241,11 +241,6 @@ button {
   border-radius: 0;
 }
 
-/* button:focus {
-  outline: 1px dotted;
-  outline: 5px auto -webkit-focus-ring-color;
-} */
-
 input,
 button,
 select,
@@ -273,6 +268,7 @@ select {
 
 select {
   word-wrap: normal;
+  overflow-y: auto;
 }
 
 button,
@@ -1241,13 +1237,13 @@ pre code {
   text-shadow: 0 0 0 #495057;
 }
 
-.form-control:focus {
+/* .form-control:focus {
   color: #495057;
   background-color: #fff;
   border-color: #ffefb3;
   outline: 0;
   box-shadow: none;
-}
+} */
 
 .form-control::placeholder {
   color: #999999;
@@ -2823,8 +2819,9 @@ input[type="checkbox"]:checked {
 
 .custom-control-input:checked ~ .custom-control-label::before {
   color: #fff;
-  border-color: #E2E8F0;
-  background-color: #475569;
+  /* border-color: #E2E8F0; */
+  border: 5px solid #475569;
+  background-color: #fff;
 }
 
 .custom-control-input:focus ~ .custom-control-label::before {
@@ -2906,8 +2903,8 @@ input[type="checkbox"]:checked {
 
 .custom-radio .custom-control-input:checked ~ .custom-control-label::after {
   /* background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); */
-  background-color: #fff;
-  border-radius: 50%;
+  /* background-color: #fff; */
+  /* border-radius: 50%; */
 }
 
 .custom-radio .custom-control-input:disabled:checked ~ .custom-control-label::before {
@@ -2955,16 +2952,16 @@ input[type="checkbox"]:checked {
   color: #495057;
   vertical-align: middle;
   background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right 0.75rem center/8px 10px;
-  border: 1px solid #ced4da;
+  border: 1px solid #495057;
   border-radius: 0;
   appearance: none;
 }
 
-.custom-select:focus {
+/* .custom-select:focus {
   border-color: #ffefb3;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(255, 211, 51, 0.25);
-}
+} */
 
 .custom-select:focus::-ms-value {
   color: #495057;
@@ -7150,8 +7147,20 @@ WebKit (Chrome, Edge, Safari)
 
 
 
+/* ################################################# */
 
-
+.installment-pay {
+  overflow: hidden;
+  max-height: 0;                 /* collapsed */
+  opacity: 0;
+  transform: translateY(-40px);
+  transition: max-height 1500ms ease, opacity 1500ms ease, transform 1000ms ease;
+}
+.installment-pay.show {
+  max-height: 200px;              /* enough to contain the row */
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* ################################################# */
 
@@ -7262,4 +7271,17 @@ WebKit (Chrome, Edge, Safari)
 
 .back {
   transform: rotateY(180deg);
+}
+
+
+
+/* ################################################# */
+button:focus-visible,
+div:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 1px solid #475569;
+  outline-offset: -3px;
 }

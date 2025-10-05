@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import './App.css';
 import './css/style.css';
 import './css/responsive.css';
+// import './css/purged/style.css';
+// import './css/purged/responsive.css';
 import './css/animation.css';
 // import './css/animations.css';
 import './css/reduced-motion.css';
@@ -89,3 +91,7 @@ function App() {
 }
 
 export default App;
+
+
+// $ npm install -D purgecss
+// $ npx purgecss --css style.css --content "../**/*.js" "../**/*.jsx" --output purged/
