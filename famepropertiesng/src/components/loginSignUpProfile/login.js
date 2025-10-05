@@ -156,6 +156,7 @@ function LogIn() {
 									type={input.name==='password'?(showPassword?'text':input.name):input.name}
 									placeholder={input.placeholder}
 									style={{borderRadius: '5px'}}
+									autoComplete={input.autoComplete}
 									required/>
 									{input.name === "password" && (
 										<span
