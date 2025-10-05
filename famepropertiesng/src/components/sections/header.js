@@ -10,7 +10,7 @@ import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { useAuth } from '../../hooks/allAuth/authContext';
 import { titleCase } from '../../hooks/changeCase';
 
-let headerMenuArr = [
+const headerMenuArr = [
 	// {
 	// 	menu: "auth",
 	// 	type: "button",
@@ -266,6 +266,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 					handleClearCart}) {
 	const { createLocal } = useCreateStorage();
 	const [isUserDetected, setIsUserDetected] = useState(null)
+	const [stateHeaderMenu, setStateHeaderMenu] = useState(headerMenuArr)
 	const accessToken = createLocal.getItem('fpng-acc');
 	const userInfo = createLocal.getItem('fpng-user');
 	const refreshToken = createLocal.getItem('fpng-ref');
@@ -276,6 +277,11 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 
 	useEffect(() => {
 		setIsUserDetected(!!userInfo)
+		if (!userInfo?.is_seller) {
+			setStateHeaderMenu(headerMenuArr.filter(header => {
+				return header?.menu.toLowerCase()!=='post products'
+			}))
+		} else setStateHeaderMenu(headerMenuArr)
 	}, [userInfo])
 	let status = accessToken
 	// console.log('fpng-status:', status)
@@ -319,8 +325,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	// 	seller: userInfo?.is_seller,
 	// 	postProd: headerMenuArr?.some(obj=>obj?.menu.toLowerCase()==='post products'),
 	// })
-	if (!userInfo?.is_seller) headerMenuArr = headerMenuArr.filter(header => header?.menu.toLowerCase()!=='post products')
-	let resortedMobile = moveItem(headerMenuArr, 'clear cart', 3);
+	// if (!userInfo?.is_seller) headerMenuArr = headerMenuArr.filter(header => header?.menu.toLowerCase()!=='post products')
+	let resortedMobile = moveItem(stateHeaderMenu, 'clear cart', 3);
 	let resortedPc
 	// console.log({headerMenuArr})
 	// console.log({resortedMobile})
@@ -337,7 +343,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 			obj.menu.toLowerCase() !== 'register store'&&
 			obj.menu.toLowerCase() !== 'post products'
 		));
-		resortedPc = headerMenuArr.filter(obj => (
+		resortedPc = stateHeaderMenu.filter(obj => (
 			obj.menu.toLowerCase() !== 'logout'&&
 			obj.menu.toLowerCase() !== 'register store'&&
 			obj.menu.toLowerCase() !== 'post products'
@@ -359,7 +365,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 					// &&(obj.menu.toLowerCase() !== 'post products'&&!userInfo?.is_seller)
 					)
 		});
-		resortedPc = headerMenuArr.filter(obj => {
+		resortedPc = stateHeaderMenu.filter(obj => {
 			if (obj?.menu.toLowerCase() === 'register store'||
 				obj?.menu.toLowerCase() === 'post products') {
 				// console.log('found register store menu item')
@@ -523,7 +529,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 									</Link>
 							</>}
 								{resortedMobile.map((menu, index) => {
-									const lastItem = index === headerMenuArr.length - 1;
+									const lastItem = index === stateHeaderMenu.length - 1;
 									// console.log('isUserDetected:', isUserDetected)
 									if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
 									const isActive = handleIsActive(menu);
