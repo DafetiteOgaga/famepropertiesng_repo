@@ -657,7 +657,7 @@ function EnterInstallmentalAmount({
 				<div className="d-flex align-items-baseline">
 					<p className="mb-0"
 					style={{whiteSpace: 'pre'}}>
-						{percent} + {' '}
+						{digitSeparator(percent)} + {' '}
 					</p>
 					<input
 					// ref={input.type==='email'?emailRef:null}
@@ -678,7 +678,7 @@ function EnterInstallmentalAmount({
 					placeholder="0"/>
 					<p className="mb-0"
 					style={{whiteSpace: 'pre'}}>
-						{' '} = {finalComputedInstallmentAmount}
+						{' '} = {digitSeparator(finalComputedInstallmentAmount)}
 					</p>
 				</div>
 			{/* </div> */}
