@@ -80,15 +80,12 @@ const validateEmail = ({email, setIsEmailLoading}) => {
 // Check if all required (specified) fields are filled
 const isFieldsValid = ({formData}) => {
 	// get list of all required fields
-	// console.log({formData})
 	const isRequiredArr = inputArr.filter(field => field.important);
 	// console.log({isRequiredArr})
 	const isFieldValid = isRequiredArr.every((field) => {
-		// console.log('for', field.name, ':', formData[field.name])
-		return typeof formData[field?.name]==='string'?formData[field.name].trim()!=="":formData[field.name]!==""
+		return typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!==""
 	});
-	const someFieldsInvalid = isRequiredArr.some((field) => typeof formData[field.name]==='string'?formData[field.name].trim()==="":formData[field.name]==="");
-	return {isFieldValid, someFieldsInvalid};
+	return isFieldValid
 };
 
 export {
