@@ -8,6 +8,7 @@ import { getBaseURL } from '../fetchAPIs';
 const baseURL = getBaseURL();
 
 const useCountryStateCity = () => {
+	const [cscRequiredFieldsGood, setCscRequiredFieldsGood] = useState(false);
 	const profilePage = useLocation().pathname.split('/')[1].toLowerCase()==='profile'; // to differentiate between profile and signup forms
 	const cscRef = useRef(false);
 	const [country, setCountry] = useState(''); // whole country object
@@ -80,6 +81,19 @@ const useCountryStateCity = () => {
 		}
 	}, [csc])
 
+	useEffect(() => {
+		// console.log('cscFormData changed, updating cscRequiredFieldsGood...');
+		// console.log('from:', cscRequiredFieldsGood)
+		setCscRequiredFieldsGood(
+			!!(
+				cscFormData?.country &&
+				(!cscFormData?.hasStates || cscFormData?.state) &&
+				(!cscFormData?.hasCities || cscFormData?.city)
+			)
+		);
+		// console.log('to:', cscRequiredFieldsGood)
+	}, [cscFormData])
+
 	// Re-enable resets if the user changes country on profile page
 	useEffect(() => {
 		if (profilePage && cscRef.current) {
@@ -128,6 +142,7 @@ const useCountryStateCity = () => {
 	// console.log({cscref: cscRef.current})
 	return {
 		cscFormData,
+		cscRequiredFieldsGood,
 		setCountry,
 		setState,
 		setCity,
