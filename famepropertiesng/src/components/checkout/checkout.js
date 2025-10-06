@@ -491,12 +491,12 @@ function Checkout() {
 		amount: finalInstallmentAmount??(checkoutResp?.amount),
 	}
 	const checkJustFields = isFieldsValid({formData});
-	console.log({userInfo})
+	// console.log({userInfo})
 	// console.log({isLoggedIn})
 	// console.log({allFieldsArr})
 	// console.log({allowedFieldsArr})
 	// console.log({phoneCode})
-	console.log({shipToDifferent})
+	// console.log({shipToDifferent})
 	// console.log({formData})
 
 	// console.log({country, state, city})
@@ -524,7 +524,7 @@ function Checkout() {
 	// 	fm: formData.paymentMethod,
 	// 	lg: loggedInFormData.paymentMethod
 	// })
-	console.log({updatedCheckoutResp, amount: updatedCheckoutResp?.amount})
+	// console.log({updatedCheckoutResp, amount: updatedCheckoutResp?.amount})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
