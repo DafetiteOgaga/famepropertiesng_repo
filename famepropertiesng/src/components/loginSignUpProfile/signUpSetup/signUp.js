@@ -177,7 +177,7 @@ function SignUp() {
 			return;
 		}
 
-		console.log({formData})
+		// console.log({formData})
 
 		// return null; // TEMP DISABLED
 
