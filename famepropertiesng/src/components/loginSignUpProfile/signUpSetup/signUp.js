@@ -47,7 +47,7 @@ const initialFormData = {
 }
 
 function SignUp() {
-	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
+	const { cscFormData, cscRequiredFieldsGood, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
 	// const emailRef = useRef();
@@ -177,7 +177,11 @@ function SignUp() {
 			return;
 		}
 
-		console.log({formData})
+		// console.log({formData})
+
+		// return null; // TEMP DISABLED
+
+
 		const cleanedData = {};
 		Object.entries(formData).forEach(([key, value]) => {
 			if (key==='password_confirmation') return; // skip password_confirmation from submission
@@ -393,8 +397,9 @@ function SignUp() {
 	// console.log({country, state, city})
 	// console.log({formData})
 	// console.log({selectedFile})
-	console.log('csc =', {country, state, city, hasStates, hasCities})
-	console.log({cscFormData})
+	// console.log('csc =', {country, state, city, hasStates, hasCities})
+	// console.log({cscFormData})
+	// console.log({cscRequiredFieldsGood})
 	return (
 		<>
 			{!isMounting ?
@@ -601,7 +606,12 @@ function SignUp() {
 						<button
 						type="submit"
 						className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
-						disabled={!checkFields||isEmailValid?.color!=='green'||loading}
+						disabled={
+							!checkFields||
+							isEmailValid?.color!=='green'||
+							loading||
+							!cscRequiredFieldsGood
+						}
 						>
 							{!loading?'Sign Up':<BouncingDots size="sm" color="#fff" p="1" />}
 						</button>

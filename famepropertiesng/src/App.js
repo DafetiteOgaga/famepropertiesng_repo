@@ -58,9 +58,9 @@ function App() {
 	}
   useEffect(() => {
 		const localCategories = localStorage.getItem('fpng-catg');
-    console.log({localCategories})
+    // console.log({localCategories})
 		if (!localCategories?.length) {
-			console.log('Fetching categories')
+			// console.log('Fetching categories')
 			fetchCategories();
 		}
 	}, [])

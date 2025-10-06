@@ -43,7 +43,7 @@ const getField = (obj, field) => {
 }
 const baseURL = getBaseURL();
 const apiUrl = getBaseURL(true) + '/get-paystack-keys/pk/';
-console.log({baseURL, apiUrl})
+// console.log({baseURL, apiUrl})
 const shipping = 1500
 
 const paymentOptions = [
@@ -58,7 +58,7 @@ function Checkout() {
 	const [typedInstallAmount, setTypedInstallAmount] = useState(0);
 	const [finalInstallmentAmount, setFinalInstallmentAmount] = useState(null);
 	const [isInstallPlan, setIsInstallPlan] = useState(false);
-	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
+	const { cscFormData, cscRequiredFieldsGood, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const { createLocal, createSession } = useCreateStorage()
 	const deviceSpec = useDeviceType();
 	const [isMounting, setIsMounting] = useState(true);
@@ -490,7 +490,8 @@ function Checkout() {
 		...checkoutResp,
 		amount: finalInstallmentAmount??(checkoutResp?.amount),
 	}
-	console.log({userInfo})
+	const checkJustFields = isFieldsValid({formData});
+	// console.log({userInfo})
 	// console.log({isLoggedIn})
 	// console.log({allFieldsArr})
 	// console.log({allowedFieldsArr})
@@ -523,7 +524,7 @@ function Checkout() {
 	// 	fm: formData.paymentMethod,
 	// 	lg: loggedInFormData.paymentMethod
 	// })
-	console.log({updatedCheckoutResp, amount: updatedCheckoutResp?.amount})
+	// console.log({updatedCheckoutResp, amount: updatedCheckoutResp?.amount})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
@@ -836,6 +837,11 @@ function Checkout() {
 								})}
 								<button
 								type="submit"
+								disabled={
+									(shipToDifferent?
+										(!checkJustFields||!cscRequiredFieldsGood):
+										false)
+								}
 								className="btn btn-block btn-primary font-weight-bold py-3">
 									Place Order
 								</button>
