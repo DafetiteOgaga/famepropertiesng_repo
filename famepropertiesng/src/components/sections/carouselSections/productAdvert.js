@@ -33,6 +33,8 @@ function ProductAdvert({productSelector, productsArr}) {
 							style={
 								isMobile?{
 									top: 'auto',
+									left: 'auto',
+									right: 'auto',
 									width: '100%',
 									height: '100%',
 									paddingTop: '1rem',
