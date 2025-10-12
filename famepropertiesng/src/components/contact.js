@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
 import { Breadcrumb } from './sections/breadcrumb';
 import { useDeviceType } from '../hooks/deviceType';
 import { BouncingDots } from '../spinners/spinner';
 
 function Contact() {
 	const [isMounting, setIsMounting] = useState(true);
-	const location = useLocation().pathname.split("/").pop();
 	const deviceType = useDeviceType().width <= 576;
 	useEffect(() => {
-		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
-	// console.log("Current Location:", location);
 	return (
 		<>
 			<Breadcrumb page={'Contact'} />
@@ -89,7 +85,7 @@ function Contact() {
 							<iframe
 							className="contact-iframe-frame"
 							title="Google Map"
-							src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.775954257609!2d3.236202274623938!3d6.549947222856214!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b85035bd522d1%3A0x511bd0254602b720!2sIsheri%20Rd%2C%20Lagos!5e0!3m2!1sen!2sng!4v1754568154818!5m2!1sen!2sng"
+							src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.1899675284258!2d3.583280874623657!3d6.49761782346433!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103bf79dc4633cad%3A0x38295b3271411e10!2sBukkateria%20(Addo%20Roundabout%2C%20Ajah)!5e0!3m2!1sen!2sng!4v1760087347846!5m2!1sen!2sng"
 							width="600"
 							height="450"
 							style={{
