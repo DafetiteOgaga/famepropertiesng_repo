@@ -11,8 +11,6 @@ const authenticator = async () => {
 			throw new Error(errorText);
 		}
 		const data = await response.json();
-		// console.log("Authentication data received");
-		// console.log("Authentication data:", data);
 		return data;
 	} catch (error) {
 		throw new Error(`Authentication failed: ${error.message}`);
