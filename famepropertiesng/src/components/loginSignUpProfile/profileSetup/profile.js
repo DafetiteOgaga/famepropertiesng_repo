@@ -2,26 +2,24 @@ import { useEffect, useState, useRef, Fragment } from "react";
 import { Breadcrumb } from "../../sections/breadcrumb"
 import { useDeviceType } from "../../../hooks/deviceType"
 import { Link, useNavigate } from 'react-router-dom';
-import { digitSeparator, formatPhoneNumber, sentenceCase, titleCase } from "../../../hooks/changeCase";
+import { formatPhoneNumber, sentenceCase, titleCase } from "../../../hooks/changeCase";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../../hooks/fetchAPIs";
 import { useCreateStorage } from "../../../hooks/setupLocalStorage";
-import { useImageKitAPIs } from "../../../hooks/fetchAPIs";
 import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCompress";
 import { BouncingDots } from "../../../spinners/spinner";
-import { authenticator } from "../dynamicFetchSetup";
-import { isFieldsValid, validatePassword } from "../signUpSetup/signUpFormInfo";
+import { validatePassword } from "../signUpSetup/signUpFormInfo";
 import { reOrderFields, toTextArea } from "../../../hooks/formMethods/formMethods";
 import { limitInput, useCountryStateCity, onlyNumbers } from "../../../hooks/formMethods/formMethods";
 import { ToggleButton } from "../../../hooks/buttons";
-// import { NavigateToComp } from "../../../hooks/navigateToComp";
+import { useAuthFetch } from "../authFetch";
+import { useUploadToImagekit } from "../../imageServer/uploadToImageKit";
 
 const baseURL = getBaseURL();
 
 const initialFormData = {
 	first_name: '',
 	last_name: '',
-	// middle_name: '',
 	username: '',
 	address: '',
 	nearest_bus_stop: '',
@@ -43,21 +41,18 @@ const initialFormData = {
 }
 
 function Profile() {
-	// const allFields = useRef([])
-	// const { navigateTo } = NavigateToComp()
+	const firstStoreRef = useRef(true);
+	const postToImagekit = useUploadToImagekit();
+	const authFetch = useAuthFetch();
 	const [editStore, setEditStore] = useState({});
-	const { cscFormData, setCountry, setState, setCity, setCSC, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
+	const { cscFormData, setCSC, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
 	const updatedFieldRef = useRef(null);
 	const updatedStoreFieldRef = useRef({});
 	const handleImageProcessingRef = useRef();
 	const { createLocal } = useCreateStorage();
 	const [loading, setLoading] = useState(false);
-	const baseAPIURL = useImageKitAPIs()?.data;
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	// const [country, setCountry] = useState(''); // whole country object
-	// const [state, setState] = useState('');     // whole state object
-	// const [city, setCity] = useState('');       // whole city object
 	const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
 	const [selectedFile, setSelectedFile] = useState(null); // local file
 	const uploadedImage = useRef(null);
@@ -71,19 +66,35 @@ function Profile() {
 	const [fieldStats, setFieldStats] = useState({})
 	const [isMounting, setIsMounting] = useState(true);
 	const [showStores, setShowStores] = useState(false);
+	const [showSelectedStore, setShowSelectedStore] = useState(null);
 	const [animating, setAnimating] = useState("slideUp");
-	const [hasUnfulfilledInstallments, setHasUnfulfilledInstallments] = useState(false);
+	const [animatingThisStore, setAnimatingThisStore] = useState('slideDownSpecificStore');
+	// const [hasUnfulfilledInstallments, setHasUnfulfilledInstallments] = useState(false);
 	const navigate = useNavigate();
 	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
 
-	// const toggleStores = () => setShowStores(prev => !prev);
 	const toggleStores = () => {
+		console.log('Toggling stores dropdown');
 		if (showStores) {
+			console.log('Hiding stores dropdown');
 			setAnimating("slideUp");
 			setTimeout(() => setShowStores(false), 400); // wait for animation
 		} else {
+			console.log('Showing stores dropdown');
 			setShowStores(true);
 			setAnimating("slideDown");
+		}
+	};
+
+	const toggleSelectedStore = (id) => {
+		if (showSelectedStore === id) {
+			// close current
+			setAnimatingThisStore("slideUpSpecificStore");
+			setTimeout(() => setShowSelectedStore(null), 400);
+		} else {
+			// open another
+			setAnimatingThisStore("slideDownSpecificStore");
+			setShowSelectedStore(id);
 		}
 	};
 
@@ -95,11 +106,18 @@ function Profile() {
 		if (!userInfo)	{
 				const isLogout = setTimeout(() => {
 				if (!userInfo) {
-					// toast.info('You have been logged out. Please log in again to continue.');
 					navigate('/')
 				}
 			}, 1000);
 			return () => clearTimeout(isLogout);
+		}
+		if (userInfo?.id&&firstStoreRef.current) {
+			console.log('setting first store as selected store by default...')
+			// check if user is a seller with stores
+			if (userInfo.is_seller && userInfo?.store?.length > 0) {
+				setShowSelectedStore(userInfo.store[0].id) // show first store by default
+			}
+			firstStoreRef.current = false;
 		}
 	}, [userInfo])
 
@@ -108,46 +126,17 @@ function Profile() {
 			const fetchCheckoutIDs = async () => {
 				setLoading(true);
 				try {
-					const response = await fetch(`${baseURL}/has-unfulfilled-installments/${userInfo?.id}/`,
-						// {
-						// 	method: "POST",
-						// 	headers: { "Content-Type": "application/json" },
-						// 	body: JSON.stringify(cleanedData),
-						// }
-					);
-		
-					if (!response.ok) {
-						// Handle non-2xx HTTP responses
-						const errorData = await response.json();
-						// setIsError(errorData?.error||errorData?.message)
-						// setLoading(false);
-						console.warn('Error:', errorData);
-						toast.error(errorData?.error || errorData?.message || 'Error!');
-						// setIsFetchCheckout(false);
-						setLoading(false);
-						return;
-					}
-					const data = await response.json();
+					const response = await authFetch(`${baseURL}/has-unfulfilled-installments/${userInfo?.id}/`);
+
+					const data = await response // .json();
+					if (!data) return
 					console.log('Response data from server',data)
 					console.log('has_unfulfilled_installments:', data)
 					console.log('updating user info in local storage...')
 					const updateUser = {...userInfo, has_unfulfilled_installments: data};
 					createLocal.setItem('fpng-user', updateUser);
 					console.log('updated user info:', updateUser)
-					setHasUnfulfilledInstallments(data);
-					// toast.success(
-					// 	<div>
-					// 		Successful.
-					// 		{/* <br /> */}
-					// 		{/* Welcome, <strong>{titleCase(data.first_name)}!</strong> */}
-					// 	</div>
-					// );
-					// toast.success(`Registration Successful.\nWelcome, ${data.first_name}!`);
-					// setFormData(initialFormData); // reset form
-					// setLoggedInFormData({});
-					// navigate('/welcome')
-					// navigate('/login') // go to login page after signup
-					// setIsFetchCheckout(false);
+					// setHasUnfulfilledInstallments(data);
 					setLoading(false);
 					return data;
 				} catch (error) {
@@ -156,7 +145,6 @@ function Profile() {
 					return null;
 				} finally {
 					setLoading(false);
-					// setIsFetchCheckout(false);
 				}
 			}
 			fetchCheckoutIDs()
@@ -164,10 +152,6 @@ function Profile() {
 	}, [])
 
 	// Step 1: Load userInfo into state once (so it's stable)
-	// const [userInfo] = useState(() => {
-	// 	const stored = createLocal.getItem('fpng-user');
-	// 	return stored ? stored : null;
-	// });
 	const storeVariables = [
 		'nearest_bus_stop',
 		'store_phone_number',
@@ -181,7 +165,6 @@ function Profile() {
 	]
 	useEffect(() => {
 		if (userInfo&&!userInfoRef.current) {
-			// console.log('User info found in local storage:', userInfo);
 			setEditFields(prev => ({
 				...prev,
 				...Object.keys(userInfo).reduce((acc, key) => {
@@ -203,46 +186,10 @@ function Profile() {
 			}
 			userInfoRef.current = true;
 		} else {
-		// console.log('No user info found in local storage.');
 		}
 	}, [userInfo])
 
-	// useEffect(() => {
-	// 	setFormData(prev => {
-	// 		// make a copy of prev (to avoid mutation)
-	// 		const updated = { ...prev };
-	// 		Object.entries(editFields).forEach(([key, value]) => {
-	// 			if (!value && userInfo?.hasOwnProperty(key)) {
-	// 				updated[key] = userInfo[key] || '';
-	// 			}
-	// 		});
-	// 		return updated; // return the new state
-	// 	});
-	// 	setStoreFormData(prev => {
-	// 		const updated = { ...prev }; // clone old state
-	// 		Object.entries(editStore).forEach(([storeID, storeField]) => {
-	// 			Object.entries(storeField).forEach(([key, value]) => {
-	// 				// only update if field is NOT being edited
-	// 				if (!value && userInfo?.is_seller && userInfo?.store?.length > 0) {
-	// 					const storeInfo = userInfo.store.find(
-	// 						store => store.id.toString() === storeID.toString()
-	// 					);
-	// 					if (storeInfo && storeInfo.hasOwnProperty(key)) {
-	// 						updated[storeID] = {
-	// 							...updated[storeID],
-	// 							[key]: storeInfo[key] || '',
-	// 						};
-	// 					}
-	// 				}
-	// 			});
-	// 		});
-	// 		return updated; // <-- don’t forget to return!
-	// 	});
-	// }, [editFields, editStore])
-	// console.log({editFields, editStore})
-	// updates country, state, city and image details in formData whenever they change
 	useEffect(() => {
-		// console.log('updating country/state/city in formData...')
 		setFormData(prev => ({
 			...prev,
 			...cscFormData,
@@ -261,10 +208,7 @@ function Profile() {
 
 	// Step 2: Populate formData from userInfo once userInfo is available
 	useEffect(() => {
-		// console.log('userInfo effect triggered');
 		if (userInfo) {
-			// console.log('setting formData from userInfo...')
-			// console.log({userInfo})
 			setFormData(prev => ({
 				...prev,
 				...userInfo,
@@ -307,37 +251,7 @@ function Profile() {
 				return prev;
 			});
 		}
-		
-		// if (userInfo.country) {
-		// 	console.log('setting country from userInfo...')
-		// 	setCountry({
-		// 		name: userInfo.country,
-		// 		phone_code: userInfo.phoneCode,
-		// 		currency: userInfo?.currency||null,
-		// 		currency_name: userInfo?.currencyName||null,
-		// 		currency_symbol: userInfo?.currencySymbol||null,
-		// 		emoji: userInfo?.countryEmoji||null,
-		// 		id: userInfo.countryId,
-		// 		hasStates: userInfo.hasStates,
-		// 	})
-		// }
-		// if (userInfo.state) {
-		// 	console.log('setting state from userInfo...')
-		// 	setState({
-		// 		name: userInfo.state,
-		// 		state_code: userInfo.stateCode,
-		// 		id: userInfo.stateId,
-		// 		hasCities: userInfo.hasCities,
-		// 	})
-		// }
-		// if (userInfo.city) {
-		// 	console.log('setting city from userInfo...')
-		// 	setCity({
-		// 		name: userInfo.city,
-		// 		id: userInfo.cityId,
-		// 	})
-		// }
-		// console.log('userInfo effect ran');
+
 	}, [])
 
 	// validate password on change
@@ -379,7 +293,6 @@ function Profile() {
 			maxWords,
 		} =
 			limitInput(cleanedValue, maxChars, undefined, isTextArea);
-		// console.log({name})
 		setFormData(prev => ({
 			...prev,
 			[name]: limitedValue
@@ -395,23 +308,13 @@ function Profile() {
 	// handle input changes
 	const onChangeStoreHandler = (e, storeID) => {
 		e.preventDefault();
-		// console.log('in onChangeStoreHandler for storeID:', storeID)
 		const { name, value, tagName } = e.target
-		// console.log({ name, value, tagName })
 		let cleanedValue = value;
 		let maxChars;
-		// if (name==='first_name'||name==='last_name'||name==='username') {
-		// 	maxChars = 50;
-		// } else if (name==='email') {
-		// 	maxChars = 100;
-		// } else
 		if (name==='store_phone_number') {
 			cleanedValue = onlyNumbers(value);
 			maxChars = 20;
 		}
-		// else if (name==='password'||name==='password_confirmation') {
-		// 	maxChars = 64;
-		// }
 		else if (name==='store_address'||name==='nearest_bus_stop') {
 			maxChars = 150;
 		}
@@ -429,7 +332,6 @@ function Profile() {
 			maxWords,
 		} =
 			limitInput(cleanedValue, maxChars, undefined, isTextArea);
-		// console.log({name})
 		setStoreFormData(prev => ({
 			...prev,
 			[storeID]: {
@@ -463,15 +365,11 @@ function Profile() {
 
 	const countryStateCityArr = ['country', 'state', 'city', 'store']
 
-	// check if all required fields are filled
-	const checkFields = isFieldsValid({formData, passwordErrorMessage});
-
 	// handles final form submission
 	const onSubmitHandler = async (e=null, store=false) => {
 		if (e) e.preventDefault();
 
 		setLoading(true);
-		// console.log('setting loading to true...')
 
 		if (!updatedFieldRef.current&&!updatedStoreFieldRef.current) {
 			console.warn('Empty form is invalid');
@@ -510,7 +408,6 @@ function Profile() {
 		if (!store) {
 			url = 'users/update-profile'
 			isImage = updatedFieldRef.current.includes('image_url')
-			// console.log('isImage update:', isImage)
 
 			if (isImage) {
 				updatedFieldRef.current.push('fileId');
@@ -519,20 +416,13 @@ function Profile() {
 			// check that there is an actual update before proceeding
 			// to submit the form to the server
 			const len = updatedFieldRef.current.length
-			// console.log('checking the length of updatedFieldRef:', len)
 
 			if (!isImage) {
 				if (len===1) {
-					// console.log('updatedField.current:', updatedFieldRef.current)
-					// console.log('only one field to update, checking for actual change...')
 					const field = updatedFieldRef.current[0]
 					const update = formData[field]?.trim()
 					const original = userInfo?.[field]
 					const isUpdated = update!==original
-					// console.log({field, update, original, isUpdated})
-					// let [objKey, objValue] = Object.entries(updatedFieldRef.current).pop()
-					// objValue = objValue.trim()
-					// console.log({objKey}, '\n', {objValue},)
 					if (!isUpdated||!update) {
 						const errorText = `No changes made to the ${titleCase(field)} field`;
 						console.warn(errorText);
@@ -541,8 +431,6 @@ function Profile() {
 						return;
 					}
 				} else if (len>1) {
-					// console.log('updatedField.current:', updatedFieldRef.current)
-					// console.log('multiple fields to update, checking for actual changes...')
 					const updates = updatedFieldRef.current.map(field => {
 						if (countryStateCityArr.includes(field)) return null
 						return ({
@@ -561,24 +449,13 @@ function Profile() {
 						setLoading(false);
 						return;
 					}
-					// updatedFieldRef.current = changedFields.map(item => item.field)
-					// console.log('final fields to update:', updatedFieldRef.current)
 				}
 			} else {
-				// console.log('new image uploaded:', uploadedImage.current)
 				if (uploadedImage.current) {
 					const newFileID = uploadedImage.current?.fileId
 					const newUrl = uploadedImage.current?.url
 					const oldFileID = userInfo?.fileId
 					const oldUrl = userInfo?.image_url
-					// console.log('processing image update...')
-					// console.log('formData before image update:', formData)
-					// console.log('image fileid from upload:', newFileID)
-					// console.log('previous image fileid:', oldFileID)
-					// if (newFileID!==oldFileID) {
-					// 	// console.log('previous image:', oldFileID, oldUrl)
-					// }
-					// console.log('including image details in submission data...')
 					cleanedData['old_image_url'] = oldUrl
 					cleanedData['old_fileId'] = oldFileID
 					cleanedData['image_url'] = newUrl
@@ -601,7 +478,6 @@ function Profile() {
 			if (updatedFieldRef.current.includes('city')) {
 				updatedFieldRef.current.push('cityId', 'hasCities');
 			}
-			// console.log('cleanedData:', cleanedData)
 
 			if (!isImage) {
 				Object.entries(formData).forEach(([key, value]) => {
@@ -628,40 +504,19 @@ function Profile() {
 				return;
 			}
 			cleanedData = { storeID: storeID, [storeField]: newVal }
-			// finalFormData = { ...storeFormData };
 		}
-		// console.log({finalFormData})
-		
-		// console.log({isImage}, 'uploadedImage:', uploadedImage.current)
-		
-
 		console.log('submitting form:', cleanedData);
-		// Object.entries(formData).forEach(([key, value]) => {
-		// 	console.log(key, ":", value);
-		// })
-		// setLoading(false)
-		// return
-
 		try {
-			const response = await fetch(`${baseURL}/${url}/${userInfo.id}/`, {
+			const response = await authFetch(`${baseURL}/${url}/${userInfo.id}/`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(cleanedData),
+				body: cleanedData,
 			});
 
-			if (!response.ok) {
-				const errorData = await response.json();
-				console.warn('Account Update Error:', errorData);
-				toast.error(errorData?.error || 'Account Update Error!');
-				setLoading(false);
-				return;
-			}
-			const data = await response.json();
-			// console.log('Response data from server',data)
+			const data = await response // .json();
+			if (!data) return
 			if (!store) {
 				createLocal.setItem("fpng-user", data);
 				uploadedImage.current = null; // reset uploaded image
-				// userInfoRef.current = false; // allow userInfo to be set again if needed
 				toast.success('Account Update Successful!');
 				updatedFieldRef.current = null; // reset
 			} else {
@@ -683,13 +538,11 @@ function Profile() {
 			return null;
 		} finally {
 			setLoading(false);
-			// console.log('setting loading to false...')
 		}
 	}
 
 	// auto upload when selectedFile changes (i.e when image has been processed)
 	useEffect(() => {
-		// console.log("generating temporary url:", selectedFile);
 		if (selectedFile) {
 			const objectUrl = URL.createObjectURL(selectedFile);
 			setImgPreview(objectUrl);
@@ -711,83 +564,26 @@ function Profile() {
 			return;
 		}
 
-		const imageDetails = {
-			image_url: userInfo?.image_url,
-			fileId: userInfo?.fileId,
-			file: selectedFile,
-		}
-		// console.log({imageDetails});
-
 		if (selectedFile instanceof Blob || selectedFile instanceof File) {
-			try {
-				// get authentication signature from backend
-				const authData = await authenticator();
-				if (!authData) {
-					setLoading(false);
-					throw new Error("Failed to get ImageKit auth data");
-				}
-				// console.log("Auth data for upload:", authData);
-				// console.log({baseAPIURL})
-
-				const imageFormData = new FormData();
-				imageFormData.append("file", selectedFile); // actual file
-				imageFormData.append("fileName", "profile_photo.jpg");
-				imageFormData.append("folder", "profile_photos");
-
-				imageFormData.append("publicKey", baseAPIURL?.IMAGEKIT_PUBLIC_KEY);
-				imageFormData.append("signature", authData.signature);
-				imageFormData.append("expire", authData.expire);
-				imageFormData.append("token", authData.token);
-
-				const replace = userInfo?.image_url?
-								"Replacing existing image ...":
-								"Uploading new image ...";
-				// console.log(replace);
-
-				// for (let [key, value] of imageFormData.entries()) {
-				// 	console.log(key, ":", value);
-				// }
-				// console.log("Uploading image to ImageKit...");
-
-				// upload endpoint
-				const uploadUrl = "https://upload.imagekit.io/api/v1/files/upload";
-				// console.log("Upload URL:", uploadUrl);
-
-				// upload to imagekit
-				const uploadResponse = await fetch(uploadUrl, {
-					method: "POST",
-					body: imageFormData,
-					}
-				);
-
-				if (!uploadResponse.ok) {
-					const errorText = "Upload failed"
-					toast.error(errorText);
-					setLoading(false);
-					throw new Error(errorText);
-				}
-				const result = await uploadResponse.json();
-				// console.log("Upload successful:", result);
-				uploadedImage.current = result; // save response
-
-				// finally submit form after successful image upload
-				// and fileID and image_url have been generated
-				onSubmitHandler(); // submit form after successful upload
-			} catch (err) {
-				toast.error('Upload failed. Please try again.');
-				// console.error("Upload failed:", err);
+			const imageKitResponse = await postToImagekit({
+				selectedFile,
+				fileName: "profile_photo.jpg",
+				folder: "profile_photos"
+			});
+			if (!imageKitResponse) {
 				setLoading(false);
-				return;
+				return; // upload failed, stop here.
 			}
+			uploadedImage.current = imageKitResponse; // save response
+			onSubmitHandler();
+			setLoading(false);
 		} else {
-			// console.log("Not a valid file:", selectedFile);
 			toast.error("Selected file is not valid. Please try again.");
 			setLoading(false);
 			console.warn("No file selected, skipping upload.");
 			return
 		}
 	};
-
 
 	// array defining the desired order of the fields
 	const reOrderFieldsArr = ["email", "mobile_no", "username", "address", "country", "state", "city", "nearest_bus_stop"];
@@ -806,14 +602,14 @@ function Profile() {
 	// 	'hasStates', 'hasCities', 'password', 'password_confirmation',
 	// 	'product_ratings', 'is_seller',
 	// ]
-	const allResponseFields = [
-		'email', 'mobile_no', 'username', 'address', 'country',
-		'state', 'city', 'nearest_bus_stop', 'id', 'first_name',
-		'last_name', 'is_staff', 'image_url', 'fileId', 'phoneCode',
-		'currency', 'currencyName', 'currencySymbol', 'countryEmoji',
-		'stateCode', 'countryId', 'stateId', 'cityId', 'hasCities',
-		'hasStates', 'product_ratings', 'is_seller',
-	]
+	// const allResponseFields = [
+	// 	'email', 'mobile_no', 'username', 'address', 'country',
+	// 	'state', 'city', 'nearest_bus_stop', 'id', 'first_name',
+	// 	'last_name', 'is_staff', 'image_url', 'fileId', 'phoneCode',
+	// 	'currency', 'currencyName', 'currencySymbol', 'countryEmoji',
+	// 	'stateCode', 'countryId', 'stateId', 'cityId', 'hasCities',
+	// 	'hasStates', 'product_ratings', 'is_seller',
+	// ]
 	const acceptedRenderFields = [
 		'email', 'mobile_no', 'username', 'address', 'country',
 		'state', 'city', 'nearest_bus_stop', 'store',
@@ -828,34 +624,8 @@ function Profile() {
 	};
 
 	useEffect(() => {
-		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
-
-	// const switchBool = () => setSwitchState(prev => !prev);
-	// console.log({country, state, city})
-	// console.log({formData})
-	console.log({userInfo})
-	// console.log({formData, editFields, userInfo})
-	// console.log('updatedFieldRef:', updatedFieldRef.current)
-	// console.log({editFields})
-	// console.log({imagePreview})
-	// console.log({selectedFile})
-	// console.log({imgPreview})
-	// console.log('uploadedImage:', uploadedImage.current)
-	// console.log('csc =', {country, state, city, hasStates, hasCities})
-	// console.log({hasStates})
-	// console.log({fieldStats})
-	// const ch = fieldStats
-	// console.log({ch: ch['15']?.store_phone_number})
-	// console.log({editStore})
-	// console.log({editFields})
-	// console.log({showStores})
-	// console.log({updatedFieldRef: updatedFieldRef.current})
-	// console.log({updatedStoreFieldRef: updatedStoreFieldRef.current})
-	// console.log({storeFormData})
-	// const temp = createLocal.getItem('fpng1-user')
-	// console.log({temp})
 	return (
 		<>
 			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
@@ -884,9 +654,7 @@ function Profile() {
 							className={`mb-0 d-flex justify-content-center align-items-center ${editFields.image_url?'flex-column':'flex-row'}`}
 							>
 								{
-								(userInfo.image_url||imgPreview)
-								// false
-								?
+								(userInfo.image_url||imgPreview) ?
 
 									// image view
 									<img
@@ -970,11 +738,11 @@ function Profile() {
 							className="profile-control bold-text d-flex align-items-center text-center mt-3 mb-0"
 							>
 								<span className="d-flex flex-column align-items-center justify-content-between">
-									<span className="d-flex flex-row align-items-center justify-content-between">
+									<span className="d-flex flex-row align-items-center justify-content-between f-wrap">
 
 										{/* first and last name */}
 										{titleCase(userInfo.first_name)}
-										<span className={`d-flex flex-row align-items-${deviceType?'center':'baseline'} justify-content-between`}>
+										<span className={`d-flex flex-row align-items-${deviceType?'center':'baseline'} justify-content-between f-wrap`}>
 											<span style={{whiteSpace: 'pre'}}>{' '}</span>
 
 												{/* last name with edit button */}
@@ -1026,10 +794,8 @@ function Profile() {
 														{`${fieldStats['last_name']?.charCount}/${fieldStats['last_name']?.maxCharsLimit} chars`}
 													</>
 													:null}
-												
 												</span>
 											</span>
-												
 
 											<span className={`align-self-${deviceType?'center':'baseline'}`}>
 											{/* last name cancel and submit buttons */}
@@ -1042,28 +808,10 @@ function Profile() {
 											</span>
 										</span>}
 									</>
-									{/* <span
-									style={{
-										fontSize: '0.625rem',
-										color: fieldStats['last_name']?.colorIndicator
-									}}
-									className={`justify-content-end d-flex font-italic`}>
-									{fieldStats['last_name']?.charCount ?
-										<>
-											{`${fieldStats['last_name']?.charCount}/${fieldStats['last_name']?.maxCharsLimit} chars`}
-										</>
-										:null}
-									
-									</span> */}
 								</span>
 							</p>
 							{reOrderFields(Object.entries(userInfo), reOrderFieldsArr).map(([userKey, userValue], index) => {
 								if (!acceptedRenderFields.includes(userKey)) return null;
-								// if (!allFields.current.includes(userKey)) allFields.current.push(userKey)
-								// console.log('allFields:', allFields.current)
-								// console.log({userKey})
-								// console.log({country, state, city, hasStates, hasCities})
-								// console.log({userKey, userValue, hasState: userInfo.hasStates, hasCity: userInfo.hasCities})
 								if (userKey==='store'&&(!userInfo.is_seller)) return null;
 								const stores = userKey==='store'
 								const mobile = userKey==='mobile_no'
@@ -1071,19 +819,13 @@ function Profile() {
 								const email = userKey==='email'
 								const sentence = userKey==='address' || userKey==='nearest_bus_stop'
 								const editField = editFields[userKey]
-								// console.log({editStore})
 								const editStoreField = Object.values(editStore)
 														.filter((value)=>value)
 														.map((obj)=>Object.values(obj))
 														.flat().some((val)=>val)
-								
+
 								const fieldSelected = Object.entries(editFields).filter(([key, value])=>value).map(([key])=>key)
-								// console.log({fieldSelected})
-								
-								// const storeFieldSelected = Object.entries(editStore).filter(([key, value])=>value).map(([key])=>key)
-								
 								const isFieldSelected = !!fieldSelected.length
-								// console.log({editStoreField, isFieldSelected})
 								const isDisabled = (isFieldSelected||editStoreField)?!fieldSelected?.includes(userKey):false
 								if (isFieldSelected) updatedFieldRef.current = fieldSelected
 								const countryStateCity = ['country', 'state', 'city'].every(
@@ -1093,7 +835,6 @@ function Profile() {
 									key => key in editFields && Boolean(editFields[key])
 								);
 								const isTextArea = toTextArea(userKey, textAreaFieldsArr)
-								// if (userKey==='state') console.log({editField})
 								const stateHasStates = editField?userInfo.hasStates:hasStates
 								const stateHasCities = editField?userInfo.hasCities:hasCities
 								return (
@@ -1116,7 +857,7 @@ function Profile() {
 											{
 											!editField ?
 												// paragraph view (content view)
-												<p
+												<div
 												style={{
 													minWidth: '6rem',
 													textWrap: 'nowrap',
@@ -1131,17 +872,7 @@ function Profile() {
 														</span>
 														{/* Toggle Switch */}
 														{userKey==='store'&&
-														<ToggleButton onClick={toggleStores} miniStyle={'justify-content-end'}/>
-														// <span className="d-flex align-items-center justify-content-end">
-														// 	<label className="toggle-switch mb-0">
-														// 		<input
-														// 		type="checkbox"
-														// 		onClick={toggleStores}
-														// 		/>
-														// 		<span className="slider"></span>
-														// 	</label>
-														// </span>
-														}
+														<ToggleButton onClick={toggleStores} miniStyle={'justify-content-end'}/>}
 													</span>
 
 													{/* paragraph text and phone code span */}
@@ -1165,84 +896,62 @@ function Profile() {
 																		'Not Provided.'}
 																	</span>):
 																	(showStores&&stores)?(userValue.map((store, storeIdx) => {
-																		// console.log({store, storeIdx})
-																		// console.log({charCount: fieldStats[store?.id]?.store_phone_number?.charCount, id: store.id})
-																		// console.log({userValue})
+																		const storeID = store.id
 																		return (
 																			<span className={`store-container ${animating}`} key={storeIdx}>
 																				{Object.entries(store).map(([sKey, sVal], sIdx) => {
-																					// console.log({sKey, sVal})
-																					// console.log({store})
-																					// console.log('rendering phone code for store phone number:', userInfo.phoneCode)
 																					const editingStoreField = editStore[store.id]?.[sKey]
 																					if (editingStoreField) {
-																						// console.log('adding', sKey)
 																						updatedStoreFieldRef.current = {id: store.id, field: sKey}
 																					} else  if (updatedStoreFieldRef.current[store.id]===sKey&&
 																						!editingStoreField) {
-																						// console.log('clearing', updatedStoreFieldRef.current[store.id])
 																						updatedStoreFieldRef.current = {}
 																					}
 																					if (sKey==='id'||
 																						sKey==='rating'||
-																						// sKey==='store_status'||
 																						sKey==='user') return null;
 																					const storeFieldsToRender = ['store_phone_number', 'store_address', 'nearest_bus_stop', 'description', 'verified', 'store_status']
-																					// console.log({sKey, sVal})
 																					const phone = sKey==='store_phone_number'
 																					const storeSentence = sKey==='store_address'||
 																											sKey==='nearest_bus_stop'||
 																											sKey==='description'
-																					
-																					// if (editingStoreField) {
-																					// 		console.log({
-																					// 		editingStoreField,
-																					// 		storeID: store.id,
-																					// 		sKey,
-																					// 	})
-																					// }
-																					
 																					const isStoreTextArea = toTextArea(sKey, textAreaFieldsArr)
-																					// console.log({sKey, isStoreTextArea})
-																					// console.log({storelen: store.length})
+																					const showThisStore = showSelectedStore === storeID
+
 																					return (
 																						<Fragment key={sKey}>
 																							<>
 																								{sKey==="store_name"&&
-																								<Link
-																								className="bold-text store-name"
-																								to={`store-products/${store.id}`}
-																								// onClick={()=>navigate('/cart')}
-																								style={{
-																									// textDecoration: 'none',
-																									// color: '#475569',
-																									// border: '1px solid #475569',
-																									// padding: '0.3rem 0.5rem',
-																									// borderRadius: '5%'
-																									}}>{titleCase(sKey)}: {titleCase(sVal)}
-																								</Link>}
+																								<div className="d-flex flex-row align-items-center justify-content-between">
+																									<Link
+																									className="bold-text store-name d-inflex f-wrap"
+																									to={`store-products/${store.id}`}
+																									style={{
+																										}}>{titleCase(sKey)}: {titleCase(sVal)}
+																									</Link>
+																									<ToggleButton
+																									onClick={()=>toggleSelectedStore(storeID)}
+																									checked={showThisStore}
+																									heights={{height: 22, mini: 18}}/>
+																								</div>}
 
-																								{/* {<hr className="my-1" />} */}
-																								{storeFieldsToRender.includes(sKey) &&
-																								<>
-																									<hr className="my-1" />
-																									<span className={`pl-3 d-flex flex-${deviceType?'column':'row'} align-items-${!deviceType?'end':(editingStoreField?'center':'end')} justify-content-between`}>
-																									{/* // <span className={`pl-3 d-flex flex-${deviceType?'column':'row'} align-items-${deviceType?'end':'end'} justify-content-between`}> */}
+																								<div
+																								className={`specific-store ${animatingThisStore} ${
+																									storeFieldsToRender.includes(sKey) ? 'store-container' : ''
+																								}`}
+																								style={{
+																									transform: showThisStore ? 'scaleY(1)' : 'scaleY(0)',
+																									opacity: showThisStore ? 1 : 0,
+																									height: showThisStore ? 'auto' : 0,
+																								}}
+																								>
+																									<hr className={`my-1 specific-store ${animatingThisStore}`} />
+																									<span className={`pl-3 d-flex flex-${deviceType?'column':'row'} align-items-${!deviceType?'end':(editingStoreField?'center':'end')} justify-content-between specific-store ${animatingThisStore}`}>
 																										<span className="w-100">
 																											<span className={`d-flex flex-column ${phone?'w-100':''}`}>
 																												<span className="bold-text text-nowrap">{titleCase(sKey)}:</span>
-
-																												{/* <span style={{whiteSpace: 'pre'}}>{' '}</span> */}
-																													{/* {(phone)&&
-																													// phone code prefix for mobile number
-																													<PhoneCode
-																													ukey={sKey}
-																													phoneCode={(sVal)?userInfo.phoneCode:''} />} */}
-
-																												{/* {console.log(`rendering editStore[${store.id}].${sKey}:`, editStore[store.id]?.[sKey])} */}
 																												{editingStoreField ?
 																												<span style={{whiteSpace: 'nowrap'}}>
-																													
 																														{(phone)&&
 																														// phone code prefix for mobile number
 																														<span style={{paddingLeft: '5%',}}>
@@ -1278,11 +987,8 @@ function Profile() {
 																														}}
 																														className={`form-control ${(!deviceType)?(sKey!=='description'?'w-80':'w-100'):(sKey==='store_phone_number'?'w-85':'w-100')}`}
 																														type="text"
-																														// type={getInputType(store.store_phone_number)}
 																														{...(sKey === 'store_phone_number' ? phoneProps : {})}
 																														/>}
-																													
-																													
 																												</span>
 																												:
 																												<span style={{whiteSpace: 'nowrap'}}>
@@ -1297,7 +1003,6 @@ function Profile() {
 																													<span
 																													style={{
 																														paddingLeft: phone?'':((deviceType&&storeVariablesMobileNoPad.includes(sKey))?'':'5%'),
-																														// display: 'inline-block',
 																														whiteSpace: 'pre-wrap',
 																														wordBreak: 'break-word',
 																														overflowWrap: 'break-word',
@@ -1307,11 +1012,6 @@ function Profile() {
 																														storeSentence?sentenceCase(sVal):
 																														titleCase(sVal))||'Not Provided.'}</span>
 																												</span>}
-																												{/* <br style={{display: 'block'}} />
-																												<p style={{display: 'block'}}>xxxxxyyyyyy</p> */}
-																												{/* <br />
-																												<span>...........</span>
-																												<br /> */}
 																											</span>
 																											{editingStoreField &&
 																													<span
@@ -1334,10 +1034,8 @@ function Profile() {
 																																{`${fieldStats[store?.id]?.[sKey]?.charCount}/${fieldStats[store?.id]?.[sKey]?.maxCharsLimit} chars`}
 																															</>)
 																														:null}
-																													
 																													</span>
 																												}
-																											
 																										</span>
 																										<span className={`${(isStoreTextArea?(!fieldStats[store?.id]?.[sKey]?.charCount?'pb-0':'pb-4'):(!fieldStats[store?.id]?.[sKey]?.charCount?'pb-0':'pb-3'))}`}>
 																											{storeVariables.includes(sKey)&&
@@ -1351,31 +1049,9 @@ function Profile() {
 																											isDisabled={isDisabled} />}
 																										</span>
 																									</span>
-																								</>}
-																								{/* {<hr className="my-1" />} */}
-																								{/* <span className="pl-3 d-flex flex-row align-items-center justify-content-between">
-																									<span>
-																										<span className="bold-text">{titleCase('nearest_bus_stop')}:</span> {store?.nearest_bus_stop||'Not Provided.'}
-																									</span>
-																									<EditFieldButton
-																									setEditFields={setEditFields}
-																									userKey={userKey}
-																									editField={editField}
-																									isDisabled={isDisabled} />
-																								</span> */}
-																								{/* <span className="pl-3 d-flex flex-row align-items-center justify-content-between">
-																									<span>
-																										<span className="bold-text">{titleCase('status')}:</span> {store?.store_status||'Not Provided.'}
-																									</span>
-																								</span> */}
-																								{/* <span className="pl-3 d-flex flex-row align-items-center justify-content-between">
-																									<span>
-																										<span className="bold-text">{titleCase('verified')}:</span> {store?.verified||'Not verified'}
-																									</span>
-																								</span> */}
-																								{/* <br /> */}
+																								</div>
+																								{/* } */}
 																							</>
-																							{/* <br /> */}
 																						</Fragment>
 																					)
 																				})}
@@ -1402,7 +1078,7 @@ function Profile() {
 														editField={editField}
 														isDisabled={isDisabled} />}
 													</span>
-												</p>
+												</div>
 												:
 
 												// input field view (edit view)
@@ -1429,12 +1105,6 @@ function Profile() {
 														<div
 														className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 														>
-															{/* <CountrySelect
-															id={userKey}
-															value={country}
-															onChange={(val) => setCountry(val)}
-															placeHolder="Select Country"
-															/> */}
 															<div className={deviceType?'':'w-75'}>
 																{CountryCompSelect}
 															</div>
@@ -1458,16 +1128,6 @@ function Profile() {
 															<div
 															className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 															>
-																{/* <StateSelect
-																id={userKey}
-																key={country?.id || "no-country"}
-																countryid={country?.id}
-																value={state}
-																onChange={(val) => {
-																	setState(val);
-																}}
-																placeHolder="Select State"
-																/> */}
 																<div className={deviceType?'':'w-75'}>
 																	{StateCompSelect}
 																</div>
@@ -1493,15 +1153,6 @@ function Profile() {
 																<div
 																className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
 																>
-																	{/* <CitySelect
-																	id={userKey}
-																	key={`${country?.id ?? "no-country"}-${state?.id ?? "no-state"}`}
-																	countryid={country?.id}
-																	stateid={state?.id}
-																	value={city}
-																	onChange={(val) => setCity(val)}
-																	placeHolder="Select City"
-																	/> */}
 																	<div className={deviceType?'':'w-75'}>
 																		{CityCompSelect}
 																	</div>
@@ -1607,13 +1258,6 @@ function Profile() {
 												</div>
 											}
 										</form>
-										{/* {(userKey==='state'&&!stateHasStates&&editFields["state"])?undefined:
-										(userKey==='city'&&(!stateHasStates||!stateHasCities)&&editFields["city"])?undefined:
-										<hr
-										style={{
-											marginTop: '0.8rem',
-											marginBottom: '0.8rem',
-											}} />} */}
 									</Fragment>
 								)}
 							)}
@@ -1626,14 +1270,11 @@ function Profile() {
 						style={{
 							marginTop: '0.5rem',
 							marginBottom: '0.5rem',
-							// backgroundColor: 'yellow',
-							// height: '5rem',
 							}} />
 							<div className={`d-flex ${deviceType?'flex-column':'flex-row'} align-items-center justify-content-around`}>
 								
 								<button
 								type="button"
-								// disabled
 								onClick={() => {navigate(`register-store/${userInfo?.id}`)}}
 								className="btn btn-sm btn-secondary d-block mt-2"
 								>
@@ -1643,50 +1284,31 @@ function Profile() {
 								{userInfo?.has_unfulfilled_installments &&
 								<button
 								type="button"
-								// disabled
 								onClick={() => {navigate(`installmental-payment`)}}
 								className="btn btn-sm btn-secondary d-block mt-2"
 								>
-									{/* {userInfo?.is_seller?'Add Another Store':'Become a Seller'} */}
 									Pay Installmental
-								</button>
-}
+								</button>}
+								{userInfo?.is_superuser &&
+								<button
+								type="button"
+								onClick={() => {navigate(`admin-dashboard`)}}
+								className="btn btn-sm btn-secondary d-block mt-2"
+								>
+									Admin Dashboard
+								</button>}
 								<button
 									type="button"
-									// disabled
-									onClick={() => {
-										// setSelectedFile(null);
-										// setPreviewURL(null);
-										// setFileName('No file chosen');
-										// setFormData(prev => ({
-										// 	...prev,
-										// 	previewURL: ''
-										// }))
-									}}
+									onClick={() => {}}
 									className="btn btn-sm btn-danger d-block mt-2"
 									>
 										Delete Account
 								</button>
-								{/* <button
-								type="submit"
-								className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
-								// disabled={
-								// 	!checkFields||
-								// 	// isEmailValid?.color!=='green'||
-								// 	loading||
-								// 	!previewURL||
-								// 	isStoreNameAvailable?.color!=='green'
-								// }
-								>
-									Become a Seller
-								</button> */}
 							</div>
 						<hr
 						style={{
 							marginTop: '0.5rem',
 							marginBottom: '0.5rem',
-							// backgroundColor: 'yellow',
-							// height: '5rem',
 							}} />
 					</>
 				</div>
@@ -1702,12 +1324,9 @@ function EditFieldButton({
 	userKey, editField, setEditFields, isDisabled,
 	onSubmitHandler, loading, handleUpload,
 	store=null}) {
-	// console.log('loading:', loading)
 	const deviceType = useDeviceType().width <= 576;
 	if (!userKey) return null;
 	if (userKey==='email') return null; // can't edit email for now
-	// console.log({store})
-	// console.log({editField})
 	return (
 		<span
 		className="d-flex align-items-center justify-content-center flex-row">
@@ -1717,11 +1336,9 @@ function EditFieldButton({
 			disabled={(store&&editField)?false:isDisabled}
 			style={{
 				padding: (deviceType&&userKey==='image_url')?'0.2rem 0.7rem':'0.25rem 0.7rem',
-				// borderRadius: (deviceType&&userKey==='image_url')?'30%':'5px',
 			}}
 			onClick={()=>{
 				if (store) {
-					// console.log(`toggling editStore[${store.id}].${store.field} from`, editField, 'to', !editField)
 					setEditFields(prev=>({
 						...prev,
 						[store.id]: {
@@ -1733,20 +1350,17 @@ function EditFieldButton({
 					setEditFields(prev=>{
 						if (userKey==='country') {
 							return ({
-								// ...prev,
 								country: !prev[userKey],
 								state: !prev[userKey],
 								city: !prev[userKey],
 							})
 						} else if (userKey==='state') {
 							return ({
-								// ...prev,
 								state: !prev[userKey],
 								city: !prev[userKey],
 							})
 						} else {
 							return ({
-							// ...prev,
 							[userKey]: !prev[userKey]
 							})
 						}
@@ -1784,9 +1398,7 @@ function EditFieldButton({
 }
 
 function PhoneCode({ukey, phoneCode}) {
-	// console.log({ukey, phoneCode})
 	if (ukey!=='mobile_no'&&ukey!=='store_phone_number') return
-	// console.log('rendering phone code for mobile number:', phoneCode)
 	return (
 		// phone code prefix for mobile number
 		<span
