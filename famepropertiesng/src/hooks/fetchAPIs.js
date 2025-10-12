@@ -23,7 +23,6 @@ function useImageKitAPIs() {
 	const getAPIs = async () => {
 		try {
 			const apiURL = getBaseURL(true) + "/get-imagekit-apis/";
-			// console.log("Fetching APIs from:", apiURL);
 
 			const apiResponse = await fetch(apiURL);
 			if (!apiResponse.ok) {
@@ -31,7 +30,6 @@ function useImageKitAPIs() {
 			}
 
 			const apiData = await apiResponse.json();
-			// console.log("API data fetched successfully:", apiData);
 			setData(apiData);
 		} catch (err) {
 			console.error("Error fetching data:", err);
@@ -45,7 +43,7 @@ function useImageKitAPIs() {
 		getAPIs();
 	}, []);
 
-  	return { data, loading, error };  // ✅ return something usable
+  	return { data, loading, error };  // return something usable
 }
 
 export { getBaseURL, useImageKitAPIs }
