@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "../sections/breadcrumb";
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useDeviceType } from "../../hooks/deviceType";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { BouncingDots } from "../../spinners/spinner";
 import { digitSeparator, titleCase } from "../../hooks/changeCase";
 import { useOutletContext } from 'react-router-dom';
 import { toast } from "react-toastify";
-import { getBaseURL } from "../../hooks/fetchAPIs";
 import { useConfirmTotals } from "../../hooks/formMethods/formMethods";
 
 const tableHeadArr = [
@@ -18,7 +17,6 @@ const tableHeadArr = [
 	"X"
 ]
 
-const baseURL = getBaseURL()
 const shipping = 1500
 
 function Cart() {
@@ -26,7 +24,6 @@ function Cart() {
 	const { handleAddToCart } = useOutletContext();
 	const { createLocal } = useCreateStorage()
 	const deviceType = useDeviceType().width <= 576;
-	// const [isImageLoading, setIsImageLoading] = useState({});
 	const [loadingImages, setLoadingImages] = useState({});
 	const userInfo = createLocal.getItem('fpng-user');
 	const [inputValue, setInputValue] = useState([]);
@@ -35,10 +32,8 @@ function Cart() {
 	const [isMounting, setIsMounting] = useState(true);
 	
 
-	// console.log({cartInStorage})
 	useEffect(() => {
 		const cartInStorage = createLocal.getItemRaw('fpng-cart')||[]
-		// console.log({cartInStorage})
 		setInputValue(cartInStorage);
 	}, [reload]);
 
@@ -78,19 +73,12 @@ function Cart() {
 			const updated = [...prev];
 			let currentValue = updated[index].nop;
 
-			// console.log({cart, index, currentValue})
 			// if user left it empty, reset to 1
 			if (currentValue === "" || currentValue === undefined) {
 				updated[index] = { ...updated[index], nop: 1 };
-				// createLocal.setItemRaw("fpng-cart", updated);
 			}
 			if (parseInt(currentValue) > parseInt(cart?.totalAvailable)) {
-				// toast.error(`Only ${cart?.totalAvailable} ${titleCase(cart?.name)} available in stock right now.`);
-				// console.log('exceeding available stock')
-				// reset to total available if exceeding available stock
 				updated[index] = { ...updated[index], nop: cart?.totalAvailable };
-				// createLocal.setItemRaw("fpng-cart", updated);
-				// runToast = true
 			}
 			createLocal.setItemRaw("fpng-cart", updated);
 			return updated;
@@ -125,7 +113,6 @@ function Cart() {
 			const newValue = Math.max(1, computedCurrVal);
 			updated[index] = { ...updated[index], nop: newValue };
 		}
-		// createLocal.setItemRaw("fpng-cart", updated);
 		return updated;
 	}
 	const currencySym = userInfo?.currencySymbol||'₦'
@@ -140,22 +127,16 @@ function Cart() {
 		setTotalAmount(total);
 	}, [inputValue]);
 
-	// console.log({inputValue});
-	// console.log({userInfo})
-	// console.log({totalAmount})
 	useEffect(() => {
-		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
 	const isInputReady = inputValue?.length
-	// console.log({currentTotalsAvailable})
 	const updatedTotalsAllGood = useConfirmTotals(inputValue)
 	console.log({updatedTotalsAllGood})
 	return (
 		<>
 			<Breadcrumb page={'Shopping Cart'} />
 
-			{/* <!-- Cart Start --> */}
 			{!isMounting ?
 			<div className="container-fluid mt-3"style={{
 				paddingLeft: deviceType ? 0 : '',
@@ -194,7 +175,6 @@ function Cart() {
 							<tbody className="align-middle">
 								{inputValue.map((cart, index) => {
 									const isLoading = loadingImages[cart?.prdId]
-									// console.log({cart})
 									const productMiniDetails = {
 										id: inputValue?.[index]?.prdId,
 										name: inputValue?.[index]?.name,
@@ -233,7 +213,7 @@ function Cart() {
 											{/* price */}
 											<td className="align-middle text-bg-color text-nowrap"
 											style={deviceType?styles.mobilePadding:{}}>
-												{currencySym} {digitSeparator(cart?.price?.split('.')[0])}
+												{currencySym} {digitSeparator(parseInt(cart?.price))}
 											</td>
 
 											{/* number of product items with controls */}
@@ -260,21 +240,12 @@ function Cart() {
 													<div className="input-group-btn">
 														<button className="btn btn-sm btn-primary btn-plus"
 														onClick={() => {
-															// console.log('clicked +')
 															const currQty = inputValue?.[index]?.nop
-															// console.log({
-															// 	inputValue,
-															// 	index,
-															// 	cart,
-															// 	currentNop: currQty,
-															// 	available: cart?.totalAvailable,
-															// })
 															if (currQty < cart?.totalAvailable) {
 																setInputValue(prev => handleStateFuncOnClicks(prev, index, '+'));
 																handleAddToCart(productMiniDetails, '+');
 																setReload(prev => !prev)
 															} else {
-																// console.log('exceeding available stock')
 																toast.error(`Only ${cart?.totalAvailable} ${titleCase(cart?.name)} available in stock right now.`);
 															}
 															}}>
@@ -283,7 +254,6 @@ function Cart() {
 													</div>
 												</div>
 											</td>
-											{/* <td className="align-middle">₦{item.total}</td> */}
 
 											{/* delete item button */}
 											<td className="align-middle"
@@ -352,14 +322,6 @@ function Cart() {
 								disabled={inputValue.length===0}
 								>
 									Proceed To Checkout
-									{/* <Link
-									type="button"
-									
-									to={"checkout"}
-									className="btn btn-block btn-primary font-weight-bold my-3 py-3"
-									>
-										Proceed To Checkout
-									</Link> */}
 								</button>
 							</div>
 						</div>
