@@ -1,5 +1,5 @@
 import { Breadcrumb } from '../sections/breadcrumb';
-import { UploadImageItem } from './imageKitUpload';
+import { UploadImageItem } from './adminImageKitUpload';
 
 function AdminDashboard() {
 	return (
