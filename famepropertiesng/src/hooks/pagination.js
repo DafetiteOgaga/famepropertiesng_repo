@@ -11,13 +11,7 @@ function Pagination({ pagination, onPageChange }) {
 										mode: null,
 									});
 	useEffect(() => {
-		// console.log(
-		// 	'\nloadRef:', loadRef.current,
-		// 	'\nload:', load,
-		// 	'\nloading:', loading
-		// )
 		if (loading && loadRef.current!==load) {
-			// console.log('Load changed, stop loading spinner');
 			setLoading({
 				action: false,
 				mode: null,
@@ -30,7 +24,6 @@ function Pagination({ pagination, onPageChange }) {
 	const getPageNumber = (url, mode) => {
 		if (!url) return mode==='-'?0:'x';
 		const params = new URL(url).searchParams;
-		// console.log(params.get("page")??0);
 		return parseInt(params.get("page")??1);
 	};
 
@@ -38,8 +31,6 @@ function Pagination({ pagination, onPageChange }) {
 	const prevPage = getPageNumber(prev, '-');
 	const showFirstPage = prevPage > 1
 	const showLastPage = nextPage < total_pages
-	// console.log({ prevPage, nextPage, total_pages, load});
-	// console.log({loading})
 
 	return (
 		<>
