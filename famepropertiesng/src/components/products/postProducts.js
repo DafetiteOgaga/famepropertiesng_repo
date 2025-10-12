@@ -2,20 +2,19 @@ import { useEffect, useState, useRef, forwardRef, useImperativeHandle, Fragment 
 import 'react-country-state-city/dist/react-country-state-city.css';
 import { Breadcrumb } from "../sections/breadcrumb";
 import { useDeviceType } from "../../hooks/deviceType";
-import { Link, useNavigate } from 'react-router-dom';
 import { titleCase } from "../../hooks/changeCase";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../hooks/fetchAPIs";
-import { useImageKitAPIs } from "../../hooks/fetchAPIs";
+import { useAuthFetch } from "../loginSignUpProfile/authFetch";
 import { ImageCropAndCompress } from "../../hooks/fileResizer/ImageCropAndCompress";
 import { BouncingDots } from "../../spinners/spinner";
-import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { inputArr, isFieldsValid } from "./productFormInfo";
 import { toTextArea, limitInput, isEmpty, getCategories,
 			onlyNumbers
 } from "../../hooks/formMethods/formMethods";
 import { Listbox } from "@headlessui/react";
+import { useUploadToImagekit } from "../imageServer/uploadToImageKit";
 
 const baseURL = getBaseURL();
 
@@ -38,13 +37,13 @@ const initialFormData = () => ({
 })
 
 function PostProduct() {
+	const authFetch = useAuthFetch();
 	const trackEmptyFormsRef = useRef([]);
 	const formImageCountRef = useRef(null);
 	const [checkReadiness, setCheckReadiness] = useState(false);
 	const { createLocal, createSession } = useCreateStorage()
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
-	const navigate = useNavigate();
 	const [selectData, setSelectData] = useState({storeID: ''})
 	const [submittedForm, setSubmittedForm] = useState([]);
 	const [sections, setSections] = useState([0]); // start with one section
@@ -59,16 +58,12 @@ function PostProduct() {
 	const userInfo = createLocal.getItem('fpng-user')
 	const storesArr = userInfo?.store
 	const categoriesArr = createSession.getItem('fpng-catg')
-	// console.log({categoriesArr})
 	const categories = getCategories(categoriesArr);
-	// console.log({categories})
 
 	// handles final form submission
 	const onSubmitToServerHandler = async (e=null) => {
 		if (e) e.preventDefault();
 
-		// console.log('Submitting form to server with data ...');
-		// console.log('set loading to true (onSubmitToServerHandler) ...')
 		setLoading(true);
 
 		// clean data: trim strings and convert to lowercase except for certain fields
@@ -77,7 +72,7 @@ function PostProduct() {
 				// check and track empty forms
 				if (isEmpty(formObj)) return null; // skip empty forms
 
-				// clean data
+				// cleaning the data
 				const cleanedData = {};
 				Object.entries(formObj)
 					.forEach(([key, value]) => {
@@ -101,57 +96,39 @@ function PostProduct() {
 					return acc
 				}, {})
 				cleanedData['productCategories'] = checkedCat;
-				// setSelectData({storeID: ''}) // reset select data after transferring to cleaned data
 
-				// console.log('Submitting form with cleaned data:', cleanedData);
 				return cleanedData;
 			}).filter(item => item !== null);;
 
-
-		// setLoading(false);
-		// return
+		console.log(cleanedDataArray);
 
 		try {
-			const response = await fetch(`${baseURL}/products/`, {
+			const response = await authFetch(`${baseURL}/products/`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(cleanedDataArray),
+				body: cleanedDataArray,
 			});
 
-			if (!response.ok) {
-				const errorData = await response.json();
-				setIsError(errorData?.error)
-				// console.log('set loading to false !response.ok (onSubmitToServerHandler) ...')
-				setLoading(false);
-				console.warn('Product Creation Error:', errorData);
-				toast.error(errorData?.error || 'Product Creation Error!');
-				return;
-			}
-			const data = await response.json();
-			// console.log('Response data from server',data)
+			const data = await response // .json();
+			if (!data) return
 			toast.success(
 				<div>
 					Successful.<br />
 					<strong>{titleCase('')} Product Created!</strong>
 				</div>
 			);
-			// console.log('Product Created Successfully:', data);
-			////// clear all values ////////
 			// clear all child forms
 			trackEmptyFormsRef.current = []; // reset empty forms tracking
 			formImageCountRef.current = null; // reset form image tracking
 			setSubmittedForm([]); // reset submitted form data
 			renderedFormIDs.current = []; // reset rendered form IDs tracking
-			// setRenderedFormIDChanged(prev => !prev) // trigger re-render
 			setSections([0]); // reset to one section
+
 			// reset first images tracking
 			firstImages.current = [];
 
 			// reset all child forms via refs
 			productSectionRefs.current.forEach(ref => {
-				// console.log('Resetting child form via ref ...')
 				if (ref && ref.resetForm) {
-					// console.log('Calling resetForm on child ref ...')
 					ref.resetForm();
 				}
 			});
@@ -168,22 +145,12 @@ function PostProduct() {
 			setTimeout(() => {
 				window.location.reload();
 			}, 100);
-			// clear timeout if component unmounts before reload
-			// return () => clearTimeout(reload), data;
-
-			// Note: don’t reset formData state here as its managed in each child
-			// instance instead,
-			// and we already reset each child via its ref above
-			// if you set formData here,
-			// it will override the child state on next render
-			// navigate to products page after short delay
 			return data;
 		} catch (error) {
 			console.error("Error during Product Creation:", error);
 			toast.error('Error! Product Creation Failed. Please try again.');
 			return null;
 		} finally {
-			// console.log('set loading to false in finally (onSubmitToServerHandler) ...')
 			setLoading(false);
 		}
 	}
@@ -191,9 +158,6 @@ function PostProduct() {
 	// auto submit form when formData has url and fileID filled
 	// (i.e when image has been uploded to cloud)
 	useEffect(() => {
-		// console.log('#####'.repeat(14));
-		// console.log('formData:', submittedForm);
-		// console.log('formimageCountRef:', formImageCountRef.current);
 		if (submittedForm.length===formImageCountRef?.current?.length) {
 			const allUploadedImagesReady = formImageCountRef?.current?.every(formEntry => {
 				const formObj = submittedForm.find(f => f.id === formEntry.id);
@@ -202,37 +166,24 @@ function PostProduct() {
 				return formEntry.uploadedImgIdx.every(idx => {
 					const imageUrlVal = formObj[`image_url${idx}`];
 					const fileIdVal = formObj[`fileId${idx}`];
-					// console.log(`Checking image url and file id at index ${idx} for form ${formObj.id}:`, !!imageUrlVal, !!fileIdVal);
 					const bValue = Boolean(imageUrlVal && fileIdVal);
-					// console.log(`Image at index ${idx} is ready for form ${formObj.id}:`, bValue);
 					return bValue;
 				});
 			});
-			// console.log('#####'.repeat(10));
-			// console.log('All uploaded images ready:', allUploadedImagesReady);
 			if (allUploadedImagesReady) {
 				onSubmitToServerHandler(); // auto submit on image upload
 				formImageCountRef.current = null; // reset
 			}
-			// else console.log('Not all images are ready yet, waiting...');
 		}
-		// else console.log('waiting for other forms to upload images ...');
-		// console.log('#####'.repeat(14));
 	}, [checkReadiness]);
 
 	// handle form submission on button click
 	const handleSubmittingProcessedImagesWithForm = async (e) => {
 		e.preventDefault();
-		// console.log('set loading to true (handleSubmittingProcessedImagesWithForm) ...')
 		setLoading(true);
 
-		// console.log("called handleSubmittingProcessedImagesWithForm from parent ...");
-
 		// trigger child to upload images and submit form
-		// console.log("Triggering image upload in all sections ...");
-		// console.log({sections})
 		for (let i = 0; i < sections.length; i++) {
-			// console.log(`Triggering upload for section index: ${i} (array position: ${i})`);
 			if (productSectionRefs.current[i]) {
 				await productSectionRefs.current[i].triggerUpload();
 			}
@@ -271,11 +222,8 @@ function PostProduct() {
 
 	// Remove the last section/form or specific index
 	const handleRemoveSection = (index=-1) => {
-		// console.log('Removing section at index:', index);
 		setSections(prev => {
 			const copy = [...prev]; // make a shallow copy so we don’t mutate React state directly
-			const copyLength = copy.length;
-			// console.log('Current sections length:', copyLength);
 
 			if (copy.length <= 1) {
 				// safeguard: don’t allow removing the only remaining section
@@ -319,18 +267,7 @@ function PostProduct() {
 		});
 	};
 
-	// const handleFirstImageSelected = (isFirstImages) => {
-	// 	firstImages.current.push(isFirstImages);
-	// }
-
 	const handleFieldsValidation = () => {
-		const areInstancesValid = Object.entries(submittedForm).map(([key, value]) => {
-			// console.log({key, value})
-			const fieldId = value.id;
-			const isValid = isFieldsValid({formData: value});
-			return { fieldId, isValid };
-		})
-		// const allValid = areInstancesValid.every(item => item.isValid);
 		const allFormsFirstImageSelected = firstImages.current.every(obj => obj.selected)&&
 											// or maybe i should use renderedFormIDs.length (its still consistent with instant updates)
 											sections.length===firstImages.current.length;
@@ -344,49 +281,13 @@ function PostProduct() {
 
 	useEffect(() => {
 		const renderedFormsIDs = renderedFormIDs?.current?.map(form=>form.id)||[];
-		// console.log('Rendered form IDs changed, checking first images selected ...', renderedFormsIDs);
 		firstImages.current = firstImages.current.filter(obj => renderedFormsIDs.includes(obj.id));
-		// console.log('Tracking first images selected for forms:', firstImages.current);
 	}, [renderedFormIDChanged])
-	// // track current form ID
-	// const handleCurrentFormID = (id) => {
-	// 	console.log({id})
-	// }
-
-	// console.log('formdata from child:\n'.repeat(5), submittedForm)
-	// console.log('renderedFormIDs', renderedFormIDs.current)
-	// console.log('productSectionRefs:', productSectionRefs.current)
-	// console.log({sections: sections.length, submittedForm: submittedForm.length})
-	// console.log('sections length:', sections.length)
-	// console.log('trackEmptyFormsRef:\n'.repeat(2), trackEmptyFormsRef.current)
-	// console.log({checkFields})
-	// console.log(
-	// 	'\nfirstImages:', firstImages,
-	// 	'\nall', `(${firstImages.current.length})`,
-	// 	'true:', firstImages.current.every(obj => obj.selected),
-	// 	`\nsections(${sections.length}) = firstImages(${firstImages.current.length}):`, sections.length===firstImages.current.length,
-	// 	'\ncheckFields:', checkFields,
-	// 	'\nrenderedFormIDs:', renderedFormIDs.current,
-	// )
-	// console.log({userInfo})
 	useEffect(() => {
-		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
 	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
-	// console.log({checkCategory, isCategoryEmpty})
-	// const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
-	// 	if (value) acc[key] = value
-	// 	return acc
-	// }, {})
-	// console.log({checkedCat})
 	const selectedStoreNme = storesArr?.find(store => store.id.toString()===selectData.storeID.toString())?.store_name
-	// console.log({selectData})
-	// console.log({
-	// 	storesArr,
-	// 	foundstore: storesArr?.find(store => store.id.toString()===selectData.storeID.toString()),
-	// })
-	// console.log({selectedStoreNme})
 	return (
 		<>
 			<Breadcrumb page={'Post-Product(s)'} />
@@ -394,7 +295,6 @@ function PostProduct() {
 			{!isMounting ?
 			<form
 			onSubmit={handleSubmittingProcessedImagesWithForm}
-			// className="container-fluid"
 			style={
 				!deviceType?
 					{
@@ -408,10 +308,6 @@ function PostProduct() {
 					width: deviceType?'':'90%',
 				}}>
 					<h5 className="text-uppercase mb-3">
-						{/* <span className="bg-secondary pr-3"
-						style={{color: '#475569'}}>
-							Post Products
-						</span> */}
 					</h5>
 					<div className={`bg-light ${deviceType?'p-18':'p-30'} mb-5`}
 					style={{borderRadius: '10px'}}>
@@ -441,7 +337,6 @@ function PostProduct() {
 								<ProductSection
 								ref={el => (productSectionRefs.current[i] = el)}
 								renderedFormIDs={renderedFormIDs}
-								// handleCurrentFormID={handleCurrentFormID}
 								submittedForm={submittedForm}
 								setRenderedFormIDChanged={setRenderedFormIDChanged}
 								setSubmittedForm={handlSubmittedForm}
@@ -453,7 +348,6 @@ function PostProduct() {
 								onSubmitToServerHandler={onSubmitToServerHandler} />
 
 								<hr
-								// className="bg-lite"
 								style={{borderTop: '1px dashed #ccc', margin: '2rem 0'}} />
 							</Fragment>
 						)})}
@@ -483,9 +377,9 @@ function PostProduct() {
 							</select> */}
 							<div style={{ position: "relative", width: "100%" }}>
 								<Listbox
-								value={selectData.storeID}
-								onChange={(val)=>setSelectData({storeID: val})}
-								disabled={loading||!storesArr?.length}>
+									value={selectData.storeID}
+									onChange={(val)=>setSelectData({storeID: val})}
+									disabled={loading||!storesArr?.length}>
 
 									{/* Hidden input for form submission */}
 									<input
@@ -505,7 +399,10 @@ function PostProduct() {
 										backgroundColor: "#fff",
 										textAlign: "left",
 										cursor: "pointer",
-										color: '#6c757d'
+										color: '#6c757d',
+										overflow: "hidden",
+										textOverflow: "ellipsis",
+										whiteSpace: "nowrap",
 									}}
 									>
 										{selectedStoreNme || "-- Select a Store --"}
@@ -562,11 +459,6 @@ function PostProduct() {
 							style={{
 								marginLeft: deviceType?'0':'',
 								marginRight: deviceType?'0':'',
-								// maxHeight: 200,
-								// overflowY: 'auto',
-								// border: '1px solid #ccc',
-								// padding: deviceType?'0.5rem':'1rem',
-								// borderRadius: 10,
 							}}>
 								{categories.map((cat, catIdx) => {
 									return (
@@ -579,7 +471,6 @@ function PostProduct() {
 												<label className="d-flex hover-checkbox mb-0"
 												style={{ cursor: "pointer", gap: 3 }}>
 													<input
-													// style={{fontSize: 20}}
 													type="checkbox"
 													checked={!!checkCategory[cat]} // check if this category is true
 													onChange={() =>
@@ -643,7 +534,6 @@ function PostProduct() {
 	)
 }
 const ProductSection = forwardRef(({renderedFormIDs,
-									// handleCurrentFormID,
 									setSubmittedForm,
 									submittedForm,
 									setRenderedFormIDChanged,
@@ -654,18 +544,16 @@ const ProductSection = forwardRef(({renderedFormIDs,
 									checkFirstImageSelected,
 									setCheckReadiness},
 									ref) => {
-	const baseAPIURL = useImageKitAPIs()?.data;
 	const [formData, setFormData] = useState(initialFormData);
 	const [fieldStats, setFieldStats] = useState({})
 	const [selectedFiles, setSelectedFiles] = useState([]);
 	const [uploadedImages, setUploadedImages] = useState([]); // imagekit response like {image_url, fileId}
 	const [imagePreviews, setImagePreviews] = useState([]);
-	const [isFirstImages, setIsFirstImages] = useState([]); // track if first image for all forms are selected
+	const postToImagekit = useUploadToImagekit();
 
 	// reset form data
 	const resetForm = () => {
 		setFormData(initialFormData)
-		// console.log('Form reset to initial state ...');
 		handleSendFormToParent()
 	};
 
@@ -737,14 +625,6 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			id: `product_image3_${formData.id}`,
 			label: "Product Image 3",
 		},
-		// {
-		// 	id: `product_image4_${formData.id}`,
-		// 	label: "Product Image 4",
-		// },
-		// {
-		// 	id: `product_image5_${formData.id}`,
-		// 	label: "Product Image 5",
-		// }
 	]
 
 	const imageLength = imageCropAndCompressArrDetails.length;
@@ -752,20 +632,13 @@ const ProductSection = forwardRef(({renderedFormIDs,
 	useEffect(() => {
 		setSelectedFiles(new Array(imageLength).fill(null));
 		setUploadedImages(new Array(imageLength).fill(null));
-		// setImagePreviews(new Array(imageLength).fill(false));
 	}, [imageCropAndCompressArrDetails.length])
-
-	// notify parent if first image is selected for this form instance
-	// const handleFirstImageSelected = (func) => {
-	// 	func(isFirstImages);
-	// }
 
 	// track if first image is selected for all forms
 	// and if first image is closed reset all other images (per form instance)
 	useEffect(() => {
 		// clear all images if first image is closed
 		if (selectedFiles[0] === null) {
-			// console.log('Resetting all image fields as first image is closed ...');
 			setSelectedFiles(new Array(imageLength).fill(null));
 
 			// remove from isFirstImages if it exists
@@ -776,21 +649,11 @@ const ProductSection = forwardRef(({renderedFormIDs,
 		// track if first image is selected for all forms
 		if (selectedFiles[0] instanceof Blob || selectedFiles[0] instanceof File) {
 			const prev = checkFirstImageSelected.current || [];
-			// console.log('checkinhg if first image exists in tracking array ...')
 			const exists = prev.some(obj => obj.id === formData.id);
-			// console.log('')
-			// console.log({exists})
 			if (!exists) {
-				// console.log('Tracking first image selection for this form instance ...')
 				checkFirstImageSelected.current = [...prev, { id: formData.id, selected: true }];
 			}
 		}
-		// else console.log('First image not selected ...')
-		// else {
-		// 	// remove from isFirstImages if it exists
-		// 	const prev = checkFirstImageSelected.current || [];
-		// 	checkFirstImageSelected.current = prev.filter(obj => obj.id !== formData.id);
-		// }
 	}, [selectedFiles[0]]);
 
 	// updates images instance details in formData whenever they change
@@ -838,7 +701,6 @@ const ProductSection = forwardRef(({renderedFormIDs,
 	// with the image URLs and fileIds (via onSubmitToServerHandler())
 	const handleImageUploadToCloud = async (e=null) => {
 		if (e) e.preventDefault();
-		// console.log('set loading to true (handleImageUploadToCloud) ...')
 		setLoading(true);
 
 		// collect all files into an array
@@ -849,82 +711,47 @@ const ProductSection = forwardRef(({renderedFormIDs,
 				}))
 				.filter(item => item.file); // only keep ones with actual files
 
-		// console.log("Files to upload:", files);
-
-
-		// update formImageCountRef to track which forms have which image indexes
-		// so we can track (and delay submission of incomplete data such as
-		// images urls and fileIDs until) when all images for a form are uploaded
-		// and these data is in the formData state
-
 		// initialze formImageCountRef if null
 		if (!formImageCountRef.current) {
-			// console.log('Initializing formImageCountRef');
 			formImageCountRef.current = [];
 		}
 
 		// check if entry for this form ID already exists
 		const existingEntryIndex = formImageCountRef.current.findIndex(entry => entry.id === formData.id);
-		// console.log('Existing entry index:', existingEntryIndex);
 
 		// update if exists, else add new
 		if (existingEntryIndex >= 0) {
 			// update existing form entry
-			// console.log('Updating existing form entry in formImageCountRef');
 			formImageCountRef.current[existingEntryIndex].uploadedImgIdx = files.map(item => item.idx);
 		} else {
 			// add new form entry
-			// console.log('Adding new form entry to formImageCountRef');
 			formImageCountRef.current.push({
 				id: formData.id,
 				uploadedImgIdx: files.map(item => item.idx),
 			});
 		}
-		// console.log("Files to upload indexes:", formImageCountRef.current);
 
 		// only upload if there's at least first file selected
 		if (selectedFiles[0] instanceof Blob || selectedFiles[0] instanceof File) {
-			// console.log("File(s) ready for upload:", files);
 			try {
 				// upload each file one by one
 				for (let i = 0; i < files.length; i++) {
-					// get authentication signature from backend
-					const authData = await authenticator();
-					if (!authData) throw new Error("Failed to get ImageKit auth data");
-					// console.log("Auth data for upload:", authData);
-
 					const { file, idx } = files[i];
-					// console.log(`Uploading file ${i + 1}:`, file);
-
-					const imageFormData = new FormData();
-					imageFormData.append("file", file);
-					imageFormData.append("fileName", `product_${i + 1}.jpg`);
-					imageFormData.append("folder", "products");
-					imageFormData.append("publicKey", baseAPIURL?.IMAGEKIT_PUBLIC_KEY);
-					imageFormData.append("signature", authData.signature);
-					imageFormData.append("expire", authData.expire);
-					imageFormData.append("token", authData.token);
-
-					const uploadResponse = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
-						method: "POST",
-						body: imageFormData,
+					console.log(`Uploading file ${i + 1}:`, file);
+					const imageKitResponse = await postToImagekit({
+						selectedFile: file,
+						fileName: `product_${i + 1}.jpg`,
+						folder: "products"
 					});
-
-					if (!uploadResponse.ok) {
-						const errorText = `Upload failed for file ${i + 1}`;
-						console.warn(errorText, uploadResponse);
-						toast.error(errorText);
-						continue; // move to next file instead of stopping everything
+					if (!imageKitResponse) {
+						setLoading(false);
+						return; // upload failed, stop here
 					}
-
-					const result = await uploadResponse.json();
-					console.log(`Upload successful for file ${i + 1}:`, result);
-					toast.success(`Upload successful for file ${i + 1}: ${result.name.slice(0,15)}...`);
 					setUploadedImages(prev => {
 						const newUploadedImages = [...prev];
-						newUploadedImages[idx] = result;
+						newUploadedImages[idx] = imageKitResponse;
 						return newUploadedImages;
-					}); // store response in the corresponding uploadedImage state
+					});
 				}
 				// uploadedImages state will update formData with the result (containing image url and fileID)
 				// via useEffect above
@@ -939,7 +766,6 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			}
 		} else {
 			// just submit if no file to upload
-			// console.log("No file selected, skipping upload.");
 			onSubmitToServerHandler(); // submit form after successful upload
 		}
 	};
@@ -947,10 +773,8 @@ const ProductSection = forwardRef(({renderedFormIDs,
 	// expose triggerUpload method to parent via ref
 	useImperativeHandle(ref, () => ({
 		triggerUpload: async (...args) => {
-			// console.log("BBBBB triggerUpload started".repeat(5));
 			try {
 				const result = await handleImageUploadToCloud(...args);
-				// console.log("BBBBB triggerUpload ended".repeat(5));
 				return result;
 			} catch (error) {
 				console.error("BBBBB triggerUpload failed:".repeat(5), error);
@@ -972,7 +796,7 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			newFiles[index] = file;
 			return newFiles;
 		});
-		// try handling sending file check for 1st file here
+
 	};
 	const handlePreviewImage = (index, preview) => {
 		setImagePreviews(prev => {
@@ -984,20 +808,12 @@ const ProductSection = forwardRef(({renderedFormIDs,
 
 	// send form data to parent whenever formData changes
 	const handleSendFormToParent = () => {
-		// console.log('Sending form data to parent');
-		// console.log({formData})
 		setSubmittedForm(formData)
-		// handleFirstImageSelected(checkFirstImageSelected)
 	}
 
 	// check if all fields are empty (skipping id)
 	useEffect(() => {
 		// check if all fields (except id) are empty strings
-		// const allEmpty = Object.entries(formData).every(([key, value]) => {
-		// 	if (key === 'id') return true // skip id
-		// 	return value === '' // check others are empty strings
-		// })
-		// console.log({allEmpty})
 		const isFormTracked = renderedFormIDs.current.find(form=>form.id===formData.id)
 
 		// track rendered form IDs (used for dynamic rendering and removal of forms in parent)
@@ -1008,9 +824,6 @@ const ProductSection = forwardRef(({renderedFormIDs,
 			});
 			setRenderedFormIDChanged(prev => !prev) // trigger re-render
 		}
-
-		// console.log('current form:XXXXXXX\n'.repeat(5), formData);
-		// console.log('existing forms:ZZZZZ\n'.repeat(5), submittedForm);
 
 		// only send to parent if some fields are filled (i.e form not empty)
 		if (!isEmpty(formData)) {
@@ -1029,14 +842,6 @@ const ProductSection = forwardRef(({renderedFormIDs,
 		// reload parent component to fetch updated data
 		setCheckReadiness(prev => !prev);  // only toggle once data is in sync
 	}, [formData])
-	// console.log({formData})
-	// console.log('uploadedImages array:', uploadedImages)
-	// // console.log({checkFields})
-	// console.log('selectedFiles array:', selectedFiles)
-	// console.log('imagePreviews array:', imagePreviews)
-	// console.log('formImageCountRef:', formImageCountRef?.current);
-	// // console.log({numberOfImages})
-	// console.log('isFirstImages:', isFirstImages)
 	return (
 		<>
 			<div className="row">
@@ -1146,19 +951,7 @@ const ProductSection = forwardRef(({renderedFormIDs,
 		</>
 	)
 })
-function BouncingSpinner() {
-	return (
-		<>
-			<span
-			style={{
-				display: 'inline-block',
-				marginLeft: '0.5rem',
-			}}>
-				<BouncingDots size="vm" color="#475569" p="0" />
-			</span>
-		</>
-	)
-}
+
 function Note() {
 	return (
 		<>
