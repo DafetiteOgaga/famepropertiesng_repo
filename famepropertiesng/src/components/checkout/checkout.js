@@ -307,11 +307,11 @@ function Checkout() {
 			}
 			console.log('Response data from server',data)
 			setCheckoutResp(data);
-			toast.success(
-				<div>
-					Successful.
-				</div>
-			);
+			// toast.success(
+			// 	<div>
+			// 		Successful.
+			// 	</div>
+			// );
 			setLoading(false)
 			return data;
 		} catch (error) {
