@@ -1,15 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useDeviceInfo } from '../hooks/deviceType';
 import { useCheckLoginValidity } from '../hooks/checkLoginValidity';
-// import { TestSpinners } from '../spinners/spinner';
-// import { StarRating } from '../hooks/handleStars';
 
 function PageNotFound() {
 	const deviceInfo = useDeviceInfo()
 	const checkLoginValidity = useCheckLoginValidity()
-	// console.log({deviceInfo})
-	// const location = useLocation().pathname.split("/").pop();
-	// const [products, setProducts] = useState([]);
 	return (
 		<>
 			{/* Breadcrumb Start */}
@@ -32,17 +27,12 @@ function PageNotFound() {
 				}}>
 				<h2
 				style={{color: '#475569',}}>Oopsy!</h2>
-				{/* <h2
-				className="text-uppercase"
-				style={{color: '#475569',}}>Page Not Found</h2> */}
 			</div>
 			<div className="container-fluid"
 			style={{
 				display: 'flex',
 				justifyContent: 'center',
 				}}>
-				{/* <h2
-				style={{color: '#475569',}}>Oopsy!</h2> */}
 				<h2
 				className="text-uppercase"
 				style={{color: '#475569',}}>Page Not Found</h2>
@@ -69,14 +59,6 @@ function PageNotFound() {
 				}}>
 				<h3 style={{color: '#475569', fontSize: 16, textAlign: 'center'}}>{checkLoginValidity}</h3>
 			</div>
-			{/* <div className="container-fluid"
-			style={{
-				display: 'flex',
-				justifyContent: 'center',
-				}}>
-				<StarRating rating={63} />
-			</div> */}
-			{/* <TestSpinners /> */}
 		</>
 	)
 }
