@@ -1,12 +1,11 @@
 import { useState, useEffect, Fragment, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDeviceType } from '../../hooks/deviceType';
-import { getImage } from '../../hooks/baseImgUrl';
+import { useAuthFetch } from '../loginSignUpProfile/authFetch';
 import { digitSeparator, titleCase } from '../../hooks/changeCase';
 import { getBaseURL } from '../../hooks/fetchAPIs';
 import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { BouncingDots } from '../../spinners/spinner';
-import { toast } from 'react-toastify';
 import { useOutletContext } from 'react-router-dom';
 import { StarRating, convertLikesToStars } from '../../hooks/handleStars';
 import { Pagination } from '../../hooks/pagination';
@@ -25,16 +24,6 @@ const productsActionArr = [
 		click: 'like',
 		type: 'button'
 	},
-	// {
-	// 	icon: "fa fa-sync-alt",
-	// 	url: '#####',
-	// },
-	// "fa fa-search",
-	// "fa fa-search-plus",
-	// {
-	// 	icon: "fa fa-images",
-	// 	url: 'detail',
-	// },
 	{
 		icon: "fa fa-expand",
 		url: "detail",
@@ -56,15 +45,10 @@ const checkproductRating = (productId, productRatingArr) => {
 	}
 	return false;
 }
-const totalNoOfReviewers = (arr) => {
-	if (!arr?.length) return 0;
 
-	return arr.reduce((acc, curr) => {
-		return acc + (curr.liked ? 1 : 0)
-	}, 0);
-}
 // const productStar = "fa fa-star"
 function Products() {
+	const authFetch = useAuthFetch();
 	const [activeProductId, setActiveProductId] = useState(null);
 	const hasValue = useRef(false);
 	const { handleAddToCart } = useOutletContext();
@@ -89,11 +73,6 @@ function Products() {
 	const categoryName = parameters?.productname
 	// ?.split('-').join(' ');
 
-	// useEffect(() => {
-	// 	sessionStorage.removeItem('fpng-prod'); // to force re-fetch of total users on next login
-	// }, []);
-	// console.log({userInfo})
-
 	// handles image loading state
 	const handleImageLoad = (id) => {
 		setLoadingImages(prev => ({ ...prev, [id]: false }));
@@ -110,26 +89,22 @@ function Products() {
 		// console.log(`Fetching data from endpoint: ${endpoint}`);
 		const config = {
 			method: isLike?'POST':'GET',
-			body: isLike?JSON.stringify({
-				userId: userInfo.id,
-				productId: isLike,
-				liked: true,
-			}):null,
+			body: isLike ? {
+						userId: userInfo.id,
+						productId: isLike,
+						liked: true,
+					}:null,
 		}
 		// console.log({isLike})
 		try {
-			const prodRes = await (fetch(`${baseURL}/${endpoint}${endpoint.includes('?')?'':'/'}`,
-				{
-					...config,
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				}
-			));
-			if (!prodRes.ok) {
-				throw new Error("Network response was not ok");
-			}
-			const prodData = await prodRes.json();
+			const prodRes = await authFetch(`${baseURL}/${endpoint}${endpoint.includes('?')?'':'/'}`,
+				{...config}
+			);
+			// if (!prodRes.ok) {
+			// 	throw new Error("Network response was not ok");
+			// }
+			const prodData = await prodRes // .json();
+			if (!prodData) return
 			if (isLike) {
 				// console.log('Response from server:', prodData);
 				// console.log({productItemArr})
@@ -266,18 +241,6 @@ function Products() {
 		}
 		return false;
 	}
-
-	// useEffect(() => {
-	// 	const handleBeforeUnload = (event) => {
-	// 		console.log('Cleaning up local storage before unload...');
-	// 		createLocal.removeItem('fpng-prod');
-	// 		createLocal.removeItem('fpng-tprd');
-	// 	};
-	// 	window.addEventListener("beforeunload", handleBeforeUnload);
-	// 	return () => {
-	// 		window.removeEventListener("beforeunload", handleBeforeUnload);
-	// 	};
-	// }, []);
 
 	// console.log({productItemArr, categoryArr})
 	const productArray = categoryName ? categoryArr : productItemArr
@@ -442,7 +405,9 @@ function Products() {
 										</div>}
 									</div>
 									<div className="text-center py-4">
-										<p className="h6 text-decoration-none text-truncate px-2">{titleCase(productObjItem.name)}</p>
+										<p className="h6 text-decoration-none text-truncate px-2">
+											{titleCase(productObjItem.name)}
+										</p>
 										<div className="d-flex align-items-center justify-content-center mt-2"
 										style={{
 											display: 'flex',
@@ -487,23 +452,6 @@ function Products() {
 					</div>
 				</div>
 				:
-				// (isMobile?
-				// 	((Array.from({length: 2})).map((_, index) => {
-				// 	return (
-				// 		<div to={"detail"} key={index} className="col-lg-3 col-md-4 col-sm-6 pb-1"
-				// 		style={{paddingLeft: 0,
-				// 				paddingRight: 0,}}>
-				// 				{(Array.from({length: 4}).map((_, innerIndex) => {
-				// 					return (
-				// 							<div key={innerIndex} className={`product-item bg-light mb-4`}
-				// 							style={{borderRadius: '10px'}}>
-				// 								<BouncingDots size={"lg"} color={"#475569"} p={"10"} />
-				// 							</div>
-				// 				)}))}
-				// 		</div>
-				// 	)
-				// 	}))
-				// :
 				<BouncingDots size={isMobile?"sm":"lg"} color={"#475569"} p={isMobile?"8":"12"} />
 			}
 		</div>
