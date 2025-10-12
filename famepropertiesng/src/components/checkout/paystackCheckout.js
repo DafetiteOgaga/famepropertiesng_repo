@@ -1,17 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getBaseURL } from "../../hooks/fetchAPIs";
 import { BouncingDots } from "../../spinners/spinner";
 import { useNavigate } from "react-router-dom";
+import { useAuthFetch } from "../loginSignUpProfile/authFetch";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 
 
 const baseURL = getBaseURL();
 
 const PaystackCheckout = ({ checkoutData }) => {
+	console.log('entry:', {checkoutData})
+	const referenceRef = useRef(false); // to ensure reference generation runs only once
+	const authFetch = useAuthFetch();
 	const { createSession } = useCreateStorage();
 	const navigate = useNavigate();
-	console.log({ checkoutData });
-	// const [loading, setLoading] = useState(false);
 	const [showOverlay, setShowOverlay] = useState(false);
 	const [paymentStatus, setPaymentStatus] = useState("pending"); // new state
   	const [details, setDetails] = useState(null); // product + thumbnail
@@ -19,30 +21,31 @@ const PaystackCheckout = ({ checkoutData }) => {
 		if (checkoutData?.reference) {
 			handlePay()
 		}
-	}, [checkoutData?.reference])
-	console.log("PaystackCheckout component rendered with props\n:", { checkoutData, amount: checkoutData?.amount });
+	}, [])
+	console.log({ref_sent: checkoutData?.reference})
 	if (!checkoutData?.reference) return null;
 
-	// return null
-
 	const isPK = createSession.getItem('fpng-pspk')
+	console.log({isPK})
 	const pollPaymentStatus = (reference) => {
 		const interval = setInterval(async () => {
 			try {
-				const res = await fetch(`${baseURL}/checkout-status/${reference}/`);
-				if (!res.ok) throw new Error("Network response was not ok");
-		
-				const data = await res.json();
+				const res = await authFetch(`${baseURL}/verify-payment/${reference}/`);
+
+				const data = await res // .json();
+				if (!data) return
 				console.log("Polled payment status:", data);
-		
-				setPaymentStatus(data.status);
-				setDetails(data.productDetails);
-		
+
+				setPaymentStatus(data?.status);
+				setDetails(data?.productDetails);
+
 				if (data.status === "completed" || data.status === "failed") {
 					const completed = data.status === "completed";
 					clearInterval(interval); // stop polling when resolved
-					// setLoading(false);
 					setShowOverlay(false);
+					if (!data.status) {
+						alert("Transaction failed.");
+					}
 					navigate(completed?"success" : "/cart");
 				}
 			} catch (error) {
@@ -53,14 +56,34 @@ const PaystackCheckout = ({ checkoutData }) => {
 
 	const handlePay = async () => {
 		console.log("Initiating payment in handlePay fxn...");
-		if (!checkoutData?.reference) {
+		console.log('initial refrence:', checkoutData?.reference)
+		if (referenceRef.current) return; // prevent multiple calls
+		referenceRef.current = true; // set to true to prevent re-entry
+		if (checkoutData?.reference === "installmental_payment") {
+			console.log("installmental_payment reference detected...");
+			console.log("Generating new unique reference from backend...");
+			try {
+				const newRef = await authFetch(`${baseURL}/generate-reference/`);
+
+				if (!newRef) return
+				console.log("new reference:", newRef);
+
+				checkoutData.reference = newRef?.reference;
+				referenceRef.current = false; // ensure this block runs only once
+			} catch (error) {
+				console.error("Error polling payment status:", error);
+			}
+		}
+		console.log("Using reference:", checkoutData?.reference);
+		if (!checkoutData?.reference && checkoutData?.reference!=="installmental_payment") {
 			alert("Reference not ready yet!");
 			return;
 		}
+		// return; // temp disable
 		const handler = window.PaystackPop.setup({
 			key: isPK, // use your test public key
 			email: checkoutData?.email,
-			amount: parseInt(checkoutData?.amount) * 100, // amount in kobo (₦500 = 50000)
+			amount: parseInt(checkoutData?.amount) * 100, // amount in kobo (N500 = 50000)
 			currency: "NGN",
 			ref: checkoutData?.reference, // unique transaction reference from backend
 			metadata: {
@@ -84,75 +107,29 @@ const PaystackCheckout = ({ checkoutData }) => {
 				// },
 			},
 			callback: function (response) {
-				console.log("Payment callback:", response);
-				// setLoading(true);
-				// ✅ instead of verify-payment, start polling backend
+				console.log("Payment complete (callback):", response);
+
+				// instead of verify-payment, start polling backend
 				pollPaymentStatus(response.reference);
 			},
-			// callback: function (response) {
-			// 	(async () => {
-			// 		try {
-			// 			setLoading(true); // show loading state
-			
-			// 			// send reference to your Django backend for verification
-			// 			const res = await fetch(`${baseURL}/verify-payment/`, {
-			// 				method: "POST",
-			// 				headers: { "Content-Type": "application/json" },
-			// 				body: JSON.stringify({ reference: response.reference }),
-			// 			});
-			
-			// 			if (!res.ok) {
-			// 				throw new Error(`Server responded with status ${res.status}`);
-			// 			}
-			
-			// 			const data = await res.json();
-			// 			console.log("Verification response:", data);
-			
-			// 			if (data.success) {
-			// 				console.log("Payment verified successfully");
-			// 				// ✅ success toast/redirect can go here
-			// 			} else {
-			// 				console.warn("Payment verification failed", data);
-			// 				// ❌ failure toast/message here
-			// 			}
-			// 		} catch (error) {
-			// 			console.error("Error verifying payment:", error.message);
-			// 		} finally {
-			// 			setLoading(false); // always reset
-			// 			setShowOverlay(false); // hide overlay when done
-			// 		}
-			// 	})();
-			// },
 			onClose: function() {
 				alert("Transaction was not completed, window closed.");
 				setShowOverlay(false); // hide overlay if user closes
 			},
 		});
-		console.log("Opening Paystack iframe...");
-		// setShowOverlay(true); // show overlay when opening iframe
+		console.log("Opening Paystack iframe with ref:", checkoutData.reference, "...");
+		setShowOverlay(true); // show your overlay now
 		handler.openIframe();
-		// Observe DOM changes to detect Paystack iframe
-		const observer = new MutationObserver(() => {
-			const iframe = document.querySelector("iframe[src*='paystack']");
-			if (iframe) {
-			setShowOverlay(true);  // show overlay only when iframe is there
-			observer.disconnect(); // stop watching
-			}
-		});
-		observer.observe(document.body, { childList: true, subtree: true });
 	};
 	console.log({
-		// loading,
 		showOverlay,
 		paymentStatus,
 		details,
 	})
 	return (
 		<>
-			{/* {reference && <div/>} */}
 			{showOverlay && (
 				<div
-				// id="custom-overlay"
 				style={{
 					position: "fixed",
 					top: 0,
@@ -172,7 +149,7 @@ const PaystackCheckout = ({ checkoutData }) => {
 						transform: "translate(-50%, -50%)"
 					}}
 					>
-						<span className="mb-2 font-italic">Please, wait</span>
+						<span className="mb-2 font-italic">Please, wait </span>
 						<BouncingDots size={"ts"} color="#fff" p={"1"} />
 					</div>
 				</div>
