@@ -31,7 +31,12 @@ function ProductAdvert({productSelector, productsArr}) {
 								{/* } */}
 							<div className="offer-text"
 							style={
-								isMobile?{top: 'auto'}:{}}>
+								isMobile?{
+									top: 'auto',
+									width: '100%',
+									height: '100%',
+									paddingTop: '1rem',
+									}:{}}>
 								<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}
 								style={{
 									fontSize: isVerySmallMobile?'1rem':isSmallMobile?'1.1rem':'',
