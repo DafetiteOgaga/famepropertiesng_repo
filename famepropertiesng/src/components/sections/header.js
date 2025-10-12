@@ -1,34 +1,13 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useScrollDetection } from '../../hooks/scrollDetection';
-// import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 import { useDeviceType } from '../../hooks/deviceType';
 import { Sidebar } from '../bars/sidebar';
 import { getImage } from '../../hooks/baseImgUrl';
-// import { createLocal } from '../../hooks/setupLocalStorage';
 import { useCreateStorage } from '../../hooks/setupLocalStorage';
-import { useAuth } from '../../hooks/allAuth/authContext';
 import { titleCase } from '../../hooks/changeCase';
 
 const headerMenuArr = [
-	// {
-	// 	menu: "auth",
-	// 	type: "button",
-	// 	authItems: {
-	// 		login: {
-	// 			menu: "Login",
-	// 			link: "/login"
-	// 		},
-	// 		logout: {
-	// 			menu: "Logout",
-	// 			link: "logout"
-	// 		},
-	// 		signup: {
-	// 			menu: "Sign Up",
-	// 			link: "/signup"
-	// 		},
-	// 	},
-	// },
 	{
 		menu: "Logout",
 		type: "button",
@@ -49,15 +28,6 @@ const headerMenuArr = [
 		angleD: "fas fa-angle-down",
 		angleL: "fas fa-angle-left",
 	},
-	// {
-	// 	menu: "Account Settings",
-	// 	link: "/settings"
-	// },
-	// {
-	// 	menu: "Admin Page",
-	// 	link: "/admin-page",
-	// 	type: "link",
-	// },
 	{
 		menu: "Register Store",
 		link: "/register-store/id",
@@ -85,26 +55,18 @@ const headerMenuArr = [
 ]
 
 function Header({mTop, numberOfProductsInCart, handleClearCart}) {
-	// console.log({numberOfProductsInCart})
-	// console.log({isUserDetected})
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	// const [isVisible, setIsVisible] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
-	// const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
 	const renderdelay = () => {setTimeout(() => setShouldRender(false), 200)}
 	const overlayRef = useRef(null); // not exactly in use
 	const menuRef = useRef(null);
 	const menuIconRef = useRef(null);
 	const categoryMenuRef = useRef(null);
-	// const menuWrapperRef = useRef(null);
 	let { scrollingDown } = useScrollDetection();
-	// const [scrollUp, setScrollUp] = useState(scrollingDown)
 	const deviceType = useDeviceType()
 	const currentPage = useLocation().pathname;
-	const navigate = useNavigate();
 	const menuHandler = () => {
 		setIsMenuOpen(prev=> {
-			// console.log("Menu Opened:", !prev);
 			if (prev) {
 				renderdelay()
 			} else setShouldRender(true);
@@ -112,18 +74,7 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 		});
 	}
 
-	// const { createLocal } = useCreateStorage()
-	// const productsInCart = createLocal.getItemRaw('fpng-cart');
-	// useEffect(() => {
-	// 	if (productsInCart) {
-	// 		const numberOfItems = productsInCart.length
-	// 		setNumberOfProductsInCart(numberOfItems)
-	// 	}
-	// }, [productsInCart])
-	
 	useEffect(() => {
-		// const rootContainer = document.getElementById('root');
-		// console.log("is Menu Opened:", isMenuOpen);
 		if (isMenuOpen) {
 			document.documentElement.style.overflow = "hidden";
 			document.body.style.overflow = "hidden";
@@ -133,46 +84,15 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 		}
 
 		const handleClickToCloseMenu = (e) => {
-			// console.log("Clicked:", e.target);
-
-			// close menu overlay when logout is clicked
-			// const anchor = e.target;
-			// const span = anchor.querySelector('span');
-			// const spanId = span?.id?.toLowerCase();
-			// console.log('spanId:', spanId);
-			// if (spanId==='logout') {
-			// 	// console.log("Clicked on overlay, closing menu");
-			// 	setIsMenuOpen(false);
-			// 	renderdelay(); // your animation cleanup
-			// 	// console.log('logout process initiated and navigating to home')
-			// 	// navigate('/')
-			// }
-
 			// if you clicked on the menu itself or any of its children, do nothing
 			if (menuRef.current && menuRef.current.contains(e.target)) return;
 			if (categoryMenuRef.current && categoryMenuRef.current.contains(e.target)) return;
 
-			// if you clicked inside overlayRef (background area), close the menu
-			// else {
-			// 	console.log("Clicked anywhere else, closing menu");
-			// 	setIsMenuOpen(false);
-			// 	renderdelay(); // your animation cleanup
-			// }
-
 			if (!menuIconRef.current.contains(e.target)) {
-				// console.log("Clicked on overlay, closing menu");
 				setIsMenuOpen(false);
 				renderdelay(); // your animation cleanup
 			}
 
-			// if (
-			// 	// menuWrapperRef.current &&
-			// 	event.target === menuWrapperRef.current ||
-			// 	!menuWrapperRef.current.contains(event.target)
-			// ) {
-			// 	setIsMenuOpen(false);
-			// 	renderdelay();
-			// }
 		};
 		if (isMenuOpen) {
 			document.addEventListener('mousedown', handleClickToCloseMenu);
@@ -191,8 +111,6 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	}, [currentPage])
 
 	const removeLabelName = deviceType.width<400
-	// console.log({isMenuOpen})
-	// console.log('shouldRender:', shouldRender)
 	return (
 		<>
 			<nav className={`container-fluid container-fluid-nav navbar bg-dark navbar-expand-lg navbar-dark py-3 py-lg-0 px-xl-5 ${isMenuOpen?'':!scrollingDown ? 'hidden' : ''}`}
@@ -226,7 +144,6 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 					ref={menuIconRef}
 					type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
 						<span
-						// className={`fas ${!isMenuOpen?'fa-bars':'fa-times'}`}
 						className={`${!isMenuOpen?'fa fa-bars':'fa fa-times'}`}></span>
 					</button>
 				</>
@@ -238,7 +155,6 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 					handleClearCart={handleClearCart}
 					currentPage={currentPage}
 					numberOfProductsInCart={numberOfProductsInCart}
-					// isUserDetected={isUserDetected}
 					/>
 				</div>}
 			</nav>
@@ -248,13 +164,11 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 				currentPage={currentPage}
 				mTop={mTop}
 				isMenuOpen={isMenuOpen}
-				// menuWrapperRef={menuWrapperRef}
 				overlayRef={overlayRef}
 				menuRef={menuRef}
 				categoryMenuRef={categoryMenuRef}
 				numberOfProductsInCart={numberOfProductsInCart}
 				handleClearCart={handleClearCart}
-				// isUserDetected={isUserDetected}
 				/>}
 		</>
 	)
@@ -264,44 +178,34 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 					menuRef, categoryMenuRef,
 					currentPage, numberOfProductsInCart,
 					handleClearCart}) {
-	const { createLocal } = useCreateStorage();
+	const { createLocal, createSession } = useCreateStorage();
 	const [isUserDetected, setIsUserDetected] = useState(null)
 	const [stateHeaderMenu, setStateHeaderMenu] = useState(headerMenuArr)
-	const accessToken = createLocal.getItem('fpng-acc');
 	const userInfo = createLocal.getItem('fpng-user');
-	const refreshToken = createLocal.getItem('fpng-ref');
-	// console.log({accessToken}, {userInfo})
-	// console.log({refreshToken})
-	const deviceType = useDeviceType()
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		setIsUserDetected(!!userInfo)
 		if (!userInfo?.is_seller) {
 			setStateHeaderMenu(headerMenuArr.filter(header => {
 				return header?.menu.toLowerCase()!=='post products'
 			}))
-		} else setStateHeaderMenu(headerMenuArr)
+		} else {
+			setStateHeaderMenu(headerMenuArr)
+		}
+		setIsUserDetected(!!userInfo)
 	}, [userInfo])
-	let status = accessToken
-	// console.log('fpng-status:', status)
-	// status = status??null;
 	const [itemClicked, setItemClicked] = useState(false);
 	const handleMenuItemClick = () => {
 		setItemClicked(prev => !prev);
 	}
 	const handleSidbarMenuButtonClick = (statusLink) => {
-		// console.log('handleSidbarMenuButtonClick', {statusLink})
 		if (statusLink.toLowerCase()==='logout') {
-			// console.log('logout process initiated')
+			createSession.removeItem('fpng-pspk');
 			createLocal.removeAllItems();
-			// console.log('navigating to home')
 			navigate('/')
 		} else if (statusLink.toLowerCase()==='clear cart') {
-			// console.log('clearing cart ...')
 			handleClearCart()
 		} else {
-			// console.log('navigate click')
 			navigate(statusLink)
 		}
 	}
@@ -309,30 +213,16 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		let fromIndex = from;
 		if (typeof fromIndex === 'string') {
 			fromIndex = array.findIndex(obj => obj.menu.toLowerCase() === 'clear cart')
-			// const clearCartItem = array[fromIndex];
-			// console.log({fromIndex ,clearCartItem})
 		}
 		const newArray = [...array]; // copy to avoid mutating original
-		// console.log('newArray:', newArray)
 		const [movedItem] = newArray.splice(fromIndex, 1); // remove item
 		newArray.splice(toIndex, 0, movedItem); // insert at new index
 		return newArray;
 	}
 	// usage;
 	// const reordered = moveItem(menuArrItems, 2, 1);
-	// console.log({headerMenuArr})
-	// console.log({
-	// 	seller: userInfo?.is_seller,
-	// 	postProd: headerMenuArr?.some(obj=>obj?.menu.toLowerCase()==='post products'),
-	// })
-	// if (!userInfo?.is_seller) headerMenuArr = headerMenuArr.filter(header => header?.menu.toLowerCase()!=='post products')
 	let resortedMobile = moveItem(stateHeaderMenu, 'clear cart', 3);
 	let resortedPc
-	// console.log({headerMenuArr})
-	// console.log({resortedMobile})
-	// console.log({resortedPc})
-	// console.log({isUserDetected})
-	// console.log({menuRef})
 
 	let isLoggedIn = false
 	if (!isUserDetected) {
@@ -355,66 +245,38 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		resortedMobile = resortedMobile.filter(obj => {
 			if (obj?.menu.toLowerCase() === 'register store'||
 				obj?.menu.toLowerCase() === 'post products') {
-				// console.log('found register store menu item')
-				// console.log('link before:', obj.link)
 				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
-				// console.log('link after:', obj.link)
 			}
 			return (obj.menu.toLowerCase() !== 'login'&&
 					obj.menu.toLowerCase() !== 'register store'
-					// &&(obj.menu.toLowerCase() !== 'post products'&&!userInfo?.is_seller)
 					)
 		});
 		resortedPc = stateHeaderMenu.filter(obj => {
 			if (obj?.menu.toLowerCase() === 'register store'||
 				obj?.menu.toLowerCase() === 'post products') {
-				// console.log('found register store menu item')
-				// console.log('link before:', obj.link)
 				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
-				// console.log('link after:', obj.link)
 			}
 			return (obj.menu.toLowerCase() !== 'login'&&
-					obj.menu.toLowerCase() !== 'register store'
-					// &&(obj.menu.toLowerCase() !== 'post products'&&!userInfo?.is_seller)
-					)
+					obj.menu.toLowerCase() !== 'register store')
 		});
 	}
 	const page = currentPage.split('/')[1].toLowerCase();
 	const cartPage = page === 'cart'||page === 'detail'
-	// console.log({page, cartPage})
 	if (cartPage) {
 		// remove cart from menu if on cart page
 		resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 		resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
 	}
-	// if (userInfo) {
-	// 	//
-	// 	// if (userInfo.)
-	// 	// resortedMobile = resortedMobile.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
-	// 	// resortedPc = resortedPc.filter(obj => obj.menu.toLowerCase() !== 'clear cart');
-	// 	console.log({userInfo})
-	// }
-	// console.log({resortedMobile, resortedPc})
 	const handleIsActive = (menu) => {
 		const page = currentPage.split('/')[1];
 		const link = menu?.link?.split('/')[1];
-		// console.log({type: menu.type, menu: menu.menu, itemClicked})
 		if (menu.type==='button'&&
 			menu.menu.toLowerCase()==='categories'&&
 			itemClicked) {
-			// console.log('categories active')
 			return itemClicked
 		}
-		// console.log({page, link, mlink:menu?.link})
-		// console.log('menu:', menu)
 		return page === link;
 	}
-	// console.log({resortedMobile, resortedPc})
-	// else {
-	// 	// Remove item
-	// 	resortedMobile = resortedMobile.filter(obj => obj.menu !== 'logout');
-	// }
-	// console.log({overlayRef, menuRef})
 	return (
 		<>
 			{/* mobile container */}
@@ -424,15 +286,12 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 				style={{
 					position: 'fixed',
 					top: `${30-mTop}%`,
-					// top: `${mTop-1}%`,
 					left: 0,
 					backgroundColor: 'rgba(0, 0, 0, 0.51)',
 					zIndex: 20,
 					height: '100vh',
 					width: '100vw',
 					overflowY: 'auto',
-					// transition: 'transform 0.3s ease-in-out'
-					// cursor: 'pointer',
 				}}>
 					<div className={`col-lg-2 ${isMenuOpen?'slideInRight':'slideOutRight'}`}
 					ref={overlayRef}
@@ -440,7 +299,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						display: 'flex',
 						justifyContent: 'flex-end',
 						alignItems: 'center',
-						// backgroundColor: 'rgba(0, 0, 0, 0.82)',
 						}}>
 						{itemClicked &&
 						<span
@@ -452,7 +310,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						<div className="w-35 pt-0"
 						ref={menuRef}
 						style={{
-							// position: 'absolute',
 							height: '95vh',
 							backgroundColor: 'rgba(0, 0, 0, 0.62)',
 							marginRight: '-1rem',
@@ -477,8 +334,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 									color: '#E2E8F0',
 									textAlign: 'center',
 									padding: '3.5rem 0.8rem 3.3rem 0.8rem',
-									// paddingTop: '1rem',
-									// paddingBottom: '2rem',
 									marginLeft: 0,
 									marginRight: 0,
 									marginTop: '',
@@ -509,7 +364,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 												marginRight: '0.5rem',
 												padding: 2,
 												border: '1px solid #F8F6F2',
-												// textDecoration: 'none',
 											}}
 											/>
 										</div>
@@ -518,7 +372,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 										style={{
 											fontSize: '2.8rem',
 											marginBottom: '0.5rem',
-											// textDecoration: 'none',
 										}}
 										/>}
 										<span
@@ -530,43 +383,26 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 							</>}
 								{resortedMobile.map((menu, index) => {
 									const lastItem = index === stateHeaderMenu.length - 1;
-									// console.log('isUserDetected:', isUserDetected)
 									if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
 									const isActive = handleIsActive(menu);
-									// console.log({itemClicked})
-									// console.log({isActive, name: menu.menu, type: menu.type, link: menu.link})
 									return (
 										<Fragment key={index}>
 											{menu?.type==='button'?
 												<span
 												onClick={(e) => {
-													// const logout = status?.toLowerCase()
-													// const clearCart = menu?.clear?.toLowerCase()
-													// console.log("Clicked on");
-													// console.log({menu, status, logout, clearCart, statusLink})
-													
-													// console.log('menu.clear:', logoutOrClearCart)
 													if (menu?.menu?.toLowerCase() === 'categories') {
-														// console.log("Clicked on Categories");
 														e.stopPropagation();
 														handleMenuItemClick();
 													}
 													else if (menu.menu.toLowerCase() === 'logout') {
-														// console.log("Clicked on auth");
-														// console.log({statusLink})
-														// console.log('logout 414 clicked')
 														e.stopPropagation();
 														handleSidbarMenuButtonClick(menu.menu.toLowerCase())
 													}
 													else if (menu.menu.toLowerCase()==='clear cart') {
-														// console.log("Clicked on auth");
-														// console.log({statusLink})
-														// console.log('clear cart 414 clicked')
 														e.stopPropagation();
 														handleSidbarMenuButtonClick(menu.menu.toLowerCase())
 													}
 												}}
-												// onClick={handleMenuItemClick}
 												className={`dropdown-item slideInRight mr-0 ${isActive?'active':''}`} // removed mr-3 to mr-0
 												style={{
 													display: 'flex',
@@ -576,12 +412,10 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 													textWrap: 'nowrap',
 													fontSize: '0.8rem',
 													color: '#E2E8F0',
-													// backgroundColor: isActive?'#475569':'',
 													textAlign: 'center',
 													padding: '0rem 1rem',
 													marginLeft: 0,
 													marginRight: 0,
-													// marginTop: menu?.menu?.toLowerCase() === "contact" ? '14rem' : '',
 													marginBottom: lastItem ? '60%' : '',
 													border: '2px outset buttonborder',
 													borderTopLeftRadius: 0,
@@ -606,7 +440,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 												</span>
 												:
 												<Link to={menu.link}
-												// onClick={handleMenuItemClick}
 												className={`dropdown-item slideInRight mr-0 ${isActive?'active':''}`} // removed mr-3 to mr-0
 												style={{
 													display: 'flex',
@@ -658,7 +491,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						display: 'flex',
 						justifyContent: 'center',
 						alignItems: 'center',
-						// paddingRight: 'auto',
 						}}>
 						{userInfo &&
 						<Link to={"/profile"}
@@ -666,8 +498,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						style={{
 							textWrap: 'nowrap',
 							color: '#F8F6F2',
-							// fontSize: '0.9rem',
-							// fontStyle: 'italic',
 							fontWeight: 'bold',
 							display: 'flex',
 							alignItems: 'center',
@@ -685,14 +515,12 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 									marginRight: '0.5rem',
 									padding: 1,
 									border: '1px solid #F8F6F2',
-									// textDecoration: 'none',
 								}}
 								/>
 								:<span
 								className="fas fa-user-circle mr-2"
 								style={{
 									fontSize: '2.3rem',
-									// textDecoration: 'none',
 								}}
 								/>}
 								<span
@@ -703,22 +531,12 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 								if (menu?.menu?.toLowerCase() === "cart") return null;
 								if (menu?.menu?.toLowerCase() === "categories") return null;
 								if (!numberOfProductsInCart&&menu.menu.toLowerCase()==='clear cart') return null
-								const page = currentPage.split('/')[1];
 								const isActive = handleIsActive(menu);
-								// console.log(
-								// 	'\ncurrentPage:', currentPage,
-								// 	'\npage:', page,
-								// 	'\nmenuLink[1]:', menu?.link?.split('/')[1],
-								// 	'\nmenu:', menu.menu, '- type:', menu.type,
-								// 	'\nisActive:', isActive
-								// )
-								// console.log({menu})
 								return (
 									<Fragment key={index}>
 										{menu.type==='button' ?
 											<button
 											style={{
-												// paddingRight: '1rem',
 												color: '#F8F6F2',
 												border: '1px solid rgba(248, 246, 242, 0.23)',
 												borderRadius: '3px',
@@ -734,18 +552,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 									</Fragment>
 								)
 							})}
-							{/* {numberOfProductsInCart &&
-							<button
-							style={{
-								color: '#F8F6F2',
-								border: '1px solid rgba(248, 246, 242, 0.23)',
-								borderRadius: '3px',
-							}}
-							onClick={()=>handleClearCart()}
-							className="dropdown-item"
-							type="button">
-								Clear Cart
-							</button>} */}
 						</div>
 					</div>
 					<CartLink numberOfProductsInCart={numberOfProductsInCart} />
@@ -761,9 +567,6 @@ function Brand() {
 		<Link to={"/"}
 		className="text-decoration-none"
 		style={{
-			// display: 'flex',
-			// width: '11.3%',
-			// paddingRight: '1%',
 			cursor: 'pointer',
 			}}>
 			<img src={getImage('famouspropertiesngTransparent.png')} alt="famouspropertiesng"
@@ -778,17 +581,8 @@ function Brand() {
 	)
 }
 function CartLink({propStyle, numberOfProductsInCart}) {
-	// const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
 	const deviceType = useDeviceType()
 	const removeLabelName = deviceType.width<400
-	// const { createLocal } = useCreateStorage()
-	// const productsInCart = createLocal.getItemRaw('fpng-cart');
-	// useEffect(() => {
-	// 	if (productsInCart) {
-	// 		const numberOfItems = productsInCart.length
-	// 		setNumberOfProductsInCart(numberOfItems)
-	// 	}
-	// }, [productsInCart])
 	return (
 		<Link to={"cart"} className={`btn px-0 ml-0 ${propStyle} ${removeLabelName?'pr-3':''}`}>
 			<span className="fas fa-shopping-cart fa-lg"
