@@ -275,6 +275,7 @@ const useConfirmTotals = (inputValue) => {
 		}
 
 		const productIds = inputValue.map(item => item.prdId);
+		console.log('Checking available totals for product IDs:', productIds);
 
 		const getUpdatedTotalAvailableItemsFromServer = async () => {
 			try {
@@ -310,7 +311,7 @@ const useConfirmTotals = (inputValue) => {
 		getUpdatedTotalAvailableItemsFromServer();
 	}, [inputValue]);
 
-	console.log({ currentTotalsAvailable, allGood });
+	// console.log({ currentTotalsAvailable, allGood });
 	return allGood; // null = still checking, true/false = result
 };
 
