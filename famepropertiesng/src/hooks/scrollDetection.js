@@ -7,7 +7,6 @@ function useScrollDetection() {
 	useEffect(() => {
 		const handleScroll = () => {
 			const currentScrollY = window.scrollY;
-		
 			if (currentScrollY > lastScrollY) {
 				setScrollingDown(false); // hide when scrolling down
 			} else {
@@ -15,13 +14,10 @@ function useScrollDetection() {
 			}
 			setLastScrollY(currentScrollY);
 		};
-	
 		window.addEventListener('scroll', handleScroll);
-	
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, [lastScrollY]);
 
-	// console.log({scrollingDown, lastScrollY});
 	return { scrollingDown, lastScrollY};
 }
 export { useScrollDetection };

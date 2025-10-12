@@ -2,19 +2,15 @@ import { Link } from 'react-router-dom';
 import { useDeviceType } from '../../hooks/deviceType';
 
 function Breadcrumb({page, slash=true}) {
-	// console.log({page});
 	const checkPage = page?.includes("/")&&slash
 	const deviceType = useDeviceType()?.width <= 576
-	// console.log({page, checkPage});
 	let otherPages
 	let breadcrumb = page
 	if (checkPage) {
 		const pages = page.split("/")
 		breadcrumb = pages.pop()
 		otherPages = pages.map((item, index) => {
-			// console.log({item, index});
 			const itemPath = pages.filter(Boolean).slice(0, index+1).join("/").toLowerCase()
-			// console.log("page path:", itemPath);
 			return (
 				<span key={index}
 				className="breadcrumb-item">
@@ -42,7 +38,7 @@ function Breadcrumb({page, slash=true}) {
 						}}>
 						<Link to={"/"} className="breadcrumb-item text-dark">Home</Link>
 						{otherPages}
-						<span className="breadcrumb-item active">{breadcrumb}</span>
+						<span className="breadcrumb-item text-truncate active">{breadcrumb}</span>
 					</nav>
 				</div>
 			</div>

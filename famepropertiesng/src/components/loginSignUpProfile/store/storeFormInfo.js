@@ -1,5 +1,4 @@
 import { getBaseURL } from "../../../hooks/fetchAPIs";
-import { toast } from "react-toastify";
 import { emailRegex } from "../../../hooks/formMethods/formMethods";
 
 const baseURL = getBaseURL();
@@ -9,64 +8,49 @@ const inputArr = [
 		placeholder: "Chi's Boutique",
 		type: 'text',
 		important: true,
-		autoComplete: true,
+		autoComplete: 'on', // store name
 	},
 	{
 		name: 'description',
 		placeholder: 'We sell quality clothes and accessories',
 		type: 'text',
 		important: false,
-		autoComplete: true,
+		autoComplete: 'on', // store description
 	},
 	{
 		name: 'business_registration_number',
 		placeholder: 'RC123456',
 		type: 'text',
 		important: false,
-		autoComplete: true,
+		autoComplete: 'on', // business registration number
 	},
 	{
 		name: 'tax_identification_number',
 		placeholder: '12345678901',
 		type: 'text',
 		important: false,
-		autoComplete: true,
+		autoComplete: 'on', // tax identification number
 	},
-	// {
-	// 	name: 'country',
-	// 	important: true,
-	// 	autoComplete: 'country', // country code / name
-	// },
-	// {
-	// 	name: 'state',
-	// 	important: true,
-	// 	autoComplete: 'address-level1', // state / province
-	// },
-	// {
-	// 	name: 'city',
-	// 	important: true,
-	// 	autoComplete: 'address-level2', // city / locality
-	// },
 	{
 		name: 'store_address',
 		placeholder: 'Shop 3, 123 bake plaza, Addo, Ajah',
 		type: 'text',
 		important: false,
-		autoComplete: true,
+		autoComplete: 'on', // store address
 	},
 	{
 		name: 'nearest_bus_stop',
 		placeholder: 'addo roundabout, opposite uba bank',
 		type: 'text',
 		important: true,
-		autoComplete: true,
+		autoComplete: 'on', // nearest bus stop
 	},
 	{
 		name: 'store_email_address',
 		placeholder: 'chisuperstore@email.com',
 		type: 'email',
 		important: false,
-		autoComplete: false,
+		autoComplete: 'email', // email
 	},
 	{
 		name: 'store_phone_number',
@@ -81,20 +65,6 @@ const inputArr = [
 			pattern: '[0-9]{7,10}', // allows only numbers and between 7 and 14 characters
 		}
 	},
-	// {
-	// 	name: 'password',
-	// 	placeholder: 'password',
-	// 	type: 'password',
-	// 	important: true,
-	// 	autoComplete: 'new-password', // for signup, use "current-password" for login
-	// },
-	// {
-	// 	name: 'password_confirmation',
-	// 	placeholder: 'password confirmation',
-	// 	type: 'password',
-	// 	important: true,
-	// 	autoComplete: 'new-password', // confirmation uses same as password
-	// },
 ]
 
 // check passwords
@@ -137,12 +107,9 @@ const validatePassword = ({formData, setPasswordErrorMessage}) => {
 }
 
 const validateEmail = ({email, setIsEmailLoading}) => {
-	// console.log('Email changed:', email);
 	// validate email field whenever it changes
-	// console.log('Validating email:', email);
 	if (email) {
 		if (emailRegex.test(email)) {
-			// console.log('Email format is valid');
 			setIsEmailLoading(true)
 		} else {
 			setIsEmailLoading(false)
@@ -154,7 +121,6 @@ const validateEmail = ({email, setIsEmailLoading}) => {
 const isFieldsValid = ({formData}) => {
 	// get list of all required fields here
 	const isRequiredArr = inputArr.filter(field => field.important);
-	// console.log({isRequiredArr})
 	const isFieldValid = isRequiredArr.every((field) => formData[field.name].trim() !== "");
 	return isFieldValid
 };
@@ -165,21 +131,12 @@ const checkEmailUniqueness = async ({
 	setIsEmailValid,
 		}) => {
 	try {
-		// setIsEmailLoading(true)
 		const response = await fetch(`${baseURL}/store/check-store-email/${email}/`);
 		const data = await response.json();
-		// console.log("Server says:", data);
 		setIsEmailValid(data)
-		// toast.success(
-		// 	<div>
-		// 		Registration Successful.<br />
-		// 		Welcome, <strong>{data.message}!</strong>
-		// 	</div>
-		// );
 		return data
 	} catch (error) {
 		setIsEmailValid(null)
-		// toast.error('Error checking email. Please try again.');
 		console.error("Error checking email:", error);
 	} finally {
 		setIsEmailLoading(false)
@@ -192,21 +149,12 @@ const checkStoreNameUniqueness = async ({
 	setIsStoreNameAvailable,
 		}) => {
 	try {
-		// setIsEmailLoading(true)
 		const response = await fetch(`${baseURL}/store/check-store-name/${name}/`);
 		const data = await response.json();
-		// console.log("Server says:", data);
 		setIsStoreNameAvailable(data)
-		// toast.success(
-		// 	<div>
-		// 		Registration Successful.<br />
-		// 		Welcome, <strong>{data.message}!</strong>
-		// 	</div>
-		// );
 		return data
 	} catch (error) {
 		setIsStoreNameAvailable(null)
-		// toast.error('Error checking email. Please try again.');
 		console.error("Error checking store name:", error);
 	} finally {
 		setIsStoreLoading(false)
@@ -221,47 +169,3 @@ export {
 	checkEmailUniqueness,
 	checkStoreNameUniqueness,
 };
-
-
-
-
-
-
-// // handle file selection
-// const handleFileChange = (e) => {
-// 	const file = e.target.files[0];
-// 	if (file) {
-// 		setSelectedFile(file);
-// 		setPreviewURL(URL.createObjectURL(file)); // create local preview
-// 	}
-// };
-
-// {/* <div> */}
-// 	{/* Local Preview */}
-// 	{/* {previewURL && (
-// 		<div className="mt-2">
-// 			<img
-// 				src={previewURL}
-// 				alt="Local preview"
-// 				className="w-24 h-24 rounded object-cover"
-// 				style={{
-// 					width: '100px',
-// 					height: '100px',
-// 					borderRadius: '8px',
-// 					objectFit: 'cover',
-// 				}}
-// 			/>
-// 		</div>
-// 	)} */}
-
-// 	{/* Upload Button */}
-// 	{/* <button
-// 		onClick={handleUpload}
-// 		className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
-// 		style={{
-// 			backgroundColor: '#475569',
-// 		}}
-// 	>
-// 		Upload to ImageKit
-// 	</button> */}
-// {/* </div> */}

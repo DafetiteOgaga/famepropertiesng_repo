@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "../sections/breadcrumb"
 import { useDeviceType } from "../../hooks/deviceType"
-import { createLocal } from "../../hooks/setupLocalStorage";
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuthFetch } from "./authFetch";
 import { GoogleAuthButtonAndSetup } from "../../hooks/allAuth/googleAuthButtonAndSetup";
 import { titleCase } from "../../hooks/changeCase";
-import { useAuth } from "../../hooks/allAuth/authContext";
 import { getBaseURL } from "../../hooks/fetchAPIs";
 import { BouncingDots } from "../../spinners/spinner";
 
 const baseURL = getBaseURL();
-// console.log({baseURL})
 const initialFormData = {
 	email: '',
 	password: '',
@@ -35,7 +32,6 @@ function LogIn() {
 	const [loading, setLoading] = useState(false);
 	const authFetch = useAuthFetch()
 	const [showPassword, setShowPassword] = useState(false);
-	// const { accessToken, updateToken } = useAuth();
 	const navigate = useNavigate();
 	const [isError, setIsError] = useState(null);
 	const [formData, setFormData] = useState(initialFormData);
@@ -44,15 +40,12 @@ function LogIn() {
 	const onChangeHandler = (e) => {
 		e.preventDefault();
 		const { name, value } = e.target
-		// console.log({name})
-		// console.log({value})
 		setFormData(prev => ({
 			...prev,
 			[name]: value
 		}))
 	}
 	const isNotRotKey = !localStorage.getItem("fpng-rot")
-	// console.log({isNotRotKey})
 
 	// Check if all required fields are filled
 	const isFieldsValid = () => {
@@ -64,7 +57,6 @@ function LogIn() {
 	const onSubmitHandler = async (e) => {
 		e.preventDefault();
 		setLoading(true);
-		// console.log('Submitting form with data:');
 		if (!isFieldsValid()) {
 			console.warn('Form is invalid');
 			toast.error('Error! Login Failed. Invalid form data');
@@ -74,15 +66,13 @@ function LogIn() {
 		try {
 			const response = await authFetch(`${baseURL}/api/token/`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
 				body: {
 					email: formData.email.trim(),
 					password: formData.password.trim()
 				},
-			});
+			}, true);
 
 			const data = await response;
-			// console.log({data})
 			if (data === "/login/") {
 				console.log("you need to sign in again")
 				navigate(data);
@@ -93,11 +83,8 @@ function LogIn() {
 				setFormData(initialFormData);
 				toast.success('Login Successful!');
 				navigate('/')
-			} else {
-				setIsError(data?.error)
-				toast.error(data?.error||'Login Error!');
-				return;
 			}
+			if (!data) return
 
 			return data;
 		} catch (error) {
@@ -117,7 +104,6 @@ function LogIn() {
 		}
 	}, [isError])
 	useEffect(() => {
-		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
 	return (
@@ -180,14 +166,12 @@ function LogIn() {
 						marginLeft: marginX,
 						marginRight: marginX,
 						}}>
-						{/* <label>Password</label> */}
 						<button
 						className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
 						disabled={isNotRotKey||!isFieldsValid()||loading}
 						>
 							{!loading?'Log In':<BouncingDots size="sm" color="#fff" p="1" />}
 						</button>
-						
 					</div>
 					{<>
 						<LinkToSignUp />
@@ -237,7 +221,6 @@ function LinkToForgotPassword() {
 				fontStyle: 'italic',
 			}}>Forgot Password?
 				<Link
-				// to="/signup"
 				style={{
 					paddingLeft: '0.5rem',
 					color: '#475569',

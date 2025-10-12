@@ -1,5 +1,4 @@
 import { getBaseURL } from "../../../hooks/fetchAPIs";
-import { toast } from "react-toastify";
 import { emailRegex } from "../../../hooks/formMethods/formMethods";
 
 const baseURL = getBaseURL();
@@ -18,13 +17,6 @@ const inputArr = [
 		important: false,
 		autoComplete: 'family-name', // last name
 	},
-	// {
-	// 	name: 'middle_name',
-	// 	placeholder: 'Dolly',
-	// 	type: 'text',
-	// 	important: false,
-	// 	autoComplete: 'additional-name', // middle name
-	// },
 	{
 		name: 'username',
 		placeholder: 'Dols',
@@ -59,7 +51,7 @@ const inputArr = [
 		placeholder: 'addo roundabout, opposite uba bank',
 		type: 'text',
 		important: true,
-		autoComplete: 'off', // no standard autocomplete, disable it
+		autoComplete: true, // no standard autocomplete, disable it
 	},
 	{
 		name: 'email',
@@ -86,14 +78,14 @@ const inputArr = [
 		placeholder: 'password',
 		type: 'password',
 		important: true,
-		autoComplete: 'new-password', // for signup, use "current-password" for login
+		autoComplete: true, // for signup, use "current-password" for login
 	},
 	{
 		name: 'password_confirmation',
 		placeholder: 'password confirmation',
 		type: 'password',
 		important: true,
-		autoComplete: 'new-password', // confirmation uses same as password
+		autoComplete: true, // confirmation uses same as password
 	},
 ]
 
@@ -151,7 +143,6 @@ const validateEmail = ({email, setIsEmailLoading}) => {
 const isFieldsValid = ({formData, passwordErrorMessage}) => {
 	// get list of all required fields
 	const isRequiredArr = inputArr.filter(field => field.important);
-	// console.log({isRequiredArr})
 	const isFieldValid = isRequiredArr.every((field) => {
 		return typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!==""
 	});
@@ -164,21 +155,12 @@ const checkEmailUniqueness = async ({
 		setIsEmailValid,
 	}) => {
 	try {
-		// setIsEmailLoading(true)
 		const response = await fetch(`${baseURL}/check-email/${email}/`);
 		const data = await response.json();
-		// console.log("Server says:", data);
 		setIsEmailValid(data)
-		// toast.success(
-		// 	<div>
-		// 		Registration Successful.<br />
-		// 		Welcome, <strong>{data.message}!</strong>
-		// 	</div>
-		// );
 		return data
 	} catch (error) {
 		setIsEmailValid(null)
-		// toast.error('Error checking email. Please try again.');
 		console.error("Error checking email:", error);
 	} finally {
 		setIsEmailLoading(false)
@@ -192,47 +174,3 @@ export {
 	isFieldsValid,
 	checkEmailUniqueness,
 };
-
-
-
-
-
-
-// // handle file selection
-// const handleFileChange = (e) => {
-// 	const file = e.target.files[0];
-// 	if (file) {
-// 		setSelectedFile(file);
-// 		setPreviewURL(URL.createObjectURL(file)); // create local preview
-// 	}
-// };
-
-// {/* <div> */}
-// 	{/* Local Preview */}
-// 	{/* {previewURL && (
-// 		<div className="mt-2">
-// 			<img
-// 				src={previewURL}
-// 				alt="Local preview"
-// 				className="w-24 h-24 rounded object-cover"
-// 				style={{
-// 					width: '100px',
-// 					height: '100px',
-// 					borderRadius: '8px',
-// 					objectFit: 'cover',
-// 				}}
-// 			/>
-// 		</div>
-// 	)} */}
-
-// 	{/* Upload Button */}
-// 	{/* <button
-// 		onClick={handleUpload}
-// 		className="mt-2 px-3 py-1 bg-blue-500 text-white rounded"
-// 		style={{
-// 			backgroundColor: '#475569',
-// 		}}
-// 	>
-// 		Upload to ImageKit
-// 	</button> */}
-// {/* </div> */}

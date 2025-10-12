@@ -10,14 +10,12 @@ import { PageNotFound } from '../components/pageNotFound';
 import { Products } from '../components/products/products';
 import { LogIn } from '../components/loginSignUpProfile/login';
 import { SignUp } from '../components/loginSignUpProfile/signUpSetup/signUp';
-import { AdminPage } from '../components/addProduct';
+import { AdminDashboard } from '../components/admin/adminDashboard';
 import { ProcessImage } from '../components/downloadAndCrop';
 import { Welcome } from '../components/welcome';
 import { Profile } from '../components/loginSignUpProfile/profileSetup/profile';
 import { StoreSignUp } from '../components/loginSignUpProfile/store/storeSignup';
 import { PostProduct } from '../components/products/postProducts';
-import { SingleImageUploader } from '../hooks/backgroundRemover/singleBackgroundRemover';
-import { BulkImageUploader } from '../hooks/backgroundRemover/multipleBackgroundRemover';
 import { EditProduct } from '../components/products/editProducts';
 import { StoreProducts } from '../components/loginSignUpProfile/profileSetup/storeProducts';
 import { Success } from '../components/checkout/success';
@@ -30,10 +28,6 @@ function AppRoutes() {
 				{/* This makes Home the default route */}
 				<Route index element={<Home />} />
 
-				{/* test routes */}
-				<Route path="s-img-remover" element={<SingleImageUploader />} />
-				<Route path="b-img-remover" element={<BulkImageUploader />} />
-
 				{/* Other routes from Outlet in Index */}
 				{/* products */}
 				<Route path="products/:productname" element={<Products />} />
@@ -45,8 +39,8 @@ function AppRoutes() {
 				{/* edit product */}
 				<Route path=":userID/update-product/:productID" element={<EditProduct />} />
 				<Route path="products/:category/:userID/update-product/:productID" element={<EditProduct />} />
-				{/* AddProduct */}
-				<Route path="admin-page" element={<AdminPage />} />
+				{/* admin dashboard */}
+				<Route path="profile/admin-dashboard" element={<AdminDashboard />} />
 				{/* process image page */}
 				<Route path="process-image" element={<ProcessImage />} />
 				{/* cart */}

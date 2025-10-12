@@ -1,15 +1,41 @@
-// import { createLocal } from "./setupLocalStorage";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { useAuth } from "../../hooks/allAuth/authContext";
 import { getBaseURL } from "../../hooks/fetchAPIs";
 import { useEffect, useRef } from "react";
-// import { useNavigate } from 'react-router-dom';
+import { toast } from "react-toastify";
+import { toast as htoast } from "react-hot-toast";
 
 const baseURL = getBaseURL();
 const apiBaseUrl = getBaseURL(true);
 function base64ToUtf8(str) {
 	return decodeURIComponent(escape(atob(str)));
 }
+
+const trimmedBody = (dataObj) => {
+	if (Array.isArray(dataObj)) {
+		return dataObj
+	} else {
+		return Object.fromEntries(
+			Object.entries(dataObj).map(([key, value]) => [
+				key,
+				typeof value === "string" ? value.trim() : value
+				])
+			)
+		}
+};
+
+// const deepTrim = (data) => {
+// 	if (typeof data === "string") {
+// 		return data.trim();
+// 	} else if (Array.isArray(data)) {
+// 		return data.map(deepTrim);
+// 	} else if (data && typeof data === "object") {
+// 		return Object.fromEntries(
+// 			Object.entries(data).map(([key, value]) => [key, deepTrim(value)])
+// 		);
+// 	}
+// 	return data; // numbers, booleans, null, undefined
+// };
 
 async function getRandom(setRotNumber, setStoredrChars) {
 	// Check if rot number exists in localStorage
@@ -33,33 +59,31 @@ async function getRandom(setRotNumber, setStoredrChars) {
 	const rotNum = data.randomNumber;
 	const rotChars = base64ToUtf8(data.randChars);;  // back to original chars
 
-	// 3️⃣ Save to localStorage and state
+	// Save to localStorage and state
 	localStorage.setItem("fpng-rot", rotNum);
 	localStorage.setItem("fpng-rchars", JSON.stringify(rotChars));
 	setRotNumber(rotNum);
 	setStoredrChars(rotChars)
 
-	// console.log("Got new rot number from API:", rotNum);
 	return rotNum;
 };
 
 async function refreshToken(
-	// {updateToken,
-	// updateRefreshToken,
-	createLocal,
-	refreshTken
-	// ,}
+	createLocal, createSession
 	) {
-	// const refresh = createLocal.getItem("fpng-refresh");
+	const refreshTken = createLocal.getItem("fpng-ref")
+	console.log("Access token expired, refreshing it...");
+	// console.log({refreshTken})
 	const response = await fetch(`${baseURL}/api/token/refresh/`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
-		body: JSON.stringify({ refreshTken }), // send refresh token in body
+		body: JSON.stringify({ refresh: refreshTken }), // send refresh token in body
 	});
 
 	const data = await response.json();
+	console.log("refreshed")
 
 	if (response.ok) {
 		createLocal.setItem("fpng-acc", data.access); // update access token
@@ -69,30 +93,25 @@ async function refreshToken(
 	  	// refresh expired too → user must log in again
 		createLocal.removeItem("fpng-acc");
 		createLocal.removeItem("fpng-ref");
+		createSession.removeItem("fpng-pspk");
 		createLocal.removeAllItems();
-		// updateToken(null);
-		// updateRefreshToken(null);
-		// createLocal.removeItem("fpng-refresh");
 		return null;
 	}
 }
 
 function useAuthFetch() {
-	const randomRef = useRef(null);
-	const { createLocal } = useCreateStorage();
+	const refreshingPromiseRef = useRef(null);
+	const { createLocal, createSession } = useCreateStorage();
 	const {
-		// accessToken, updateToken,
-		// userInfo, updateUserInfo,
-		// refreshTken:refreshTken, updateRefreshToken,
-		storedChars, setStoredrChars,
-		rotNumber, setRotNumber,
-	} = useAuth(); // ✅ hook is called inside another hook
+		setStoredrChars,
+		setRotNumber,
+	} = useAuth(); // hook is called inside another hook
 
+	// rot returned not used
 	useEffect(() => {
 		async function fetchRot() {
 			try {
-				const rot = await getRandom(setRotNumber, setStoredrChars); // ✅ async call
-				// console.log("Rot number ready:", rot);
+				await getRandom(setRotNumber, setStoredrChars); // async call
 			} catch (e) {
 				console.error("Failed to fetch rot number:", e);
 			}
@@ -100,91 +119,98 @@ function useAuthFetch() {
 		fetchRot();
 	  }, []); // empty dependency → run once on mount
 
-	async function fetchWithAuth(url, options={}) {
+	async function authorizedFetch(url, options={}, login=false) {
+		console.log('requesting for:', '\n',{url}, '\n', {method: options?.method||'GET'})
 		let access = createLocal.getItem("fpng-acc")
-		// console.log("Using access token from localStorage:", access);
-		// accessToken
-		// Add token to headers
-		options.headers = {
-			...options.headers,
-			"Authorization": `Bearer ${access}`,
-		};
 
-		if (options.method!=='GET') {
-			options.method = options.method || "POST";
-			options.headers["Content-Type"] = "application/json";
-			if (options.body) {
-				const trimmedBody = Object.fromEntries(
-					Object.entries(options.body).map(([key, value]) => [
-						key,
-						typeof value === "string" ? value.trim() : value
-					])
-				);
-				options.body = JSON.stringify(trimmedBody);
-			} else {
-				options.body = JSON.stringify({});
-			}
-		} else {
+		if (!options?.method||options?.method==='GET') {
 			options.method = "GET";
-			// ✅ Attach query params if `data.body` exists
+			// Attach query params if `data.body` exists
 			if (options.body) {
 				const params = new URLSearchParams(options.body).toString();
 				url += "?" + params;
 			}
+		} else {
+			// Add token to headers
+			const noHeader = options.headers === 'no-header'
+			if (noHeader) {
+				delete options.headers
+			}
+			// console.log('adding token...')
+			options.headers = {
+				...options.headers,
+				...(noHeader ? {} : { Authorization: `Bearer ${access}` }),
+			};
+			options.method = options.method || "POST";
+			options.headers["Content-Type"] = "application/json";
+			if (options.body) {
+				options.body = JSON.stringify(trimmedBody(options.body));
+			} else {
+				options.body = JSON.stringify({});
+			}
 		}
 
+		// console.log("Fetching ...");
 		let response = await fetch(url, options);
 
+		// console.log("Initial response:", response.status);
 		if (response.status === 401) {
 			// Token expired → get a new one
-			const refreshTken = createLocal.getItem("fpng-ref")
-			access = await refreshToken(
-				// {updateToken, updateRefreshToken,
-				refreshTken,
-				createLocal,
-			// }
-			);
+			if (!refreshingPromiseRef.current) {
+				refreshingPromiseRef.current = refreshToken(createLocal, createSession)
+					.finally(() => {
+						refreshingPromiseRef.current = null; // reset after done
+					});
+			}
+			// others wait for whichever one that triggeres refresh token finishes and they all use it
+			// access = await refreshingPromise;
+			const access = await refreshingPromiseRef.current;
 
 			if (access) {
 				options.headers["Authorization"] = `Bearer ${access}`;
 				response = await fetch(url, options); // retry
+				console.log("Re-try status:", response.status);
 			} else {
-				// 🔴 Refresh failed → log out
-				createLocal.removeItem("fpng-acc");
-				createLocal.removeItem("fpng-ref");
-				createLocal.removeAllItems();
-				// createLocal.removeItem("fpng-rot");
-				// createLocal.removeItem("fpng-user");
-				// updateToken(null);
-				// updateRefreshToken(null);
-				// updateUserInfo(null);
-				setRotNumber(0)
-				setStoredrChars(null)
-				// createLocal.removeItem("fpng-refresh");
-			
-				return "/login"
-				// // Redirect to login page (example)
-				// navigate("/login");
-			
-				// // Or just throw an error for the caller to handle
-				// throw new Error("Session expired. Please log in again.");
+				if (login) {
+					console.log("Login attempt failed due to invalid refresh token");
+					// if Refresh failed → log out
+					createLocal.removeItem("fpng-acc");
+					createLocal.removeItem("fpng-ref");
+					createSession.removeItem("fpng-pspk");
+					createLocal.removeAllItems();
+					setRotNumber(0)
+					setStoredrChars(null)
+					toast.error("Session expired. Please log in again.");
+					console.log("Redirecting to login page");
+					return "/login"
+				} else {
+					console.log("Non-login request failed due to invalid refresh token");
+					console.warn(response)
+					toast.error("Session expired. Please log in again.");
+					return null
+				}
 			}
 		}
-		// console.log("Response:", response);
+		console.log("Final response status:", response.status);
 		const data = await response.json()
-		// console.log("Got new access token from response:", data);
-		if (!data?.error) {
-			// console.log("2222222222".repeat(10), data);
+		if (!data?.error&&login) {
 			createLocal.setItem("fpng-acc", data.access);
 			createLocal.setItem("fpng-ref", data.refresh);
 			createLocal.setItem("fpng-user", data.user);
 			createLocal.setItem("fpng-stor", data.user.store);
 			createLocal.setItem("fpng-ctdw", Date.now());
-		} else if (data?.error) {
-			// createLocal.removeItem("fpng-rot");
+		} else if (data?.error||data?.status==='error') {
+			const errorText = data.error||
+								data.detail||
+								data.message||
+								"Error occurred. Please try again."
+			console.warn(errorText)
+			toast.error(errorText);
+			// htoast.success(errorText);
+			return null
 		}
 		return data;
 	}
-	return fetchWithAuth; // ✅ return the function
+	return authorizedFetch; // return the function
 }
 export { useAuthFetch };

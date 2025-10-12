@@ -1,16 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 
-function NavigateToComp() {
+function useNavigateToComp() {
 	const navigate = useNavigate();
-	
+
 	const navigateTo = (path) => {
 		navigate(path);
 	};
-
-	return { navigateTo };
+	return navigateTo;
 }
-export { NavigateToComp }
+export { useNavigateToComp }
 
 // usage:
-// const navigateTo = NavigateToComp();
+// const navigateTo = useNavigateToComp();
 // navigateTo('/desired-path');

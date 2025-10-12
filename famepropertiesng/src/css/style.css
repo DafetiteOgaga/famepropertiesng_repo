@@ -5252,6 +5252,10 @@ button.bg-dark:focus {
   display: flex !important;
 }
 
+.d-inflex {
+  display: inline-flex !important;
+}
+
 .d-inline-flex {
   display: inline-flex !important;
 }
@@ -5563,6 +5567,13 @@ button.bg-dark:focus {
 
 .shadow-none {
   box-shadow: none !important;
+}
+
+.f-wrap {
+  flex-wrap: wrap !important;
+}
+.f-nowrap {
+  flex-wrap: nowrap !important;
 }
 
 .w-5 {
@@ -7195,7 +7206,7 @@ WebKit (Chrome, Edge, Safari)
 .slider:before {
   position: absolute;
   content: "";
-  height: 24px;
+  height: var(--before-height, 24px);
   width: 24px;
   left: 2px;
   bottom: 2px;
@@ -7284,4 +7295,30 @@ textarea:focus-visible,
 a:focus-visible {
   outline: 1px solid #475569;
   outline-offset: -3px;
+}
+
+
+/* ################################################# */
+/* Base wrapper for smooth slide specific store slides */
+.store-container,
+.specific-store {
+  overflow: hidden;
+  transition: all 0.4s ease;
+  transform-origin: top;
+  will-change: transform, opacity;
+}
+
+/* Open animation */
+.specific-store.slideDownSpecificStore {
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+/* Closed animation */
+.specific-store.slideUpSpecificStore {
+  transform: scaleY(0);
+  opacity: 0;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }

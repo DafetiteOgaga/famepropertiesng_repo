@@ -1,5 +1,4 @@
 import { DafetiteFooter } from "../../hooks/dafetiteFooter/dafetiteFooter";
-// import famousPropertiesNGLogo from '../../images/famouspropertiesngTransparent.png';
 import { Link, useLocation } from 'react-router-dom';
 import { useDeviceType } from "../../hooks/deviceType";
 import { Fragment } from "react";
@@ -11,9 +10,7 @@ const switchFooter = [
 ]
 function Footer() {
 	const location = useLocation().pathname.split('/').pop();
-	// console.log("Current Location:", location);
 	const logIn = location.toLowerCase() === 'login' || location.toLowerCase() === 'signup';
-	// console.log({logIn});
 	const deviceType = useDeviceType();
 	const footerItems = deviceType.width > 768 ? switchFooter : [...switchFooter].reverse();
 
@@ -38,9 +35,6 @@ function Footer() {
 						<DafetiteFooter />
 					</p>
 				</div>
-				{/* <div className="col-md-6 px-xl-0 text-center text-md-right">
-					<img className="img-fluid" alt="" src={getImage("payments.png")}/>
-				</div> */}
 			</div>
 		</div>
 	)

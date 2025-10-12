@@ -356,6 +356,13 @@
 .store-container.slideUp {
 	animation: slideUp 0.4s ease forwards;
 }
+/* .specific-store.slideDownSpecificStore {
+	animation: slideDown 1s ease forwards;
+}
+
+.specific-store.slideUpSpecificStore {
+	animation: slideUp 1s ease forwards;
+} */
 
 /* .emoji-explosion {
 	position: relative;

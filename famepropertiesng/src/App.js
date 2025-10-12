@@ -1,27 +1,22 @@
 import { useEffect } from 'react';
-// import 'react-country-state-city/dist/react-country-state-city.css';
 import './App.css';
 import './css/style.css';
 import './css/responsive.css';
-// import './css/purged/style.css';
-// import './css/purged/responsive.css';
 import './css/animation.css';
-// import './css/animations.css';
 import './css/reduced-motion.css';
-// import './css/test.css'
-// import { useLogMediaSize } from './hooks/mediaSize';
 import { AppRoutes } from './routes/route';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useDeviceType } from './hooks/deviceType';
-import { getTotalUsers } from './hooks/getTotalUsers';
-import { getBaseURL } from './hooks/fetchAPIs';
-import { useCreateStorage } from './hooks/setupLocalStorage';
-
-const baseURL = getBaseURL();
+import { useGetTotalUsers } from './hooks/getTotalUsers';
+import { Toaster } from 'react-hot-toast';
+import { usePSPK, useFetchCategories } from './hooks/formMethods/formMethods';
 
 function App() {
-  const { createSession, createLocal } = useCreateStorage()
+  const pspk = usePSPK()
+  useFetchCategories()
+  console.log({pspk})
+  const getTotalUsers = useGetTotalUsers();
   const totalU = sessionStorage.getItem('fpng-tot');
   useEffect(() => {
     if (!totalU) {
@@ -29,41 +24,7 @@ function App() {
       getTotalUsers();
     }
   }, [totalU])
-  // useEffect(() => {
-	// 	const handleBeforeUnload = (event) => {
-	// 		console.log('Cleaning up local storage before unload...');
-	// 		createLocal.removeItem('fpng-prod');
-	// 		createLocal.removeItem('fpng-tprd');
-	// 	};
-	// 	window.addEventListener("beforeunload", handleBeforeUnload);
-  //   console.log('product data cleared on mount');
-	// 	return () => {
-	// 		window.removeEventListener("beforeunload", handleBeforeUnload);
-	// 	};
-	// }, []);
-  const fetchCategories = async (endpoint="categories") => {
-		try {
-			const categoriesRes = await (fetch(`${baseURL}/${endpoint}/`));
-			if (!categoriesRes.ok) {
-				throw new Error("Network response was not ok");
-			}
-			const categoriesData = await categoriesRes.json();
-			// setCategoriesOptions(categoriesData);
-      console.log('fetched categories:', categoriesData);
-			createSession.setItem('fpng-catg', categoriesData);
-      return categoriesData;
-		} catch (error) {
-			console.error("Error fetching data:", error);
-		}
-	}
-  useEffect(() => {
-		const localCategories = localStorage.getItem('fpng-catg');
-    // console.log({localCategories})
-		if (!localCategories?.length) {
-			// console.log('Fetching categories')
-			fetchCategories();
-		}
-	}, [])
+
   const deviceType = useDeviceType().width <= 576;
   return (
     <>
@@ -80,9 +41,22 @@ function App() {
       draggable
       pauseOnHover
       />
+
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            borderRadius: '8px',
+            background: '#333',
+            color: '#fff',
+          },
+        }}
+      />
+
+
+
       {/*
-      frizbe
-      everrt
       kiqqa
       jenttle
        */}

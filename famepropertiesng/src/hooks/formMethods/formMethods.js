@@ -4,6 +4,8 @@ import 'react-country-state-city/dist/react-country-state-city.css';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getBaseURL } from '../fetchAPIs';
+import { useAuthFetch } from '../../components/loginSignUpProfile/authFetch';
+import { useCreateStorage } from '../setupLocalStorage';
 
 const baseURL = getBaseURL();
 
@@ -18,7 +20,6 @@ const useCountryStateCity = () => {
 	const [cscFormData, setCSCFormData] = useState({})
 
 	const updateFormData = () => {
-		// console.log('Updating form data with country, state, city changes...');
 		setCSCFormData(prev => ({
 			...prev,
 
@@ -45,11 +46,8 @@ const useCountryStateCity = () => {
 	}
 
 	useEffect(() => {
-		// console.log('in useefect:', {csc})
 		if (csc&&!cscRef.current) {
-			// console.log('csc exists, not overwriting with country/state/city changes')
 			if (csc.country) {
-				// console.log('setting country from userInfo...')
 				setCountry({
 					name: csc?.country,
 					phone_code: csc?.phoneCode,
@@ -62,7 +60,6 @@ const useCountryStateCity = () => {
 				})
 			}
 			if (csc.state) {
-				// console.log('setting state from userInfo...')
 				setState({
 					name: csc?.state,
 					state_code: csc.stateCode,
@@ -71,7 +68,6 @@ const useCountryStateCity = () => {
 				})
 			}
 			if (csc.city) {
-				// console.log('setting city from userInfo...')
 				setCity({
 					name: csc?.city,
 					id: csc?.cityId,
@@ -82,8 +78,6 @@ const useCountryStateCity = () => {
 	}, [csc])
 
 	useEffect(() => {
-		// console.log('cscFormData changed, updating cscRequiredFieldsGood...');
-		// console.log('from:', cscRequiredFieldsGood)
 		setCscRequiredFieldsGood(
 			!!(
 				cscFormData?.country &&
@@ -91,7 +85,6 @@ const useCountryStateCity = () => {
 				(!cscFormData?.hasCities || cscFormData?.city)
 			)
 		);
-		// console.log('to:', cscRequiredFieldsGood)
 	}, [cscFormData])
 
 	// Re-enable resets if the user changes country on profile page
@@ -108,15 +101,6 @@ const useCountryStateCity = () => {
 			}
 		}
 	}, [country, state, profilePage, csc]);
-
-	// // Re-enable resets if the user changes state on profile page
-	// useEffect(() => {
-	// 	if (profilePage && cscRef.current) {
-	// 		if (state && state.id !== csc?.stateId) {
-	// 			cscRef.current = false; // allow city to reset
-	// 		}
-	// 	}
-	// }, [state, profilePage, csc]);
 
 	useEffect(() => {
 		if (!profilePage&&(country?.name||country?.hasStates===false)) {
@@ -136,10 +120,6 @@ const useCountryStateCity = () => {
 		updateFormData()
 	}, [country, state, city])
 
-	// console.log('#####', {country, state, city})
-	// console.log('in comp', {csc})
-	// console.log({location})
-	// console.log({cscref: cscRef.current})
 	return {
 		cscFormData,
 		cscRequiredFieldsGood,
@@ -198,7 +178,6 @@ const reOrderFields = (entries, reOrderFieldsArr) => {
 // Determine if a field should be a textarea based on its name
 const toTextArea = (str, textAreaFieldsArr) => {
 	const checker = textAreaFieldsArr.includes(str)
-	// console.log({str, checker})
 	return checker
 }
 
@@ -237,7 +216,6 @@ const limitInput = (value, maxChars = 80, maxWords = 200, isTextArea = false) =>
 	const limitedValue = isTextArea ? limitedWordsValue : limitedCharsValue;
 	const charCount = limitedValue.length;
 	const wordCount = limitedValue.trim() ? limitedValue.trim().split(/\s+/).length : 0;
-	// const maxValue = isTextArea ? 200 : maxChars;
 
 	return {
 		value: limitedValue,
@@ -259,9 +237,8 @@ const isEmpty =  (formObj, ignoreID=true) => {
 							(typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
 		return fieldsBool // returns every() value to isEmpty fxn
 	})
-	if (emptyCheck) {
-		// console.log(`Form ID ${formObj.id} is completely empty and should be skipped.`);
-	}
+	// if (emptyCheck) {
+	// }
 	return emptyCheck // returned from every() fxn and passed to calling fxn outside of isEmpty()
 };
 
@@ -270,7 +247,6 @@ const getCategories = (categoriesArr) => {
 	const categories = categoriesArr.reduce((acc, currVal) => {
 		let updated
 		if (currVal.subcategories?.length) {
-			// console.log('skipping:', currVal.name)
 			updated = acc.concat(getCategories(currVal.subcategories))
 		} else {
 			updated  = acc.concat(currVal.name)
@@ -288,6 +264,7 @@ const onlyNumbers = (input) => {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const useConfirmTotals = (inputValue) => {
+	const authFetch = useAuthFetch();
 	const [currentTotalsAvailable, setCurrentTotalsAvailable] = useState({});
 	const [allGood, setAllGood] = useState(null);
 
@@ -301,15 +278,14 @@ const useConfirmTotals = (inputValue) => {
 
 		const getUpdatedTotalAvailableItemsFromServer = async () => {
 			try {
-				const response = await fetch(`${baseURL}/available-totals/`, {
+				const response = await authFetch(`${baseURL}/available-totals/`, {
 					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ productIds }),
+					headers: 'no-header',
+					body: { productIds },
 				});
 
-				if (!response.ok) throw new Error("Network response was not ok");
-
-				const data = await response.json();
+				const data = await response // .json();
+				if (!data) return
 				console.log("Available totals from server:", data);
 
 				setCurrentTotalsAvailable(data);
@@ -338,6 +314,70 @@ const useConfirmTotals = (inputValue) => {
 	return allGood; // null = still checking, true/false = result
 };
 
+const usePSPK = () => {
+	const authFetch = useAuthFetch();
+	const { createSession } = useCreateStorage()
+	const pspkRef = useRef(null);
+	const [pspk, setPspk] = useState(null)
+	const apiUrl = getBaseURL(true) + '/get-paystack-keys/pk/';
+	useEffect(() => {
+		console.log('usePSPK hook called')
+		const fetchPK = async () => {
+			const isPK = createSession.getItem('fpng-pspk')
+			if (isPK&&isPK.startsWith('pk_')) {
+				console.log('using existing pspk')
+				pspkRef.current = isPK
+				setPspk(isPK)
+				return
+			}
+			try {
+				console.log('removing old/bad pspk:', isPK?.slice(0, 15))
+				createSession.removeItem('fpng-pspk')
+				console.log('fetching new pspk')
+				const response = await authFetch(apiUrl);
+				const data = await response //.json();
+				if (!data) return
+				createSession.setItem('fpng-pspk', data?.pk);
+				pspkRef.current = data?.pk
+				setPspk(data?.pk)
+				// return data;
+			} catch (error) {
+				console.error("catch error:", error);
+				toast.error('catch error! Failed. Please try again.');
+				return null;
+			} finally {}
+		}
+		fetchPK()
+	}, [])
+	return pspk
+}
+
+const useFetchCategories = () => {
+	console.log('useFetchCategories hook called')
+	const authFetch = useAuthFetch();
+	const { createSession } = useCreateStorage()
+	useEffect(() => {
+		const fetchCategories = async (endpoint="categories") => {
+			const localCategories = localStorage.getItem('fpng-catg');
+			console.log({localCategories})
+			if (!localCategories?.length) {
+				// console.log('Fetching categories')
+				try {
+					const categoriesRes = await authFetch(`${baseURL}/${endpoint}/`);
+					const categoriesData = await categoriesRes // .json();
+					if (!categoriesData) return
+					console.log('fetched categories:', categoriesData);
+					createSession.setItem('fpng-catg', categoriesData);
+					return categoriesData;
+				} catch (error) {
+					console.error("Error fetching data:", error);
+				}
+			}
+		}
+		fetchCategories();
+	}, [])
+}
+
 // export all functions
 export {
 	reOrderFields,
@@ -349,4 +389,6 @@ export {
 	onlyNumbers,
 	emailRegex,
 	useConfirmTotals,
+	usePSPK,
+	useFetchCategories,
 };

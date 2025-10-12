@@ -1,27 +1,22 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Breadcrumb } from "../../sections/breadcrumb"
 import { useDeviceType } from "../../../hooks/deviceType"
-import { Link, useNavigate } from 'react-router-dom';
-import { GoogleAuthButtonAndSetup } from "../../../hooks/allAuth/googleAuthButtonAndSetup";
+import { useNavigate } from 'react-router-dom';
 import { titleCase } from "../../../hooks/changeCase";
-import { useAuth } from "../../../hooks/allAuth/authContext";
+import { useAuthFetch } from "../authFetch";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../../hooks/fetchAPIs";
-import { IKContext, IKUpload, IKImage } from "imagekitio-react";
-import { useImageKitAPIs } from "../../../hooks/fetchAPIs";
-import { ImageCropAndCompress } from "../../../hooks/fileResizer/ImageCropAndCompress";
 import { BouncingDots } from "../../../spinners/spinner";
-import { authenticator } from "../dynamicFetchSetup";
 import { useCreateStorage } from "../../../hooks/setupLocalStorage";
 import { limitInput, useCountryStateCity, onlyNumbers,
 			emailRegex,
 } from "../../../hooks/formMethods/formMethods";
-// import { inputArr } from "../signUpSetup/formInfo";
 import {
 	inputArr, isFieldsValid,
 	checkEmailUniqueness, validateEmail,
 	checkStoreNameUniqueness,
 } from "./storeFormInfo";
+import { useUploadToImagekit } from "../../imageServer/uploadToImageKit";
 
 const baseURL = getBaseURL();
 
@@ -35,41 +30,20 @@ const initialFormData = {
 	store_email_address: '',
 	store_phone_number: '',
 	previewURL: '',
-	// image_url: '',
-	// password: '',
-	// password_confirmation: '',
-	// country: '',
-	// state: '',
-	// stateCode: '',
-	// phoneCode: '',
-	// city: '',
-	// hasStates: false,
-	// hasCities: false,
 }
 
 function StoreSignUp() {
+	const postToImagekit = useUploadToImagekit();
+	const authFetch = useAuthFetch();
 	const { cscFormData, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
-	// const [sellerValue, setSellerValue] = useState(null);
 	const { createLocal } = useCreateStorage()
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
-	// const emailRef = useRef();
-	const handleImageProcessingRef = useRef();
-	const baseAPIURL = useImageKitAPIs()?.data;
 	const navigate = useNavigate();
-	// const [showPassword, setShowPassword] = useState(false);
-	// const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-	// const [country, setCountry] = useState(''); // whole country object
-	// const [state, setState] = useState('');     // whole state object
-	// const [city, setCity] = useState('');       // whole city object
-	// const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
-	// const [selectedProfilePhoto, setSelectedProfilePhoto] = useState(false);
 	const [selectedFile, setSelectedFile] = useState(null); // local file
 	const [previewURL, setPreviewURL] = useState(null);     // local preview
 	const [uploadedImage, setUploadedImage] = useState(null); // imagekit response like {image_url, fileId}
 	const [fileName, setFileName] = useState('No file chosen');
-	// const [returnedFile, setReturnedFile] = useState(null);
-	// const [imagePreview, setImagePreview] = useState(false);
 	const [formData, setFormData] = useState(initialFormData);
 	const [isEmailValid, setIsEmailValid] = useState(null);
 	const [isStoreNameAvailable, setIsStoreNameAvailable] = useState(null);
@@ -82,16 +56,9 @@ function StoreSignUp() {
 	const {country, state, city, hasStates, hasCities, phoneCode: countryPhoneCode } = cscFormData;
 
 	const userInfo = createLocal.getItem('fpng-user')
-	// validate password on change
-	// useEffect(() => {
-	// 	validatePassword({formData, setPasswordErrorMessage})
-	// }, [formData.password, formData.password_confirmation,
-	// 	formData.username, formData.first_name,
-	// 	formData.last_name,])
 
 	// validate email on change
 	useEffect(() => {
-		// console.log('Email changed, validating format:', formData.store_email_address);
 			validateEmail({
 				email: formData.store_email_address,
 				setIsEmailLoading})
@@ -122,7 +89,6 @@ function StoreSignUp() {
 		} else if (name==='store_address'||name==='nearest_bus_stop') {
 			maxChars = 150;
 		}
-		// if (name==='store_name') setIsStoreLoading(true)
 		// auto-detect textarea
 		const isTextArea = String(tagName).toUpperCase() === 'TEXTAREA';
 
@@ -136,7 +102,6 @@ function StoreSignUp() {
 			maxWords,
 		} =
 			limitInput(cleanedValue, maxChars, undefined, isTextArea);
-		// console.log({name})
 		setFormData(prev => ({
 			...prev,
 			[name]: limitedValue
@@ -151,10 +116,6 @@ function StoreSignUp() {
 
 	// updates country, state, city and image details in formData whenever they change
 	useEffect(() => {
-		// setFormData(prev => ({
-		// 	...prev,
-		// ...cscFormData,
-		// }))
 		if (uploadedImage) {
 			const imageDetails = {
 				image_url: uploadedImage.url,
@@ -166,17 +127,7 @@ function StoreSignUp() {
 			}))
 			setUploadedImage(null);
 		}
-	}, [
-		// cscFormData,
-		uploadedImage])
-
-	// watches if type is password handles switching between text and password types
-	// const getInputType = (input) => {
-	// 	if (input.type !== "password") return input.type;
-	// 	if (input.name === "password") return showPassword ? "text" : "password";
-	// 	if (input.name === "password_confirmation") return showConfirmPassword ? "text" : "password";
-	// 	return "password"; // default fallback
-	// };
+	}, [uploadedImage])
 
 	// check if all required fields are filled
 	const checkFields = isFieldsValid({formData});
@@ -213,25 +164,13 @@ function StoreSignUp() {
 		// add user ID to data
 		cleanedData['userID'] = userInfo.id; // add user ID to data
 
-		// console.log('submitting form:', cleanedData);
-		// toast.success('Registration Successful!');
 		try {
-			const response = await fetch(`${baseURL}/store/${userInfo.id}/`, {
+			const response = await authFetch(`${baseURL}/store/${userInfo.id}/`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(cleanedData),
+				body: cleanedData,
 			});
-
-			if (!response.ok) {
-				// Handle non-2xx HTTP responses
-				const errorData = await response.json();
-				setIsError(errorData?.error)
-				setLoading(false);
-				console.warn('Registration Error:', errorData);
-				toast.error(errorData?.error || 'Registration Error!');
-				return;
-			}
-			const data = await response.json();
+			const data = await response // .json();
+			if (!data) return
 			const updateUserInfo = {
 				...userInfo,
 				is_seller: data?.user?.id === userInfo?.id,
@@ -257,114 +196,32 @@ function StoreSignUp() {
 		}
 	}
 
-	// auto upload when selectedFile changes (i.e when image has been processed)
-	// useEffect(() => {
-	// 	console.log("Selected file changed:", selectedFile);
-	// 	if (selectedFile) handleImageUploadToCloud(); // auto upload on file select
-	// }, [selectedFile]);
-
 	// auto submit form when formData has url and fileID filled (i.e when image has been uploded to cloud)
 	useEffect(() => {
-		// console.log('formData.image_url or formData.fileId changed:', formData.image_url, formData.fileId);
 		if (formData.image_url&&formData.fileId) onSubmitToServerHandler(); // auto submit on image upload
 	}, [formData.image_url, formData.fileId]);
-
-	// handle start of form submission, trigger child to process image first if any
-	// const handleSubmitOkayFromChild = (e) => {
-	// 	e.preventDefault();
-	// 	setLoading(true);
-	// 	if (handleImageProcessingRef.current&&imagePreview) {
-	// 		console.log("Triggering child handleImageProcessing function...");
-	// 		console.log('selectedFile before child processing:', selectedFile);
-	// 		handleImageProcessingRef.current.handleImageProcessing(); // parent directly triggers child’s function
-	// 		console.log('selectedFile after child processing:', selectedFile);
-	// 		// handleImageUploadToCloud(e); // then upload
-	// 	} else if (!imagePreview) {
-	// 		console.log("No image selected, skipping processing...");
-	// 		handleImageUploadToCloud(e); // no image to process, just upload
-	// 	} else {
-	// 		console.warn("Child handleImageProcessing function not available");
-	// 		toast.error("Image processing not ready. Please try again.");
-	// 		return;
-	// 	}
-	// }
 
 	// handle image upload to cloud then finally submit form after
 	const handleImageUploadToCloud = async (e=null) => {
 		if (e) e.preventDefault();
 
-		// prevent multiple store registration
-		// if (userInfo?.is_seller) {
-		// 	const errText = 'You already have a store registered'
-		// 	toast.error(errText);
-		// 	setIsError(errText);
-		// 	return;
-		// }
-
 		setLoading(true);
-
-		// if (!selectedFile) {
-		// 	toast.error("Please select a file first");
-		// 	return;
-		// }
 
 		// console.log("Uploading file:", selectedFile);
 		if (selectedFile instanceof Blob || selectedFile instanceof File) {
-			// console.log("File ready for upload:", selectedFile);
-			try {
-				const imageFormData = new FormData();
-				imageFormData.append("file", selectedFile); // actual file
-				imageFormData.append("fileName", "store_credential.jpg");
-				imageFormData.append("folder", "store_credentials");
-			
-				// get authentication signature from backend
-				const authData = await authenticator();
-				if (!authData) throw new Error("Failed to get ImageKit auth data");
-				// console.log("Auth data for upload:", authData);
-				// console.log({baseAPIURL})
-			
-				// if (authData&&baseAPIURL) {
-				imageFormData.append("publicKey", baseAPIURL?.IMAGEKIT_PUBLIC_KEY);
-				imageFormData.append("signature", authData.signature);
-				imageFormData.append("expire", authData.expire);
-				imageFormData.append("token", authData.token);
-
-				// upload to imagekit
-				// console.log("Uploading to ImageKit...");
-				const uploadResponse = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
-					method: "POST",
-					// headers: {
-					// 	Authorization: `Basic ${baseAPIURL.IMAGEKIT_PUBLIC_KEY + ":"}`,
-					// 	// Public key only, followed by ":" (empty password)
-					// },
-					body: imageFormData,
-					}
-				);
-		
-				if (!uploadResponse.ok) {
-					const errorText = "Upload failed"
-					console.warn(errorText, uploadResponse);
-					toast.error(errorText);
-					setLoading(false);
-					throw new Error(errorText);
-					// return;
-				}
-				const result = await uploadResponse.json();
-				// console.log("Upload successful:", result);
-				setUploadedImage(result); // save response
-				// added image_url and fileId to formdata and finally submit form
-				// this is setup in a useEffect above
-			} catch (err) {
-				toast.error('Upload failed. Please try again.');
-				console.error("Upload failed:", err);
-				return;
+			const imageKitResponse = await postToImagekit({
+				selectedFile,
+				fileName: "store_credential.jpg",
+				folder: "store_credentials"
+			});
+			if (!imageKitResponse) {
+				setLoading(false);
+				return; // upload failed, stop here.
 			}
-			// finally {
-			// 	setLoading(false);
-			// }
+			setUploadedImage(imageKitResponse); // save response
+			// setLoading(false);
 		} else {
 			// just submit if no file to upload
-			// console.log("No file selected, skipping upload.");
 			onSubmitToServerHandler(); // submit form after successful upload
 		}
 	};
@@ -437,34 +294,15 @@ function StoreSignUp() {
 			}))
 		}
 	};
-
-	// console.log({country, state, city})
-	// console.log({userInfo})
-	// console.log({store:userInfo?.store})
-	// console.log({seller:userInfo?.is_seller})
-	// const userInfoSeller = userInfo?.is_seller;
-	// console.log({userInfoSeller})
-	// console.log({sellerValue})
-	// const updatedSeller = sellerValue?.user?.is_seller
-	// console.log({updatedSeller})
-	// console.log({formData})
-	// console.log({checkFields})
-	// console.log({selectedFile}, 'is and instance of blob, file:', selectedFile instanceof Blob, selectedFile instanceof File)
-	// console.log({previewURL})
-	// console.log({isEmailLoading})
 	useEffect(() => {
-		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
-	// console.log('csc =', {country, state, city, hasStates, hasCities})
-	// console.log({cscFormData})
 	return (
 		<>
 			<Breadcrumb page={'Register Store'} />
 
 			{!isMounting ?
 			<form onSubmit={handleImageUploadToCloud}
-			// onSubmit={handleSubmitOkayFromChild}
 			className="row px-xl-5"
 			style={{
 				display: 'flex',
@@ -475,20 +313,17 @@ function StoreSignUp() {
 					padding: deviceType?'0 1rem':'0 1rem',
 					width: deviceType?'':'70%',
 				}}>
-					{/* <div className=""> */}
 					<h2 className="section-title position-relative text-uppercase mt-3 text-uppercase">
 						<span className="bg-secondary"
 						style={{color: '#475569'}}>
 							Become a seller
 						</span>
 					</h2>
-					{/* </div> */}
 					<div className={`bg-light ${deviceType?'p-18':'p-30'} mb-5`}
 					style={{borderRadius: '10px'}}>
 						<div className="row">
 							{inputArr.map((input, index) => {
 								const phone = input.name==='store_phone_number';
-								// console.log(input.name, '-', {phone})
 								return (
 									<div key={index}
 									className="col-md-6 form-group">
@@ -496,35 +331,12 @@ function StoreSignUp() {
 										htmlFor={input.name}>{titleCase(input.name)}<span>{`${input.important?'*':''}`}</span></label>
 										{input.name==='country' ?
 										CountryCompSelect
-										// <CountrySelect
-										// id={input.name}
-										// value={country}
-										// onChange={(val) => setCountry(val)}
-										// placeHolder="Select Country"
-										// />
 										:
 										input.name==='state' ?
 											StateCompSelect
-											// <StateSelect
-											// id={input.name}
-											// key={country?.id || "no-country"} // to reset when country changes
-											// countryid={country?.id}
-											// value={state}
-											// onChange={(val) => setState(val)}
-											// placeHolder="Select State"
-											// />
 											:
 											input.name==='city' ?
 												CityCompSelect
-												// <CitySelect
-												// id={input.name}
-												// key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
-												// countryid={country?.id}
-												// stateid={state?.id}
-												// value={city}
-												// onChange={(val) => setCity(val)}
-												// placeHolder="Select City"
-												// />
 												:
 												<>
 													<div
@@ -540,7 +352,6 @@ function StoreSignUp() {
 															marginRight: '0.5rem',
 														}}>+{userInfo.phoneCode}</p>}
 														<input
-														// ref={input.type==='email'?emailRef:null}
 														id={input.name}
 														name={input.name}
 														onChange={onChangeHandler}
@@ -550,7 +361,7 @@ function StoreSignUp() {
 														type={input}
 														required={input.important}
 														disabled={!input.important&&input.name!=='description'}
-														// autoComplete={input.autoComplete}
+														autoComplete={input.autoComplete}
 														{...input.phoneProps}
 														placeholder={input.placeholder}/>
 													</div>
@@ -566,10 +377,6 @@ function StoreSignUp() {
 													<EmailValidText
 													isEmailValid={isEmailValid}
 													isEmailLoading={isEmailLoading} />}
-
-													{/* email loading spinner */}
-													{/* {(input.type==='email'&&isEmailLoading)&&
-													<BouncingSpinner />} */}
 												</>}
 
 												<span
@@ -583,7 +390,6 @@ function StoreSignUp() {
 														{`${fieldStats[input.name]?.charCount}/${fieldStats[input.name]?.maxCharsLimit} chars`}
 													</>
 													:null}
-												
 												</span>
 									</div>
 								)
@@ -640,14 +446,6 @@ function StoreSignUp() {
 										</button>
 									</div>
 								)}
-
-								{/* select, crop and compress file */}
-								{/* <ImageCropAndCompress
-								onComplete={setSelectedFile}
-								type={'profilePhoto'}
-								ref={handleImageProcessingRef}
-								isImagePreview={setImagePreview} /> */}
-
 							</div>
 						</div>
 
@@ -657,7 +455,6 @@ function StoreSignUp() {
 						className={`btn btn-block btn-auth font-weight-bold ${!loading?'py-3':'pt-3'}`}
 						disabled={
 							!checkFields||
-							// isEmailValid?.color!=='green'||
 							loading||
 							!previewURL||
 							isStoreNameAvailable?.color!=='green'
@@ -669,16 +466,6 @@ function StoreSignUp() {
 						{/* show error response message */}
 						{isError && <ShowErrorFromServer isError={isError} />}
 
-
-						{/* <div
-						style={{
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-							marginTop: '1rem',
-						}}>
-							<GoogleAuthButtonAndSetup />
-						</div> */}
 					</div>
 				</div>
 			</form>
@@ -707,7 +494,6 @@ function StoreNameAndNoteValidText({
 }
 function EmailValidText({
 	isEmailValid, isEmailLoading}) {
-		// console.log({isEmailLoading})
 	return (
 		<>
 			{isEmailLoading ?

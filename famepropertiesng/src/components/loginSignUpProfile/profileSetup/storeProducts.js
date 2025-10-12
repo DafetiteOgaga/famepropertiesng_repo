@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { Breadcrumb } from "../../sections/breadcrumb";
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDeviceType } from "../../../hooks/deviceType";
 import { useCreateStorage } from "../../../hooks/setupLocalStorage";
 import { BouncingDots } from "../../../spinners/spinner";
 import { digitSeparator, titleCase } from "../../../hooks/changeCase";
-import { useOutletContext } from 'react-router-dom';
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../../hooks/fetchAPIs";
 import { Pagination } from "../../../hooks/pagination";
+import { useAuthFetch } from "../authFetch";
 
 const tableHeadArr = [
 	"Products",
@@ -21,6 +21,7 @@ const tableHeadArr = [
 const baseURL = getBaseURL();
 
 function StoreProducts() {
+	const authFetch = useAuthFetch();
 	const parameters = useParams()
 	const navigate = useNavigate();
 	const { createLocal } = useCreateStorage()
@@ -41,17 +42,9 @@ function StoreProducts() {
 
 	const fetchStoreProducts = async (endpoint=`store-products/${parameters?.storeID}/`) => {
 		try {
-			const response = await fetch(`${baseURL}/${endpoint}`);
-	
-			if (!response.ok) {
-				const errorData = await response.json();
-				console.warn('Error:', errorData);
-				toast.error(errorData?.error);
-				setLoading(false);
-				return;
-			}
-			const data = await response.json();
-			// console.log('Response data from server',data)
+			const response = await authFetch(`${baseURL}/${endpoint}`);
+			const data = await response // .json();
+			if (!data) return
 			setPagination({
 				prev: data?.previous,
 				next: data?.next,
@@ -68,12 +61,10 @@ function StoreProducts() {
 			return null;
 		} finally {
 			setLoading(false);
-			// console.log('setting loading to false...')
 		}
 	}
 
 	useEffect(() => {
-		// console.log({parameters: parameters.storeID})
 		if (parameters?.storeID) {
 			fetchStoreProducts()
 		}
@@ -97,15 +88,6 @@ function StoreProducts() {
 
 	const currencySym = userInfo?.currencySymbol||'₦'
 	const isProductAvailable = storeProductsArr?.length
-
-	// console.log({inputValue});
-	// console.log({userInfo})
-	// console.log({store: userInfo?.store})
-	// console.log({totalAmount})
-	// console.log({parameters: parameters.storeID})
-	// console.log({storeProductsArr})
-	// console.log({lStore})
-	// console.log({lStore, lStoreDetails, paraid: parameters?.storeID})
 	return (
 		<>
 			<Breadcrumb page={titleCase(lStoreDetails?.store_name)} />
@@ -115,8 +97,6 @@ function StoreProducts() {
 				paddingLeft: deviceType ? 0 : '',
 				paddingRight: deviceType ? 0 : '',
 			}}>
-				{/* <h2 className="section-title position-relative text-uppercase mx-xl-5 mb-4"><span className="bg-secondary pr-3"
-				style={{color: '#475569'}}>store name here</span></h2> */}
 				<div className="row px-xl-5 justify-content-center">
 					<div className="col-lg-8 table-responsive mb-5">
 						<table className={`table ${isProductAvailable?'table-light':''} table-borderless table-hover text-center mb-0`}>
@@ -151,7 +131,6 @@ function StoreProducts() {
 								{storeProductsArr.map((product, index) => {
 									const isLoading = loadingImages[product?.id]
 									const available = !!product?.numberOfItemsAvailable
-									// console.log({product, available})
 									return (
 										<tr key={index}
 										onClick={()=>navigate(`/detail/${product?.id}`)}
@@ -188,7 +167,7 @@ function StoreProducts() {
 											{/* discount price */}
 											<td className="align-middle text-bg-color text-nowrap"
 											style={deviceType?styles.mobilePadding:{}}>
-												{currencySym} {digitSeparator(product?.discountPrice?.split('.')[0])}
+												{currencySym} {digitSeparator(parseInt(product?.discountPrice))}
 											</td>
 
 											{/* market price */}
@@ -198,7 +177,7 @@ function StoreProducts() {
 												styles.mobilePadding:{},
 												fontSize: 14,
 												}}>
-												<del>{currencySym} {digitSeparator(product?.marketPrice?.split('.')[0])}</del>
+												<del>{currencySym} {digitSeparator(parseInt(product?.marketPrice))}</del>
 											</td>
 
 											{/* number of products left */}

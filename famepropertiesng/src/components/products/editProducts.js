@@ -1,21 +1,21 @@
-import { useEffect, useState, useRef, forwardRef, useImperativeHandle, Fragment } from "react";
+import { useEffect, useState, useRef, Fragment } from "react";
 import 'react-country-state-city/dist/react-country-state-city.css';
 import { Breadcrumb } from "../sections/breadcrumb";
 import { useDeviceType } from "../../hooks/deviceType";
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { titleCase } from "../../hooks/changeCase";
 import { toast } from "react-toastify";
 import { getBaseURL } from "../../hooks/fetchAPIs";
-import { useImageKitAPIs } from "../../hooks/fetchAPIs";
+import { useAuthFetch } from "../loginSignUpProfile/authFetch";
 import { ImageCropAndCompress } from "../../hooks/fileResizer/ImageCropAndCompress";
 import { BouncingDots } from "../../spinners/spinner";
-import { authenticator } from "../loginSignUpProfile/dynamicFetchSetup";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
-import { inputArr, isFieldsValid } from "./productFormInfo";
+import { inputArr } from "./productFormInfo";
 import { toTextArea, limitInput, isEmpty, getCategories,
 			onlyNumbers
 } from "../../hooks/formMethods/formMethods";
 import { ToggleButton } from "../../hooks/buttons";
+import { useUploadToImagekit } from "../imageServer/uploadToImageKit";
 
 const baseURL = getBaseURL();
 
@@ -34,17 +34,16 @@ const initialFormData = () => ({
 	discount_price: '',
 	number_of_items_available: '',
 	storeID: '',
-	// id: crypto.randomUUID(),
 })
 
 function EditProduct() {
+	const postToImagekit = useUploadToImagekit();
+	const authFetch = useAuthFetch();
 	const imgRefs = useRef([]);
 	const [imageDimensions, setImageDimensions] = useState([]);
 	const parameter = useParams()
-	// console.log({parameter})
 	const productID = parameter.productID;
 	const reloadRef = useRef(1);
-	const baseAPIURL = useImageKitAPIs()?.data;
 	const formImageCountRef = useRef(null);
 	const [checkReadiness, setCheckReadiness] = useState(false);
 	const { createLocal, createSession } = useCreateStorage()
@@ -62,23 +61,16 @@ function EditProduct() {
 	const [isMounting, setIsMounting] = useState(true);
 	const deviceType = useDeviceType().width <= 576;
 
-	const lStore = createLocal.getItem('fpng-stor')||[];
 	const userInfo = createLocal.getItem('fpng-user')
-	// const lStoreDetails = lStore.find(store=>store.id?.toString()===parameters?.storeID?.toString())
 	const storesArr = userInfo?.store
 
 	const sessionProducts = createLocal.getItem('fpng-prod');
-	// console.log({sessionProducts})
-	// console.log({productID})
 	const productToEdit = sessionProducts?.find(prod => String(prod.id) === String(productID));
-	// console.log({productToEdit})
 	const productImgs = {}
 	let currentCateories
 
 	const categoriesArr = createSession.getItem('fpng-catg')
-	// console.log({categoriesArr})
 	const categories = getCategories(categoriesArr);
-	// console.log({categories})
 
 	// change this from image_url_x to thumbnail_url_x later
 	if (productToEdit) {
@@ -99,9 +91,6 @@ function EditProduct() {
 			setCheckCategory(initialCategories)
 		}
 	}, [])
-	// :
-	// 					[]
-	// console.log({productImgs})
 
 	// array of fields that should be text areas instead of input fields
 	const textAreaFieldsArr = [
@@ -124,14 +113,6 @@ function EditProduct() {
 			id: `product_image3_${formData.id}`,
 			label: "Product Image 3",
 		},
-		// {
-		// 	id: `product_image4_${formData.id}`,
-		// 	label: "Product Image 4",
-		// },
-		// {
-		// 	id: `product_image5_${formData.id}`,
-		// 	label: "Product Image 5",
-		// }
 	]
 
 	useEffect(() => {
@@ -210,11 +191,8 @@ function EditProduct() {
 		if (e) e.preventDefault();
 
 		console.log('Submitting form to server with data ...');
-		// console.log('set loading to true (onSubmitToServerHandler) ...')
-		// console.log({submittedForm})
 		setLoading(true);
 
-		// clean data: trim strings and convert to lowercase except for certain fields
 		console.log('Processing form object:', formData);
 		// check and track empty forms
 		if (isEmpty(formData)) return null; // skip empty forms
@@ -236,8 +214,6 @@ function EditProduct() {
 				)?value:value.trim().toLowerCase();
 			})
 
-		// add select data
-		// cleanedData['storeID'] = selectStoreData['storeID'];
 		// add categories
 		const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
 			if (value) acc[key] = value
@@ -247,30 +223,14 @@ function EditProduct() {
 
 		console.log('Submitting form with cleaned data:', cleanedData);
 
-
-		// setLoading(false);
-		// console.log({cleanedData})
-		// return
-
 		try {
-			const response = await fetch(`${baseURL}/update-product/${productID}/`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(cleanedData),
+			const response = await authFetch(`${baseURL}/update-product/${productID}/`, {
+				method: "POST",
+				body: cleanedData,
 			});
 
-			if (!response.ok) {
-				const errorData = await response.json();
-				setIsError(errorData?.error)
-				// console.log('set loading to false !response.ok (onSubmitToServerHandler) ...')
-				setLoading(false);
-				console.warn('Product Update Error:', errorData);
-				toast.error(errorData?.error || 'Product Update Error!');
-				return;
-			}
-			const data = await response.json();
-			// console.log('Response data from server',data)
-			// const sessionProducts = createLocal.getItem('fpng-prod');
+			const data = await response // .json();
+			if (!data) return
 			const updated = sessionProducts?.map(prod => {
 				return String(prod.id) === String(data?.id) ? data : prod
 			});
@@ -283,33 +243,23 @@ function EditProduct() {
 				</div>
 			);
 			console.log('Product Updated Successfully:', data);
-			// use a transparent background to refresh this page
-			// reset to one section
-			// productSectionRefs.current[0].resetForm();
-			// setFormData(initialFormData); // reset form
-			/////// navigate('/') ///////// go to home page after registration
+
 			navigate(`/detail/${data.id}`);
 			return data;
+
 		} catch (error) {
 			console.error("Error during Product Update:", error);
 			toast.error('Error! Product Update Failed. Please try again.');
 			return null;
 		} finally {
-			// console.log('set loading to false in finally (onSubmitToServerHandler) ...')
 			setLoading(false);
-			// reloadRef,current = 0 // reset
 		}
 	}
 
 	// auto submit form when formData has url and fileID filled
 	// (i.e when image has been uploded to cloud)
 	useEffect(() => {
-		// console.log('#####'.repeat(14));
-		// console.log('formData:', submittedForm);
-		// console.log('formimageCountRef:', formImageCountRef.current);
-		// if (submittedForm.length===formImageCountRef?.current?.length) {
 			const allUploadedImagesReady = formImageCountRef?.current?.every(formEntry => {
-				// const formObj = submittedForm.find(f => f.id === formEntry.id);
 				if (!formData) return false;
 		
 				return formEntry.uploadedImgIdx.every(idx => {
@@ -321,8 +271,6 @@ function EditProduct() {
 					return bValue;
 				});
 			});
-			// console.log('#####'.repeat(10));
-			// console.log('All uploaded images ready:', allUploadedImagesReady);
 			if (allUploadedImagesReady) {
 				onSubmitToServerHandler(); // auto submit on image upload
 				formImageCountRef.current = null; // reset
@@ -330,10 +278,8 @@ function EditProduct() {
 			} else if (!allUploadedImagesReady && reloadRef.current <= 5) {
 				reloadRef.current += 1;
 				setCheckReadiness(prev => !prev); // re-check readiness
-				// console.log(`Not all images are ready yet, reloading (${reloadRef.current})...`);
 			}
-		// } else console.log('waiting for other forms to upload images ...');
-		// console.log('#####'.repeat(14));
+
 	}, [checkReadiness]);
 
 	// handle image upload to imagekit cloud before finally submit form
@@ -353,30 +299,20 @@ function EditProduct() {
 
 		console.log("Files to upload:", files);
 
-
-		// update formImageCountRef to track which forms have which image indexes
-		// so we can track (and delay submission of incomplete data such as
-		// images urls and fileIDs until) when all images for a form are uploaded
-		// and these data is in the formData state
-
 		// initialze formImageCountRef if null
 		if (!formImageCountRef.current) {
-			// console.log('Initializing formImageCountRef');
 			formImageCountRef.current = [];
 		}
 
 		// check if entry for this form ID already exists
 		const existingEntryIndex = formImageCountRef.current.findIndex(entry => entry.id === formData.id);
-		// console.log('Existing entry index:', existingEntryIndex);
 
 		// update if exists, else add new
 		if (existingEntryIndex >= 0) {
 			// update existing form entry
-			// console.log('Updating existing form entry in formImageCountRef');
 			formImageCountRef.current[existingEntryIndex].uploadedImgIdx = files.map(item => item.idx);
 		} else {
 			// add new form entry
-			// console.log('Adding new form entry to formImageCountRef');
 			formImageCountRef.current.push({
 				id: formData.id,
 				uploadedImgIdx: files.map(item => item.idx),
@@ -389,61 +325,28 @@ function EditProduct() {
 		// only upload if there's at least first file selected
 		if (hasImage) {
 			console.log("File(s) ready for upload:", files);
-			try {
+			// try {
 				// upload each file one by one
 				for (let i = 0; i < files.length; i++) {
-					// get authentication signature from backend
-					const authData = await authenticator();
-					if (!authData) throw new Error("Failed to get ImageKit auth data");
-					console.log("Auth data for upload:", authData);
-
 					const { file, idx } = files[i];
 					console.log(`Uploading file ${i + 1}:`, file);
-
-					const imageFormData = new FormData();
-					imageFormData.append("file", file);
-					imageFormData.append("fileName", `product_${i + 1}.jpg`);
-					imageFormData.append("folder", "products");
-					imageFormData.append("publicKey", baseAPIURL?.IMAGEKIT_PUBLIC_KEY);
-					imageFormData.append("signature", authData.signature);
-					imageFormData.append("expire", authData.expire);
-					imageFormData.append("token", authData.token);
-
-					const uploadResponse = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
-						method: "POST",
-						body: imageFormData,
+					const imageKitResponse = await postToImagekit({
+						selectedFile: file,
+						fileName: `product_${i + 1}.jpg`,
+						folder: "products"
 					});
-
-					if (!uploadResponse.ok) {
-						const errorText = `Upload failed for file ${i + 1}`;
-						console.warn(errorText, uploadResponse);
-						toast.error(errorText);
-						continue; // move to next file instead of stopping everything
+					if (!imageKitResponse) {
+						setLoading(false);
+						return; // upload failed, stop here
 					}
-
-					const result = await uploadResponse.json();
-					console.log(`Upload successful for file ${i + 1}:`, result);
-					toast.success(`Upload successful for file ${i + 1}: ${result.name.slice(0,15)}...`);
 					setUploadedImages(prev => {
 						const newUploadedImages = [...prev];
-						newUploadedImages[idx] = result;
+						newUploadedImages[idx] = imageKitResponse;
 						return newUploadedImages;
-					}); // store response in the corresponding uploadedImage state
-					// setCheckReadiness(prev => !prev); // trigger readiness check for submission
+					});
+					// setLoading(false);
 				}
 				setCheckReadiness(prev => !prev); // trigger readiness check for submission
-				// uploadedImages state will update formData with the result (containing image url and fileID)
-				// via useEffect above
-			} catch (err) {
-				toast.error('Upload failed. Please try again.');
-				console.error("Upload failed:", err);
-				console.log('set loading to false in catch (handleImageUploadToCloud) ...')
-				setLoading(false);
-				return;
-			} finally {
-				console.log('Finally block reached after upload attempts');
-				// onSubmitToServerHandler(); // submit form after successful upload
-			}
 		} else {
 			// just submit if no file to upload
 			console.log("No file selected, skipping upload.");
@@ -460,12 +363,6 @@ function EditProduct() {
 			return ()=>clearTimeout(delay)
 		}
 	}, [isError])
-
-	const handleFieldsValidation = () => {
-		console.log({selectStoreData: selectStoreData.storeID})
-		return selectStoreData.storeID
-	}
-	const checkFields = true // handleFieldsValidation();
 
 	// handle setting selected files from ImageCropAndCompress component
 	// i.e cropped and compressed files
@@ -495,7 +392,6 @@ function EditProduct() {
 	useEffect(() => {
 		setSelectedFiles(new Array(imageLength).fill(null));
 		setUploadedImages(new Array(imageLength).fill(null));
-		// setImagePreviews(new Array(imageLength).fill(false));
 	}, [imageCropAndCompressArrDetails.length])
 
 	// updates images instance details in formData whenever they change
@@ -539,20 +435,7 @@ function EditProduct() {
 		})
 	}, [uploadedImages, selectedFiles])
 
-	// console.log({formData})
-	// console.log({selectedFiles})
-	// console.log({uploadedImages})
-	// console.log({imagePreviews})
-	
-	// console.log({hasImage})
 	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
-	// console.log({checkCategory, isCategoryEmpty})
-	// const checkedCat = Object.entries(checkCategory).reduce((acc, [key, value]) => {
-	// 	if (value) acc[key] = value
-	// 	return acc
-	// }, {})
-	// console.log({checkedCat})
-	// console.log({productToEdit, currentCateories})
 	useEffect(() => {
 		if (!imgRefs.current.length) return;
 		const observer = new ResizeObserver((entries) => {
@@ -574,12 +457,6 @@ function EditProduct() {
 		return () => observer.disconnect();
 	}, [productImgs]);
 
-	// useEffect(() => {
-	// 	const [imageDimensions, setImageDimensions] = useState(
-	// 		Array.from({ length: productImgs.length }, () => ({ width: 210, height: 210 }))
-	// 	);
-	// }, [productImgs])
-	// console.log({productToEdit})
 	return (
 		<>
 			<Breadcrumb page={`Update Product / ${titleCase(productToEdit?.name||'')}`} slash={false} />
@@ -587,7 +464,6 @@ function EditProduct() {
 			{!isMounting ?
 			<form
 			onSubmit={handleImageUploadToCloud}
-			// className="container-fluid"
 			style={
 				!deviceType?
 					{
@@ -608,15 +484,6 @@ function EditProduct() {
 						<ToggleButton
 						onClick={() => setAllFieldsLocked(prev => !prev)}
 						miniStyle={'justify-content-end'}/>
-						{/* <span className="d-flex align-items-center justify-content-end">
-							<label className="toggle-switch mb-0">
-								<input
-								type="checkbox"
-								onClick={() => setAllFieldsLocked(prev => !prev)}
-								/>
-								<span className="slider"></span>
-							</label>
-						</span> */}
 						<div
 						className="d-flex justify-content-between align-items-baseline"
 						>
@@ -714,8 +581,6 @@ function EditProduct() {
 								<>
 									{/* Select, crop and compress files */}
 									{imageCropAndCompressArrDetails.map(({ id, label, required }, idx) => {
-										// if (!selectedFiles[0]&&idx>0) return null; // only show others if first one is selected
-										// console.log({idx, hasFile: selectedFiles[idx], url: productImgs[`image_url_${idx}`]})
 										return (
 											<div className="col-md-6 form-group" key={id}>
 												<label htmlFor={id}>
@@ -744,12 +609,10 @@ function EditProduct() {
 														<img
 														ref={el => imgRefs.current[idx] = el}
 														style={{
-															// marginTop: '0.5rem',
 															maxWidth: '210px',
 															maxHeight: '210px',
 															objectFit: 'contain',
 															borderRadius: '3%',
-															// border: '1px solid #ccc',
 														}}
 														src={productImgs[`image_url_${idx}`]}
 														alt={`Product ${idx+1}`} />
@@ -774,7 +637,6 @@ function EditProduct() {
 							style={{borderRadius: '5px'}}
 							value={selectStoreData['storeID']}
 							required={true}
-							// disabled={loading||!storesArr?.length||allFieldsLocked}
 							disabled
 							>
 								<option value={formData['storeID']}>{(storesArr?.length)?formData['storeName']:'No Store Registered'}</option>
@@ -805,11 +667,6 @@ function EditProduct() {
 							style={{
 								marginLeft: deviceType?'0':'',
 								marginRight: deviceType?'0':'',
-								// maxHeight: 200,
-								// overflowY: 'auto',
-								// border: '1px solid #ccc',
-								// padding: deviceType?'0.5rem':'1rem',
-								// borderRadius: 10,
 							}}>
 								{categories.map((cat, catIdx) => {
 									return (
@@ -851,7 +708,7 @@ function EditProduct() {
 								allFieldsLocked||
 								loading||
 								isCategoryEmpty}>
-								{!loading?`Post`:
+								{!loading?`Update Product`:
 								<BouncingDots size="sm" color="#fff" p="1" />}
 							</button>
 						{/* <NoteOnNumOfPosts /> */}
@@ -868,19 +725,6 @@ function EditProduct() {
 	)
 }
 
-function BouncingSpinner() {
-	return (
-		<>
-			<span
-			style={{
-				display: 'inline-block',
-				marginLeft: '0.5rem',
-			}}>
-				<BouncingDots size="vm" color="#475569" p="0" />
-			</span>
-		</>
-	)
-}
 function StoreNameAndNoteValidText({
 	isStoreNameAvailable, isStoreLoading}) {
 	return (
@@ -895,19 +739,6 @@ function StoreNameAndNoteValidText({
 	)
 }
 
-function NoteOnNumOfPosts() {
-	return (
-		<>
-			<span
-			style={{
-				fontSize: '0.75rem',
-				display: 'inline-block',
-				transform: 'skewX(-10deg)',
-				textAlign: 'center',
-			}}>*Note: You can only submit 5 products in one post. To post more, make multiple posts</span>
-		</>
-	)
-}
 function Note() {
 	return (
 		<>

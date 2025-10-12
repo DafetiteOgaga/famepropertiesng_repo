@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ImageCropAndCompress } from '../hooks/fileResizer/ImageCropAndCompress';
 import { Breadcrumb } from './sections/breadcrumb';
 
@@ -15,13 +14,10 @@ function ProcessImage() {
 	const [processFor, setProcessFor] = useState(null);
 	const handleChange = (e) => {
 		const selectedValue = e.target.value;
-		// console.log("User selected:", selectedValue);
-	  
+
 		// run your compression/resizing logic here
 		setProcessFor(selectedValue);
 	};
-	// const location = useLocation().pathname.split("/").pop();
-	// const [products, setProducts] = useState([]);
 	return (
 		<>
 			{/* Breadcrumb Start */}
@@ -31,7 +27,6 @@ function ProcessImage() {
 			style={{
 				display: 'flex',
 				justifyContent: 'center',
-				// flexDirection: 'column',
 				}}>
 				<div
 				style={{flexDirection: 'column',}}>
@@ -41,24 +36,12 @@ function ProcessImage() {
 					{processFor &&
 					<>
 						<ImageCropAndCompress onComplete={setReturnedFile} type={processFor} />
-						{/* <button
-						onClick={handleClick}
-						className="mt-3 px-4 py-2 rounded-lg"
-						style={{
-							// zIndex: 1000,
-							position: "absolute",
-						}}
-						>
-							Accept Crop
-						</button> */}
 					</>}
-					
 					<select
 					onChange={handleChange}
 					value={processFor||optionsArr[0]}
 					className="mt-3 px-4 py-2 rounded-lg"
 					style={{
-						// zIndex: 1000,
 						position: "absolute",
 						top: "40%",
 					}}
@@ -73,8 +56,6 @@ function ProcessImage() {
 					</select>
 				</div>
 			</div>
-
-			
 		</>
 	)
 }
