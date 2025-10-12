@@ -1,7 +1,5 @@
-import { getBaseURL } from "../../hooks/fetchAPIs";
-import { toast } from "react-toastify";
 
-const baseURL = getBaseURL();
+
 const inputArr = [
 	{
 		name: 'product_name',
@@ -100,17 +98,11 @@ const inputArr = [
 const isFieldsValid = ({formData}) => {
 	// get list of all required fields here
 	const isRequiredArr = inputArr.filter(field => field.important);
-	// console.log({isRequiredArr})
-	// console.log({formData})
 	const isFieldValid = isRequiredArr.every((field) => typeof formData?.[field.name]==='string'?formData?.[field.name].trim()!=="":formData?.[field.name]!=='');
 	return isFieldValid
 };
 
 export {
 	inputArr,
-	// validateEmail,
-	// validatePassword,
 	isFieldsValid,
-	// checkEmailUniqueness,
-	// checkStoreNameUniqueness,
 };
