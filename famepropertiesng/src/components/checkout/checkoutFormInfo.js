@@ -62,7 +62,7 @@ const inputArr = [
 		placeholder: 'addo roundabout, opposite uba bank',
 		type: 'text',
 		important: true,
-		autoComplete: 'off', // no standard autocomplete, disable it
+		autoComplete: 'on', // no standard autocomplete, disable it
 	},
 ]
 
@@ -81,7 +81,6 @@ const validateEmail = ({email, setIsEmailLoading}) => {
 const isFieldsValid = ({formData}) => {
 	// get list of all required fields
 	const isRequiredArr = inputArr.filter(field => field.important);
-	// console.log({isRequiredArr})
 	const isFieldValid = isRequiredArr.every((field) => {
 		return typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!==""
 	});
@@ -91,7 +90,5 @@ const isFieldsValid = ({formData}) => {
 export {
 	inputArr,
 	validateEmail,
-	// validatePassword,
 	isFieldsValid,
-	// checkEmailUniqueness,
 };
