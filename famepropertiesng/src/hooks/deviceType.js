@@ -12,9 +12,7 @@ const useDeviceType = () => {
 	const [deviceType, setDeviceType] = useState(deviceLabels);
 
 	useEffect(() => {
-		// console.log("useDeviceType hook initialized");
 		const getType = () => {
-			// console.log("Detecting device type...");
 			// Reset all values to false
 			let resetAndcleanTypes = Object.fromEntries(
 				Object.keys(deviceLabels).map(key => [key, false])
@@ -23,19 +21,14 @@ const useDeviceType = () => {
 			const width = window.innerWidth;
 
 			if (width < 576) {
-				// console.log("Device type: Mobile");
 				resetAndcleanTypes = { ...resetAndcleanTypes, mobile: true };
 			} else if (width < 768) {
-				// console.log("Device type: Small Tablet");
 				resetAndcleanTypes = { ...resetAndcleanTypes, smallTablet: true };
 			} else if (width < 992) {
-				// console.log("Device type: Tablet");
 				resetAndcleanTypes = { ...resetAndcleanTypes, tablet: true };
 			} else if (width < 1200) {
-				// console.log("Device type: Laptop");
 				resetAndcleanTypes = { ...resetAndcleanTypes, laptop: true };
 			} else {
-				// console.log("Device type: Desktop");
 				resetAndcleanTypes = { ...resetAndcleanTypes, desktop: true };
 			}
 			resetAndcleanTypes = { ...resetAndcleanTypes, width: width };
@@ -53,17 +46,15 @@ const useDeviceType = () => {
 		// Cleanup listener on unmount
 		return () => window.removeEventListener("resize", getType);
 	}, []);
-	// console.log("Device Type:", deviceType);
 	return deviceType;
 };
 
 const useDeviceInfo = () => {
 	const deviceInfoObject = useDeviceType();
+	// extract the width
 	const { width, ...rest } = deviceInfoObject;
-	// console.log("Device Width:", width);
-	// console.log("Device Info:", rest);
+	// extract the device with value true (the current device used by the client)
 	const deviceInfo = Object.entries(deviceInfoObject).find(([key, value]) => value === true)?.[0] || "unknown";
-	// console.log("Device Info Label:", deviceInfo);
 	return { deviceInfo, width };
 };
 
