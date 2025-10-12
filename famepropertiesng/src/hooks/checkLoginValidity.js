@@ -3,19 +3,15 @@ import { useCreateStorage } from "./setupLocalStorage";
 import { toast } from "react-toastify";
 
 function useCheckLoginValidity() {
-	// console.log('Checking login validity...');
 	const { createLocal } = useCreateStorage()
 	const [daysRemaining, setDaysRemaining] = useState(null);
 	useEffect(() => {
-		// console.log('useEffect triggered for login validity check');
 		const lastLogin = createLocal.getItem("fpng-ctdw"); // time at login
 		if (!lastLogin) return;
 
 		const now = Date.now();
 		const diffMs = now - lastLogin;
 		const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;
-
-		// let daysRemaining
 
 		if (diffMs >= fiveDaysMs) {
 			const message = "Session Expired, please login again"
