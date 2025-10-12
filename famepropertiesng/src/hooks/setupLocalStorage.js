@@ -1,6 +1,5 @@
 import { useAuth } from "./allAuth/authContext";
 
-// const localRot = localStorage.getItem("fpng-rot");
 const addRotKeys = (storage) => {
 	const allAppKeys = storage.getItem("fpng-app-keys");
 	if (allAppKeys) {
@@ -31,16 +30,14 @@ function SetAllKeys(storage, key) {
 }
 function useStorage(storage) {
 	const { RotCipher, encrypt, decrypt, } = useAuth() || {};
-	// encrypt = localRot ? parseInt(localRot) : 0;
-	// decrypt = localRot ? -parseInt(localRot) : 0;
 	return {
 		setItem(key, value, duration = null) {
 			if (storage === localStorage) {
 				SetAllKeys(storage, key);
+			} else if (storage === sessionStorage && key === 'fpng-pspk') {
+				// Optionally handle sessionStorage keys if needed
+				SetAllKeys(storage, key);
 			}
-			// console.log('#####useStorage setItem called'.repeat(5));
-			// console.log('setting key:', key);
-			// console.log('Original value:', typeof value);
 			const now = Date.now();
 
 			// Step 1: Convert any type (string, array, object, etc.) into JSON string
@@ -57,31 +54,16 @@ function useStorage(storage) {
 		},
 
 		getItem(key) {
-			// console.log('#####useStorage getItem called'.repeat(5));
-			// console.log('getting key:', key,);
 			const itemStr = storage.getItem(key);
-			// console.log('Raw item string from storage:', itemStr);
+
 			if (!itemStr) return null;
 			try {
-				// console.log('Parsing item string...', itemStr);
 				let data = JSON.parse(itemStr);
-
-				// console.log('Parsed item:', data);
-
-				// if (!value&&!expiry) {
-				// 	console.log('Item has no value and no expiry, returning raw string');
-				// 	value = itemStr;
-				// }
 
 				// Decrypt the string and parse it back to array/object/string
 				let decryptedVal = null;
 				if (data.value) {
-					// const ones = '11111'.repeat(3)
-					// console.log(ones);
-					// console.log('Decrypting value...:', data.value);
 					decryptedVal = RotCipher(data.value, decrypt);
-					// console.log('Decrypted raw string:', decryptedVal);
-					// console.log(ones);
 
 					// only one parse needed
 					decryptedVal = JSON.parse(decryptedVal);
@@ -89,7 +71,6 @@ function useStorage(storage) {
 					decryptedVal = data;
 				}
 
-				// console.log('Decrypted value:', decryptedVal);
 				// No expiry → return value
 				if (!data.expiry) return decryptedVal;
 
@@ -158,23 +139,22 @@ function useStorage(storage) {
 		},
 
 		removeItem(key) {
-			// console.log('Removing item with key:', key);
 			storage.removeItem(key);
 		},
 
 		removeAllItems() {
 			let allAppKeys = storage.getItem("fpng-app-keys");
 			if (allAppKeys) {
-				// console.log({allAppKeys})
 				allAppKeys = JSON.parse(allAppKeys);
-				// console.log({allAppKeys})
 				for (let i = 0; i < allAppKeys.length; i++) {
 					const key = allAppKeys[i];
-					// console.log('Removing item with key:', key);
-					storage.removeItem(key);
+					// storage.removeItem(key); use this preferrably
+					localStorage.removeItem(key); // hardcoded localStorage
+					sessionStorage.removeItem(key); // hardcoded sessionStorage
 				};
-				storage.removeItem("fpng-app-keys");
-				// console.log('All app keys removed');
+				// storage.removeItem("fpng-app-keys"); use this preferrably
+				localStorage.removeItem("fpng-app-keys"); // hardcoded localStorage
+				sessionStorage.removeItem("fpng-app-keys"); // hardcoded sessionStorage
 			}
 		},
 
@@ -193,7 +173,7 @@ function useStorage(storage) {
 }
 
 const useCreateStorage = () => {
-	// Your implementation here
+	// implementation goes here
 	
 	// Create two versions
 	const createLocal = useStorage(localStorage);
@@ -201,54 +181,3 @@ const useCreateStorage = () => {
 	return { createLocal, createSession };
 }
 export { useCreateStorage };
-// Example usage:
-// const { createLocal } = useCreateStorage();
-// createLocal.setItem('testKey', 'testValue', 5000); // expires in 5 seconds
-// console.log(createLocal.getItem('testKey')); // 'testValue'
-// setTimeout(() => {
-// 	console.log(createLocal.getItem('testKey')); // null (expired)
-// }, 6000);
-//
-// createLocal.extendItem('testKey', 5000); // extend by 5 seconds
-// console.log(createLocal.getItem('testKey')); // 'testValue' (if not expired)
-// setTimeout(() => {
-// 	console.log(createLocal.getItem('testKey')); // null (expired after extension)
-// }, 11000);
-// createLocal.removeItem('testKey'); // manually remove
-// console.log(createLocal.getItem('testKey')); // null
-// createLocal.clear(); // clear all items
-// console.log(createLocal.length); // number of items
-// 			const newAccess = await refreshToken();
-// 				if (newAccess) {
-// 					options.headers["Authorization"] = `Bearer ${newAccess}`;
-// 					const retryResponse = await fetch(url, options);
-// 					return retryResponse;
-// 				} else {
-// 					// Redirect to login or handle as needed
-// 					navigate("/login");
-// 					return null;
-// 				}
-// 			}
-// 		}
-// 		return response;
-// 	}
-// 	return fetchWithAuth; //return the function
-// }
-// export { useAuthFetch };
-// 			const newAccess = await refreshToken();
-// 				if (newAccess) {
-// 					options.headers["Authorization"] = `Bearer ${newAccess}`;
-// 					const retryResponse = await fetch(url, options);
-// 					return retryResponse;
-// 				} else {
-// 					// Redirect to login or handle as needed
-// 					navigate("/login");
-// 					return null;
-// 				}
-// 			}
-// 		}
-// 		return response;
-// 	}
-// 	return fetchWithAuth; // return the function
-// }
-// export { useAuthFetch };
