@@ -1,17 +1,13 @@
-import { getImage } from "../../../hooks/baseImgUrl";
 import { titleCase } from "../../../hooks/changeCase";
 import { useDeviceType } from "../../../hooks/deviceType";
 import { BouncingDots } from "../../../spinners/spinner";
 
 function ProductAdvert({productSelector, productsArr}) {
-	// console.log({productSelector, productsArr})
 	const deviceType = useDeviceType();
 	const isMobile = deviceType.width <= 576
 	const isSmallMobile = deviceType.width <= 400
 	const isVerySmallMobile = deviceType.width <= 390
 	const isLoading = !productsArr.length;
-	// const isVeryVerySmallMobile = deviceType.width <= 375
-	// console.log({productsArr})
 	return (
 		<>
 			{!isLoading ?
@@ -19,30 +15,19 @@ function ProductAdvert({productSelector, productsArr}) {
 				{productsArr.map((productItem, index) => {
 					const isActive = productsArr[productSelector].id===productItem.id
 					const evenIndex = index % 2 === 0;
-					// console.log(
-					// 	'productItem:', productItem, 'isActive:', isActive, 'index:', index, 'evenIndex:', evenIndex
-					// )
 					return (
 						<div key={index} className="prod-y col-lg-6 product-offer carousel-div2"
 						style={{
 							...{display: isActive?'block':'none'},
 							...isMobile?{
-								// position: '',
-								// top: isVeryVerySmallMobile?'70%':(isVerySmallMobile?'40%':'70%'),
-								// top: '70%',
 								maxHeight: 300,
 								height: 70,
 								padding: 0,
-								// width: 'auto%',
-								// left: '',
-								// bottom: '-7%',
-								// borderTopRightRadius: 0,
-								// borderBottomLeftRadius: 0,
-								// background: 'yellow',
 							}:{}
 							}}>
-							{/* {!isMobile&& */}
-							<img className="img-fluid" alt="" src={productItem.image_url}/>
+							<img className="img-fluid"
+							alt=""
+							src={productItem.image_url}/>
 								{/* } */}
 							<div className="offer-text"
 							style={
@@ -50,16 +35,12 @@ function ProductAdvert({productSelector, productsArr}) {
 								<h6 className={`text-white text-uppercase ${isActive?evenIndex?'fadeInLeft':'fadeInRight':''}`}
 								style={{
 									fontSize: isVerySmallMobile?'1rem':isSmallMobile?'1.1rem':'',
-									// color: '#fff',
 									zIndex: 1,
 									}}>{productItem.discount}</h6>
 								<h5 className={`text-white mb-3 ${isActive?'bounceInDown':''}`}
 								style={{
 									fontSize: isMobile?'0.7rem':'',
-									// textWrap: productItem.paragraph.length<=10?'nowrap':'wrap',
 									}}>{titleCase(productItem.paragraph)}</h5>
-								{/* button */}
-								{/* <span className="productbtn btn btn-primary">{productItem.anchor}</span> */}
 							</div>
 						</div>
 					)
@@ -72,7 +53,6 @@ function ProductAdvert({productSelector, productsArr}) {
 					...{display: 'block'},
 					...isMobile?{
 						position: 'absolute',
-						// top: isVeryVerySmallMobile?'70%':(isVerySmallMobile?'40%':'70%'),
 						top: '70%',
 						maxHeight: 300,
 						height: 150,
@@ -85,7 +65,7 @@ function ProductAdvert({productSelector, productsArr}) {
 					}}>
 						<BouncingDots size={"sm"} color={isMobile?"#fff":"#475569"} p={isMobile?"4":"6"} />
 				</div>
-			</>}  {/* shows dots only if loading */}
+			</>}
 		</>
 	)
 }
