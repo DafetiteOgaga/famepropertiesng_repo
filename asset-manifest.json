@@ -1,33 +1,18 @@
 {
   "files": {
-    "main.css": "/famepropertiesng_repo/static/css/main.59831e71.css",
-    "main.js": "/famepropertiesng_repo/static/js/main.da8d6c0c.js",
+    "main.css": "/famepropertiesng_repo/static/css/main.e59e8634.css",
+    "main.js": "/famepropertiesng_repo/static/js/main.9ee76d5d.js",
     "static/js/900.274af4e7.chunk.js": "/famepropertiesng_repo/static/js/900.274af4e7.chunk.js",
     "static/js/453.7031f8d3.chunk.js": "/famepropertiesng_repo/static/js/453.7031f8d3.chunk.js",
     "static/media/TwemojiMozilla.ttf": "/famepropertiesng_repo/static/media/TwemojiMozilla.c993f93bd40b647e0b38.ttf",
-    "static/media/story-bg-1.jpg": "/famepropertiesng_repo/static/media/story-bg-1.776a6053d253f4ff1f77.jpg",
-    "static/media/carousel-1.jpg": "/famepropertiesng_repo/static/media/carousel-1.60602d436fd1c214c746.jpg",
-    "static/media/product-7.jpg": "/famepropertiesng_repo/static/media/product-7.4b68f0a4c166ccfeb349.jpg",
-    "static/media/product-4.jpg": "/famepropertiesng_repo/static/media/product-4.6c563b3ca6e5c3e02fe1.jpg",
-    "static/media/carousel-3.jpg": "/famepropertiesng_repo/static/media/carousel-3.bccfb696d299dbe84841.jpg",
-    "static/media/product-8.jpg": "/famepropertiesng_repo/static/media/product-8.c5cbe9755beb7c9328ad.jpg",
-    "static/media/product-1.jpg": "/famepropertiesng_repo/static/media/product-1.78d63a8ff4e344b53377.jpg",
-    "static/media/product-6.jpg": "/famepropertiesng_repo/static/media/product-6.9451b0a7b2eb230c0433.jpg",
-    "static/media/offer-1.jpg": "/famepropertiesng_repo/static/media/offer-1.6bd98b846d36554bf44b.jpg",
-    "static/media/carousel-2.jpg": "/famepropertiesng_repo/static/media/carousel-2.c8ffc953002ee1e0816b.jpg",
-    "static/media/product-9.jpg": "/famepropertiesng_repo/static/media/product-9.514a61c1770d4c7f4240.jpg",
-    "static/media/product-2.jpg": "/famepropertiesng_repo/static/media/product-2.a429598f475f21bb3395.jpg",
-    "static/media/product-5.jpg": "/famepropertiesng_repo/static/media/product-5.d17a272d2186ca8165e4.jpg",
-    "static/media/product-3.jpg": "/famepropertiesng_repo/static/media/product-3.98525da20389b7550fc5.jpg",
-    "static/media/offer-2.jpg": "/famepropertiesng_repo/static/media/offer-2.cbe6dfd75d3e42d31265.jpg",
     "static/media/dafelogoWhiteTransparent.png": "/famepropertiesng_repo/static/media/dafelogoWhiteTransparent.9e22063262c522af2111.png",
     "index.html": "/famepropertiesng_repo/index.html",
-    "main.59831e71.css.map": "/famepropertiesng_repo/static/css/main.59831e71.css.map",
-    "main.da8d6c0c.js.map": "/famepropertiesng_repo/static/js/main.da8d6c0c.js.map",
+    "main.e59e8634.css.map": "/famepropertiesng_repo/static/css/main.e59e8634.css.map",
+    "main.9ee76d5d.js.map": "/famepropertiesng_repo/static/js/main.9ee76d5d.js.map",
     "453.7031f8d3.chunk.js.map": "/famepropertiesng_repo/static/js/453.7031f8d3.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.59831e71.css",
-    "static/js/main.da8d6c0c.js"
+    "static/css/main.e59e8634.css",
+    "static/js/main.9ee76d5d.js"
   ]
 }
