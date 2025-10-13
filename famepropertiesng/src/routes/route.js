@@ -20,6 +20,7 @@ import { EditProduct } from '../components/products/editProducts';
 import { StoreProducts } from '../components/loginSignUpProfile/profileSetup/storeProducts';
 import { Success } from '../components/checkout/success';
 import { InstallmentalPayment } from '../components/loginSignUpProfile/profileSetup/installmental';
+import { PODelivery } from '../components/loginSignUpProfile/profileSetup/pod';
 
 function AppRoutes() {
 	return (
@@ -59,6 +60,10 @@ function AppRoutes() {
 				<Route path="profile/installmental-payment" element={<InstallmentalPayment />} />
 				{/* installment pay success */}
 				<Route path="profile/installmental-payment/success" element={<Success />} />
+				{/* pay on delivery */}
+				<Route path="profile/pay-on-delivery" element={<PODelivery />} />
+				{/* pay on delivery success */}
+				<Route path="profile/pay-on-delivery/success" element={<Success />} />
 				{/* store products */}
 				<Route path="profile/store-products/:storeID" element={<StoreProducts />} />
 				{/* log in */}
