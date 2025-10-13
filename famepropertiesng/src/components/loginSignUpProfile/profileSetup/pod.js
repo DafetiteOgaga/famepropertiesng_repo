@@ -25,7 +25,7 @@ const removeHyphens = (str) => {
 	return str?.replace(/-/g, '')
 }
 
-function InstallmentalPayment() {
+function PODelivery() {
 	usePSPK()
 	const authFetch = useAuthFetch();
 	// const navigate = useNavigate();
@@ -35,7 +35,7 @@ function InstallmentalPayment() {
 	const userInfo = createLocal.getItem('fpng-user');
 	const [isMounting, setIsMounting] = useState(true);
 	const [loading, setLoading] = useState(false);
-	const [unfulfilledCheckoutIds, setUnfulfilledCheckoutIds] = useState(null);
+	const [unsettledCheckoutIds, setUnsettledCheckoutIds] = useState(null);
 	const [finalInstallmentAmount, setFinalInstallmentAmount] = useState(0);
 	const [typedInstallAmount, setTypedInstallAmount] = useState(0);
 	const [isFetchCheckout, setIsFetchCheckout] = useState(false);
@@ -64,11 +64,11 @@ function InstallmentalPayment() {
 			const fetchCheckoutIDs = async () => {
 				setLoading(true);
 				try {
-					const response = await authFetch(`${baseURL}/get-unfulfilled-and-or-unsettled-checkout-ids/${userInfo?.id}/installments/`);
+					const response = await authFetch(`${baseURL}/get-unfulfilled-and-or-unsettled-checkout-ids/${userInfo?.id}/pod/`);
 					const data = await response //.json();
 					if (!data) return
-					// console.log('Response data from server',data)
-					setUnfulfilledCheckoutIds(data);
+					console.log('Response data from server',data)
+					setUnsettledCheckoutIds(data);
 					setLoading(false);
 					return data;
 				} catch (error) {
@@ -121,17 +121,21 @@ function InstallmentalPayment() {
 		}
 	}, [isFetchCheckout])
 	const checkoutProducts = checkoutInfomation?.products||[]
-	const paymentData = {...checkoutInfomation?.new_payment_details, amount: finalInstallmentAmount}
+	const paymentData = {
+		reference: removeHyphens(checkoutInfomation?.checkoutID),
+		email: checkoutInfomation?.email,
+		amount: parseInt(checkoutInfomation?.total_amount)
+	}
 	console.log({paymentData})
-	// console.log({
-	// 	selectedCheckoutID,
-	// 	checkoutInfomation,
-	// 	unfulfilledCheckoutIds
-	// })
+	console.log({
+		// selectedCheckoutID,
+		// checkoutInfomation,
+		unsettledCheckoutIds
+	})
 	const needToRefetch = checkoutInfomation?.checkoutID && selectedCheckoutID
 		? removeHyphens(checkoutInfomation.checkoutID) !== selectedCheckoutID
 		: false;
-	console.log({checkoutInfomation})
+	console.log({checkoutInfomation, needToRefetch})
 	return (
 		<>
 			<Breadcrumb page={'Shopping Cart'} />
@@ -241,7 +245,7 @@ function InstallmentalPayment() {
 						</h5>
 						<div className="bg-light p-30 mb-3"
 						style={{borderRadius: '10px'}}>
-							{(unfulfilledCheckoutIds?.has_unfulfilled_installments) ?
+							{(unsettledCheckoutIds?.has_unsettled_delivery_payments) ?
 							<div className="border-bottom pb-2">
 								<label
 								htmlFor={'CheckoutId'}>Select Checkout<span>*</span></label>
@@ -280,7 +284,7 @@ function InstallmentalPayment() {
 											zIndex: 10,
 										}}
 										>
-											{unfulfilledCheckoutIds?.unfulfilled_checkout_ids?.map((id) => (
+											{unsettledCheckoutIds?.unsettled_checkout_ids?.map((id) => (
 												<Listbox.Option
 												key={id}
 												value={removeHyphens(id).trim()}
@@ -311,7 +315,7 @@ function InstallmentalPayment() {
 						</div>
 
 						{/* installment amount */}
-						<div className={`installment-pay ${checkoutInfomation?'show':''}`}>
+						{/* <div className={`installment-pay ${checkoutInfomation?'show':''}`}>
 							<h5 className="section-title position-relative text-uppercase mb-3">
 								<span className="bg-secondary pr-3"
 								style={{color: '#475569'}}>
@@ -329,7 +333,7 @@ function InstallmentalPayment() {
 								setFinalInstallmentAmount={setFinalInstallmentAmount}
 								/>}
 							</div>
-						</div>
+						</div> */}
 
 						{/* cart summary */}
 						<h5 className="section-title position-relative text-uppercase mb-3">
@@ -341,22 +345,22 @@ function InstallmentalPayment() {
 						<div className="bg-light p-30 mb-5"
 						style={{borderRadius: '10px'}}>
 							<div className="border-bottom pb-2">
-								<div className="d-flex justify-content-between mb-1">
+								{/* <div className="d-flex justify-content-between mb-1">
 									<h6 className="font-weight-medium">Number  of Installments Paid</h6>
 									<h6 className="font-weight-medium">{checkoutInfomation?.installments_count||'N/A'}</h6>
-								</div>
+								</div> */}
 								<div className="d-flex justify-content-between mb-1">
 									<h6>Subtotal</h6>
 									<h6>{currencySym} {digitSeparator(parseInt(checkoutInfomation?.subtotal_amount))||'0'}</h6>
 								</div>
 								<div className="d-flex justify-content-between mb-1">
-									<h6 className="font-weight-medium">Total Paid (Incl. shipping)</h6>
-									<h6 className="font-weight-medium">{currencySym} {digitSeparator(parseInt(checkoutInfomation?.total_paid))||'0'}</h6>
+									<h6 className="font-weight-medium">Shipping</h6>
+									<h6 className="font-weight-medium">{currencySym} {digitSeparator(parseInt(checkoutInfomation?.shipping_fee))||'0'}</h6>
 								</div>
-								<div className="d-flex justify-content-between">
+								{/* <div className="d-flex justify-content-between">
 									<h6 className="font-weight-medium">Remaining Balance</h6>
 									<h6 className="font-weight-medium">{currencySym} {digitSeparator(parseInt(checkoutInfomation?.remaining_balance))||'0'}</h6>
-								</div>
+								</div> */}
 							</div>
 							<div className="pt-2">
 								<div className="d-flex justify-content-between mt-2">
@@ -366,7 +370,10 @@ function InstallmentalPayment() {
 								<button
 								className="btn btn-block btn-primary font-weight-bold my-3 py-3"
 								onClick={() => setProceedToPay(true)}
-								disabled={!finalInstallmentAmount}
+								disabled={
+									!checkoutInfomation?.checkoutID||
+									needToRefetch
+								}
 								>
 									Proceed To Pay
 								</button>
@@ -461,4 +468,4 @@ const styles = {
 		width: '50%',
 	}
 }
-export { InstallmentalPayment };
+export { PODelivery };

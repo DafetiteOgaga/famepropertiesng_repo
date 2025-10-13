@@ -126,14 +126,18 @@ function Profile() {
 			const fetchCheckoutIDs = async () => {
 				setLoading(true);
 				try {
-					const response = await authFetch(`${baseURL}/has-unfulfilled-installments/${userInfo?.id}/`);
+					const response = await authFetch(`${baseURL}/has-unfulfilled-and-or-unsettled/${userInfo?.id}/`);
 
 					const data = await response // .json();
 					if (!data) return
 					console.log('Response data from server',data)
-					console.log('has_unfulfilled_installments:', data)
+					// console.log('has_unfulfilled_installments:', data)
 					console.log('updating user info in local storage...')
-					const updateUser = {...userInfo, has_unfulfilled_installments: data};
+					const updateUser = {
+						...userInfo,
+						has_unfulfilled_installments: data?.pending_installments,
+						has_unsettled_delivery_payments: data?.pending_delivery_payments,
+					};
 					createLocal.setItem('fpng-user', updateUser);
 					console.log('updated user info:', updateUser)
 					// setHasUnfulfilledInstallments(data);
@@ -1272,7 +1276,7 @@ function Profile() {
 							marginBottom: '0.5rem',
 							}} />
 							<div className={`d-flex ${deviceType?'flex-column':'flex-row'} align-items-center justify-content-around`}>
-								
+								{/* become a seller / add more stores button */}
 								<button
 								type="button"
 								onClick={() => {navigate(`register-store/${userInfo?.id}`)}}
@@ -1280,7 +1284,8 @@ function Profile() {
 								>
 									{userInfo?.is_seller?'Add Another Store':'Become a Seller'}
 								</button>
-								
+
+								{/* installmental payment button */}
 								{userInfo?.has_unfulfilled_installments &&
 								<button
 								type="button"
@@ -1289,6 +1294,18 @@ function Profile() {
 								>
 									Pay Installmental
 								</button>}
+
+								{/* pay on delivery button */}
+								{userInfo?.has_unsettled_delivery_payments &&
+								<button
+								type="button"
+								onClick={() => {navigate(`pay-on-delivery`)}}
+								className="btn btn-sm btn-secondary d-block mt-2"
+								>
+									Settle Delivery Payment
+								</button>}
+
+								{/* admin dashboard button */}
 								{userInfo?.is_superuser &&
 								<button
 								type="button"
@@ -1297,6 +1314,8 @@ function Profile() {
 								>
 									Admin Dashboard
 								</button>}
+
+								{/* delete account button */}
 								<button
 									type="button"
 									onClick={() => {}}

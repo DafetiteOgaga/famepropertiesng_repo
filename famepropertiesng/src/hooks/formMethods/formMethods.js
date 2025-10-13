@@ -367,7 +367,7 @@ const useFetchCategories = () => {
 					const categoriesRes = await authFetch(`${baseURL}/${endpoint}/`);
 					const categoriesData = await categoriesRes // .json();
 					if (!categoriesData) return
-					console.log('fetched categories:', categoriesData);
+					// console.log('fetched categories:', categoriesData);
 					createSession.setItem('fpng-catg', categoriesData);
 					return categoriesData;
 				} catch (error) {

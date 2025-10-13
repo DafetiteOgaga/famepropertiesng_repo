@@ -12,6 +12,7 @@ import { getBaseURL } from "../../hooks/fetchAPIs";
 import { useAuthFetch } from "../loginSignUpProfile/authFetch";
 import { ToggleButton } from "../../hooks/buttons";
 import { PaystackCheckout } from "./paystackCheckout";
+import { useNavigate } from "react-router-dom";
 
 const initialFormData = {
 	first_name: '',
@@ -50,9 +51,12 @@ const paymentOptions = [
 	"installmental_payment",
 ]
 
-const _15percent = 0.15
+const percentToBeUsedInstallment = 10 // adjust this to change percent for installment plan
+const calculatedInstallmentPercent = percentToBeUsedInstallment/100
+// console.log({percentToBeUsedInstallment, calculatedInstallmentPercent})
 
 function Checkout() {
+	const navigate = useNavigate();
 	usePSPK() // fetch and store paystack public key
 	const authFetch = useAuthFetch()
 	const [typedInstallAmount, setTypedInstallAmount] = useState(0);
@@ -130,7 +134,7 @@ function Checkout() {
 			const quantity = parseInt(item.nop) || 1;
 			return sum + price * quantity;
 		}, 0)||0;
-		setsubTotalAmount(isInstallPlan?((total*_15percent)+total):total);
+		setsubTotalAmount(isInstallPlan?((total*calculatedInstallmentPercent)+total):total);
 	}, [cartItems, isInstallPlan]);
 
 	const shipToProfileAddress = () => {
@@ -244,7 +248,7 @@ function Checkout() {
 		setLoading(true);
 
 		if (shipToDifferent&&!checkFields) {
-			console.log('using formData ... (diff addy)')
+			// console.log('using formData ... (diff addy)')
 			const emptyFieldsErrTxt = 'Error! All fields with * are required'
 			setIsError(emptyFieldsErrTxt)
 			console.warn(emptyFieldsErrTxt);
@@ -252,7 +256,7 @@ function Checkout() {
 			setLoading(false)
 			return;
 		} else if (!shipToDifferent&&(loggedInFormData.paymentMethod===''||!loggedInFormData.paymentMethod)) {
-			console.log('using loggedInFormData ... (profile addy)')
+			// console.log('using loggedInFormData ... (profile addy)')
 			const paymentErrTxt = 'Error! Please select a payment method'
 			setIsError(paymentErrTxt)
 			console.warn(paymentErrTxt);
@@ -306,6 +310,11 @@ function Checkout() {
 				return
 			}
 			console.log('Response data from server',data)
+			if (data?.payment_method==='pay_on_delivery'&&
+				data?.reference
+			) {
+				navigate("success");
+			}
 			setCheckoutResp(data);
 			// toast.success(
 			// 	<div>
@@ -350,7 +359,7 @@ function Checkout() {
 			if (hasCities) {
 				newMorePx += 80;
 			}
-			console.log('Updating morePx from', prev, 'to', newMorePx);
+			// console.log('Updating morePx from', prev, 'to', newMorePx);
 			return newMorePx;
 		});
 	}, [formData, loggedInFormData])
@@ -366,15 +375,23 @@ function Checkout() {
 		}
 	}, [formData.paymentMethod, loggedInFormData.paymentMethod])
 
-	const _15percentField = parseInt(subTotalAmount) - parseInt((subTotalAmount/(1+_15percent)));
+	const installmentFee = parseInt(subTotalAmount) - parseInt((subTotalAmount/(1+calculatedInstallmentPercent)));
 
 	const updatedCheckoutResp = {
 		...checkoutResp,
 		amount: finalInstallmentAmount??(checkoutResp?.amount),
 	}
+	const referenceAndNotPOD = checkoutResp?.reference&&checkoutResp.payment_method!=='pay_on_delivery'
+	console.log({
+		checkoutResp,
+		reference: checkoutResp?.reference,
+		payment_method: checkoutResp?.payment_method,
+		POD: checkoutResp?.payment_method==='pay_on_delivery',
+		referenceAndNotPOD,
+	})
 	const checkJustFields = isFieldsValid({formData});
 
-	console.log({loading})
+	// console.log({loading})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
@@ -556,13 +573,15 @@ function Checkout() {
 							<div className="border-bottom pt-3 pb-2">
 								<div className={`installment-pay ${isInstallPlan?'show':''}`}>
 									<div className="d-flex justify-content-between mb-3">
-										<h6>Installmental fee (15%)</h6>
-										<h6>{currencySym} {digitSeparator(_15percentField)}</h6>
+										<h6>Installmental fee ({percentToBeUsedInstallment}%)</h6>
+										<h6>{currencySym} {digitSeparator(installmentFee)}</h6>
 									</div>
 								</div>
 								<div className="d-flex justify-content-between mb-3">
 									<h6>Subtotal
-										<span className={`installment-pay ${isInstallPlan?'show':''}`}>{isInstallPlan&&' + 15%'}</span>
+										<span className={`installment-pay ${isInstallPlan?'show':''}`}>
+											{isInstallPlan&&` + ${percentToBeUsedInstallment}%`}
+										</span>
 									</h6>
 									<h6>{currencySym} {digitSeparator(subTotalAmount)}</h6>
 								</div>
@@ -625,11 +644,11 @@ function Checkout() {
 												id={option}
 												value={option}
 												// disabled={(pod||installmental)&&!isLoggedInUser}
-												disabled={pod||(installmental&&!isLoggedInUser)}
+												disabled={(pod||installmental)&&!isLoggedInUser}
 												onChange={
 													// handleRadio
 													(e) => {
-														console.log('radio checked:', option)
+														// console.log('radio checked:', option)
 													setFormData(prev=>({...prev, paymentMethod: e.target.value}));
 													setLoggedInFormData(prev=>({...prev, paymentMethod: e.target.value}))
 												}
@@ -637,9 +656,9 @@ function Checkout() {
 												<label
 												className="custom-control-label"
 												htmlFor={option}>
-													{sentenceCase(option)}{installmental&&' + (15%)'}
-													{(installmental&&!isLoggedInUser)&&ExtraNote([`You must be logged-in to use this option.`,])}
-													{pod&&ExtraNote([`Temporarily unavailable.`,])}
+													{sentenceCase(option)}{installmental&&` + (${percentToBeUsedInstallment}%)`}
+													{(installmental||pod)&&!isLoggedInUser&&ExtraNote([`You must be logged-in to use this option.`,])}
+													{/* {pod&&ExtraNote([`Temporarily unavailable.`,])} */}
 												</label>
 											</div>
 										</div>
@@ -654,10 +673,11 @@ function Checkout() {
 									loading
 								}
 								className="btn btn-block btn-primary font-weight-bold py-3">
-									{!loading?'Place Order':
-									<div style={{margin: '-2.5% auto'}}>
-										<BouncingDots size={"sm"} color="#475569" p={"1"} />
-									</div>}
+									{!loading?'Place Order'
+												:
+												<div style={{margin: '-2.5% auto'}}>
+													<BouncingDots size={"sm"} color="#475569" p={"1"} />
+												</div>}
 								</button>
 							</div>
 							:
@@ -666,7 +686,7 @@ function Checkout() {
 					</div>
 				</form>
 			</div>
-			{checkoutResp?.reference &&
+			{referenceAndNotPOD &&
 			<>
 				<PaystackCheckout
 				checkoutData={updatedCheckoutResp}
@@ -727,7 +747,7 @@ function EnterInstallmentalAmount({
 				</label>
 				{ExtraNote([
 					"(First installment must be at least 40% of the total amount).",
-					`Note that the total amount includes 15% installmental fee (and shipping fee of ${currencySym}${digitSeparator(shipping)} which is charged on first installment).`,
+					`Note that the total amount includes ${percentToBeUsedInstallment}% installmental fee (and shipping fee of ${currencySym}${digitSeparator(shipping)} which is charged on first installment).`,
 					])}
 				<div className="d-flex align-items-baseline">
 
