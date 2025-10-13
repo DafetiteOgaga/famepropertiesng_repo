@@ -64,7 +64,7 @@ function InstallmentalPayment() {
 			const fetchCheckoutIDs = async () => {
 				setLoading(true);
 				try {
-					const response = await authFetch(`${baseURL}/get-unfulfilled-checkout-ids/${userInfo?.id}/`);
+					const response = await authFetch(`${baseURL}/get-unfulfilled-and-or-unsettled-checkout-ids/${userInfo?.id}/installments/`);
 					const data = await response //.json();
 					if (!data) return
 					// console.log('Response data from server',data)
@@ -91,7 +91,7 @@ function InstallmentalPayment() {
 				setLoading(true);
 				try {
 					console.log('fetching...')
-					const response = await authFetch(`${baseURL}/installment-payment/${selectedCheckoutID}/`);
+					const response = await authFetch(`${baseURL}/fetch-chechout-details/${selectedCheckoutID}/`);
 
 					console.log('response ok. waiting for data...')
 					const data = await response // .json();
@@ -241,7 +241,7 @@ function InstallmentalPayment() {
 						</h5>
 						<div className="bg-light p-30 mb-3"
 						style={{borderRadius: '10px'}}>
-							{(unfulfilledCheckoutIds?.unfulfilled_checkout_ids) ?
+							{(unfulfilledCheckoutIds?.has_unfulfilled_installments) ?
 							<div className="border-bottom pb-2">
 								<label
 								htmlFor={'CheckoutId'}>Select Checkout<span>*</span></label>
@@ -341,7 +341,7 @@ function InstallmentalPayment() {
 						<div className="bg-light p-30 mb-5"
 						style={{borderRadius: '10px'}}>
 							<div className="border-bottom pb-2">
-							<div className="d-flex justify-content-between mb-1">
+								<div className="d-flex justify-content-between mb-1">
 									<h6 className="font-weight-medium">Number  of Installments Paid</h6>
 									<h6 className="font-weight-medium">{checkoutInfomation?.installments_count||'N/A'}</h6>
 								</div>
