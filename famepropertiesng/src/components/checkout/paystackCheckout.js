@@ -5,15 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../loginSignUpProfile/authFetch";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 
-
 const baseURL = getBaseURL();
 
 const PaystackCheckout = ({ checkoutData }) => {
-	console.log('entry:', {checkoutData})
+	// console.log('entry:', {checkoutData})
 	const referenceRef = useRef(false); // to ensure reference generation runs only once
 	const authFetch = useAuthFetch();
 	const { createSession } = useCreateStorage();
 	const navigate = useNavigate();
+	const [seconds, setSeconds] = useState(0);
+	const [minutes, setMinutes] = useState(0);
 	const [showOverlay, setShowOverlay] = useState(false);
 	const [paymentStatus, setPaymentStatus] = useState("pending"); // new state
   	const [details, setDetails] = useState(null); // product + thumbnail
@@ -22,11 +23,11 @@ const PaystackCheckout = ({ checkoutData }) => {
 			handlePay()
 		}
 	}, [])
-	console.log({ref_sent: checkoutData?.reference})
+	// console.log({ref_sent: checkoutData?.reference})
 	if (!checkoutData?.reference) return null;
 
 	const isPK = createSession.getItem('fpng-pspk')
-	console.log({isPK})
+	// console.log({isPK})
 	const pollPaymentStatus = (reference) => {
 		const interval = setInterval(async () => {
 			try {
@@ -53,6 +54,30 @@ const PaystackCheckout = ({ checkoutData }) => {
 			}
 		}, 3000); // poll every 3s
 	};
+	const startTimer = () => {
+		console.log("Starting 15-minute timer...");
+		let sec = 0
+		let min = 0
+		const timer = setInterval(() => {
+			sec++;
+			setSeconds(sec);
+			if (sec === 60) {
+				min++;
+				setMinutes(min);
+				sec = 0;
+				setSeconds(0);
+				console.log("One minute passed...");
+			}
+			if (min === 5) {
+				console.log("5 minutes passed, stopping timer and closing overlay...");
+				clearInterval(timer);
+				alert("Oopsi! something went wrong. Please try again.");
+				setShowOverlay(false);
+				navigate("/cart");
+			}
+		}, 1000);
+		return () => clearInterval(timer);
+	}
 
 	const handlePay = async () => {
 		console.log("Initiating payment in handlePay fxn...");
@@ -119,13 +144,14 @@ const PaystackCheckout = ({ checkoutData }) => {
 		});
 		console.log("Opening Paystack iframe with ref:", checkoutData.reference, "...");
 		setShowOverlay(true); // show your overlay now
+		startTimer(); // start 15-min countdown
 		handler.openIframe();
 	};
-	console.log({
-		showOverlay,
-		paymentStatus,
-		details,
-	})
+	// console.log({
+	// 	showOverlay,
+	// 	paymentStatus,
+	// 	details,
+	// })
 	return (
 		<>
 			{showOverlay && (
@@ -149,8 +175,20 @@ const PaystackCheckout = ({ checkoutData }) => {
 						transform: "translate(-50%, -50%)"
 					}}
 					>
-						<span className="mb-2 font-italic">Please, wait </span>
-						<BouncingDots size={"ts"} color="#fff" p={"1"} />
+						<div className="d-flex flex-column justify-content-center align-items-center">
+							<div className="d-flex flex-row justify-content-center align-items-center">
+								<span className="mb-2 font-italic">Please, wait <span
+								style={{fontSize: '12px'}}>
+									({seconds}s)</span>
+								</span>
+								<BouncingDots size={"ts"} color="#fff" p={"1"} />
+							</div>
+							{minutes>=1 && <span
+											className="mb-2 font-italic"
+											style={{textAlign: 'center'}}>
+												Make sure third-part cookie is enabled in your browser setting
+											</span>}
+						</div>
 					</div>
 				</div>
 			)}
