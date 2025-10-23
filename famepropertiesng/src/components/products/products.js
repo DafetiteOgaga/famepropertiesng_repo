@@ -97,7 +97,7 @@ function Products() {
 		}
 		// console.log({isLike})
 		try {
-			const prodRes = await authFetch(`${baseURL}/${endpoint}${endpoint.includes('?')?'':'/'}`,
+			const prodRes = await authFetch(`${endpoint}${endpoint.includes('?')?'':'/'}`,
 				{...config}
 			);
 			// if (!prodRes.ok) {
