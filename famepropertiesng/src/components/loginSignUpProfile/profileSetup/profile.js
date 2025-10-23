@@ -454,7 +454,7 @@ function Profile() {
 
 		if (!updatedFieldRef.current&&!updatedStoreFieldRef.current) {
 			console.warn('Empty form is invalid');
-			toast.error('Oopsi! No updates made. Please edit a field and try again.');
+			toast.error('Oopsy! No updates made. Please edit a field and try again.');
 			setLoading(false);
 			return;
 		}

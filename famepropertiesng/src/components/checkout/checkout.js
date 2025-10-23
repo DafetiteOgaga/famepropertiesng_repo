@@ -214,7 +214,7 @@ function Checkout() {
 		'nearest_bus_stop', 'country', 'state'
 	] + ((userInfo?.country?.toLowerCase()==='nigeria') ? ['lga', 'subArea',] : ['city'])
 
-	console.log({allowedFields})
+	// console.log({allowedFields})
 	const allowedFieldsArr = allFieldsArr.reduce((acc, item) => {
 		const targetIndex = 5
 		if (item.field === "nearest_bus_stop") {
@@ -394,14 +394,14 @@ function Checkout() {
 		amount: finalInstallmentAmount??(checkoutResp?.amount),
 	}
 	const referenceAndNotPOD = checkoutResp?.reference&&checkoutResp.payment_method!=='pay_on_delivery'
-	console.log({
-		// checkoutResp,
-		// reference: checkoutResp?.reference,
-		// payment_method: checkoutResp?.payment_method,
-		// POD: checkoutResp?.payment_method==='pay_on_delivery',
-		// referenceAndNotPOD,
-		userInfo
-	})
+	// console.log({
+	// 	// checkoutResp,
+	// 	// reference: checkoutResp?.reference,
+	// 	// payment_method: checkoutResp?.payment_method,
+	// 	// POD: checkoutResp?.payment_method==='pay_on_delivery',
+	// 	// referenceAndNotPOD,
+	// 	userInfo
+	// })
 	const checkJustFields = isFieldsValid({formData});
 
 	// console.log({cscFormData})
