@@ -31,6 +31,16 @@ const inputArr = [
 		autoComplete: 'address-level2', // city / locality
 	},
 	{
+		name: 'lga',
+		important: true,
+		autoComplete: 'address-level2', // city / locality
+	},
+	{
+		name: 'sub_area',
+		important: true,
+		autoComplete: 'address-level2', // city / locality
+	},
+	{
 		name: 'mobile_no',
 		placeholder: '806 000 1111',
 		type: 'tel',
@@ -81,9 +91,16 @@ const validateEmail = ({email, setIsEmailLoading}) => {
 const isFieldsValid = ({formData}) => {
 	// get list of all required fields
 	const isRequiredArr = inputArr.filter(field => field.important);
+	console.log({isRequiredArr})
 	const isFieldValid = isRequiredArr.every((field) => {
-		return typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!==""
+		// console.log({formData})
+		// console.log({field: field.name, value: formData[field.name]})
+		// const formDataKey = formData[field.name]
+		// const fieldValueIsStr = typeof(formData[field.name])==='string'
+		// console.log({formDataKey, fieldValueIsStr})
+		return typeof(formData[field.name])==='string'?formData[field.name].trim()!=="":formData[field.name]!==""
 	});
+	console.log({isFieldValid})
 	return isFieldValid
 };
 
