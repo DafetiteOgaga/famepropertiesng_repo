@@ -31,7 +31,7 @@ const PaystackCheckout = ({ checkoutData }) => {
 	const pollPaymentStatus = (reference) => {
 		const interval = setInterval(async () => {
 			try {
-				const res = await authFetch(`${baseURL}/verify-payment/${reference}/`);
+				const res = await authFetch(`verify-payment/${reference}/`);
 
 				const data = await res // .json();
 				if (!data) return
@@ -88,7 +88,7 @@ const PaystackCheckout = ({ checkoutData }) => {
 			console.log("installmental_payment reference detected...");
 			console.log("Generating new unique reference from backend...");
 			try {
-				const newRef = await authFetch(`${baseURL}/generate-reference/`);
+				const newRef = await authFetch(`generate-reference/`);
 
 				if (!newRef) return
 				console.log("new reference:", newRef);
