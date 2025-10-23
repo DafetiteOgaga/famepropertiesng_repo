@@ -21,6 +21,10 @@ import { StoreProducts } from '../components/loginSignUpProfile/profileSetup/sto
 import { Success } from '../components/checkout/success';
 import { InstallmentalPayment } from '../components/loginSignUpProfile/profileSetup/installmental';
 import { PODelivery } from '../components/loginSignUpProfile/profileSetup/pod';
+import { StaffDashboard } from '../components/staff/StaffDashboard';
+import { Notifications } from '../components/staff/notifications';
+// import { NigeriaLocationPicker } from '../hooks/formMethods/nigerianLocations';
+// import { useCountryStateCity } from '../hooks/formMethods/locationPicker';
 
 function AppRoutes() {
 	return (
@@ -28,6 +32,10 @@ function AppRoutes() {
 			<Route path="/" element={<Index />}>
 				{/* This makes Home the default route */}
 				<Route index element={<Home />} />
+
+				{/* tests */}
+				{/* <Route path="ng" element={<NigeriaLocationPicker />} /> */}
+				{/* <Route path="loc" element={<useCountryStateCity />} /> */}
 
 				{/* Other routes from Outlet in Index */}
 				{/* products */}
@@ -74,6 +82,13 @@ function AppRoutes() {
 				<Route path="cart/checkout" element={<Checkout />} />
 				{/* contact us */}
 				<Route path="contact" element={<Contact />} />
+				{/* notifications */}
+				<Route path="notifications/:id" element={<Notifications />} />
+				{/* staff dashboard */}
+				<Route path="staff-dashboard/:id" element={<StaffDashboard />} />
+				{/* notification - staff dashboard
+				<Route path="staff-dashboard/:id/:nId" element={<StaffDashboard />} /> */}
+
 				{/* page not found */}
 				<Route path="*" element={<PageNotFound />} />
 			</Route>
