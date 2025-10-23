@@ -14,6 +14,7 @@ import { toTextArea, limitInput, isEmpty, getCategories,
 			onlyNumbers
 } from "../../hooks/formMethods/formMethods";
 import { Listbox } from "@headlessui/react";
+import { HeadlessSelectBtn } from "../../hooks/buttons";
 import { useUploadToImagekit } from "../imageServer/uploadToImageKit";
 
 const baseURL = getBaseURL();
@@ -103,7 +104,7 @@ function PostProduct() {
 		console.log(cleanedDataArray);
 
 		try {
-			const response = await authFetch(`${baseURL}/products/`, {
+			const response = await authFetch(`products/`, {
 				method: "POST",
 				body: cleanedDataArray,
 			});
@@ -288,6 +289,7 @@ function PostProduct() {
 	}, []);
 	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
 	const selectedStoreNme = storesArr?.find(store => store.id.toString()===selectData.storeID.toString())?.store_name
+	console.log({selectData})
 	return (
 		<>
 			<Breadcrumb page={'Post-Product(s)'} />
@@ -375,71 +377,19 @@ function PostProduct() {
 									)
 								})}
 							</select> */}
-							<div style={{ position: "relative", width: "100%" }}>
-								<Listbox
-									value={selectData.storeID}
-									onChange={(val)=>setSelectData({storeID: val})}
-									disabled={loading||!storesArr?.length}>
 
-									{/* Hidden input for form submission */}
-									<input
-									type="hidden"
-									name="storeID"
-									required
-									value={selectData.storeID || ""}
-									/>
-
-									{/* Button that triggers dropdown */}
-									<Listbox.Button
-									style={{
-										width: "100%",
-										padding: "10px 12px",
-										borderRadius: "6px",
-										border: "1px solid #495057",
-										backgroundColor: "#fff",
-										textAlign: "left",
-										cursor: "pointer",
-										color: '#6c757d',
-										overflow: "hidden",
-										textOverflow: "ellipsis",
-										whiteSpace: "nowrap",
-									}}
-									>
-										{selectedStoreNme || "-- Select a Store --"}
-									</Listbox.Button>
-
-									<Listbox.Options
-									style={{
-										position: "absolute",
-										marginTop: "4px",
-										width: "100%",
-										backgroundColor: "#fff",
-										border: "1px solid #ddd",
-										borderRadius: "6px",
-										boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-										maxHeight: "200px",
-										overflowY: "auto",
-										overflowX: "hidden",
-										zIndex: 10,
-									}}
-									>
-										{storesArr?.map((store, i) => {
-											return (
-											<Listbox.Option
-											key={i}
-											value={store.id}
-											style={{
-												padding: "10px 12px",
-												cursor: "pointer",
-												fontSize: deviceType?16.5:15,
-											}}
-											>
-												{store.store_name}
-											</Listbox.Option>
-										)})}
-									</Listbox.Options>
-								</Listbox>
-							</div>
+							<HeadlessSelectBtn
+							onChangeLB={[(val)=>setSelectData({storeID: val})]}
+							lbStateVal={selectData.storeID}
+							lbArr={storesArr}
+							lbInitialVal={selectedStoreNme || "-- Select a Store --"}
+							input={{
+								name: "storeID",
+								value: selectData.storeID || "",
+								disabled: loading||!storesArr?.length
+							}}/>
+							
+							
 						</div>
 						{/* if user has no store */}
 						{(!storesArr?.length)&&

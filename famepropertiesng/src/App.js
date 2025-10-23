@@ -11,19 +11,29 @@ import { useDeviceType } from './hooks/deviceType';
 import { useGetTotalUsers } from './hooks/getTotalUsers';
 import { Toaster } from 'react-hot-toast';
 import { usePSPK, useFetchCategories } from './hooks/formMethods/formMethods';
+// import { useRequestForFCMToken } from './components/firebaseSetup/firebase-config';
 
 function App() {
   const pspk = usePSPK()
   useFetchCategories()
+  // useRequestForFCMToken();
   console.log({pspk})
   const getTotalUsers = useGetTotalUsers();
   const totalU = sessionStorage.getItem('fpng-tot');
   useEffect(() => {
     if (!totalU) {
-      console.log("Fetching total users...");
+      // console.log("Fetching total users...");
       getTotalUsers();
     }
   }, [totalU])
+
+  // useEffect(() => {
+  //   console.log("Requesting notification permission...");
+  //   console.log("current permission:", Notification.permission);
+  //   console.log("current service workers:", navigator.serviceWorker.getRegistrations());
+  //   console.log("current path:", process.env.PUBLIC_URL);
+  //   // useRequestForFCMToken();
+  // }, [])
 
   const deviceType = useDeviceType().width <= 576;
   return (

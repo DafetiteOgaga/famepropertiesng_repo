@@ -24,6 +24,10 @@ const trimmedBody = (dataObj) => {
 		}
 };
 
+const isAPIKeysEndpoint = (url) => {
+	return url.includes("dafetiteapiendpoint")
+};
+
 // const deepTrim = (data) => {
 // 	if (typeof data === "string") {
 // 		return data.trim();
@@ -151,7 +155,7 @@ function useAuthFetch() {
 		}
 
 		// console.log("Fetching ...");
-		let response = await fetch(url, options);
+		let response = await fetch(isAPIKeysEndpoint(url)?url:`${baseURL}/${url}`, options);
 
 		// console.log("Initial response:", response.status);
 		if (response.status === 401) {
@@ -168,7 +172,7 @@ function useAuthFetch() {
 
 			if (access) {
 				options.headers["Authorization"] = `Bearer ${access}`;
-				response = await fetch(url, options); // retry
+				response = await fetch(isAPIKeysEndpoint(url)?url:`${baseURL}/${url}`, options); // retry
 				console.log("Re-try status:", response.status);
 			} else {
 				if (login) {
@@ -192,7 +196,15 @@ function useAuthFetch() {
 			}
 		}
 		console.log("Final response status:", response.status);
+		if (!response.ok && response.status !== 401) {
+			console.warn("Network response was not ok", response.status);
+			console.warn(response)
+			toast.error(`Error: ${response.status} ${response.statusText}`);
+			return null;
+		}
 		const data = await response.json()
+		console.log("Response data for:",
+						"\n", {url, data});
 		if (!data?.error&&login) {
 			createLocal.setItem("fpng-acc", data.access);
 			createLocal.setItem("fpng-ref", data.refresh);

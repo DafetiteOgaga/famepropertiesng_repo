@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getNigeriaStates, getLGAs, getLgaSubAreas } from "geo-ng";
 import { CountrySelect, StateSelect, CitySelect } from "react-country-state-city";
 import 'react-country-state-city/dist/react-country-state-city.css';
 import { useLocation } from 'react-router-dom';
@@ -6,8 +7,136 @@ import { toast } from 'react-toastify';
 import { getBaseURL } from '../fetchAPIs';
 import { useAuthFetch } from '../../components/loginSignUpProfile/authFetch';
 import { useCreateStorage } from '../setupLocalStorage';
+import { titleCase } from '../changeCase';
+import { HeadlessSelectBtn } from '../buttons';
 
-const baseURL = getBaseURL();
+// const baseURL = getBaseURL();
+
+function useNigeriaLocationPicker(onLocationChange, country, onPickerReady) {
+	// const { onLocationChange } = props;
+	// State variables to track selected state, LGA, and area
+	const [selectedNGState, setSelectedNGState] = useState("");
+	const [selectedNGLGA, setSelectedNGLGA] = useState("");
+	const [selectedNGArea, setSelectedNGArea] = useState("");
+	// const [areas, setAreas] = useState([]);
+	const profilePage = useLocation().pathname.split('/')[1].toLowerCase()==='profile'; // to differentiate between profile and signup forms
+	// console.log({profilePage})
+
+	// Load all Nigerian states
+	const states = getNigeriaStates();
+
+	// Load LGAs dynamically when a state is selected
+	const lgas = selectedNGState ? getLGAs(selectedNGState) : [];
+
+	// // Load areas dynamically when an LGA is selected
+	// useEffect(() => {
+	// 	console.log('='.repeat(60))
+	// 	console.log('Loading areas for:', {selectedNGState, selectedNGLGA})
+	// 	if (selectedNGState && selectedNGLGA) {
+	// 		console.log('Setting areas for:', {selectedNGState, selectedNGLGA})
+	// 		const areasList = getLgaSubAreas(selectedNGState, selectedNGLGA);
+	// 		console.log('w'.repeat(60))
+	// 		console.log({areasList})
+	// 		setAreas(areasList);
+	// 	} else {
+	// 		console.log('Clearing areas')
+	// 		setAreas([]);
+	// 	}
+	// }, [selectedNGState, selectedNGLGA]); // runs on mount + change
+
+	// Load areas dynamically when an LGA is selected
+	const areas =
+		selectedNGState && selectedNGLGA
+		? getLgaSubAreas(selectedNGState, selectedNGLGA)
+		: [];
+
+	// bubble up setters to the parent
+	useEffect(() => {
+		if (onPickerReady) {
+			onPickerReady({
+				setSelectedNGState,
+				setSelectedNGLGA,
+				setSelectedNGArea,
+				selectedNGState,
+				selectedNGLGA,
+				selectedNGArea,
+			});
+		}
+	}, []);
+
+	// notify parent of changes:
+	useEffect(() => {
+		let stateName = null;
+		let stateCode = null;
+
+		if (selectedNGState) {
+			const stateObj = states.find((s) => s.code === selectedNGState);
+			stateName = stateObj?.name;
+			stateCode = stateObj?.code;
+		}
+
+		if (onLocationChange) {
+			onLocationChange({
+				state: stateName || null,
+				stateCode: stateCode || null,
+				lga: selectedNGLGA || null,
+				area: selectedNGArea || null,
+			});
+		}
+	}, [selectedNGState, selectedNGLGA, selectedNGArea]);
+
+	useEffect(() => {
+		// reset if country is not Nigeria
+		if (country?.name?.toLowerCase() !== "nigeria") {
+			setSelectedNGState("");
+			setSelectedNGLGA("");
+			setSelectedNGArea("");
+		}
+	}, [country?.name])
+
+	// console.log('w'.repeat(60))
+	// console.log({selectedNGState, selectedNGLGA, selectedNGArea})
+	// console.log({country})
+	// console.log({states, lgas, areas})
+	// console.log('x'.repeat(60))
+	return {
+		NGStateCompSelect: (
+			<>
+				<HeadlessSelectBtn
+					onChangeLB={[setSelectedNGState,
+							setSelectedNGLGA,
+							setSelectedNGArea]}
+					lbStateVal={selectedNGState}
+					lbArr={states}
+					lbInitialVal={(states.find(state=>
+								state.code===selectedNGState)?.name)||
+								"Select State"}/>
+			</>),
+
+		NGLGACompSelect: (
+			(
+				<>
+					<HeadlessSelectBtn
+					onChangeLB={[setSelectedNGLGA,
+							setSelectedNGArea,]}
+					lbStateVal={selectedNGLGA}
+					lbArr={lgas}
+					lbInitialVal={(selectedNGLGA) || "Select LGA"}/>
+				</>
+			)),
+
+		NGAreaCompSelect:
+			(selectedNGLGA && (
+				<>
+					<HeadlessSelectBtn
+					onChangeLB={[setSelectedNGArea,]}
+					lbStateVal={selectedNGArea}
+					lbArr={areas}
+					lbInitialVal={(selectedNGArea) || "Select Area"}/>
+				</>
+			))
+	};
+}
 
 const useCountryStateCity = () => {
 	const [cscRequiredFieldsGood, setCscRequiredFieldsGood] = useState(false);
@@ -16,9 +145,24 @@ const useCountryStateCity = () => {
 	const [country, setCountry] = useState(''); // whole country object
 	const [state, setState] = useState('');     // whole state object
 	const [city, setCity] = useState('');       // whole city object
+	const [nigeriaData, setNigeriaData] = useState(null); // store NG picker data
 	const [csc, setCSC] = useState(null);         // combined country-state-city string
 	const [cscFormData, setCSCFormData] = useState({})
+	const [NGStates, setNGStates] = useState(null);
 
+	// ✅ Update Nigeria data when NigeriaLocationPicker changes
+	const handleNigeriaLocationChange = (data) => {
+		setNigeriaData(data); // { state, stateCode, lga, area }
+	};
+
+	// Initialize Nigeria picker once
+	const nigeriaPicker = useNigeriaLocationPicker(
+		handleNigeriaLocationChange, // use callback to get data from child
+		country, // get updated country value from child
+		(pickSetters) => setNGStates(pickSetters), // receive setter from child
+	);
+
+	const nigeriaNG = country?.name?.toLowerCase() === "nigeria"
 	const updateFormData = () => {
 		setCSCFormData(prev => ({
 			...prev,
@@ -33,20 +177,42 @@ const useCountryStateCity = () => {
 			countryEmoji: country?.emoji||null,
 			hasStates: country?.hasStates||false,
 
+			// // state
+			// state: country?.hasStates?(state?.name):null,
+			// stateId: country?.hasStates?(state?.id):null,
+			// stateCode: country?.hasStates?(state?.state_code):null,
+			// hasCities: state?.hasCities||false,
+
+			// // city
+			// city: state?.hasCities?(city?.name):null,
+			// cityId: state?.hasCities?(city?.id):null,
+
+			// If Nigeria, use nigeriaData; else use normal state/city
 			// state
-			state: country?.hasStates?(state?.name):null,
-			stateId: country?.hasStates?(state?.id):null,
-			stateCode: country?.hasStates?(state?.state_code):null,
-			hasCities: state?.hasCities||false,
+			state: (nigeriaNG)
+				? nigeriaData?.state
+				: (country?.hasStates) ? state?.name : null,
+			stateCode: (nigeriaNG)
+				? nigeriaData?.stateCode
+				: (country?.hasStates) ? state?.state_code : null,
+			stateId: (country?.hasStates) ? state?.id : null,
+			hasCities: state?.hasCities || false,
 
 			// city
-			city: state?.hasCities?(city?.name):null,
+			city: (state?.hasCities) ? city?.name : null,
 			cityId: state?.hasCities?(city?.id):null,
+
+			// lga
+			lga: nigeriaData?.lga || null,
+
+			// area if Nigeria
+			subArea: nigeriaData?.area || null,
 		}))
 	}
 
 	useEffect(() => {
 		if (csc&&!cscRef.current) {
+			console.log('Prefilling CSC data from prop:', csc)
 			if (csc.country) {
 				setCountry({
 					name: csc?.country,
@@ -81,8 +247,21 @@ const useCountryStateCity = () => {
 		setCscRequiredFieldsGood(
 			!!(
 				cscFormData?.country &&
-				(!cscFormData?.hasStates || cscFormData?.state) &&
-				(!cscFormData?.hasCities || cscFormData?.city)
+				(
+					// Special handling for Nigeria
+					(cscFormData?.country?.toLowerCase() === "nigeria" &&
+						cscFormData?.state &&
+						cscFormData?.lga &&
+						cscFormData?.subArea
+					)
+					||
+					// Default for other countries
+					(
+						cscFormData?.country !== "Nigeria" &&
+						(!cscFormData?.hasStates || cscFormData?.state) &&
+						(!cscFormData?.hasCities || cscFormData?.city)
+					)
+				)
 			)
 		);
 	}, [cscFormData])
@@ -118,8 +297,14 @@ const useCountryStateCity = () => {
 	// updates country, state, city and image details in formData whenever they change
 	useEffect(() => {
 		updateFormData()
-	}, [country, state, city])
+		if (country?.name?.toLowerCase() !== 'nigeria') {
+			// Clear if another country is selected
+			setNigeriaData(null);
+		}
+	}, [country, state, city, nigeriaData])
 
+	// console.log({nigeriaNG, nigeriaData})
+	// console.log({country})
 	return {
 		cscFormData,
 		cscRequiredFieldsGood,
@@ -127,35 +312,54 @@ const useCountryStateCity = () => {
 		setState,
 		setCity,
 		setCSC,
+		NGStates,
 		CountryCompSelect: (
 			<CountrySelect
 			value={country}
-			onChange={(val) => setCountry(val)}
+			onChange={(val) => {
+				console.log('Country changed to:', val)
+				setCountry(val)
+			}}
 			placeHolder='Select Country' />
 		),
-		StateCompSelect: (
-			<StateSelect
-			countryid={country?.id}
-			key={country?.id || "no-country"} // to reset when country changes
-			value={state}
-			onChange={(val) => setState(val)}
-			placeHolder='Select State' />
-		),
-		CityCompSelect: (
-			<CitySelect
-			countryid={country?.id}
-			key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
-			stateid={state?.id}
-			value={city}
-			onChange={(val) => setCity(val)}
-			placeHolder='Select City' />
-		),
+		StateCompSelect: nigeriaNG ?
+			(
+				nigeriaPicker.NGStateCompSelect
+			)
+			:
+			(
+				<StateSelect
+				countryid={country?.id}
+				key={country?.id || "no-country"} // to reset when country changes
+				value={state}
+				onChange={(val) => setState(val)}
+				placeHolder='Select State' />
+			),
+		CityCompSelect: nigeriaNG ?
+				(
+					nigeriaPicker.NGLGACompSelect
+				)
+			:
+			(
+				<CitySelect
+				countryid={country?.id}
+				key={`${country?.id || "no-country"}-${state?.id || "no-state"}`}
+				stateid={state?.id}
+				value={city}
+				onChange={(val) => setCity(val)}
+				placeHolder='Select City' />
+			),
+		AreaCompSelect: nigeriaNG && nigeriaPicker.NGAreaCompSelect,
 	};
 }
 
 
 // Reorder fields based on a predefined order array
 const reOrderFields = (entries, reOrderFieldsArr) => {
+	console.log({
+		entries,
+		reOrderFieldsArr
+	})
 	// Create a mapping of index for location keys
 	const orderMap = Object.fromEntries(
 		reOrderFieldsArr.map((key, i) => [key, i])
@@ -279,7 +483,7 @@ const useConfirmTotals = (inputValue) => {
 
 		const getUpdatedTotalAvailableItemsFromServer = async () => {
 			try {
-				const response = await authFetch(`${baseURL}/available-totals/`, {
+				const response = await authFetch(`available-totals/`, {
 					method: "POST",
 					headers: 'no-header',
 					body: { productIds },
@@ -322,11 +526,11 @@ const usePSPK = () => {
 	const [pspk, setPspk] = useState(null)
 	const apiUrl = getBaseURL(true) + '/get-paystack-keys/pk/';
 	useEffect(() => {
-		console.log('usePSPK hook called')
+		// console.log('usePSPK hook called')
 		const fetchPK = async () => {
 			const isPK = createSession.getItem('fpng-pspk')
 			if (isPK&&isPK.startsWith('pk_')) {
-				console.log('using existing pspk')
+				// console.log('using existing pspk')
 				pspkRef.current = isPK
 				setPspk(isPK)
 				return
@@ -354,17 +558,17 @@ const usePSPK = () => {
 }
 
 const useFetchCategories = () => {
-	console.log('useFetchCategories hook called')
+	// console.log('useFetchCategories hook called')
 	const authFetch = useAuthFetch();
 	const { createSession } = useCreateStorage()
 	useEffect(() => {
 		const fetchCategories = async (endpoint="categories") => {
 			const localCategories = localStorage.getItem('fpng-catg');
-			console.log({localCategories})
+			// console.log({localCategories})
 			if (!localCategories?.length) {
 				// console.log('Fetching categories')
 				try {
-					const categoriesRes = await authFetch(`${baseURL}/${endpoint}/`);
+					const categoriesRes = await authFetch(`${endpoint}/`);
 					const categoriesData = await categoriesRes // .json();
 					if (!categoriesData) return
 					// console.log('fetched categories:', categoriesData);

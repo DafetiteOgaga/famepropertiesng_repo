@@ -62,7 +62,7 @@ function Checkout() {
 	const [typedInstallAmount, setTypedInstallAmount] = useState(0);
 	const [finalInstallmentAmount, setFinalInstallmentAmount] = useState(null);
 	const [isInstallPlan, setIsInstallPlan] = useState(false);
-	const { cscFormData, cscRequiredFieldsGood, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
+	const { cscFormData, cscRequiredFieldsGood, CountryCompSelect, StateCompSelect, CityCompSelect, AreaCompSelect } = useCountryStateCity();
 	const { createLocal, createSession } = useCreateStorage()
 	const deviceSpec = useDeviceType();
 	const [isMounting, setIsMounting] = useState(true);
@@ -211,9 +211,10 @@ function Checkout() {
 	const allFieldsArr = Object.entries(userInfo).map(([field, value]) => ({ field, value }));
 	const allowedFields = [
 		'first_name', 'last_name', 'email', 'mobile_no', 'address',
-		'nearest_bus_stop', 'country', 'state', 'city'
-	]
+		'nearest_bus_stop', 'country', 'state'
+	] + ((userInfo?.country?.toLowerCase()==='nigeria') ? ['lga', 'subArea',] : ['city'])
 
+	console.log({allowedFields})
 	const allowedFieldsArr = allFieldsArr.reduce((acc, item) => {
 		const targetIndex = 5
 		if (item.field === "nearest_bus_stop") {
@@ -266,11 +267,12 @@ function Checkout() {
 		}
 
 		const formToBeSubmitted = shipToDifferent ? formData : loggedInFormData
+		// console.log({formToBeSubmitted})
 
 		const cleanedData = {};
 		Object.entries(formToBeSubmitted).forEach(([key, value]) => {
 			cleanedData[key] =
-				value === null ? value:
+				(value === null||value === undefined) ? null:
 				(
 					key==='fileId'||
 					key==='image_url'||
@@ -297,8 +299,12 @@ function Checkout() {
 		// add user id if logged in
 		cleanedData['userID'] = userInfo?.id||null;
 
+		// console.log({cleanedData})
+		// setLoading(false)
+		// return
+
 		try {
-			const response = await authFetch(`${baseURL}/checkouts/`, {
+			const response = await authFetch(`checkouts/`, {
 				method: "POST",
 				headers: 'no-header',
 				body: cleanedData,
@@ -313,6 +319,12 @@ function Checkout() {
 			if (data?.payment_method==='pay_on_delivery'&&
 				data?.reference
 			) {
+				toast.success(
+					<div>
+						Successful.
+					</div>
+				);
+				// return
 				navigate("success");
 			}
 			setCheckoutResp(data);
@@ -383,15 +395,31 @@ function Checkout() {
 	}
 	const referenceAndNotPOD = checkoutResp?.reference&&checkoutResp.payment_method!=='pay_on_delivery'
 	console.log({
-		checkoutResp,
-		reference: checkoutResp?.reference,
-		payment_method: checkoutResp?.payment_method,
-		POD: checkoutResp?.payment_method==='pay_on_delivery',
-		referenceAndNotPOD,
+		// checkoutResp,
+		// reference: checkoutResp?.reference,
+		// payment_method: checkoutResp?.payment_method,
+		// POD: checkoutResp?.payment_method==='pay_on_delivery',
+		// referenceAndNotPOD,
+		userInfo
 	})
 	const checkJustFields = isFieldsValid({formData});
 
-	// console.log({loading})
+	// console.log({cscFormData})
+	const isNigeria = cscFormData?.country?.toLowerCase()==='nigeria'
+	// const lengthOfAddy = shipToDifferent ? formData?.address?.length : loggedInFormData?.address?.length
+	// const lengthOfNearestBusStop = shipToDifferet ? formData?.nearest_bus_stop?.length : loggedInFormData?.nearest_bus_stop?.length
+
+	const lengthOfAddy = shipToDifferent ? formData?.address?.length : loggedInFormData?.address?.length
+	const lengthOfNearestBusStop = shipToDifferent ? formData?.nearest_bus_stop?.length : loggedInFormData?.nearest_bus_stop?.length
+
+	const getBoxesLength = Math.max(1, (parseInt(lengthOfAddy / 32, 10) + parseInt(lengthOfNearestBusStop / 32, 10))) * 10
+
+	// console.log({getBoxesLength, mobile: isMobile, shipToDifferent, isNigeria})
+	// console.log({
+	// 	checkJustFields,
+	// 	cscRequiredFieldsGood,
+	// 	notcheckJustFields: !checkJustFields,
+	// 	notcscRequiredFieldsGood: !cscRequiredFieldsGood})
 	return (
 		<>
 			<Breadcrumb page={'Cart/Checkout'} />
@@ -422,7 +450,17 @@ function Checkout() {
 							style={{borderRadius: '10px'}}>
 								<div className={`flip-container ${shipToDifferent ? "flipped" : ""}`}>
 									<div className="flipper"
-									style={{minHeight: !isMobile?(shipToDifferent?'380px':'270px'):(shipToDifferent?`${500+morePx}px`:'520px')}}>
+									style={{minHeight: !isMobile?
+										(shipToDifferent? // desktop view
+											380: // new address
+											270) // profile address
+										:
+										(shipToDifferent? // mobile view
+											(isNigeria? // nigeria
+												670+getBoxesLength: // new address
+												500+getBoxesLength)+morePx: // other countries
+											520+getBoxesLength) // profile address
+									}}>
 										<div className="front row">
 											{allowedFieldsArr.map((field, index) => {
 												return (
@@ -433,7 +471,9 @@ function Checkout() {
 														style={{
 															color: '#475569',
 															textDecoration: 'underline'
-														}}>{titleCase(field.field)}:</h6>
+														}}>{field?.field?.toLowerCase()==='lga'?
+															field.field.toUpperCase():
+															titleCase(field.field)}:</h6>
 														<p
 														style={{borderRadius: '5px'}}
 														className="">
@@ -462,9 +502,13 @@ function Checkout() {
 													country==='') return null;
 												if (input?.name.toLowerCase()==='city'&&
 													state==='') return null;
+												if (input?.name.toLowerCase()==='lga'&&
+													!cscFormData.state) return null;
+												if (input?.name.toLowerCase()==='sub_area'&&
+													!cscFormData.lga) return null;
 												return (
 													<div key={index}
-													className="col-md-6 form-group">
+													className="col-md-6 form-group d-flex flex-column">
 														<label
 														htmlFor={input.name}>
 															{titleCase(input.name)}
@@ -478,50 +522,53 @@ function Checkout() {
 														input.name==='state' ?
 															StateCompSelect
 															:
-															input.name==='city' ?
+															(input.name==='city'||input.name==='lga') ?
 																CityCompSelect
 																:
-																<>
-																	<div
-																	style={{
-																		display: 'flex',
-																		flexDirection: 'row',
-																		alignItems: 'baseline',
-																		position: 'relative',
-																		width: '100%',
-																	}}>
-																		{phone && <p
+																input.name==='sub_area' ?
+																	AreaCompSelect
+																	:
+																	<>
+																		<div
 																		style={{
-																			marginRight: '0.5rem',
-																		}}>{countryPhoneCode}</p>}
-																		<input
-																		id={input.name}
-																		name={input.name}
-																		onChange={onChangeHandler}
-																		value={formData[input.name]}
-																		style={{borderRadius: '5px'}}
-																		className="form-control"
-																		type={input.type}
-																		required={shipToDifferent?input.important:false}
-																		autoComplete={input.autoComplete}
-																		{...input.phoneProps}
-																		placeholder={input.placeholder}/>
-																	</div>
-																</>}
-																<>
-																	{!['email','password', 'password_confirmation', 'mobile_no'].includes(input.name)&&
-																	<span
-																	style={{
-																		fontSize: '0.625rem',
-																		color: fieldStats[input.name]?.colorIndicator
-																	}}
-																	className={`justify-content-end d-flex font-italic`}>
-																	{fieldStats[input.name]?.charCount ?
-																		<>
-																			{`${fieldStats[input.name]?.charCount}/${fieldStats[input.name]?.maxCharsLimit} chars`}
-																		</>:null}
-																	</span>}
-																</>
+																			display: 'flex',
+																			flexDirection: 'row',
+																			alignItems: 'baseline',
+																			position: 'relative',
+																			width: '100%',
+																		}}>
+																			{phone && <p
+																			style={{
+																				marginRight: '0.5rem',
+																			}}>{countryPhoneCode}</p>}
+																			<input
+																			id={input.name}
+																			name={input.name}
+																			onChange={onChangeHandler}
+																			value={formData[input.name]}
+																			style={{borderRadius: '5px'}}
+																			className="form-control"
+																			type={input.type}
+																			required={shipToDifferent?input.important:false}
+																			autoComplete={input.autoComplete}
+																			{...input.phoneProps}
+																			placeholder={input.placeholder}/>
+																		</div>
+																	</>}
+																	<>
+																		{!['email','password', 'password_confirmation', 'mobile_no'].includes(input.name)&&
+																		<span
+																		style={{
+																			fontSize: '0.625rem',
+																			color: fieldStats[input.name]?.colorIndicator
+																		}}
+																		className={`justify-content-end d-flex font-italic`}>
+																		{fieldStats[input.name]?.charCount ?
+																			<>
+																				{`${fieldStats[input.name]?.charCount}/${fieldStats[input.name]?.maxCharsLimit} chars`}
+																			</>:null}
+																		</span>}
+																	</>
 													</div>
 												)
 											})}

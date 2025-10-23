@@ -10,6 +10,7 @@ import { getBaseURL } from "../../../hooks/fetchAPIs";
 import { onlyNumbers, usePSPK } from "../../../hooks/formMethods/formMethods";
 import { PaystackCheckout } from "../../checkout/paystackCheckout";
 import { Listbox } from "@headlessui/react";
+import { HeadlessSelectBtn } from "../../../hooks/buttons";
 import { useAuthFetch } from "../authFetch";
 
 const tableHeadArr = [
@@ -64,7 +65,7 @@ function InstallmentalPayment() {
 			const fetchCheckoutIDs = async () => {
 				setLoading(true);
 				try {
-					const response = await authFetch(`${baseURL}/get-unfulfilled-and-or-unsettled-checkout-ids/${userInfo?.id}/installments/`);
+					const response = await authFetch(`get-unfulfilled-and-or-unsettled-checkout-ids/${userInfo?.id}/installments/`);
 					const data = await response //.json();
 					if (!data) return
 					// console.log('Response data from server',data)
@@ -91,7 +92,7 @@ function InstallmentalPayment() {
 				setLoading(true);
 				try {
 					console.log('fetching...')
-					const response = await authFetch(`${baseURL}/fetch-chechout-details/${selectedCheckoutID}/`);
+					const response = await authFetch(`fetch-chechout-details/${selectedCheckoutID}/`);
 
 					console.log('response ok. waiting for data...')
 					const data = await response // .json();
@@ -246,7 +247,13 @@ function InstallmentalPayment() {
 								<label
 								htmlFor={'CheckoutId'}>Select Checkout<span>*</span></label>
 
-								<div style={{ position: "relative", width: "100%" }}>
+								<HeadlessSelectBtn
+								onChangeLB={[setSelectedCheckoutID]}
+								lbStateVal={selectedCheckoutID}
+								lbArr={unfulfilledCheckoutIds?.unfulfilled_checkout_ids}
+								lbInitialVal={selectedCheckoutID || "Select a Checkout ID"}/>
+
+								{/* <div style={{ position: "relative", width: "100%" }}>
 									<Listbox value={selectedCheckoutID} onChange={setSelectedCheckoutID}>
 										<Listbox.Button
 										style={{
@@ -295,7 +302,7 @@ function InstallmentalPayment() {
 											))}
 										</Listbox.Options>
 									</Listbox>
-								</div>
+								</div> */}
 							</div>
 							:
 							<BouncingDots size={"sm"} color="#475569" p={"2"} />}

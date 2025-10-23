@@ -13,6 +13,8 @@ export function AuthProvider({ children }) {
 	const [userInfo, setUserInfo] = useState(null);
 	const [rotNumber, setRotNumber] = useState(0);
 	const [storedChars, setStoredrChars] = useState(null);
+	const [freshNotifications, setFreshNotifications] = useState(false);
+	const [isSeen, setIsSeen] = useState(false);
 
 	// 3. Function to update token
 	const updateToken = (aToken) => {
@@ -77,7 +79,9 @@ export function AuthProvider({ children }) {
 			userInfo, updateUserInfo,
 			storedChars, setStoredrChars,
 			rotNumber, setRotNumber,
-			RotCipher, encrypt, decrypt
+			RotCipher, encrypt, decrypt,
+			freshNotifications, setFreshNotifications,
+			isSeen, setIsSeen,
 			}}>
 			{children}
 		</AuthContext.Provider>

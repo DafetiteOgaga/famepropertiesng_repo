@@ -6,7 +6,7 @@ const useGetTotalUsers = () => {
 	const authFetch = useAuthFetch();
 	const getTotalUsers = async () => {
 		try {
-			const response = await authFetch(`${baseURL}/users/total-users/`);
+			const response = await authFetch(`users/total-users/`);
 			// if (!response.ok) {
 			// 	throw new Error("Network response was not ok");
 			// }

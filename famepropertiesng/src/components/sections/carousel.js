@@ -47,9 +47,9 @@ function Carousel() {
 	const fetchServerData = async () => {
 		try {
 			const [carouselsRes, productsRes, featuresRes] = await Promise.all([
-				authFetch(`${baseURL}/carousels/`),
-				authFetch(`${baseURL}/products-adverts/`),
-				authFetch(`${baseURL}/features-adverts/`),
+				authFetch(`carousels/`),
+				authFetch(`products-adverts/`),
+				authFetch(`features-adverts/`),
 			]);
 			if (!carouselsRes || !productsRes|| !featuresRes) {
 				return
@@ -59,9 +59,9 @@ function Carousel() {
 				productsRes, // .json(),
 				featuresRes, // .json(),
 			]);
-			console.log("Fetched data from server.",
-				{carouselsData, productsData, featuresData}
-			);
+			// console.log("Fetched data from server.",
+			// 	{carouselsData, productsData, featuresData}
+			// );
 			setCarouselsArr(carouselsData);
 			setProductsArr(productsData);
 			setFeaturesArr(featuresData);

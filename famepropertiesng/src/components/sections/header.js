@@ -6,8 +6,21 @@ import { Sidebar } from '../bars/sidebar';
 import { getImage } from '../../hooks/baseImgUrl';
 import { useCreateStorage } from '../../hooks/setupLocalStorage';
 import { titleCase } from '../../hooks/changeCase';
+import { onMessage } from 'firebase/messaging';
+import { messaging, useRequestForFCMToken } from '../firebaseSetup/firebase-config';
+import { toast } from 'react-toastify';
+import { saveToIndexedDB, clearNotificationsDB, getNotificationsFromIndexedDB,
+	deleteNotificationById, useAllNotifications
+} from '../firebaseSetup/indexDBMethods';
+import { useAuth } from '../../hooks/allAuth/authContext';
+
 
 const headerMenuArr = [
+	{
+		menu: "Dashboard",
+		link: "/staff-dashboard/id",
+		type: "link",
+	},
 	{
 		menu: "Logout",
 		type: "button",
@@ -55,6 +68,8 @@ const headerMenuArr = [
 ]
 
 function Header({mTop, numberOfProductsInCart, handleClearCart}) {
+	// clearNotificationsDB(); // for testing only - remove in production
+	useRequestForFCMToken();
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
 	const renderdelay = () => {setTimeout(() => setShouldRender(false), 200)}
@@ -65,6 +80,108 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	let { scrollingDown } = useScrollDetection();
 	const deviceType = useDeviceType()
 	const currentPage = useLocation().pathname;
+	const [isNewNotification, setIsNewNotification] = useState(undefined);
+	const { createLocal } = useCreateStorage();
+	const userInfo = createLocal.getItem('fpng-user');
+	const { notificationsCount, notifications:deviceNotificationsArr } = useAllNotifications({
+		trigger: isNewNotification,
+		setTrigger: setIsNewNotification,
+		comp: 'header',
+	})
+	const { setFreshNotifications, isSeen, setIsSeen } = useAuth();
+	const [isSeeenNotification, setIsSeeenNotification] = useState([]);
+	const [isUpdateNotification, setIsUpdateNotification] = useState(false);
+
+	// 2️⃣ Listen for messages when app is open
+	useEffect(() => {
+		// onMessage(messaging, (payload) => {
+		// 	console.log("Message received in foreground:", payload);
+		// 	const notiTitle = payload?.notification?.title;
+		// 	const warmUp = notiTitle?.toLowerCase() === "token_warmup"
+		// 	console.log({
+		// 		notiTitle,
+		// 		body: payload?.notification?.body,
+		// 		data: payload?.data,
+		// 		warmUp,
+		// 	})
+		
+		// 	if (!warmUp) {
+		// 		// replace with toast notification
+		// 		alert(`yippy! ${payload.notification?.title}` || "New notification");
+		// 	}
+		
+		// 	// Optional: refresh orders instantly
+		// 	// fetchOrders();
+		// });
+		onMessage(messaging, async (payload) => {
+			console.log("Message received in foreground:", payload);
+			const title = payload?.notification?.title || "New notification";
+			const warmUp = title?.toLowerCase() === "token_warmup";
+			const body = payload?.notification?.body || "";
+			const status = payload?.data?.status || "pending";
+			const completed = status === "completed";
+			const id = payload?.data?.id;
+			const shipping_status = payload?.data?.shipping_status;
+			const user = payload?.data?.user;
+			const amount = payload?.data?.amount;
+
+			console.log({status, id, completed, warmUp});
+			let success
+			let infoToast
+			 // If message says a task is completed → delete from DB
+			if (completed) {
+				success = await deleteNotificationById(id);
+			}
+		
+			   // Only save and toast for real notifications
+			if (!warmUp && !completed) {
+				const notificationData = {
+					title: title,
+					body: body,
+					timestamp: Date.now(),
+					seen: false,
+					pending: status === "pending",
+					id: id,
+					user: user,
+					amount: amount,
+					shipping_status: shipping_status,
+				};
+			
+				success = await saveToIndexedDB(notificationData); // ✅ use same helper as SW
+				console.log("Notification saved to IndexedDB:", success);
+				infoToast = success;
+			}
+			
+			if (success) {
+				console.log("[debug]: refreshing notifications count due to new message");
+				setIsNewNotification(success);
+				//   alert(`New notification: ${title}`);
+				if (infoToast) {
+					toast.info(`📩 ${title}`);
+				}
+				console.log('turned on fresh notifications flag (via context)');
+				setFreshNotifications(true);
+				setIsUpdateNotification(success);
+			}
+			
+		});
+	}, []);
+
+	useEffect(() => {
+		console.log('load isSeen effect')
+		if (isSeen||isUpdateNotification) {
+			console.log('r'.repeat(50)+'\n', 'Setting isSeen to', !isSeen)
+			getNotificationsFromIndexedDB('unseen').then(setIsSeeenNotification);
+			setIsSeen(false);
+			setIsUpdateNotification(false);
+		}
+		// if (isUpdateNotification) {
+		// 	console.log('u'.repeat(50)+'\n', 'Setting isUpdateNotification to false')
+		// 	getNotificationsFromIndexedDB().then(setIsSeeenNotification);
+		// 	setIsUpdateNotification(false);
+		// }
+	}, [isSeen, isUpdateNotification]);
+
 	const menuHandler = () => {
 		setIsMenuOpen(prev=> {
 			if (prev) {
@@ -111,6 +228,12 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	}, [currentPage])
 
 	const removeLabelName = deviceType.width<400
+
+	console.log({
+		isSeeenNotification,
+		count: isSeeenNotification.length,
+		deviceNotificationsArr,
+	})
 	return (
 		<>
 			<nav className={`container-fluid container-fluid-nav navbar bg-dark navbar-expand-lg navbar-dark py-3 py-lg-0 px-xl-5 ${isMenuOpen?'':!scrollingDown ? 'hidden' : ''}`}
@@ -133,8 +256,17 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 						{}
 					}
 					>
-						<Brand />
-						<CartLink propStyle={"ml-3"} numberOfProductsInCart={numberOfProductsInCart} />
+						<div className='d-flex flex-row align-items-center'>
+							<Brand />
+							<div className='d-flex flex-row align-items-center'>
+								<Notification
+								propStyle='ml-5'
+								numberOfNotifications={isSeeenNotification.length}
+								id={userInfo?.id} />
+								<CartLink propStyle={"ml-2"} numberOfProductsInCart={numberOfProductsInCart} />
+								
+							</div>
+						</div>
 					</span>
 					<button
 					onClick={(e) => {
@@ -155,6 +287,12 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 					handleClearCart={handleClearCart}
 					currentPage={currentPage}
 					numberOfProductsInCart={numberOfProductsInCart}
+					isNewNotification={isNewNotification}
+					setIsNewNotification={setIsNewNotification}
+					notificationsCount={notificationsCount}
+					userInfo={userInfo}
+					numberOfNotifications={notificationsCount}
+					isSeeenNotificationCount={isSeeenNotification.length}
 					/>
 				</div>}
 			</nav>
@@ -169,6 +307,11 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 				categoryMenuRef={categoryMenuRef}
 				numberOfProductsInCart={numberOfProductsInCart}
 				handleClearCart={handleClearCart}
+				isNewNotification={isNewNotification}
+				setIsNewNotification={setIsNewNotification}
+				notificationsCount={notificationsCount}
+				userInfo={userInfo}
+				numberOfNotifications={notificationsCount}
 				/>}
 		</>
 	)
@@ -177,21 +320,64 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 function MenuItems({mTop, isMenuOpen, overlayRef,
 					menuRef, categoryMenuRef,
 					currentPage, numberOfProductsInCart,
-					handleClearCart}) {
+					handleClearCart, isNewNotification,
+					notificationsCount, userInfo, isSeeenNotificationCount,
+					setIsNewNotification, numberOfNotifications}) {
 	const { createLocal, createSession } = useCreateStorage();
 	const [isUserDetected, setIsUserDetected] = useState(null)
 	const [stateHeaderMenu, setStateHeaderMenu] = useState(headerMenuArr)
-	const userInfo = createLocal.getItem('fpng-user');
+	
 	const navigate = useNavigate();
+	console.log({isNewNotification, notificationsCount})
+	
+	// console.log('noti-'.repeat(20)+'\n', {notificationsCount})
+	const userInfoRef = useRef(true);
+	// console.log({
+	// 	is_seller: userInfo?.is_seller,
+	// 	is_staff: userInfo?.is_staff,
+	// })
 
 	useEffect(() => {
-		if (!userInfo?.is_seller) {
-			setStateHeaderMenu(headerMenuArr.filter(header => {
-				return header?.menu.toLowerCase()!=='post products'
-			}))
-		} else {
-			setStateHeaderMenu(headerMenuArr)
+		// console.log({userInfoRef: userInfoRef.current})
+		if (userInfoRef.current) {
+			let updatedMenuArr
+			if (!userInfo?.is_seller) {
+				// console.log('a'.repeat(50))
+				// console.log('removing post products')
+				updatedMenuArr = headerMenuArr.filter(header => {
+					const hMenu = header?.menu?.toLowerCase()!=="post products";
+					// if (header?.menu.toLowerCase()==="post products") {
+					// 	console.log('found post products to remove')
+					// 	return false
+					// }
+					// console.log({hMenu, menu: header?.menu})
+					return hMenu
+				})
+			} else {
+				// console.log('b'.repeat(50))
+				// console.log('keeping post products')
+				updatedMenuArr = headerMenuArr
+			}
+			if (!userInfo?.is_staff) {
+				// console.log('c'.repeat(50))
+				// console.log('removing dashboard')
+				// console.log({dashboardentry: updatedMenuArr})
+				updatedMenuArr = updatedMenuArr.filter(header => {
+					return header?.menu.toLowerCase()!=='dashboard'
+				})
+			} else {
+				// console.log('d'.repeat(50))
+				// console.log('keeping dashboard')
+				// updatedMenuArr = updatedMenuArr
+			}
+			// console.log('e'.repeat(50))
+			// console.log({updatedMenuArr})
+			setStateHeaderMenu(updatedMenuArr)
+			userInfoRef.current = false
 		}
+		// else {
+		// 	setStateHeaderMenu(headerMenuArr)
+		// }
 		setIsUserDetected(!!userInfo)
 	}, [userInfo])
 	const [itemClicked, setItemClicked] = useState(false);
@@ -221,30 +407,35 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	}
 	// usage;
 	// const reordered = moveItem(menuArrItems, 2, 1);
+	// console.log({stateHeaderMenu})
 	let resortedMobile = moveItem(stateHeaderMenu, 'clear cart', 3);
 	let resortedPc
 
 	let isLoggedIn = false
 	if (!isUserDetected) {
 		// not logged in - remove logout button, keep login button
-		// remove register user and post products buttons if not logged in
+		// remove register user and post products and dashboard buttons if not logged in
 		resortedMobile = resortedMobile.filter(obj => (
 			obj.menu.toLowerCase() !== 'logout'&&
 			obj.menu.toLowerCase() !== 'register store'&&
-			obj.menu.toLowerCase() !== 'post products'
+			obj.menu.toLowerCase() !== 'post products'&&
+			obj.menu.toLowerCase() !== 'dashboard'
 		));
 		resortedPc = stateHeaderMenu.filter(obj => (
 			obj.menu.toLowerCase() !== 'logout'&&
 			obj.menu.toLowerCase() !== 'register store'&&
-			obj.menu.toLowerCase() !== 'post products'
+			obj.menu.toLowerCase() !== 'post products'&&
+			obj.menu.toLowerCase() !== 'dashboard'
 		));
 	} else {
 		// logged in - remove login button, keep logout button
 		// add user id to the link for register store and post products
+		// dashboard
 		isLoggedIn = true
 		resortedMobile = resortedMobile.filter(obj => {
 			if (obj?.menu.toLowerCase() === 'register store'||
-				obj?.menu.toLowerCase() === 'post products') {
+				obj?.menu.toLowerCase() === 'post products'||
+				obj?.menu.toLowerCase() === 'dashboard') {
 				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
 			}
 			return (obj.menu.toLowerCase() !== 'login'&&
@@ -253,7 +444,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		});
 		resortedPc = stateHeaderMenu.filter(obj => {
 			if (obj?.menu.toLowerCase() === 'register store'||
-				obj?.menu.toLowerCase() === 'post products') {
+				obj?.menu.toLowerCase() === 'post products'||
+				obj?.menu.toLowerCase() === 'dashboard') {
 				obj.link = obj?.link.substring(0, obj?.link.lastIndexOf('/') + 1) + userInfo?.id;
 			}
 			return (obj.menu.toLowerCase() !== 'login'&&
@@ -277,6 +469,11 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		}
 		return page === link;
 	}
+	// console.log({
+	// 	resortedMobile,
+	// 	resortedPc,
+	// 	isUserDetected
+	// })
 	return (
 		<>
 			{/* mobile container */}
@@ -474,6 +671,16 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 																	color: '#F8F6F2',
 																}}></span>
 															</>}
+															{(menu.menu.toLowerCase()==='dashboard'&&numberOfNotifications)?
+															<span
+															style={{
+																padding: numberOfNotifications > 9 ? '0.2rem 0.1rem':'0.1rem 0.2rem',
+																fontSize: '75%',
+																right: 0,
+															}}
+															className="text-secondary border rounded-circle notification-popup ">
+																{numberOfNotifications}
+															</span>:null}
 												</Link>}
 										</Fragment>
 									)
@@ -492,9 +699,16 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						justifyContent: 'center',
 						alignItems: 'center',
 						}}>
+
+						{/* {console.log('|*+-@'.repeat(40)+'\n', {notificationsCount})} */}
+						<Notification
+						propStyle='mr-2'
+						numberOfNotifications={isSeeenNotificationCount}
+						id={userInfo?.id} />
+
 						{userInfo &&
 						<Link to={"/profile"}
-						className='profile-name-link'
+						className='profile-name-link mr-2'
 						style={{
 							textWrap: 'nowrap',
 							color: '#F8F6F2',
@@ -503,6 +717,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 							alignItems: 'center',
 							textDecoration: 'none',
 							}}>
+								
 								{userInfo.image_url ?
 								<img
 								src={userInfo.image_url}
@@ -548,7 +763,18 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 											</button>
 											:
 											<Link to={menu.link} className={`text-body head-item ${isActive?'active':''}`}
-											style={{textWrap: 'nowrap'}}>{menu.menu}</Link>}
+											style={{textWrap: 'nowrap'}}>
+												{menu.menu}
+												{(menu.menu.toLowerCase()==='dashboard'&&numberOfNotifications)?
+													<span
+													style={{
+														padding: numberOfNotifications > 9 ? '0.2rem 0.1rem':'0.1rem 0.2rem',
+														right: 0,
+													}}
+													className="text-secondary border rounded-circle notification-popup ">
+														{numberOfNotifications}
+													</span>:null}
+											</Link>}
 									</Fragment>
 								)
 							})}
@@ -563,9 +789,11 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 function Brand() {
 	const deviceType = useDeviceType()
 	const removeLabelName = deviceType.width<400
+	let famouspng = 'famousproperties'
+	famouspng = (deviceType.width<576) ? famouspng.slice(0, 6) + '...' : famouspng
 	return (
 		<Link to={"/"}
-		className="text-decoration-none"
+		className="d-flex flex-row text-decoration-none"
 		style={{
 			cursor: 'pointer',
 			}}>
@@ -574,7 +802,7 @@ function Brand() {
 			{!removeLabelName &&
 			<span
 			style={{alignSelf: 'center'}}>
-				<span className="text-uppercase text-primary bg-dark px-2 bold-text">famousproperties</span>
+				<span className="text-uppercase text-primary bg-dark px-2 bold-text">{famouspng}</span>
 				<span className="text-uppercase text-dark bg-primary px-2 bold-text ml-n1">NG</span>
 			</span>}
 		</Link>
@@ -584,12 +812,39 @@ function CartLink({propStyle, numberOfProductsInCart}) {
 	const deviceType = useDeviceType()
 	const removeLabelName = deviceType.width<400
 	return (
-		<Link to={"cart"} className={`btn px-0 ml-0 ${propStyle} ${removeLabelName?'pr-3':''}`}>
+		<Link to={"cart"} className={`d-flex flex-row align-items-center btn px-0 ml-0 ${propStyle} ${removeLabelName?'pr-3':''}`}>
 			<span className="fas fa-shopping-cart fa-lg"
 			style={{
 				color: '#F8F6F2',
 			}}></span>
-			<span className="badge text-secondary border border-secondary rounded-circle navbar-span">{numberOfProductsInCart}</span>
+			<span
+			style={{
+				padding: numberOfProductsInCart > 9 ? '0.3rem 0.2em':'0.3em 0.4em',
+			}}
+			className="badge text-secondary border border-secondary rounded-circle navbar-span">{numberOfProductsInCart}</span>
+		</Link>
+	)
+}
+
+function Notification({numberOfNotifications, id, propStyle=""}) {
+	// const { createLocal } = useCreateStorage()
+	// const userInfo = createLocal.getItem('fpng-user')
+	return (
+		<Link to={`/notifications/${id}`}
+		className={`${propStyle} ${(numberOfNotifications)?'d-flex':'d-none'} flex-row`}>
+			<span
+			className="fa fa-bell fa-lg"
+			style={{
+				color: '#F8F6F2',
+				cursor: 'pointer',
+			}}></span>
+			<span
+			style={{
+				padding: numberOfNotifications > 9 ? '0.2rem 0.1rem':'0.1rem 0.2rem',
+			}}
+			className="text-secondary border rounded-circle notification-popup hot ">
+				{numberOfNotifications}
+			</span>
 		</Link>
 	)
 }

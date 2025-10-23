@@ -5508,6 +5508,30 @@ button.bg-dark:focus {
   left: 15% !important;
   top: 100% !important;
 }
+.notification-popup {
+  position: relative;
+  top: -10px;
+  right: 10px;
+  /* z-index: 100; */
+  background-color: #475569;
+  /* display: inline-block; */
+  /* padding: 0.2rem 0.1rem; */
+  font-size: 58%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  justify-self: center;
+  align-self: center;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+a.notification-popup:hover, a.notification-popup:focus {
+  text-decoration: none;
+}
+.notification-popup:empty {
+  display: none;
+}
 
 .position-fixed {
   position: fixed !important;
@@ -7169,7 +7193,8 @@ WebKit (Chrome, Edge, Safari)
   transition: max-height 1500ms ease, opacity 1500ms ease, transform 1000ms ease;
 }
 .installment-pay.show {
-  max-height: 200px;              /* enough to contain the row */
+  /* enough to contain the row */
+  max-height: max-content; /* or 200px; */
   opacity: 1;
   transform: translateY(0);
 }

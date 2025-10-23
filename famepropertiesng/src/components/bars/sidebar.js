@@ -82,7 +82,7 @@ function Sidebar({mobileStyle = null, categoryMenuRef = null}) {
 	)
 }
 
-function CategoryItem({ category, mobileStyle, level = 0 }) {
+function CategoryItem({ category, mobileStyle = null, level = 0 }) {
 	const navigate = useNavigate()
 	const [isOpen, setIsOpen] = useState(false);
 	const hasChildren = (category?.subcategories?.length ?? 0) > 0;
@@ -157,4 +157,4 @@ function CategoryItem({ category, mobileStyle, level = 0 }) {
 	);
 }
 
-export { Sidebar };
+export { Sidebar, CategoryItem };

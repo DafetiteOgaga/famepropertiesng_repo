@@ -165,7 +165,7 @@ function StoreSignUp() {
 		cleanedData['userID'] = userInfo.id; // add user ID to data
 
 		try {
-			const response = await authFetch(`${baseURL}/store/${userInfo.id}/`, {
+			const response = await authFetch(`store/${userInfo.id}/`, {
 				method: "POST",
 				body: cleanedData,
 			});

@@ -64,7 +64,7 @@ function LogIn() {
 		}
 
 		try {
-			const response = await authFetch(`${baseURL}/api/token/`, {
+			const response = await authFetch(`api/token/`, {
 				method: "POST",
 				body: {
 					email: formData.email.trim(),
@@ -82,7 +82,8 @@ function LogIn() {
 			if (data?.access) {
 				setFormData(initialFormData);
 				toast.success('Login Successful!');
-				navigate('/')
+				// navigate('/')
+				window.location.replace('/');
 			}
 			if (!data) return
 

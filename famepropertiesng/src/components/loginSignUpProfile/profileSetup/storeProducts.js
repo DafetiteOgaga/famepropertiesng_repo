@@ -42,7 +42,7 @@ function StoreProducts() {
 
 	const fetchStoreProducts = async (endpoint=`store-products/${parameters?.storeID}/`) => {
 		try {
-			const response = await authFetch(`${baseURL}/${endpoint}`);
+			const response = await authFetch(`${endpoint}`);
 			const data = await response // .json();
 			if (!data) return
 			setPagination({
