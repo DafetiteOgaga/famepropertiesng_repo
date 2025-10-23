@@ -41,9 +41,9 @@ function UploadImageItem({type}) {
 		try {
       let serverUrls
       if (section) {
-        serverUrls = await authFetch(`${baseURL}/${section}s/${section==='product'?`all/`:''}`);
+        serverUrls = await authFetch(`${section}s/${section==='product'?`all/`:''}`);
       } else {
-        serverUrls = await authFetch(`${baseURL}/${type}s/${type==='product'?`all/`:''}`);
+        serverUrls = await authFetch(`${type}s/${type==='product'?`all/`:''}`);
       }
 			const serverData = await serverUrls;
       if (!serverData) return
@@ -126,7 +126,7 @@ function UploadImageItem({type}) {
       setImageUrl(res.url); // Use res.url for preview
 
       // Send to Django server
-      const response = await authFetch(`${baseURL}/${type}s/`, {
+      const response = await authFetch(`${type}s/`, {
         method: "POST",
         body: bodyDataUsed,
       })
@@ -158,7 +158,7 @@ function UploadImageItem({type}) {
 
   const handleDeleteImage = async () => {
     try {
-      const response = await authFetch(`${baseURL}/delete-${type}s/`, {
+      const response = await authFetch(`delete-${type}s/`, {
         method: "POST",
         body: { fileId: selectedImage.fileId }, // must have been saved earlier
       });
