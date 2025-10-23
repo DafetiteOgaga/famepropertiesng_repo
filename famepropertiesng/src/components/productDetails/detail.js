@@ -69,7 +69,7 @@ function Detail() {
 
 	const fetchServerData = async () => {
 		try {
-			const url = `${baseURL}/products/${id}/`;
+			const url = `products/${id}/`;
 			const prodRes = await authFetch(url);
 			const prodData = await prodRes // .json();
 			if (!prodData) return
