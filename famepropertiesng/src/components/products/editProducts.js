@@ -224,7 +224,7 @@ function EditProduct() {
 		console.log('Submitting form with cleaned data:', cleanedData);
 
 		try {
-			const response = await authFetch(`${baseURL}/update-product/${productID}/`, {
+			const response = await authFetch(`update-product/${productID}/`, {
 				method: "POST",
 				body: cleanedData,
 			});
