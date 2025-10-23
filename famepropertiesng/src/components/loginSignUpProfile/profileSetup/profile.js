@@ -41,11 +41,20 @@ const initialFormData = {
 }
 
 function Profile() {
+	// const editFieldsRef = useRef({
+	// 	cty: null,
+	// 	curr: true,
+	// });
+	const nigRef = useRef(false);
+	const [resetEditFieldsState, setResetEditFieldsState] = useState(false);
 	const firstStoreRef = useRef(true);
 	const postToImagekit = useUploadToImagekit();
 	const authFetch = useAuthFetch();
 	const [editStore, setEditStore] = useState({});
-	const { cscFormData, setCSC, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
+	const {
+		cscFormData, setCSC, setCountry, setState, setCity,
+		NGStates, CountryCompSelect, StateCompSelect,
+		CityCompSelect, AreaCompSelect } = useCountryStateCity();
 	const updatedFieldRef = useRef(null);
 	const updatedStoreFieldRef = useRef({});
 	const handleImageProcessingRef = useRef();
@@ -101,6 +110,50 @@ function Profile() {
 	// get user info from local storage if any
 	const userInfo = createLocal.getItem('fpng-user');
 
+	const populateFormWReset = () => {
+		setFormData(prev => ({
+			...prev,
+			...userInfo,
+			email: userInfo.email||'',
+			first_name: userInfo.first_name||'',
+			last_name: userInfo.last_name||'',
+			username: userInfo.username||'',
+			address: userInfo.address||'',
+			nearest_bus_stop: userInfo.nearest_bus_stop||'',
+			mobile_no: userInfo.mobile_no||'',
+			country: userInfo.country||'',
+			countryId: userInfo.countryId||'',
+			state: userInfo.state||'',
+			stateId: userInfo.stateId||'',
+			stateCode: userInfo.stateCode||'',
+			phoneCode: userInfo.phoneCode||'',
+			currency: userInfo?.currency||null,
+			currencyName: userInfo?.currencyName||null,
+			currencySymbol: userInfo?.currencySymbol||null,
+			countryEmoji: userInfo?.countryEmoji||null,
+			city: userInfo.city||'',
+			cityId: userInfo.cityId||'',
+			hasStates: userInfo.hasStates,
+			hasCities: userInfo.hasCities,
+		}))
+		setCSC(userInfo)
+		setStoreFormData(prev => {
+			if (userInfo.is_seller && userInfo?.store?.length > 0) {
+				return userInfo.store.reduce((acc, store) => {
+					acc[store.id] = {
+						...prev[store.id], // keep existing values if already present
+						...storeVariables.reduce((fieldAcc, field) => {
+							fieldAcc[field] = store[field] || '';
+							return fieldAcc;
+						}, {})
+					};
+					return acc;
+				}, { ...prev });
+			}
+			return prev;
+		});
+	}
+
 	// redirect to home if no user info found (i.e user is logged out)
 	useEffect(() => {
 		if (!userInfo)	{
@@ -126,7 +179,7 @@ function Profile() {
 			const fetchCheckoutIDs = async () => {
 				setLoading(true);
 				try {
-					const response = await authFetch(`${baseURL}/has-unfulfilled-and-or-unsettled/${userInfo?.id}/`);
+					const response = await authFetch(`has-unfulfilled-and-or-unsettled/${userInfo?.id}/`);
 
 					const data = await response // .json();
 					if (!data) return
@@ -167,15 +220,21 @@ function Profile() {
 		'store_address',
 		'description',
 	]
+	useResetFields(setEditFields, resetEditFieldsState, setResetEditFieldsState)
 	useEffect(() => {
 		if (userInfo&&!userInfoRef.current) {
-			setEditFields(prev => ({
-				...prev,
-				...Object.keys(userInfo).reduce((acc, key) => {
-					acc[key] = false;
-					return acc;
-				}, {})
-			}));
+			console.log('a'.repeat(50))
+			console.log('Populating editFields and editStore states based on userInfo...');
+			setResetEditFieldsState(true)
+			// const SetDefaultEdits = () => ;
+			// SetDefaultEdits();
+			// setEditFields(prev => ({
+			// 	...prev,
+			// 	...Object.keys(userInfo).reduce((acc, key) => {
+			// 		acc[key] = false;
+			// 		return acc;
+			// 	}, {})
+			// }));
 			if (userInfo.is_seller && userInfo?.store?.length > 0) {
 				setEditStore(prev => ({
 					...prev,
@@ -191,7 +250,65 @@ function Profile() {
 			userInfoRef.current = true;
 		} else {
 		}
+
+		if (userInfo?.country?.toLowerCase()==='nigeria' && NGStates && !nigRef.current) {
+			// // preload the fields (momentarily)
+			console.log('Setting Nigeria state, lga and area fields to user values...')
+			NGStates.setSelectedNGState(userInfo?.stateCode)
+			NGStates.setSelectedNGLGA(userInfo?.lga?.toUpperCase()||'')
+			NGStates.setSelectedNGArea(userInfo?.subArea?.toUpperCase()||'')
+			nigRef.current = true;
+		}
 	}, [userInfo])
+
+	// move to top level
+	const editFieldsRef = useRef({
+		cty: null,
+		curr: true,
+	});
+
+	useEffect(() => {
+		console.log(
+			'c'.repeat(50) + '\n', {
+			country,
+			editFieldsRef: editFieldsRef?.current,
+		})
+		if (editFieldsRef.current.cty===null&&userInfo?.country?.toLowerCase()===country?.toLowerCase()) {
+			console.log('First run - skipping country change effect');
+			// editFieldsRef.current.cty = country;
+			return; // ⛔ Skip first run
+		}
+		console.log('b'.repeat(50))
+		console.log('in useeffect - Country changed to:', country);
+		
+		if (country && editFieldsRef?.current?.cty!==country) {
+			console.log('country changes detected')
+			if (country.toLowerCase() === 'nigeria') {
+				console.log('Country is Nigeria - adjusting editFields accordingly')
+				setEditFields(prev => {
+					console.log('Toggling country, state, lga, and subArea edit fields based on country change to Nigeria')
+					return ({
+						country: true,
+						state: true,
+						lga: true,
+						subArea: true,
+					})
+				})
+			} else if (country.toLowerCase() !== 'nigeria') {
+				console.log('Country is NOT Nigeria - adjusting editFields accordingly')
+				setEditFields(prev => {
+					console.log('Toggling country, state, and city edit fields based on country change to non-Nigeria')
+					return ({
+						country: true,
+						state: true,
+						city: true,
+					})
+				})
+			}
+			editFieldsRef.current.cty = country
+			editFieldsRef.current.curr = country.toLowerCase() !== 'nigeria'
+		}
+	}, [country])
 
 	useEffect(() => {
 		setFormData(prev => ({
@@ -213,47 +330,7 @@ function Profile() {
 	// Step 2: Populate formData from userInfo once userInfo is available
 	useEffect(() => {
 		if (userInfo) {
-			setFormData(prev => ({
-				...prev,
-				...userInfo,
-				email: userInfo.email||'',
-				first_name: userInfo.first_name||'',
-				last_name: userInfo.last_name||'',
-				username: userInfo.username||'',
-				address: userInfo.address||'',
-				nearest_bus_stop: userInfo.nearest_bus_stop||'',
-				mobile_no: userInfo.mobile_no||'',
-				country: userInfo.country||'',
-				countryId: userInfo.countryId||'',
-				state: userInfo.state||'',
-				stateId: userInfo.stateId||'',
-				stateCode: userInfo.stateCode||'',
-				phoneCode: userInfo.phoneCode||'',
-				currency: userInfo?.currency||null,
-				currencyName: userInfo?.currencyName||null,
-				currencySymbol: userInfo?.currencySymbol||null,
-				countryEmoji: userInfo?.countryEmoji||null,
-				city: userInfo.city||'',
-				cityId: userInfo.cityId||'',
-				hasStates: userInfo.hasStates,
-				hasCities: userInfo.hasCities,
-			}))
-			setCSC(userInfo)
-			setStoreFormData(prev => {
-				if (userInfo.is_seller && userInfo?.store?.length > 0) {
-					return userInfo.store.reduce((acc, store) => {
-						acc[store.id] = {
-							...prev[store.id], // keep existing values if already present
-							...storeVariables.reduce((fieldAcc, field) => {
-								fieldAcc[field] = store[field] || '';
-								return fieldAcc;
-							}, {})
-						};
-						return acc;
-					}, { ...prev });
-				}
-				return prev;
-			});
+			populateFormWReset();
 		}
 
 	}, [])
@@ -399,9 +476,9 @@ function Profile() {
 			'is_staff',
 			'hasStates',
 			'hasCities',
-			'country',
-			'state',
-			'city',
+			// 'country',
+			// 'state',
+			// 'city',
 			'store_phone_number'
 		]
 
@@ -511,7 +588,7 @@ function Profile() {
 		}
 		console.log('submitting form:', cleanedData);
 		try {
-			const response = await authFetch(`${baseURL}/${url}/${userInfo.id}/`, {
+			const response = await authFetch(`${url}/${userInfo.id}/`, {
 				method: "POST",
 				body: cleanedData,
 			});
@@ -590,8 +667,16 @@ function Profile() {
 	};
 
 	// array defining the desired order of the fields
-	const reOrderFieldsArr = ["email", "mobile_no", "username", "address", "country", "state", "city", "nearest_bus_stop"];
-
+	let reOrderFieldsArr = [
+		"email", "mobile_no", "username", "address", "country",
+		"state",
+		`${country?.toLowerCase()==='nigeria'?'lga':''}`,
+		`${country?.toLowerCase()==='nigeria'?'subArea':''}`,
+		`${country?.toLowerCase()!=='nigeria'?'city':''}`,
+		"nearest_bus_stop"
+	]
+	reOrderFieldsArr = reOrderFieldsArr.filter(field=>field!=='')
+	console.log({reOrderFieldsArr})
 	// array of fields that should be text areas instead of input fields
 	const textAreaFieldsArr = [
 		'address', 'nearest_bus_stop',
@@ -614,9 +699,13 @@ function Profile() {
 	// 	'stateCode', 'countryId', 'stateId', 'cityId', 'hasCities',
 	// 	'hasStates', 'product_ratings', 'is_seller',
 	// ]
+	// console.log({country, state, city})
+	// console.log({cscFormData, userInfo})
+
 	const acceptedRenderFields = [
 		'email', 'mobile_no', 'username', 'address', 'country',
-		'state', 'city', 'nearest_bus_stop', 'store',
+		'state', 'nearest_bus_stop', 'store',
+		...(country?.toLowerCase() === 'nigeria' ? ['lga', 'subArea'] : ['city']),
 	]
 
 	// other phone input props
@@ -630,6 +719,21 @@ function Profile() {
 	useEffect(() => {
 		setIsMounting(false);
 	}, []);
+	const reOrderedArrToUse = reOrderFields(Object.entries(userInfo), reOrderFieldsArr)
+	console.log({
+		country,
+		reOrderedArrToUse,
+		acceptedRenderFields,
+		editFields
+	})
+	console.log({
+		country,
+		state,
+		city,
+		hasStates,
+		hasCities,
+		countryPhoneCode,
+	})
 	return (
 		<>
 			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
@@ -703,6 +807,9 @@ function Profile() {
 												{/* cancel and submit button (for image replacement) */}
 												<EditFieldButton
 												setEditFields={setEditFields}
+												setCountry={setCountry}
+												editFieldsRef={editFieldsRef}
+												NGStates={NGStates}
 												userKey={"image_url"}
 												editField={editFields["image_url"]}
 												onSubmitHandler={onSubmitHandler}
@@ -721,6 +828,9 @@ function Profile() {
 										{/* edit button (image) */}
 										<EditFieldButton
 											setEditFields={setEditFields}
+											setCountry={setCountry}
+											editFieldsRef={editFieldsRef}
+											NGStates={NGStates}
 											userKey={"image_url"}
 											editField={editFields["image_url"]}
 											onSubmitHandler={onSubmitHandler}
@@ -754,6 +864,9 @@ function Profile() {
 												{!editFields.last_name&&
 												<EditFieldButton
 													setEditFields={setEditFields}
+													setCountry={setCountry}
+													editFieldsRef={editFieldsRef}
+													NGStates={NGStates}
 													userKey={"last_name"}
 													editField={editFields["last_name"]}
 													onSubmitHandler={onSubmitHandler}
@@ -805,6 +918,9 @@ function Profile() {
 											{/* last name cancel and submit buttons */}
 											<EditFieldButton
 											setEditFields={setEditFields}
+											setCountry={setCountry}
+											editFieldsRef={editFieldsRef}
+											NGStates={NGStates}
 											userKey={"last_name"}
 											editField={editFields["last_name"]}
 											onSubmitHandler={onSubmitHandler}
@@ -814,7 +930,7 @@ function Profile() {
 									</>
 								</span>
 							</p>
-							{reOrderFields(Object.entries(userInfo), reOrderFieldsArr).map(([userKey, userValue], index) => {
+							{reOrderedArrToUse.map(([userKey, userValue], index) => {
 								if (!acceptedRenderFields.includes(userKey)) return null;
 								if (userKey==='store'&&(!userInfo.is_seller)) return null;
 								const stores = userKey==='store'
@@ -839,8 +955,31 @@ function Profile() {
 									key => key in editFields && Boolean(editFields[key])
 								);
 								const isTextArea = toTextArea(userKey, textAreaFieldsArr)
-								const stateHasStates = editField?userInfo.hasStates:hasStates
-								const stateHasCities = editField?userInfo.hasCities:hasCities
+								let stateHasStates = editField?userInfo.hasStates:hasStates
+								let stateHasCities = hasCities // editField?userInfo.hasCities:hasCities
+								const showNGstate = userKey==='state'&&(editFields?.country)
+								const ShowNGLGA = userKey==='lga'&&(editFields?.state)
+								const showSubArea = userKey==='subArea'&&(editFields?.lga)
+								// console.log({
+								// 	state: editFields?.state,
+								// 	lga: editFields?.lga,
+								// 	subArea: editFields?.subArea,
+								// 	country: editFields?.country,
+								// 	lgakey: userKey==='lga',
+								// 	statekey: userKey==='state',
+								// 	subAreakey: userKey==='subArea',
+								// 	ShowNGLGA,
+								// 	showNGstate,
+								// 	showSubArea
+								// })
+								if (userKey==='city') {
+									// stateHasCities = true
+									console.log('city passed!\n', {
+									userKey,
+									stateHasStates,
+									stateHasCities,
+									editcity: editFields?.city,
+								})}
 								return (
 									<Fragment key={index}>
 										{(userKey==='state'&&!stateHasStates&&editFields["state"])?undefined:
@@ -872,7 +1011,7 @@ function Profile() {
 													<span className="d-flex flex-row align-items-center justify-content-between">
 														<span
 														className="bold-text"
-														style={{textDecoration: userKey==='store'?'underline':''}}>{titleCase((userKey==='store'&&userValue.length>=1)?userKey+'s':userKey)}:
+														style={{textDecoration: userKey==='store'?'underline':''}}>{userKey?.toLowerCase()==='lga'?userKey.toUpperCase():titleCase((userKey==='store'&&userValue.length>=1)?userKey+'s':userKey)}:
 														</span>
 														{/* Toggle Switch */}
 														{userKey==='store'&&
@@ -1046,6 +1185,9 @@ function Profile() {
 																											<EditFieldButton
 																											store={{id: store.id, field: sKey, parentField: userKey}}
 																											setEditFields={setEditStore}
+																											setCountry={setCountry}
+																											editFieldsRef={editFieldsRef}
+																											NGStates={NGStates}
 																											userKey={sKey}
 																											loading={loading}
 																											onSubmitHandler={onSubmitHandler}
@@ -1074,17 +1216,23 @@ function Profile() {
 														</span>
 														{/* edit button for all (locations inclusive) fields */}
 														{(((userKey==='state'&&!userInfo.hasStates)||
-														(userKey==='city'&&(!userInfo.hasCities)))||
+														(userKey==='city'&&(!hasCities)))||
 														userKey==='store')?undefined:
 														<EditFieldButton
 														setEditFields={setEditFields}
+														setCountry={setCountry}
+														editFieldsRef={editFieldsRef}
+														NGStates={NGStates}
 														userKey={userKey}
+														userValue={userValue}
+														country={country}
 														editField={editField}
 														isDisabled={isDisabled} />}
 													</span>
 												</div>
 												:
 
+												//////////////////////////////////////////////////////////////
 												// input field view (edit view)
 												<div className="d-flex flex-column">
 
@@ -1101,7 +1249,7 @@ function Profile() {
 														textWrap: 'nowrap',
 													}}
 													>
-														{titleCase(userKey)}:
+														{(userKey==='lga')?userKey?.toUpperCase():titleCase(userKey)}:
 													</label>}
 														{userKey==='country' ?
 
@@ -1116,6 +1264,9 @@ function Profile() {
 															<div>
 																<EditFieldButton
 																setEditFields={setEditFields}
+																setCountry={setCountry}
+																editFieldsRef={editFieldsRef}
+																NGStates={NGStates}
 																userKey={userKey}
 																editField={editField}
 																onSubmitHandler={onSubmitHandler}
@@ -1137,8 +1288,11 @@ function Profile() {
 																</div>
 																{/* state cancel and submit buttons */}
 																<div>
-																	{!countryStateCity&&<EditFieldButton
+																	{(!countryStateCity&&!showNGstate)&&<EditFieldButton
 																	setEditFields={setEditFields}
+																	setCountry={setCountry}
+																	editFieldsRef={editFieldsRef}
+																	NGStates={NGStates}
 																	userKey={userKey}
 																	editField={editField}
 																	onSubmitHandler={onSubmitHandler}
@@ -1164,6 +1318,9 @@ function Profile() {
 																	<div>
 																		{(!countryStateCity&&!stateCity)&&<EditFieldButton
 																		setEditFields={setEditFields}
+																		setCountry={setCountry}
+																		editFieldsRef={editFieldsRef}
+																		NGStates={NGStates}
 																		userKey={userKey}
 																		editField={editField}
 																		onSubmitHandler={onSubmitHandler}
@@ -1171,6 +1328,54 @@ function Profile() {
 																	</div>
 																</div>
 																:
+																(userKey==='lga'
+																) ?
+	
+																	// lga select field
+																	<div
+																	className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
+																	>
+																		<div className={deviceType?'':'w-75'}>
+																			{CityCompSelect}
+																		</div>
+																		{/* lga cancel and submit buttons */}
+																		<div>
+																			{((!countryStateCity&&!stateCity)&&!ShowNGLGA)&&<EditFieldButton
+																			setEditFields={setEditFields}
+																			setCountry={setCountry}
+																			editFieldsRef={editFieldsRef}
+																			NGStates={NGStates}
+																			userKey={userKey}
+																			editField={editField}
+																			onSubmitHandler={onSubmitHandler}
+																			loading={loading} />}
+																		</div>
+																	</div>
+																	:
+																	(userKey==='subArea'
+																	) ?
+		
+																		// sub-area select field
+																		<div
+																		className={`d-flex ${deviceType?'flex-column':'flex-row'} justify-content-between`}
+																		>
+																			<div className={deviceType?'':'w-75'}>
+																				{AreaCompSelect}
+																			</div>
+																			{/* sub-area cancel and submit buttons */}
+																			<div>
+																				{((!countryStateCity&&!stateCity)&&!showSubArea)&&<EditFieldButton
+																				setEditFields={setEditFields}
+																				setCountry={setCountry}
+																				editFieldsRef={editFieldsRef}
+																				NGStates={NGStates}
+																				userKey={userKey}
+																				editField={editField}
+																				onSubmitHandler={onSubmitHandler}
+																				loading={loading} />}
+																			</div>
+																		</div>
+																		:
 
 																// all other fields (input and textarea fields)
 																(!countryStateCityArr.includes(userKey) ?
@@ -1250,6 +1455,9 @@ function Profile() {
 																			{/* cancel and submit buttons for all non location fields (input and textarea) */}
 																			<EditFieldButton
 																			setEditFields={setEditFields}
+																			setCountry={setCountry}
+																			editFieldsRef={editFieldsRef}
+																			NGStates={NGStates}
 																			userKey={userKey}
 																			editField={editField}
 																			onSubmitHandler={onSubmitHandler}
@@ -1340,12 +1548,19 @@ function Profile() {
 }
 
 function EditFieldButton({
-	userKey, editField, setEditFields, isDisabled,
-	onSubmitHandler, loading, handleUpload,
-	store=null}) {
+	userKey, userValue, editField, country, setEditFields, isDisabled,
+	onSubmitHandler, loading, handleUpload, setCountry, editFieldsRef,
+	NGStates, store=null}) {
+	const { createLocal } = useCreateStorage();
+
+	// get user info from local storage if any
+	const userInfo = createLocal.getItem('fpng-user');
+
+	const resetToTheDefaults = useResetFields()
 	const deviceType = useDeviceType().width <= 576;
 	if (!userKey) return null;
 	if (userKey==='email') return null; // can't edit email for now
+	const allowedArr = ['country', 'state', 'city', 'lga', 'subArea',]
 	return (
 		<span
 		className="d-flex align-items-center justify-content-center flex-row">
@@ -1357,7 +1572,9 @@ function EditFieldButton({
 				padding: (deviceType&&userKey==='image_url')?'0.2rem 0.7rem':'0.25rem 0.7rem',
 			}}
 			onClick={()=>{
+				console.log('clicked edit button', userKey);
 				if (store) {
+					console.log('editing store field');
 					setEditFields(prev=>({
 						...prev,
 						[store.id]: {
@@ -1366,22 +1583,81 @@ function EditFieldButton({
 						}
 					}))
 				} else {
+					console.log('editing user field');
 					setEditFields(prev=>{
-						if (userKey==='country') {
-							return ({
-								country: !prev[userKey],
-								state: !prev[userKey],
-								city: !prev[userKey],
+						const isCancelling = prev[userKey]
+						if (isCancelling) {
+							NGStates.setSelectedNGState(userInfo?.stateCode)
+							NGStates.setSelectedNGLGA(userInfo?.lga?.toUpperCase()||'')
+							NGStates.setSelectedNGArea(userInfo?.subArea?.toUpperCase()||'')
+							console.log('resetting fields on cancel');
+							editFieldsRef.current = {
+								cty: null,
+								curr: true,
+							}
+							setCountry({
+								name: userInfo?.country,
+								phone_code: userInfo?.phoneCode,
+								currency: userInfo?.currency||null,
+								currency_name: userInfo?.currencyName||null,
+								currency_symbol: userInfo?.currencySymbol||null,
+								emoji: userInfo?.countryEmoji||null,
+								id: userInfo?.countryId,
+								hasStates: userInfo?.hasStates,
 							})
-						} else if (userKey==='state') {
-							return ({
-								state: !prev[userKey],
-								city: !prev[userKey],
-							})
+							return resetToTheDefaults
+						}
+						console.log('p'.repeat(50)+'\n', {prev, isCancelling, userKey, country})
+						if (country?.toLowerCase()==='nigeria'&&
+							allowedArr.includes(userKey)) {
+							if (userKey==='state') {
+								console.log('toggling state, lga and subArea');
+								return ({
+									state: !prev[userKey],
+									lga: !prev[userKey],
+									subArea: !prev[userKey],
+								})
+							} if (userKey==='lga') {
+								console.log('toggling lga and subArea');
+								return ({
+									lga: !prev[userKey],
+									subArea: !prev[userKey],
+								})
+							} if (userKey==='subArea') {
+								console.log('toggling subArea');
+								return ({
+									subArea: !prev[userKey],
+								})
+							} else {
+								console.log('toggling country, state, lga and subArea');
+								return ({
+									country: !prev[userKey],
+									state: !prev[userKey],
+									lga: !prev[userKey],
+									subArea: !prev[userKey],
+								})
+							}
 						} else {
-							return ({
-							[userKey]: !prev[userKey]
-							})
+							console.log('non-nigeria toggling');
+							if (userKey==='country') {
+								console.log('toggling country, state and city');
+								return ({
+									country: !prev[userKey],
+									state: !prev[userKey],
+									city: !prev[userKey],
+								})
+							} if (userKey==='state') {
+								console.log('toggling state and city');
+								return ({
+									state: !prev[userKey],
+									city: !prev[userKey],
+								})
+							} else {
+								console.log('toggling city or any other field');
+								return ({
+								[userKey]: !prev[userKey]
+								})
+							}
 						}
 					})}
 				}
@@ -1426,4 +1702,26 @@ function PhoneCode({ukey, phoneCode}) {
 		}}>{phoneCode}</span>
 	)
 }
+
+function useResetFields(cbFxn=null, reset=false, resetCB=null) {
+	const { createLocal } = useCreateStorage();
+
+	// get user info from local storage if any
+	const userInfo = createLocal.getItem('fpng-user');
+
+	if (cbFxn && !reset) return;
+
+	const setDefaults = Object.keys(userInfo).reduce((acc, key) => {
+		acc[key] = false;
+		return acc;
+	}, {})
+
+	if (!cbFxn) return setDefaults;
+	cbFxn(prev => ({
+		...prev,
+		...setDefaults
+	}));
+	resetCB(false)
+}
+
 export { Profile }
