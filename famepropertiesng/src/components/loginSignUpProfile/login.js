@@ -82,8 +82,8 @@ function LogIn() {
 			if (data?.access) {
 				setFormData(initialFormData);
 				toast.success('Login Successful!');
-				// navigate('/')
-				window.location.replace('/');
+				navigate('/')
+				// window.location.replace('/');
 			}
 			if (!data) return
 
