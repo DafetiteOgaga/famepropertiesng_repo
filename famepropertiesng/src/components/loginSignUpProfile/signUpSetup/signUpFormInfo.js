@@ -40,6 +40,16 @@ const inputArr = [
 		autoComplete: 'address-level2', // city / locality
 	},
 	{
+		name: 'lga',
+		important: true,
+		autoComplete: 'address-level2', // city / locality
+	},
+	{
+		name: 'sub_area',
+		important: true,
+		autoComplete: 'address-level2', // city / locality
+	},
+	{
 		name: 'address',
 		placeholder: 'No.3, 123 crescent, Addo, Ajah',
 		type: 'text',
@@ -144,7 +154,7 @@ const isFieldsValid = ({formData, passwordErrorMessage}) => {
 	// get list of all required fields
 	const isRequiredArr = inputArr.filter(field => field.important);
 	const isFieldValid = isRequiredArr.every((field) => {
-		return typeof formData[field]==='string'?formData[field].trim()!=="":formData[field]!==""
+		return typeof(formData[field?.name])==='string'?formData[field?.name].trim()!=="":formData[field?.name]!==""
 	});
 	return isFieldValid && !passwordErrorMessage
 };
