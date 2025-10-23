@@ -45,7 +45,7 @@ const initialFormData = {
 function SignUp() {
 	const postToImagekit = useUploadToImagekit()
 	const authFetch = useAuthFetch();
-	const { cscFormData, cscRequiredFieldsGood, CountryCompSelect, StateCompSelect, CityCompSelect } = useCountryStateCity();
+	const { cscFormData, cscRequiredFieldsGood, CountryCompSelect, StateCompSelect, CityCompSelect, AreaCompSelect } = useCountryStateCity();
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(null);
 	const handleImageProcessingRef = useRef();
@@ -169,30 +169,32 @@ function SignUp() {
 		const cleanedData = {};
 		Object.entries(formData).forEach(([key, value]) => {
 			if (key==='password_confirmation') return; // skip password_confirmation from submission
-			cleanedData[key] = (
-				key==='fileId'||
-				key==='image_url'||
-				key==='stateCode'||
-				key==='phoneCode'||
-				key==='currency'||
-				key==='currencyName'||
-				key==='currencySymbol'||
-				key==='countryEmoji'||
-				key==='password' ||
-				key==='hasStates'||
-				key==='hasCities' ||
-				key==='email' ||
-				key==='country' ||
-				key==='state' ||
-				key==='city' ||
-				key==='cityId' ||
-				key==='stateId' ||
-				typeof value === 'number'
-			)?value:value.trim().toLowerCase();
+			cleanedData[key] =
+				(value === null||value === undefined) ? null:
+				(
+					key==='fileId'||
+					key==='image_url'||
+					key==='stateCode'||
+					key==='phoneCode'||
+					key==='currency'||
+					key==='currencyName'||
+					key==='currencySymbol'||
+					key==='countryEmoji'||
+					key==='password' ||
+					key==='hasStates'||
+					key==='hasCities' ||
+					key==='email' ||
+					// key==='country' ||
+					// key==='state' ||
+					// key==='city' ||
+					key==='cityId' ||
+					key==='stateId' ||
+					typeof value === 'number'
+				)?value:value.trim().toLowerCase();
 			if (key==='email') cleanedData[key] = value.trim()
 		})
 		try {
-			const response = await authFetch(`${baseURL}/users/`, {
+			const response = await authFetch(`users/`, {
 				method: "POST",
 				headers: 'no-header',
 				body: cleanedData,
@@ -284,6 +286,7 @@ function SignUp() {
 		setIsMounting(false);
 	}, []);
 
+	console.log({formData})
 	return (
 		<>
 			{!isMounting ?
@@ -319,6 +322,10 @@ function SignUp() {
 									country==='') return null;
 								if (input?.name.toLowerCase()==='city'&&
 									state==='') return null;
+								if (input?.name.toLowerCase()==='lga'&&
+									!cscFormData.state) return null;
+								if (input?.name.toLowerCase()==='sub_area'&&
+									!cscFormData.lga) return null;
 								return (
 									<div key={index}
 									className="col-md-6 form-group">
@@ -330,90 +337,93 @@ function SignUp() {
 										input.name==='state' ?
 											StateCompSelect
 											:
-											input.name==='city' ?
+											(input.name==='city'||input.name==='lga') ?
 												CityCompSelect
 												:
-												<>
-													<div
-													style={{
-														display: 'flex',
-														flexDirection: 'row',
-														alignItems: 'baseline',
-														position: 'relative',
-														width: '100%',
-													}}>
-														{phone && <p
+												input.name==='sub_area' ?
+													AreaCompSelect
+													:
+													<>
+														<div
 														style={{
-															marginRight: '0.5rem',
-														}}>{countryPhoneCode}</p>}
-														<input
-														id={input.name}
-														name={input.name}
-														onChange={onChangeHandler}
-														value={formData[input.name]}
-														style={{borderRadius: '5px'}}
-														className="form-control"
-														type={getInputType(input)}
-														required={input.important}
-														autoComplete={input.autoComplete}
-														{...input.phoneProps}
-														placeholder={input.placeholder}/>
-														{(input.name === "password"||input.name === "password_confirmation") && (
-															(input.name==="password" ?
-															<span
-															className={`far ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
-															onClick={() => setShowPassword((prev) => !prev)} // toggle state
+															display: 'flex',
+															flexDirection: 'row',
+															alignItems: 'baseline',
+															position: 'relative',
+															width: '100%',
+														}}>
+															{phone && <p
 															style={{
-																position: "absolute",
-																top: "50%",
-																right: "10px",
-																transform: "translateY(-50%)",
-																cursor: "pointer",
-															}}
-															/>
-															:
-															<span
-															className={`far ${showConfirmPassword ? "fa-eye" : "fa-eye-slash"}`}
-															onClick={() => setShowConfirmPassword((prev) => !prev)} // toggle state
-															style={{
-																position: "absolute",
-																top: "50%",
-																right: "10px",
-																transform: "translateY(-50%)",
-																cursor: "pointer",
-															}}
-															/>)
-														)}
-													</div>
+																marginRight: '0.5rem',
+															}}>{countryPhoneCode}</p>}
+															<input
+															id={input.name}
+															name={input.name}
+															onChange={onChangeHandler}
+															value={formData[input.name]}
+															style={{borderRadius: '5px'}}
+															className="form-control"
+															type={getInputType(input)}
+															required={input.important}
+															autoComplete={input.autoComplete}
+															{...input.phoneProps}
+															placeholder={input.placeholder}/>
+															{(input.name === "password"||input.name === "password_confirmation") && (
+																(input.name==="password" ?
+																<span
+																className={`far ${showPassword ? "fa-eye" : "fa-eye-slash"}`}
+																onClick={() => setShowPassword((prev) => !prev)} // toggle state
+																style={{
+																	position: "absolute",
+																	top: "50%",
+																	right: "10px",
+																	transform: "translateY(-50%)",
+																	cursor: "pointer",
+																}}
+																/>
+																:
+																<span
+																className={`far ${showConfirmPassword ? "fa-eye" : "fa-eye-slash"}`}
+																onClick={() => setShowConfirmPassword((prev) => !prev)} // toggle state
+																style={{
+																	position: "absolute",
+																	top: "50%",
+																	right: "10px",
+																	transform: "translateY(-50%)",
+																	cursor: "pointer",
+																}}
+																/>)
+															)}
+														</div>
 
-													{/* password error messages */}
-													{input.type==='password'&&
-													<PasswordErrorMessage
-													passwordErrorMessage={passwordErrorMessage} />}
+														{/* password error messages */}
+														{input.type==='password'&&
+														<PasswordErrorMessage
+														passwordErrorMessage={passwordErrorMessage} />}
 
-													{/* email validity messages */}
-													{(input.type==='email')&&
-													<EmailValidText
-													isEmailValid={isEmailValid}
-													isEmailLoading={isEmailLoading} />}
+														{/* email validity messages */}
+														{(input.type==='email')&&
+														<EmailValidText
+														isEmailValid={isEmailValid}
+														isEmailLoading={isEmailLoading} />}
 
-												</>}
-												<>
-													{!['email','password', 'password_confirmation', 'mobile_no'].includes(input.name)&&
-													<span
-													style={{
-														fontSize: '0.625rem',
-														color: fieldStats[input.name]?.colorIndicator
-													}}
-													className={`justify-content-end d-flex font-italic`}>
-													{
-														fieldStats[input.name]?.charCount ?
-															<>
-																{`${fieldStats[input.name]?.charCount}/${fieldStats[input.name]?.maxCharsLimit} chars`}
-															</>:null}
-													
-													</span>}
-												</>
+													</>}
+													<>
+														{!['email','password', 'password_confirmation', 'mobile_no'].includes(input.name)&&
+														<span
+														style={{
+															fontSize: '0.625rem',
+															color: fieldStats[input.name]?.colorIndicator
+														}}
+														className={`justify-content-end d-flex font-italic`}>
+														{
+															fieldStats[input.name]?.charCount ?
+																<>
+																	{`${fieldStats[input.name]?.charCount}/${fieldStats[input.name]?.maxCharsLimit} chars`}
+																</>:null}
+														
+														</span>}
+													</>
 									</div>
 								)
 							})}
