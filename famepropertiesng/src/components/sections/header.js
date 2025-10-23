@@ -258,26 +258,27 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 					>
 						<div className='d-flex flex-row align-items-center'>
 							<Brand />
-							<div className='d-flex flex-row align-items-center'>
-								<Notification
-								propStyle='ml-5'
-								numberOfNotifications={isSeeenNotification.length}
-								id={userInfo?.id} />
-								<CartLink propStyle={"ml-2"} numberOfProductsInCart={numberOfProductsInCart} />
-								
-							</div>
 						</div>
 					</span>
-					<button
-					onClick={(e) => {
-						e.stopPropagation();
-						menuHandler();
-					}}
-					ref={menuIconRef}
-					type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-						<span
-						className={`${!isMenuOpen?'fa fa-bars':'fa fa-times'}`}></span>
-					</button>
+					<div className='d-flex flex-row align-items-center'>
+						<div className='d-flex flex-row align-items-center'>
+							<Notification
+							propStyle='ml-5'
+							numberOfNotifications={isSeeenNotification.length}
+							id={userInfo?.id} />
+							<CartLink propStyle={"ml-2"} numberOfProductsInCart={numberOfProductsInCart} />
+						</div>
+						<button
+						onClick={(e) => {
+							e.stopPropagation();
+							menuHandler();
+						}}
+						ref={menuIconRef}
+						type="button" className="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+							<span
+							className={`${!isMenuOpen?'fa fa-bars':'fa fa-times'}`}></span>
+						</button>
+					</div>
 				</>
 				:
 				// desktop
