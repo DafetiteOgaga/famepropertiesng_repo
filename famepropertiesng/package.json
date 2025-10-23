@@ -13,6 +13,8 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
     "browser-image-compression": "^2.0.2",
+    "firebase": "^12.4.0",
+    "geo-ng": "^1.0.5",
     "imagekitio-react": "^4.3.0",
     "react": "^19.1.0",
     "react-confetti": "^6.4.0",
