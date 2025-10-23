@@ -419,3 +419,69 @@
 	animation-play-state: paused; /* pause on hover */
 	color: #fff;
 }
+
+/* @keyframes popBounce {
+	0% {
+	  transform: scale(0);
+	  opacity: 0;
+	}
+	60% {
+	  transform: scale(1.2);
+	  opacity: 1;
+	}
+	100% {
+	  transform: scale(1);
+	}
+  }
+  
+  .notification-popup {
+	animation: popBounce 0.4s ease-in-out;
+  } */
+
+  /* @keyframes pulse {
+	0%, 100% {
+	  transform: scale(1);
+	}
+	50% {
+	  transform: scale(1.2);
+	}
+  }
+  
+  .notification-popup {
+	animation: pulse 1s ease-in-out infinite;
+  } */
+
+  @keyframes ultimateMotion {
+	0% {
+	  transform: scale(1) rotate(0deg) translateY(0);
+	  /* background-color: #475569; */
+	  box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+	  opacity: 1;
+	}
+	25% {
+	  transform: scale(1.15) rotate(5deg) translateY(-2px);
+	  /* background-color: #64748b; */
+	  box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+	}
+	50% {
+	  transform: scale(1.25) rotate(-5deg) translateY(0);
+	  /* background-color: #94a3b8; */
+	  box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+	  opacity: 0.9;
+	}
+	75% {
+	  transform: scale(1.1) rotate(3deg) translateY(-1px);
+	  /* background-color: #64748b; */
+	  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+	}
+	100% {
+	  transform: scale(1) rotate(0deg) translateY(0);
+	  /* background-color: #475569; */
+	  box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+	  opacity: 1;
+	}
+  }
+  
+  .notification-popup.hot {
+	animation: ultimateMotion 1.8s ease-in-out infinite;
+  }
