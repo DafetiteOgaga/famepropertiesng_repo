@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { getBaseURL } from "../../hooks/fetchAPIs";
 import { BouncingDots } from "../../spinners/spinner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthFetch } from "../loginSignUpProfile/authFetch";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
+import { toast } from 'react-toastify';
 
 const baseURL = getBaseURL();
 
 const PaystackCheckout = ({ checkoutData }) => {
 	// console.log('entry:', {checkoutData})
+	const timerRef = useRef(null);
+	const currPage = useLocation().pathname
+	// console.log({currPage})
 	const referenceRef = useRef(false); // to ensure reference generation runs only once
 	const authFetch = useAuthFetch();
 	const { createSession } = useCreateStorage();
@@ -35,7 +39,7 @@ const PaystackCheckout = ({ checkoutData }) => {
 
 				const data = await res // .json();
 				if (!data) return
-				console.log("Polled payment status:", data);
+				// console.log("Polled payment status:", data);
 
 				setPaymentStatus(data?.status);
 				setDetails(data?.productDetails);
@@ -43,9 +47,10 @@ const PaystackCheckout = ({ checkoutData }) => {
 				if (data.status === "completed" || data.status === "failed") {
 					const completed = data.status === "completed";
 					clearInterval(interval); // stop polling when resolved
+					stopTimer(); // stop the timer
 					setShowOverlay(false);
 					if (!data.status) {
-						alert("Transaction failed.");
+						toast.error("Transaction failed.");
 					}
 					navigate(completed?"success" : "/cart");
 				}
@@ -55,10 +60,10 @@ const PaystackCheckout = ({ checkoutData }) => {
 		}, 3000); // poll every 3s
 	};
 	const startTimer = () => {
-		console.log("Starting 15-minute timer...");
+		// console.log("Starting 15-minute timer...");
 		let sec = 0
 		let min = 0
-		const timer = setInterval(() => {
+		timerRef.current = setInterval(() => {
 			sec++;
 			setSeconds(sec);
 			if (sec === 60) {
@@ -69,29 +74,41 @@ const PaystackCheckout = ({ checkoutData }) => {
 				console.log("One minute passed...");
 			}
 			if (min === 5) {
-				console.log("5 minutes passed, stopping timer and closing overlay...");
-				clearInterval(timer);
-				alert("Oopsi! something went wrong. Please try again.");
+				console.log("2 minutes passed, stopping timer and closing overlay...");
+				stopTimer();
+				// alert("Oopsy! something went wrong. Please try again.");
 				setShowOverlay(false);
-				navigate("/cart");
+			
+				// consider removing the navigation
+				if (currPage.includes('cart/checkout')) {
+					console.log('navigating to cart from checkout page...')
+					navigate("/cart");
+				}
 			}
 		}, 1000);
-		return () => clearInterval(timer);
+		// return () => clearInterval(timer);
 	}
 
+	// Stop timer manually if needed
+	const stopTimer = () => {
+		console.log("Stopping timer manually...");
+		console.log('stp'.repeat(40))
+		clearInterval(timerRef.current);
+	};
+
 	const handlePay = async () => {
-		console.log("Initiating payment in handlePay fxn...");
-		console.log('initial refrence:', checkoutData?.reference)
+		// console.log("Initiating payment in handlePay fxn...");
+		// console.log('initial refrence:', checkoutData?.reference)
 		if (referenceRef.current) return; // prevent multiple calls
 		referenceRef.current = true; // set to true to prevent re-entry
 		if (checkoutData?.reference === "installmental_payment") {
-			console.log("installmental_payment reference detected...");
-			console.log("Generating new unique reference from backend...");
+			// console.log("installmental_payment reference detected...");
+			// console.log("Generating new unique reference from backend...");
 			try {
 				const newRef = await authFetch(`generate-reference/`);
 
 				if (!newRef) return
-				console.log("new reference:", newRef);
+				// console.log("new reference:", newRef);
 
 				checkoutData.reference = newRef?.reference;
 				referenceRef.current = false; // ensure this block runs only once
@@ -99,9 +116,9 @@ const PaystackCheckout = ({ checkoutData }) => {
 				console.error("Error polling payment status:", error);
 			}
 		}
-		console.log("Using reference:", checkoutData?.reference);
+		// console.log("Using reference:", checkoutData?.reference);
 		if (!checkoutData?.reference && checkoutData?.reference!=="installmental_payment") {
-			alert("Reference not ready yet!");
+			toast.info("Reference not ready yet!");
 			return;
 		}
 		// return; // temp disable
@@ -132,17 +149,17 @@ const PaystackCheckout = ({ checkoutData }) => {
 				// },
 			},
 			callback: function (response) {
-				console.log("Payment complete (callback):", response);
+				// console.log("Payment complete (callback):", response);
 
 				// instead of verify-payment, start polling backend
 				pollPaymentStatus(response.reference);
 			},
 			onClose: function() {
-				alert("Transaction was not completed, window closed.");
+				toast.error("Transaction was not completed, window closed.");
 				setShowOverlay(false); // hide overlay if user closes
 			},
 		});
-		console.log("Opening Paystack iframe with ref:", checkoutData.reference, "...");
+		// console.log("Opening Paystack iframe with ref:", checkoutData.reference, "...");
 		setShowOverlay(true); // show your overlay now
 		startTimer(); // start 15-min countdown
 		handler.openIframe();
