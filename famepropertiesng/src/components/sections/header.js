@@ -10,7 +10,7 @@ import { onMessage } from 'firebase/messaging';
 import { messaging, useRequestForFCMToken } from '../firebaseSetup/firebase-config';
 import { toast } from 'react-toastify';
 import { saveToIndexedDB, clearNotificationsDB, getNotificationsFromIndexedDB,
-	deleteNotificationById, useAllNotifications
+	deleteNotificationById, useAllNotifications, markNotificationsAsShipped
 } from '../firebaseSetup/indexDBMethods';
 import { useAuth } from '../../hooks/allAuth/authContext';
 
@@ -119,7 +119,8 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 			const warmUp = title?.toLowerCase() === "token_warmup";
 			const body = payload?.notification?.body || "";
 			const status = payload?.data?.status || "pending";
-			const completed = status === "completed";
+			const completed = status === "delivered";
+			const shipped = status === "shipped";
 			const id = payload?.data?.id;
 			const shipping_status = payload?.data?.shipping_status;
 			const user = payload?.data?.user;
@@ -130,11 +131,14 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 			let infoToast
 			 // If message says a task is completed → delete from DB
 			if (completed) {
+				console.log("Notification status is 'completed', deleting from IndexedDB if exists...", id);
 				success = await deleteNotificationById(id);
-			}
-		
-			   // Only save and toast for real notifications
-			if (!warmUp && !completed) {
+			} else if (shipped) {
+				// if shipped, just pop toast notification
+				await markNotificationsAsShipped([id], 'header');
+				toast.info(`🚚 ${title}`)
+			} else if (!warmUp && !completed && !shipped) {
+				// Only save and toast for real notifications
 				const notificationData = {
 					title: title,
 					body: body,
