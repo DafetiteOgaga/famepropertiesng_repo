@@ -106,8 +106,8 @@ function clearNotificationsDB() {
 // 	});
 // }
 function markNotificationsAsSeen(idArr = [], comp=null) {
-	console.log('m=a=r=k='.repeat(50));
-	console.log('[debug]', comp, 'markNotificationsAsSeen called with IDs:', idArr);
+	console.log('m=a=r=k='.repeat(150));
+	console.log('[debug]', comp, 'called markNotificationsAsSeen with IDs:', idArr);
 	console.log("[debug] marking multiple notifications as seen:", idArr);
 	return new Promise((resolve, reject) => {
 		const request = indexedDB.open("notificationsDB", 1);
@@ -144,7 +144,63 @@ function markNotificationsAsSeen(idArr = [], comp=null) {
 
 			// Resolve after all updates complete
 			tx.oncomplete = () => {
-				console.log("[debug] all notifications marked as seen");
+				console.log("[debug]", completed, "notifications marked as seen");
+				resolve(true);
+			}
+	
+			tx.onerror = (e) => {
+				console.warn("IndexedDB transaction error:", e.target.error);
+				reject(false);
+			};
+		};
+  
+		request.onerror = (e) => {
+			console.warn("IndexedDB open error:", e.target.error);
+			reject(false);
+		};
+	});
+}
+
+function markNotificationsAsShipped(idArr = [], comp=null) {
+	console.log('s=h=i=p=p=e=d='.repeat(150));
+	console.log('[debug]', comp, 'called markNotificationsAsShipped with IDs:', idArr);
+	console.log("[debug] marking multiple notifications as shipped:", idArr);
+	return new Promise((resolve, reject) => {
+		const request = indexedDB.open("notificationsDB", 1);
+
+		request.onsuccess = (event) => {
+			const db = event.target.result;
+			const tx = db.transaction("notifications", "readwrite");
+			const store = tx.objectStore("notifications");
+	
+			let completed = 0;
+  
+			idArr.forEach((id) => {
+				console.log("[debug] marking notification as shipped for id:", id);
+				const getReq = store.get(id);
+		
+				getReq.onsuccess = () => {
+					const notification = getReq.result;
+					if (notification) {
+						notification.shipping_status = 'shipped';
+						store.put(notification);
+					}
+					completed++;
+	
+					
+					console.log("[debug] marked id as shipped:", id);
+				};
+	
+				getReq.onerror = (e) => {
+					console.warn("Failed to fetch notification with id:", id, e.target.error);
+					completed++;
+				};
+				
+			});
+
+			// Resolve after all updates complete
+			tx.oncomplete = () => {
+				console.log("[debug]", completed, "notifications marked as shipped");
 				resolve(true);
 			}
 	
@@ -164,6 +220,7 @@ function markNotificationsAsSeen(idArr = [], comp=null) {
 // markNotificationAsSeen(notification.id);
 
 function deleteNotificationById(id) {
+	console.log('d=e=l=e=t=e='.repeat(150));
 	console.log('[debug] deleting notification by id:', id)
 	return new Promise((resolve, reject) => {
 		console.log('[debug] opening notifications DB for deletion...')
@@ -304,7 +361,7 @@ function useAllNotifications({trigger, setTrigger, seen, comp}={}) {
 export {
 	getNotificationsFromIndexedDB,
 	clearNotificationsDB,
-	// markNotificationAsSeen,
+	markNotificationsAsShipped,
 	markNotificationsAsSeen,
 	deleteNotificationById,
 	saveToIndexedDB,
