@@ -7348,3 +7348,16 @@ a:focus-visible {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+.shipped-color {
+  color: #475569;
+}
+.delivered-color {
+  color: #22c55e;
+}
+.cancelled-color {
+  color: #dc2626;
+}
+.processing-color {
+  color: #eab308;
+}
