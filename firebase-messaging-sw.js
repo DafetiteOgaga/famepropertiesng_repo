@@ -45,21 +45,23 @@ messaging.onBackgroundMessage(async (payload) => {
 	const user = (payload && payload.data && payload.data.user) || null;
 	const amount = (payload && payload.data && payload.data.amount) || null;
 
-	if (status === "completed") {
+	const icon = `${self.location.origin}/famepropertiesng_repo/logo192.png`
+	console.log('icon URL:', icon);
+	const options = {
+		body,
+		// icon: '/logo192.png', // optional - change or remove
+		icon: icon, // optional - change or remove
+		data: { url: `${self.location.origin}/famepropertiesng_repo` } // optional: used to open/focus the dashboard when notification clicked
+	};
+
+	if (status === "delivered") {
 		console.log("Notification status is 'completed', deleting from IndexedDB if exists...", id);
 		await self.deleteNotificationById(id);
-	}
-
-	if (!warmUp) {
+	} else if (status === "shipped") {
+		await self.markNotificationAsShipped(id);
+		self.registration.showNotification(title, options);
+	} else if (!warmUp) {
 		console.log("Displaying notification...", { title, body, status, id });
-		const icon = `${self.location.origin}/famepropertiesng_repo/logo192.png`
-		console.log('icon URL:', icon);
-		const options = {
-			body,
-			// icon: '/logo192.png', // optional - change or remove
-			icon: icon, // optional - change or remove
-			data: { url: '/' } // optional: used to open/focus the dashboard when notification clicked
-		};
 
 		console.log("Showing notification with options:", options);
 		// Show the notification
@@ -96,13 +98,13 @@ self.addEventListener("notificationclick", (event) => {
 		clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
 			for (const client of clientList) {
 				// If there's a tab with your site, focus it
-				if (client.url.includes("/") && "focus" in client) {
+				if (client.url.includes(`${self.location.origin}/famepropertiesng_repo`) && "focus" in client) {
 					return client.focus();
 				}
 			}
 			// Otherwise, open a new window/tab to your dashboard root
 			if (clients.openWindow) {
-				return clients.openWindow("/");
+				return clients.openWindow(`${self.location.origin}/famepropertiesng_repo`);
 			}
 			return null;
 		})
