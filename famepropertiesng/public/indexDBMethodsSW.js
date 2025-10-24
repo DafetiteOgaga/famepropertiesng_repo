@@ -98,6 +98,34 @@ self.markNotificationAsSeen = async function (id) {
 	  };
 	});
   }
+
+self.markNotificationAsShipped = async function (id) {
+	console.log("debug markNotificationAsShipped called for id:", id);
+	const db = await self.getDB();
+	return new Promise((resolve, reject) => {
+
+		const tx = db.transaction("notifications", "readwrite");
+		const store = tx.objectStore("notifications");
+		const getReq = store.get(id);
+		getReq.onsuccess = () => {
+		  const notification = getReq.result;
+		  if (notification) {
+			notification.shipping_status = 'shipped';
+			store.put(notification);
+		  }
+
+		tx.oncomplete = () => {
+			db.close();
+			resolve();
+		  };
+		// };
+		tx.onerror = (e) => {
+			console.warn("IndexedDB error:", e.target.error);
+			reject("Failed to mark as shipped");
+		}
+	  };
+	});
+  }
 // usage example:
 // markNotificationAsSeen(notification.id);
 
