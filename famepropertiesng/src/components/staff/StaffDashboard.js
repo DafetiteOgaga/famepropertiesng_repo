@@ -34,8 +34,23 @@ function isArrayIndexString(value) {
 	);
 }
 
+const faIcon = (status) => {
+	console.log('===', {status});
+	const fa = 'fa';
+	switch (status?.toLowerCase()) {
+		case 'processing':
+			return `${fa} fa-circle processing-color`;
+		case 'shipped':
+			return `${fa} fa-truck shipped-color`;
+		case 'delivered':
+			return `${fa} fa-check delivered-color`;
+		default:
+			return `${fa} fa-question-circle cancelled-color`;
+	}
+};
+
 function convertToAmount(amount) {
-	console.log('convertToAmount check for:', amount)
+	// console.log('convertToAmount check for:', amount)
 	if (amount.toLowerCase().includes('remaining_balance')||
 		amount.toLowerCase().includes('subtotal_amount')||
 		amount.toLowerCase().includes('total_amount')||
@@ -45,11 +60,6 @@ function convertToAmount(amount) {
 		return true
 	}
 	return false
-}
-
-const removeHyphens = (str) => {
-	if (!str||typeof(str)!=='string') return str
-	return str?.replace(/-/g, '')
 }
 
 function StaffDashboard() {
@@ -75,6 +85,9 @@ function StaffDashboard() {
 	const [searchText, setSearchText] = useState('');
 	const [searchResponse, setSearchResponse] = useState(null);
 	const [selectedSearchResult, setSelectedSearchResult] = useState(null);
+	const [isOperationInProgress, setIsOperationInProgress] = useState(false);
+	const [updateData, setUpdateData] = useState(null);
+	const [updateFromServer, setUpdateFromServer] = useState(null);
 	// const notifications = useAllNotifications().notifications
 
 	const currencySym = userInfo?.currencySymbol||'₦'
@@ -88,7 +101,7 @@ function StaffDashboard() {
 			setLoadingNotification(false)
 			setFreshNotifications(false);
 		}
-	}, [loadingNotification, freshNotifications]);
+	}, [loadingNotification, freshNotifications, isSummary]);
 
 	const fetchOnClickOrMount = (cID) => {
 		if (!cID) return
@@ -126,76 +139,9 @@ function StaffDashboard() {
 		}
 	}, [notifications])
 
-  ////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////
-//   const [orders, setOrders] = useState([]);
-  // useRequestForFCMToken();
-
-  // Get FCM permission and token
-  useEffect(() => {
-    console.log("Requesting FCM token...");
-    // useRequestForFCMToken();
-  }, []);
-
-//   // Listen for messages when app is open
-//   useEffect(() => {
-//     onMessage(messaging, (payload) => {
-//       console.log("Message received in foreground:", payload);
-
-//       // replace with toast notification
-//     //   alert(payload.notification?.title || "New notification");
-// 	toast.info('in staff dashboard - wait for a second then fetch notifications from index db here')
-// 	setTimeout(() => {
-// 		console.log('m'.repeat(50))
-// 		console.log('trigger fetching notifications')
-// 		setLoadingNotification(true)
-// 	}, 1500);
-
-//       // Optional: refresh orders instantly
-//     //   fetchOrders();
-//     });
-//   }, []);
-
-  // Function to fetch latest orders
-//   const fetchOrders = async () => {
-//     const res = await fetch("/api/orders/");
-//     const data = await res.json();
-//     setOrders(data);
-//   };
-
-  useEffect(() => {
-    // fetchOrders();
-  }, []);
-  ////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////
-	// console.log({userInfo})
 	useEffect(() => {
 		setIsMounting(false);
 	}, []);
-
-	useEffect(() => {
-		// if (userInfo?.id) {
-		// 	const fetchCheckoutIDs = async () => {
-		// 		setLoading(true);
-		// 		try {
-		// 			const response = await authFetch(`get-unfulfilled-and-or-unsettled-checkout-ids/${userInfo?.id}/installments/`);
-		// 			const data = await response //.json();
-		// 			if (!data) return
-		// 			// console.log('Response data from server',data)
-		// 			setUnfulfilledCheckoutIds(data);
-		// 			setLoading(false);
-		// 			return data;
-		// 		} catch (error) {
-		// 			console.error("catch error:", error);
-		// 			toast.error('catch error! Failed. Please try again.');
-		// 			return null;
-		// 		} finally {
-		// 			setLoading(false);
-		// 		}
-		// 	}
-		// 	fetchCheckoutIDs()
-		// }
-	}, [])
 
 	useEffect(() => {
 		if (isFetchCheckout) {
@@ -263,6 +209,43 @@ function StaffDashboard() {
 	}, [isFetchCheckout])
 
 	useEffect(() => {
+		console.log('isOperationInProgress changed:', isOperationInProgress)
+		if (!isOperationInProgress) {return}
+		console.log('isOperationInProgress effect triggered')
+		const updateCheckout = async () => {
+			console.log('isOperationInProgress changed to true, refetching data...')
+			console.log('sending updateData:', updateData)
+			setLoading(true);
+			try {
+				console.log('updating...')
+				// or use dataFromCheckoutID instead of dataToRender
+				const response = await authFetch(`update-checkout/${userInfo?.id}/${dataToRender?.checkoutID}/`, {
+					method: "POST",
+					body: updateData,
+				});
+
+				console.log('response ok. waiting for data...')
+				const update = await response // .json();
+				if (!update) return
+				console.log('Response data from server',update)
+				setUpdateFromServer(update);
+				setDataToRender(update);
+
+				return update;
+			} catch (error) {
+				console.log('error caught')
+				console.error("catch error:", error);
+				toast.error('Ecatch eror! Failed. Please try again.');
+				return null;
+			} finally {
+				setIsOperationInProgress(false);
+				setLoading(false);
+			}
+		}
+		updateCheckout()
+	}, [isOperationInProgress])
+
+	useEffect(() => {
 		if (selectedSearchResult) {
 			console.log('selectedSearchResult changed:', selectedSearchResult)
 			setDataToRender(selectedSearchResult)
@@ -270,10 +253,6 @@ function StaffDashboard() {
 			setDataFromCheckoutID(null)
 		}
 	}, [selectedSearchResult])
-
-	// const needToRefetch = dataFromCheckoutID?.checkoutID && selectedCheckoutID
-	// 	? removeHyphens(dataFromCheckoutID.checkoutID) !== selectedCheckoutID
-	// 	: false;
 
 	const titleOrHead = dataToRender?.checkoutID||
 						dataToRender?.store_name||
@@ -291,6 +270,9 @@ function StaffDashboard() {
 		isSummary,
 		selectedSearchResult,
 		dataToRender, titleOrHead,
+		isOperationInProgress,
+		updateData,
+		updateFromServer
 	})
 	// console.log({searchText})
 	return (
@@ -368,11 +350,6 @@ function StaffDashboard() {
 										{notifications?.length?
 										<tbody className="align-middle">
 											{notifications.map((notification, nIdx) => {
-												// const isLoading = loadingNotification[cart?.prdId]
-												// const productMiniDetails = {
-												// 	id: inputValue?.[index]?.prdId,
-												// 	name: inputValue?.[index]?.name,
-												// }
 												return (
 													<tr key={notification?.id}
 													onClick={() => fetchOnClickOrMount(notification?.id)}
@@ -393,15 +370,6 @@ function StaffDashboard() {
 														<td className="align-middle text-wrap" // text-left"
 														>{titleCase(JSON.parse(notification?.user)?.first_name)}</td>
 
-														{/* info */}
-														{/* <td className="align-middle text-wrap" // text-left"
-														// onClick={() => navigate(`/detail/${cart?.prdId}`)}
-														// style={{
-														// 	...deviceType?styles.mobilePadding:{},
-														// 	cursor: 'pointer',
-														// 	}}
-															>{titleCase(notification?.title)}</td> */}
-
 														{/* amount */}
 														<td className={`${deviceType?'d-none':''} align-middle text-bg-color text-nowrap`}
 														// style={deviceType?styles.mobilePadding:{}}
@@ -416,11 +384,7 @@ function StaffDashboard() {
 																	{titleCase(notification?.shipping_status)}
 																</span>
 															<span
-															className={`fa ${
-																notification?.shipping_status?.toLowerCase() === 'processing' ? 'fa-circle text-muted' :
-																notification?.shipping_status?.toLowerCase() === 'shipped' ? 'fa-truck text-muted' :
-																'fa-check text-success'
-															}`}
+															className={`${faIcon(notification?.shipping_status)}`}
 															title={notification?.shipping_status}
 															/>
 															</td>
@@ -496,15 +460,33 @@ function StaffDashboard() {
 															style={{whiteSpace: 'pre-wrap',}}>
 																{/* {JSON.stringify(dataToRender, null, 4)} */}
 																{Object.entries(dataToRender||{}).map(([key, value], kIdx) => {
+																	let pStatus = 0
+																	if (dataToRender?.checkoutID && key?.toLowerCase()==='payment_status') {
+																		if (value?.toLowerCase() === 'completed') {
+																			pStatus = 1
+																		} else {
+																			pStatus = -1
+																		}
+																	}
 																	return (
 																		<div key={key+kIdx}
 																		className="py-1">
 																			<strong>{titleCase(key)}: </strong>
-																			<span style={{wordBreak: 'break-word', fontStyle: 'italic'}}>
+																			<span style={{
+																				wordBreak: 'break-word',
+																				fontStyle: 'italic',
+																				backgroundColor: pStatus===1?'#475569':'',
+																				color: pStatus===1?'#fff':'',
+																				borderRadius: (pStatus===1||pStatus===-1)?'4px':'',
+																				border: pStatus===-1?'1px solid #475569':'',
+																				padding: (pStatus===1||pStatus===-1)?'3px 6px':'',
+																				}}>
 																				{(value === null||
 																					value === undefined||
 																					(Array.isArray(value) && !value.length)|| value==='') ?
 																						'N/A' // if null
+																						// : (dataToRender?.checkoutID && key?.toLowerCase()==='payment_status')?
+																						// value+'kkk'
 																						: (typeof(value) === 'number' && value === 0) ?
 																						'0' // if zero number
 																						: (typeof(value) === 'object' && Array.isArray(value)) ?
@@ -519,7 +501,9 @@ function StaffDashboard() {
 																						value // if email
 																						:
 																						sentenceCase(String(value)) // if primitive
-																				}
+																				} {key.toLowerCase() === 'shipping_status' && typeof value === 'string' && (
+																					<span className={faIcon(value)} />
+																				)}
 																			</span>
 																			<br />
 																		</div>
@@ -527,7 +511,15 @@ function StaffDashboard() {
 																})}
 															</div>
 															{dataToRender?.checkoutID &&
-																<OperationButtons device={deviceType}/>}
+																<OperationButtons
+																info={{
+																	paymentStatus: dataToRender?.payment_status,
+																	paymentMethod: dataToRender?.payment_method,
+																	shippingStatus: dataToRender?.shipping_status,
+																}}
+																setIsOperationInProgress={setIsOperationInProgress}
+																setUpdateData={setUpdateData}
+																device={deviceType}/>}
 															
 														</td>
 													</tr>
@@ -560,29 +552,6 @@ function StaffDashboard() {
 								Search
 							</span>
 						</h5>
-
-						{/* <div className="bg-light p-30 mb-3"
-						style={{borderRadius: '10px'}}>
-							<div className="border-bottom pb-2">
-								<label
-								htmlFor={'checkout_ID'}>Select Pending Checkout<span>*</span></label>
-
-								<HeadlessSelectBtn
-								onChangeLB={[setSelectedCheckoutID]}
-								lbStateVal={selectedCheckoutID}
-								lbArr={notifications}
-								lbInitialVal={selectedCheckoutID || "Select a Checkout ID"}/>
-							</div>
-							<div className="pt-2">
-								<button
-								className={`btn btn-block font-weight-bold py-3 btn-primary`}
-								onClick={() => setIsFetchCheckout(true)}
-								disabled={(selectedCheckoutID===''||!selectedCheckoutID)}
-								>
-									{'Fetch New Get Details'}
-								</button>
-							</div>
-						</div> */}
 
 						<div className="bg-light p-30 mb-3"
 						style={{borderRadius: '10px'}}>
@@ -641,11 +610,6 @@ function StaffDashboard() {
 									{Object.entries(searchResponse?.results||{}).map(([resultKey, resultValue], rIdx) => {
 										return (
 											<div key={resultKey+rIdx} className="d-flex flex-row align-items-baseline">
-												{/* <div className="fa fa-angle-right mr-1" />
-												<h6
-												style={{textDecoration: 'underline'}}>
-													{titleCase(resultKey)}
-												</h6> */}
 												<ExpandableAndCollapsibleSearchResults
 												data={resultValue}
 												label={titleCase(resultKey)}
@@ -655,15 +619,6 @@ function StaffDashboard() {
 									})}
 
 								</div>
-								{/* <div className="pt-2">
-									<button
-									className={`btn btn-block font-weight-bold py-3 ${needToRefetch?'zoomAnimation1Btn':'btn-primary'}`}
-									onClick={() => setIsFetchCheckout(true)}
-									disabled={(searchText===''||!searchText)}
-									>
-										{needToRefetch?'Fetch New Checkout':'Get Details'}
-									</button>
-								</div> */}
 							</div>
 						</div>}
 
@@ -676,96 +631,105 @@ function StaffDashboard() {
 	)
 }
 
-function EnterInstallmentalAmount({
-	installmentsCount,
-	typedInstallAmount,
-	setTypedInstallAmount,
-	remainingBalance,
-	finalInstallmentAmount,
-	setFinalInstallmentAmount,
-}) {
-	const totalNumberOfInstallmentsAvailable = 3 // cycle of installments allowed
-	const deviceSpec = useDeviceType();
-	const isMobile = deviceSpec.width <= 576
-	const percent = Math.ceil(parseInt(remainingBalance)/(totalNumberOfInstallmentsAvailable - (installmentsCount||0)));
-	let finalComputedInstallmentAmount = parseInt(typedInstallAmount||0) + parseInt(percent);
-	if (finalComputedInstallmentAmount > remainingBalance) {
-		setTypedInstallAmount(remainingBalance - percent)
-	}
-	useEffect(() => {
-		setFinalInstallmentAmount(finalComputedInstallmentAmount)
-	}, [finalComputedInstallmentAmount])
-	return (
-		<>
-			<label className="mb-2"
-			htmlFor="installmentPayment">
-				{titleCase("installment amount")}<span>*</span>
-			</label>
-			<div className="d-flex align-items-baseline justify-content-center">
-				<p className="mb-0"
-				style={{whiteSpace: 'pre'}}>
-					{digitSeparator(percent)} + {' '}
-				</p>
-				<input
-				id="installmentPayment"
-				name="installmentPayment"
-				onChange={(e)=> {
-					console.log('changing')
-					const val = onlyNumbers(e.target.value);
-					console.log({val})
-					setTypedInstallAmount(val)
-				}}
-				value={typedInstallAmount||''}
-				style={{borderRadius: '5px'}}
-				className={`form-control ${isMobile?'w-40':'w-100'}`}
-				type="text"
-				autoComplete="on"
-				disabled={(totalNumberOfInstallmentsAvailable-1)===(installmentsCount||0)}
-				placeholder="0"/>
-				<p className="mb-0"
-				style={{whiteSpace: 'pre'}}>
-					{' '} = {digitSeparator(finalComputedInstallmentAmount)}
-				</p>
-			</div>
-		</>
-	)
-}
+function OperationButtons ({info, device, setIsOperationInProgress, setUpdateData}) {
+	console.log({info})
+	const paymentMethod = info.paymentMethod.toLowerCase();
+	const paymentStatus = info.paymentStatus.toLowerCase();
+	const shippingStatus = info.shippingStatus.toLowerCase();
 
-function OperationButtons ({device}) {
+  	// Keep track of which buttons to show
+	let showShipped = false;
+	let showDelivered = false;
+	let showCancel = true;
+
+  	// CASE 1: Pay on delivery
+	if (paymentMethod === "pay_on_delivery") {
+		if (shippingStatus === "processing") {
+			showShipped = true;
+		} else if (shippingStatus === "shipped") {
+			showDelivered = true;
+		}
+	}
+
+	// CASE 2: Pay now
+	else if (paymentMethod === "pay_now") {
+		if (shippingStatus === "processing") {
+			showShipped = true;
+		} else if (shippingStatus === "shipped" && paymentStatus === "completed") {
+			showDelivered = true;
+		}
+	}
+
+	// CASE 3: Installmental payment
+	else if (paymentMethod === "installmental_payment") {
+		if (paymentStatus === "completed") {
+			if (shippingStatus === "processing") {
+				showShipped = true;
+			} else if (shippingStatus === "shipped") {
+				showDelivered = true;
+			}
+		}
+	}
+
+	// once delivered, hide everything
+	if (shippingStatus === "delivered") {
+		showShipped = false;
+		showDelivered = false;
+		showCancel = false;
+	}
 	return (
 		<div style={device?{gap: '15px'}:{}}
 		className={`d-flex ${device?'flex-row justify-content-center':'flex-column align-items-end'}`}>
-			{/* pay on delivery button */}
-			{/* {userInfo?.has_unsettled_delivery_payments && */}
+			{/* delivered */}
+			{
+			showDelivered&&
 			<button
 			style={{textWrap: 'nowrap'}}
 			type="button"
 			className="btn btn-sm btn-secondary d-block mt-2"
+			onClick={() => {
+				setIsOperationInProgress(true);
+				setUpdateData({
+					shipping_status: 'delivered'
+				})
+			}}
 			>
 				Delivered
-			</button>
-			{/* } */}
+			</button>}
 
-			{/* admin dashboard button */}
-			{/* {userInfo?.is_superuser && */}
+			{/* shipped */}
+			{
+			showShipped&&
 			<button
 			style={{textWrap: 'nowrap'}}
 			type="button"
 			className="btn btn-sm btn-secondary d-block mt-2"
+			onClick={() => {
+				setIsOperationInProgress(true);
+				setUpdateData({
+					shipping_status: 'shipped'
+				})
+			}}
 			>
 				Shipped
-			</button>
-			{/* } */}
+			</button>}
 
-			{/* delete account button */}
+			{/* cancel order */}
+			{
+			showCancel&&
 			<button
 			style={{textWrap: 'nowrap'}}
-				type="button"
-				// onClick={() => {}}
-				className="btn btn-sm btn-danger d-block mt-2"
-				>
-					Cancel Order
-			</button>
+			type="button"
+			className="btn btn-sm btn-danger d-block mt-2"
+			// onClick={() => {
+			// 	setIsOperationInProgress(true);
+			// 	setUpdateData({
+			// 		shipping_status: 'cancelled'
+			// 	})
+			// }}
+			>
+				Cancel Order
+			</button>}
 		</div>
 	)
 }
