@@ -82,7 +82,7 @@ function LogIn() {
 			if (data?.access) {
 				setFormData(initialFormData);
 				toast.success('Login Successful!');
-				navigate('/famepropertiesng_repo')
+				navigate('/')
 				// window.location.replace('/');
 			}
 			if (!data) return
