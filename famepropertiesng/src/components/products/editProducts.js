@@ -66,6 +66,7 @@ function EditProduct() {
 
 	const sessionProducts = createLocal.getItem('fpng-prod');
 	const productToEdit = sessionProducts?.find(prod => String(prod.id) === String(productID));
+
 	const productImgs = {}
 	let currentCateories
 
@@ -83,6 +84,7 @@ function EditProduct() {
 		currentCateories = productToEdit?.category?.map(cat => cat.name)
 	}
 	useEffect(() => {
+		console.log('a'.repeat(30));
 		if (currentCateories?.length) {
 			const initialCategories = currentCateories.reduce((acc, cat) => {
 				acc[cat] = true
@@ -116,6 +118,7 @@ function EditProduct() {
 	]
 
 	useEffect(() => {
+		console.log('b'.repeat(30));
 		if (productToEdit) {
 			// prefill form data
 			setFormData(prev => ({
@@ -259,6 +262,7 @@ function EditProduct() {
 	// auto submit form when formData has url and fileID filled
 	// (i.e when image has been uploded to cloud)
 	useEffect(() => {
+		console.log('c'.repeat(30));
 			const allUploadedImagesReady = formImageCountRef?.current?.every(formEntry => {
 				if (!formData) return false;
 		
@@ -356,6 +360,7 @@ function EditProduct() {
 
 	// clear error message after 3s
 	useEffect(() => {
+		console.log('d'.repeat(30));
 		if (isError) {
 			const delay = setTimeout(() => {
 				setIsError(null)
@@ -383,6 +388,7 @@ function EditProduct() {
 	};
 
 	useEffect(() => {
+		console.log('e'.repeat(30));
 		// flip loading off immediately after mount
 		setIsMounting(false);
 	}, []);
@@ -390,12 +396,14 @@ function EditProduct() {
 	const imageLength = imageCropAndCompressArrDetails.length;
 	// initialize selectedFiles and uploadedImages arrays based on imageCropAndCompressArrDetails length
 	useEffect(() => {
+		console.log('f'.repeat(30));
 		setSelectedFiles(new Array(imageLength).fill(null));
 		setUploadedImages(new Array(imageLength).fill(null));
 	}, [imageCropAndCompressArrDetails.length])
 
 	// updates images instance details in formData whenever they change
 	useEffect(() => {
+		console.log('g'.repeat(30));
 		uploadedImages.forEach((uploadedImage, index) => {
 			if (uploadedImage) {
 				const imageKey = `image_url${index}`;
@@ -436,26 +444,39 @@ function EditProduct() {
 	}, [uploadedImages, selectedFiles])
 
 	const isCategoryEmpty = Object.keys(checkCategory).every(c=>!checkCategory[c])
-	useEffect(() => {
-		if (!imgRefs.current.length) return;
-		const observer = new ResizeObserver((entries) => {
-			for (let entry of entries) {
-				const idx = imgRefs.current.findIndex(el => el === entry.target);
-				if (idx !== -1) {
-					setImageDimensions(prev => {
-						const updated = [...prev];
-						updated[idx] = {
-						width: Math.floor(entry.contentRect.width),
-						height: Math.floor(entry.contentRect.height),
-						};
-						return updated;
-					});
-				}
+	// useEffect(() => {
+	// 	console.log('h'.repeat(30));
+	// 	if (!imgRefs.current.length) return;
+	// 	const observer = new ResizeObserver((entries) => {
+	// 		for (let entry of entries) {
+	// 			const idx = imgRefs.current.findIndex(el => el === entry.target);
+	// 			if (idx !== -1) {
+	// 				setImageDimensions(prev => {
+	// 					const updated = [...prev];
+	// 					updated[idx] = {
+	// 					width: Math.floor(entry.contentRect.width),
+	// 					height: Math.floor(entry.contentRect.height),
+	// 					};
+	// 					return updated;
+	// 				});
+	// 			}
+	// 	}
+	// 	});
+	// 	imgRefs.current.forEach(img => img && observer.observe(img));
+	// 	return () => observer.disconnect();
+	// }, [productImgs]);
+
+	if (productToEdit?.id) {
+		console.log('found product to edit with id:', productToEdit.id)
+		const productOwner = productToEdit?.store?.user?.id
+		const currentUser = userInfo?.id
+		if (String(productOwner) !== String(currentUser)) {
+			console.warn('Unauthorized access attempt to edit product!');
+			navigate('/unauthorised');
+			return null;
 		}
-		});
-		imgRefs.current.forEach(img => img && observer.observe(img));
-		return () => observer.disconnect();
-	}, [productImgs]);
+	}
+	console.log({productToEdit, userInfo})
 
 	return (
 		<>
