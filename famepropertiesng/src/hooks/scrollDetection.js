@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 function useScrollDetection() {
 	const [scrollingDown, setScrollingDown] = useState(true);
 	const [lastScrollY, setLastScrollY] = useState(0);
+	const header = document.getElementById('scrollable-header');
+	const headerHeight = header?.offsetHeight||0;
 	// handles display and hiding of the navbars
 	useEffect(() => {
 		const handleScroll = () => {
@@ -18,6 +20,6 @@ function useScrollDetection() {
 		return () => window.removeEventListener('scroll', handleScroll);
 	}, [lastScrollY]);
 
-	return { scrollingDown, lastScrollY};
+	return { scrollingDown, lastScrollY, headerHeight};
 }
 export { useScrollDetection };

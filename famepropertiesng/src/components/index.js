@@ -11,7 +11,7 @@ import { titleCase } from '../hooks/changeCase';
 
 function Index() {
 	const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0)
-	const { lastScrollY, scrollingDown } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
+	const { lastScrollY, scrollingDown, headerHeight } = useScrollDetection(); // using the custom hook to detect scroll and show/hide navbar
 	const deviceType = useDeviceType();
 	const { createLocal } = useCreateStorage()
 	const productsInCart = createLocal.getItemRaw('fpng-cart');
@@ -124,7 +124,8 @@ function Index() {
 		setNumberOfProductsInCart(0)
 	}
 
-	const mTop = deviceType.laptop ? '12':deviceType.desktop ?'6':'22.5';
+	const mTop = scrollingDown ? headerHeight : 40 // deviceType.laptop ? '12':deviceType.desktop ?'4':'19.5';
+	// console.log({mTop, scrollingDown, lastScrollY})
 	return (
 		<>
 			<main className='container-fluid px-xl-5'
@@ -137,7 +138,7 @@ function Index() {
 				}
 				:
 				{},
-				marginTop: `${mTop}%`
+				marginTop: (mTop + 5)
 			}}>
 				{/* Header */}
 				<Header mTop={mTop}

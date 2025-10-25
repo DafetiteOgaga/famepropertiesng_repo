@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
 function getNotificationsFromIndexedDB(filter = null) {
-	console.log("[debug] getNotificationsFromIndexedDB type:", filter);
+	// console.log("[debug] getNotificationsFromIndexedDB type:", filter);
 	return new Promise((resolve, reject) => {
-		console.log("[debug] opening IndexedDB...");
+		// console.log("[debug] opening IndexedDB...");
 		const request = indexedDB.open("notificationsDB", 1);
 		request.onerror = (e) => {
 			console.warn("IndexedDB error:", e.target.error);
@@ -12,28 +12,28 @@ function getNotificationsFromIndexedDB(filter = null) {
 
 		// 🟢 ADDED: Ensure object store exists even if DB opens for first time
 		request.onupgradeneeded = (event) => {
-			console.log("[debug] onupgradeneeded triggered");
+			// console.log("[debug] onupgradeneeded triggered");
 			const db = event.target.result;
 			if (!db.objectStoreNames.contains("notifications")) {
-				console.log("[debug] creating object store 'notifications'");
+				// console.log("[debug] creating object store 'notifications'");
 				db.createObjectStore("notifications", { keyPath: "id" });
 			}
 		};
 
 		request.onsuccess = (event) => {
-			console.log("[debug] IndexedDB opened successfully");
+			// console.log("[debug] IndexedDB opened successfully");
 			const db = event.target.result;
 			const tx = db.transaction("notifications", "readonly");
 			const store = tx.objectStore("notifications");
 			const getAll = store.getAll();
 
 			getAll.onsuccess = () => {
-				console.log("[debug] Retrieved all notifications from IndexedDB");
+				// console.log("[debug] Retrieved all notifications from IndexedDB");
 				let results = getAll.result;
 				if (filter === "unseen") {results = results.filter(n => !n.seen)};
 				if (filter === "seen") {results = results.filter(n => n.seen)};
 				if (filter === "pending") {results = results.filter(n => n.pending)};
-				console.log("[debug] All/Filtered results:", results);
+				// console.log("[debug] All/Filtered results:", results);
 				resolve(results);
 			};
 			getAll.onerror = (e) => {
@@ -49,12 +49,12 @@ function getNotificationsFromIndexedDB(filter = null) {
 }
 
 function clearNotificationsDB() {
-	console.log('[debug] clearing notifications DB')
+	// console.log('[debug] clearing notifications DB')
 	return new Promise((resolve, reject) => {
-		console.log('[debug] opening IndexedDB for clearing...')
+		// console.log('[debug] opening IndexedDB for clearing...')
 		const request = indexedDB.open("notificationsDB", 1);
 		request.onsuccess = (event) => {
-			console.log('[debug] opened notifications DB for clearing')
+			// console.log('[debug] opened notifications DB for clearing')
 			const db = event.target.result;
 			const tx = db.transaction("notifications", "readwrite");
 			tx.objectStore("notifications").clear();
@@ -71,44 +71,10 @@ function clearNotificationsDB() {
 	});
 }
 
-// function markNotificationAsSeen(id) {
-// 	console.log('[debug] marking notification as seen:', id)
-// 	return new Promise((resolve, reject) => {
-// 		const request = indexedDB.open("notificationsDB", 1);
-// 		request.onsuccess = (event) => {
-// 			console.log('[debug] opened notifications DB for marking as seen')
-// 			const db = event.target.result;
-// 			const tx = db.transaction("notifications", "readwrite");
-// 			const store = tx.objectStore("notifications");
-			
-// 			// 🟡 CHANGED: Make sure ID is a number to avoid lookup mismatch
-// 			const getReq = store.get(id);
-
-// 			getReq.onsuccess = () => {
-// 			const notification = getReq.result;
-// 				console.log('[debug] fetched notification for marking as seen:', notification)
-// 				if (notification) {
-// 					console.log('[debug] marking notification seen property to true')
-// 					notification.seen = true;
-// 					store.put(notification);
-// 				}
-// 				tx.oncomplete = () => resolve();
-// 			};
-// 			tx.onerror = (e) => {
-// 				console.warn("IndexedDB error:", e.target.error);
-// 				reject("Failed to mark as seen");
-// 			}
-// 		};
-// 		request.onerror = (e) => {
-// 			console.warn("IndexedDB error:", e.target.error);
-// 			reject("Error opening DB");
-// 		}
-// 	});
-// }
 function markNotificationsAsSeen(idArr = [], comp=null) {
-	console.log('m=a=r=k='.repeat(150));
-	console.log('[debug]', comp, 'called markNotificationsAsSeen with IDs:', idArr);
-	console.log("[debug] marking multiple notifications as seen:", idArr);
+	// console.log('m=a=r=k='.repeat(150));
+	// console.log('[debug]', comp, 'called markNotificationsAsSeen with IDs:', idArr);
+	// console.log("[debug] marking multiple notifications as seen:", idArr);
 	return new Promise((resolve, reject) => {
 		const request = indexedDB.open("notificationsDB", 1);
 
@@ -120,7 +86,7 @@ function markNotificationsAsSeen(idArr = [], comp=null) {
 			let completed = 0;
   
 			idArr.forEach((id) => {
-				console.log("[debug] marking notification as seen for id:", id);
+				// console.log("[debug] marking notification as seen for id:", id);
 				const getReq = store.get(id);
 		
 				getReq.onsuccess = () => {
@@ -132,7 +98,7 @@ function markNotificationsAsSeen(idArr = [], comp=null) {
 					completed++;
 	
 					
-					console.log("[debug] marked id as seen:", id);
+					// console.log("[debug] marked id as seen:", id);
 				};
 	
 				getReq.onerror = (e) => {
@@ -144,7 +110,7 @@ function markNotificationsAsSeen(idArr = [], comp=null) {
 
 			// Resolve after all updates complete
 			tx.oncomplete = () => {
-				console.log("[debug]", completed, "notifications marked as seen");
+				// console.log("[debug]", completed, "notifications marked as seen");
 				resolve(true);
 			}
 	
@@ -162,9 +128,9 @@ function markNotificationsAsSeen(idArr = [], comp=null) {
 }
 
 function markNotificationsAsShipped(idArr = [], comp=null) {
-	console.log('s=h=i=p=p=e=d='.repeat(150));
-	console.log('[debug]', comp, 'called markNotificationsAsShipped with IDs:', idArr);
-	console.log("[debug] marking multiple notifications as shipped:", idArr);
+	// console.log('s=h=i=p=p=e=d='.repeat(150));
+	// console.log('[debug]', comp, 'called markNotificationsAsShipped with IDs:', idArr);
+	// console.log("[debug] marking multiple notifications as shipped:", idArr);
 	return new Promise((resolve, reject) => {
 		const request = indexedDB.open("notificationsDB", 1);
 
@@ -176,7 +142,7 @@ function markNotificationsAsShipped(idArr = [], comp=null) {
 			let completed = 0;
   
 			idArr.forEach((id) => {
-				console.log("[debug] marking notification as shipped for id:", id);
+				// console.log("[debug] marking notification as shipped for id:", id);
 				const getReq = store.get(id);
 		
 				getReq.onsuccess = () => {
@@ -188,7 +154,7 @@ function markNotificationsAsShipped(idArr = [], comp=null) {
 					completed++;
 	
 					
-					console.log("[debug] marked id as shipped:", id);
+					// console.log("[debug] marked id as shipped:", id);
 				};
 	
 				getReq.onerror = (e) => {
@@ -200,7 +166,7 @@ function markNotificationsAsShipped(idArr = [], comp=null) {
 
 			// Resolve after all updates complete
 			tx.oncomplete = () => {
-				console.log("[debug]", completed, "notifications marked as shipped");
+				// console.log("[debug]", completed, "notifications marked as shipped");
 				resolve(true);
 			}
 	
@@ -220,13 +186,13 @@ function markNotificationsAsShipped(idArr = [], comp=null) {
 // markNotificationAsSeen(notification.id);
 
 function deleteNotificationById(id) {
-	console.log('d=e=l=e=t=e='.repeat(150));
-	console.log('[debug] deleting notification by id:', id)
+	// console.log('d=e=l=e=t=e='.repeat(150));
+	// console.log('[debug] deleting notification by id:', id)
 	return new Promise((resolve, reject) => {
-		console.log('[debug] opening notifications DB for deletion...')
+		// console.log('[debug] opening notifications DB for deletion...')
 		const request = indexedDB.open("notificationsDB", 1);
 		request.onsuccess = (event) => {
-			console.log('[debug] opened notifications DB for deletion')
+			// console.log('[debug] opened notifications DB for deletion')
 			const db = event.target.result;
 			const tx = db.transaction("notifications", "readwrite");
 
@@ -235,7 +201,7 @@ function deleteNotificationById(id) {
 
 			// tx.objectStore("notifications").delete(id);
 			tx.oncomplete = () => {
-				console.log("IndexedDB: notification deleted successfully");
+				// console.log("IndexedDB: notification deleted successfully");
 				resolve(true);
 			}
 			tx.onerror = (e) => {
@@ -252,22 +218,22 @@ function deleteNotificationById(id) {
 
   // --- IndexedDB helper ---
 function saveToIndexedDB(data) {
-	console.log('[debug] saving notification to IndexedDB:', data)
+	// console.log('[debug] saving notification to IndexedDB:', data)
 	return new Promise((resolve, reject) => {
-		console.log('[debug] opening notifications DB for saving...')
+		// console.log('[debug] opening notifications DB for saving...')
 		const request = indexedDB.open("notificationsDB", 1);
 
 		request.onupgradeneeded = (event) => {
-			console.log('[debug] onupgradeneeded triggered for saving')
+			// console.log('[debug] onupgradeneeded triggered for saving')
 			const db = event.target.result;
 			if (!db.objectStoreNames.contains("notifications")) {
-				console.log('[debug] creating object store "notifications" for saving')
+				// console.log('[debug] creating object store "notifications" for saving')
 				db.createObjectStore("notifications", { keyPath: "id"});
 			}
 		};
   
 		request.onsuccess = (event) => {
-			console.log('[debug] opened notifications DB for saving')
+			// console.log('[debug] opened notifications DB for saving')
 			const db = event.target.result;
 			const tx = db.transaction("notifications", "readwrite");
 			const store = tx.objectStore("notifications");
@@ -275,7 +241,7 @@ function saveToIndexedDB(data) {
 			const req = store.add(data); // add() fails if same id exists
 
 			req.onsuccess = () => {
-				console.log("IndexedDB: notification stored successfully");
+				// console.log("IndexedDB: notification stored successfully");
 				resolve(true);
 			};
 
@@ -304,31 +270,26 @@ function saveToIndexedDB(data) {
 }
 
 function useAllNotifications({trigger, setTrigger, seen, comp}={}) {
-	console.log('ABCD'.repeat(20));
-	console.log('[debug] useAllNotifications hook called from', comp, 'as [seen]:', seen, 'with trigger:', trigger);
+	// console.log('ABCD'.repeat(20));
+	// console.log('[debug] useAllNotifications hook called from', comp, 'as [seen]:', seen, 'with trigger:', trigger);
 	const [notifications, setNotifications] = useState([]);
 
-	console.log('[debug] useAllNotifications hook initialized');
+	// console.log('[debug] useAllNotifications hook initialized');
 	useEffect(() => {
-		// console.log('[debug] useEffect checking trigger:', trigger);
-		// if (!trigger) {
-		// 	console.log('[debug] trigger is false, skipping fetch');
-		// 	return;
-		// }
-		console.log('[debug] useEffect triggered to fetch notifications or on mount');
+		// console.log('[debug] useEffect triggered to fetch notifications or on mount');
 		let isMounted = true; // prevents setting state after unmount
 	  
 		const fetchNotifications = async () => {
-			console.log('[debug] fetching notifications from IndexedDB...');
+			// console.log('[debug] fetching notifications from IndexedDB...');
 			try {
-				console.log('[debug] awaiting getNotificationsFromIndexedDB...');
-				console.log('[debug] seen filter value:', seen);
+				// console.log('[debug] awaiting getNotificationsFromIndexedDB...');
+				// console.log('[debug] seen filter value:', seen);
 				const data = await getNotificationsFromIndexedDB(seen); // wait for IndexedDB to resolve
 				if (isMounted && Array.isArray(data)) {
-					console.log('[debug] notifications fetched:', data);
+					// console.log('[debug] notifications fetched:', data);
 					setNotifications(data); // only update state if component is still mounted
 					if (setTrigger) {
-						console.log('[debug] resetting trigger to false');
+						// console.log('[debug] resetting trigger to false');
 						setTrigger(false); // reset trigger after fetch
 					}
 				}
@@ -342,11 +303,11 @@ function useAllNotifications({trigger, setTrigger, seen, comp}={}) {
 		//    - Component mount (trigger is usually undefined initially)
 		//    - Any time trigger becomes true
 		if (trigger || trigger === undefined) {
-			console.log('[debug] trigger is true or undefined → fetching on mount');
+			// console.log('[debug] trigger is true or undefined → fetching on mount');
 			fetchNotifications();
 		} else {
-			console.log('WXYZ'.repeat(20));
-			console.log('[debug] trigger is false → skipping fetch');
+			// console.log('WXYZ'.repeat(20));
+			// console.log('[debug] trigger is false → skipping fetch');
 		}
 	  
 		return () => {
@@ -354,7 +315,7 @@ function useAllNotifications({trigger, setTrigger, seen, comp}={}) {
 		};
 	}, [trigger]);
 	
-	console.log('[debug] useAllNotifications returning notifications:', notifications);
+	// console.log('[debug] useAllNotifications returning notifications:', notifications);
 	return { notifications, notificationsCount: notifications.length };
 }
 

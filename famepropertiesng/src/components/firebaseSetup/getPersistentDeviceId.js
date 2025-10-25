@@ -5,7 +5,7 @@ async function getPersistentDeviceId() {
 	// If already exists, return early
 	if (device_id) {
 		const details = JSON.parse(localStorage.getItem(`${key}-details`) || "{}");
-		console.log("Existing device ID found:", {device_id, ...details});
+		// console.log("Existing device ID found:", {device_id, ...details});
 		return { device_id, ...details };
 	}
 

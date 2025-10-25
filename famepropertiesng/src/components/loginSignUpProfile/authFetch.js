@@ -109,6 +109,7 @@ function useAuthFetch() {
 	const {
 		setStoredrChars,
 		setRotNumber,
+		setLoggedIn,
 	} = useAuth(); // hook is called inside another hook
 
 	// rot returned not used
@@ -211,6 +212,7 @@ function useAuthFetch() {
 			createLocal.setItem("fpng-user", data.user);
 			createLocal.setItem("fpng-stor", data.user.store);
 			createLocal.setItem("fpng-ctdw", Date.now());
+			setLoggedIn(true); // trigger re-render
 		} else if (data?.error||data?.status==='error') {
 			const errorText = data.error||
 								data.detail||

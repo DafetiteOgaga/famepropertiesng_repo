@@ -92,27 +92,8 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	const [isSeeenNotification, setIsSeeenNotification] = useState([]);
 	const [isUpdateNotification, setIsUpdateNotification] = useState(false);
 
-	// 2️⃣ Listen for messages when app is open
+	// Listen for messages when app is open
 	useEffect(() => {
-		// onMessage(messaging, (payload) => {
-		// 	console.log("Message received in foreground:", payload);
-		// 	const notiTitle = payload?.notification?.title;
-		// 	const warmUp = notiTitle?.toLowerCase() === "token_warmup"
-		// 	console.log({
-		// 		notiTitle,
-		// 		body: payload?.notification?.body,
-		// 		data: payload?.data,
-		// 		warmUp,
-		// 	})
-		
-		// 	if (!warmUp) {
-		// 		// replace with toast notification
-		// 		alert(`yippy! ${payload.notification?.title}` || "New notification");
-		// 	}
-		
-		// 	// Optional: refresh orders instantly
-		// 	// fetchOrders();
-		// });
 		onMessage(messaging, async (payload) => {
 			console.log("Message received in foreground:", payload);
 			const title = payload?.notification?.title || "New notification";
@@ -172,18 +153,13 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 	}, []);
 
 	useEffect(() => {
-		console.log('load isSeen effect')
+		// console.log('load isSeen effect')
 		if (isSeen||isUpdateNotification) {
-			console.log('r'.repeat(50)+'\n', 'Setting isSeen to', !isSeen)
+			// console.log('r'.repeat(45)+'\n', 'Setting isSeen to', !isSeen)
 			getNotificationsFromIndexedDB('unseen').then(setIsSeeenNotification);
 			setIsSeen(false);
 			setIsUpdateNotification(false);
 		}
-		// if (isUpdateNotification) {
-		// 	console.log('u'.repeat(50)+'\n', 'Setting isUpdateNotification to false')
-		// 	getNotificationsFromIndexedDB().then(setIsSeeenNotification);
-		// 	setIsUpdateNotification(false);
-		// }
 	}, [isSeen, isUpdateNotification]);
 
 	const menuHandler = () => {
@@ -233,14 +209,10 @@ function Header({mTop, numberOfProductsInCart, handleClearCart}) {
 
 	const removeLabelName = deviceType.width<400
 
-	console.log({
-		isSeeenNotification,
-		count: isSeeenNotification.length,
-		deviceNotificationsArr,
-	})
 	return (
 		<>
 			<nav className={`container-fluid container-fluid-nav navbar bg-dark navbar-expand-lg navbar-dark py-3 py-lg-0 px-xl-5 ${isMenuOpen?'':!scrollingDown ? 'hidden' : ''}`}
+			id='scrollable-header'
 			style={{
 				top: -1,
 				height: '8%',
@@ -331,20 +303,13 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	const { createLocal, createSession } = useCreateStorage();
 	const [isUserDetected, setIsUserDetected] = useState(null)
 	const [stateHeaderMenu, setStateHeaderMenu] = useState(headerMenuArr)
+	const { loggedIn, setLoggedIn } = useAuth();
 	
 	const navigate = useNavigate();
-	console.log({isNewNotification, notificationsCount})
-	
-	// console.log('noti-'.repeat(20)+'\n', {notificationsCount})
-	const userInfoRef = useRef(true);
-	// console.log({
-	// 	is_seller: userInfo?.is_seller,
-	// 	is_staff: userInfo?.is_staff,
-	// })
+	// console.log({isNewNotification, notificationsCount})
 
 	useEffect(() => {
-		// console.log({userInfoRef: userInfoRef.current})
-		if (userInfoRef.current) {
+		if (loggedIn) {
 			let updatedMenuArr
 			if (!userInfo?.is_seller) {
 				updatedMenuArr = headerMenuArr.filter(header => {
@@ -360,13 +325,13 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 				})
 			}
 			setStateHeaderMenu(updatedMenuArr)
-			userInfoRef.current = false
+			setLoggedIn(false)
 		}
 		// else {
 		// 	setStateHeaderMenu(headerMenuArr)
 		// }
 		setIsUserDetected(!!userInfo)
-	}, [userInfo])
+	}, [loggedIn])
 	const [itemClicked, setItemClicked] = useState(false);
 	const handleMenuItemClick = () => {
 		setItemClicked(prev => !prev);
@@ -375,6 +340,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		if (statusLink.toLowerCase()==='logout') {
 			createSession.removeItem('fpng-pspk');
 			createLocal.removeAllItems();
+			setLoggedIn(true)
 			navigate('/')
 		} else if (statusLink.toLowerCase()==='clear cart') {
 			handleClearCart()
@@ -469,7 +435,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 				className={`${isMenuOpen?'slidePageInRight':'slidePageOutRight'}`}
 				style={{
 					position: 'fixed',
-					top: `${30-mTop}%`,
+					top: `${parseInt(mTop, 10) - 1}px`,
 					left: 0,
 					backgroundColor: 'rgba(0, 0, 0, 0.51)',
 					zIndex: 20,
