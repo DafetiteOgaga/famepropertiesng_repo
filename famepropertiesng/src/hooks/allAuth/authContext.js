@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
 
 	// Store access token in state (in-memory only)
 	const [accessToken, setAccessToken] = useState(null);
+	const [loggedIn, setLoggedIn] = useState(false);
 	const [refreshToken, setRefreshToken] = useState(null);
 	const [userInfo, setUserInfo] = useState(null);
 	const [rotNumber, setRotNumber] = useState(0);
@@ -82,6 +83,7 @@ export function AuthProvider({ children }) {
 			RotCipher, encrypt, decrypt,
 			freshNotifications, setFreshNotifications,
 			isSeen, setIsSeen,
+			loggedIn, setLoggedIn
 			}}>
 			{children}
 		</AuthContext.Provider>
