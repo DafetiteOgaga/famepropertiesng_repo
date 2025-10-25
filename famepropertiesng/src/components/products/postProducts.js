@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, forwardRef, useImperativeHandle, Fragment } from "react";
+import { useParams } from 'react-router-dom'
 import 'react-country-state-city/dist/react-country-state-city.css';
 import { Breadcrumb } from "../sections/breadcrumb";
 import { useDeviceType } from "../../hooks/deviceType";
@@ -39,6 +40,8 @@ const initialFormData = () => ({
 
 function PostProduct() {
 	const authFetch = useAuthFetch();
+	const parameters = useParams();
+	console.log({parameters})
 	const trackEmptyFormsRef = useRef([]);
 	const formImageCountRef = useRef(null);
 	const [checkReadiness, setCheckReadiness] = useState(false);

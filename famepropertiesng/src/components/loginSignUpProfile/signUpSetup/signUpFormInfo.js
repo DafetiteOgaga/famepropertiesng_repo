@@ -61,7 +61,7 @@ const inputArr = [
 		placeholder: 'addo roundabout, opposite uba bank',
 		type: 'text',
 		important: true,
-		autoComplete: true, // no standard autocomplete, disable it
+		autoComplete: 'on', // no standard autocomplete, disable it
 	},
 	{
 		name: 'email',
@@ -88,14 +88,14 @@ const inputArr = [
 		placeholder: 'password',
 		type: 'password',
 		important: true,
-		autoComplete: true, // for signup, use "current-password" for login
+		autoComplete: 'on', // for signup, use "current-password" for login
 	},
 	{
 		name: 'password_confirmation',
 		placeholder: 'password confirmation',
 		type: 'password',
 		important: true,
-		autoComplete: true, // confirmation uses same as password
+		autoComplete: 'on', // confirmation uses same as password
 	},
 ]
 

@@ -41,11 +41,11 @@ const headerMenuArr = [
 		angleD: "fas fa-angle-down",
 		angleL: "fas fa-angle-left",
 	},
-	{
-		menu: "Register Store",
-		link: "/register-store/id",
-		type: "link",
-	},
+	// {
+	// 	menu: "Register Store",
+	// 	link: "/register-store/id",
+	// 	type: "link",
+	// },
 	{
 		menu: "Post Products",
 		link: "/post-products/id",
@@ -347,36 +347,18 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 		if (userInfoRef.current) {
 			let updatedMenuArr
 			if (!userInfo?.is_seller) {
-				// console.log('a'.repeat(50))
-				// console.log('removing post products')
 				updatedMenuArr = headerMenuArr.filter(header => {
 					const hMenu = header?.menu?.toLowerCase()!=="post products";
-					// if (header?.menu.toLowerCase()==="post products") {
-					// 	console.log('found post products to remove')
-					// 	return false
-					// }
-					// console.log({hMenu, menu: header?.menu})
 					return hMenu
 				})
 			} else {
-				// console.log('b'.repeat(50))
-				// console.log('keeping post products')
 				updatedMenuArr = headerMenuArr
 			}
 			if (!userInfo?.is_staff) {
-				// console.log('c'.repeat(50))
-				// console.log('removing dashboard')
-				// console.log({dashboardentry: updatedMenuArr})
 				updatedMenuArr = updatedMenuArr.filter(header => {
 					return header?.menu.toLowerCase()!=='dashboard'
 				})
-			} else {
-				// console.log('d'.repeat(50))
-				// console.log('keeping dashboard')
-				// updatedMenuArr = updatedMenuArr
 			}
-			// console.log('e'.repeat(50))
-			// console.log({updatedMenuArr})
 			setStateHeaderMenu(updatedMenuArr)
 			userInfoRef.current = false
 		}
@@ -523,8 +505,8 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						}}>
 							{userInfo &&
 							<>
-								<Link to={"/profile"}
-								className={`dropdown-item slideInRight mr-0 ${handleIsActive({menu: 'Profile', link:"/profile"})?'active':''}`} // removed mr-3 to mr-0
+								<Link to={`/profile/${userInfo?.id}`}
+								className={`dropdown-item slideInRight mr-0 ${handleIsActive({menu: 'Profile', link:`/profile/${userInfo?.id}`})?'active':''}`} // removed mr-3 to mr-0
 								style={{
 									display: 'flex',
 									justifyContent: 'center',
@@ -712,7 +694,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						id={userInfo?.id} />
 
 						{userInfo &&
-						<Link to={"/profile"}
+						<Link to={`/profile/${userInfo?.id}`}
 						className='profile-name-link mr-2'
 						style={{
 							textWrap: 'nowrap',

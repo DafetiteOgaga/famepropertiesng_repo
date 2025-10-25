@@ -5,9 +5,7 @@ import { useDeviceType } from "../../hooks/deviceType";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { BouncingDots } from "../../spinners/spinner";
 import { digitSeparator, titleCase } from "../../hooks/changeCase";
-import { useOutletContext } from 'react-router-dom';
 import { toast } from "react-toastify";
-import { useConfirmTotals } from "../../hooks/formMethods/formMethods";
 import { useAllNotifications, markNotificationsAsSeen,
 	getNotificationsFromIndexedDB, } from "../firebaseSetup/indexDBMethods";
 import { useAuth } from "../../hooks/allAuth/authContext";

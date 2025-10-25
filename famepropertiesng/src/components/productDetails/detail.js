@@ -238,6 +238,7 @@ function Detail() {
 	const index = isNaN(parsedId)? -1
 	: inputValue?.findIndex(item => item?.prdId === parsedId);
 	const inputValToRender = inputValue?.[index]?.nop ?? "1";
+	console.log({productItem, userInfo})
 
 	return (
 		<>
@@ -413,7 +414,7 @@ function Detail() {
 								{(productItem?.store?.user?.id===userInfo?.id && userInfo?.is_seller)&&
 								<div className="d-flex align-items-center mb-4 pt-2">
 									<button
-									onClick={()=>navigate(`/${userInfo?.id}/update-product/${id}`)}
+									onClick={()=>navigate(`/${userInfo?.id}/${productItem?.store?.id}/update-product/${id}`)}
 									className="btn btn-primary px-3">
 										<span className="fa fa-pen mr-1"/>{` Update Product`}
 									</button>
