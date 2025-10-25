@@ -62,6 +62,43 @@ function convertToAmount(amount) {
 	return false
 }
 
+const datePattern = /^\d{4}[-\s]?\d{1,2}[-\s]?\d{1,2}[tT]\d{1,2}:\d{1,2}:\d{1,2}(?:\.\d+)?[zZ]$/;
+
+function formatDateTime(str) {
+	if (!str || typeof str !== 'string') return str;
+
+	// Match my custom format: "2025 10 25t12:09:41.672393z"
+	const customPattern = /^\d{4}\s?\d{2}\s?\d{2}t\d{2}:\d{2}:\d{2}(?:\.\d+)?z$/;
+
+	// Match normalized ISO format: "2025-10-25T12:09:41.672Z"
+	const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
+
+	let normalized = str;
+
+	// If it's custom format → normalize it
+	if (customPattern.test(str)) {
+		normalized = str
+					.replace(/\s+/g, '-') // spaces → dashes
+					.replace('t', 'T')    // lowercase t → uppercase T
+					.replace('z', 'Z');   // lowercase z → uppercase Z
+	}
+
+	// If it matches neither, skip parsing
+	if (!customPattern.test(str) && !isoPattern.test(str)) return str;
+
+	const date = new Date(normalized);
+	if (isNaN(date)) return str; // fallback if invalid
+
+	// Format to readable string
+	return date.toLocaleString('en-US', {
+		year: 'numeric',
+		month: 'short',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+}
+
 function StaffDashboard() {
 	const fetchSearchRef = useRef(false);
 	const { state } = useLocation()
@@ -489,6 +526,8 @@ function StaffDashboard() {
 																						'N/A' // if null
 																						// : (dataToRender?.checkoutID && key?.toLowerCase()==='payment_status')?
 																						// value+'kkk'
+																						: (datePattern.test(value)) ?
+																						formatDateTime(value)
 																						: (typeof(value) === 'number' && value === 0) ?
 																						'0' // if zero number
 																						: (typeof(value) === 'object' && Array.isArray(value)) ?
@@ -900,6 +939,7 @@ function recursivelyExpandAndRenderObjects(obj) {
 														value==='') ?
 															'N/A' // if null
 															: isArrayIndexString(key) ? value // if number key
+															: (datePattern.test(value)) ? formatDateTime(value)
 															: convertToAmount(key) ? digitSeparator(value) // if number
 															:sentenceCase(String(value)) // if primitive
 														}
