@@ -95,11 +95,13 @@ function StaffDashboard() {
 	const [notifications, setNotifications] = useState([]);
 	useEffect(() => {
 		console.log('load notification effect')
+		console.log(`isSummary is ${isSummary}-`.repeat(10))
 		if (notifications||freshNotifications) {
-			console.log('k'.repeat(50)+'\n', 'Setting loadingNotification to', !loadingNotification)
+			console.log('s=+fetching notifications'.repeat(10)+'\n', 'Setting loadingNotification to', !loadingNotification)
 			getNotificationsFromIndexedDB().then(setNotifications);
 			setLoadingNotification(false)
 			setFreshNotifications(false);
+			console.log('s=-fetched notifications'.repeat(10)+'\n', 'Setting loadingNotification to', !loadingNotification)
 		}
 	}, [loadingNotification, freshNotifications, isSummary]);
 
