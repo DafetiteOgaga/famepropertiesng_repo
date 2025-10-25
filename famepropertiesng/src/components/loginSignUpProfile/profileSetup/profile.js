@@ -1513,16 +1513,6 @@ function Profile() {
 									Settle Delivery Payment
 								</button>}
 
-								{/* admin dashboard button */}
-								{userInfo?.is_superuser &&
-								<button
-								type="button"
-								onClick={() => {navigate(`admin-dashboard`)}}
-								className="btn btn-sm btn-secondary d-block mt-2"
-								>
-									Admin Dashboard
-								</button>}
-
 								{/* delete account button */}
 								<button
 									type="button"
@@ -1532,6 +1522,19 @@ function Profile() {
 										Delete Account
 								</button>
 							</div>
+							{/* admin dashboard button */}
+							{userInfo?.is_superuser &&
+								<div className="d-flex flex-column align-items-center justify-content-center">
+									<hr className="w-50" />
+									<button
+									type="button"
+									onClick={() => {navigate(`admin-dashboard`)}}
+									className="btn btn-sm btn-secondary d-block mb-2"
+									>
+										Admin Dashboard
+									</button>
+								</div>
+							}
 						<hr
 						style={{
 							marginTop: '0.5rem',
