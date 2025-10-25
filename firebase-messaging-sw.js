@@ -15,6 +15,12 @@ importScripts("https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"
 importScripts("https://www.gstatic.com/firebasejs/10.0.0/firebase-messaging-compat.js");
 importScripts("./indexDBMethodsSW.js");
 
+function toSentenceCase(str) {
+	if (!str) return ''; // safety check
+	str = str.trim();
+	return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
 /* Initialize Firebase inside the service worker. */
 firebase.initializeApp({
 	// apiKey: "YOUR_API_KEY",
@@ -58,14 +64,15 @@ messaging.onBackgroundMessage(async (payload) => {
 		console.log("Notification status is 'completed', deleting from IndexedDB if exists...", id);
 		await self.deleteNotificationById(id);
 	} else if (status === "shipped") {
-		await self.markNotificationAsShipped(id);
-		self.registration.showNotification(title, options);
+		console.log("Notification status is 'shipped', marking as shipped in IndexedDB...", id);
+		await self.markNotificationAsShipped([id]);
+		self.registration.showNotification(toSentenceCase(title), options);
 	} else if (!warmUp) {
 		console.log("Displaying notification...", { title, body, status, id });
 
 		console.log("Showing notification with options:", options);
 		// Show the notification
-		self.registration.showNotification(title, options);
+		self.registration.showNotification(toSentenceCase(title), options);
 
 		// try {
 		console.log("Saving notification to IndexedDB...", { title, body, status, id });
