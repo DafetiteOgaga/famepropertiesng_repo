@@ -10,7 +10,6 @@ import { useOutletContext } from 'react-router-dom';
 import { StarRating, convertLikesToStars } from '../../hooks/handleStars';
 import { Pagination } from '../../hooks/pagination';
 
-const baseURL = getBaseURL();
 const productsActionArr = [
 	{
 		icon: "fa fa-shopping-cart",
@@ -349,8 +348,9 @@ function Products() {
 												if (!canEdit&&action.click==='editProduct') return null;
 
 												let productActionUrl = action.url;
+												// console.log({storeID: productObjItem?.store?.id})
 												if (action.click==='editProduct') {
-													productActionUrl = userInfo?.id+'/'+action.url.split('#')[1]
+													productActionUrl = `${userInfo?.id}/${productObjItem?.store?.id}/${action.url.split('#')[1]}`
 													// productActionUrl = `${userInfo?.id}/${productActionUrl}`;
 												}
 												// console.log({productActionUrl})
