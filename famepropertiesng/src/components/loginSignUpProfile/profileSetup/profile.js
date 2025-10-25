@@ -1487,7 +1487,7 @@ function Profile() {
 								{/* become a seller / add more stores button */}
 								<button
 								type="button"
-								onClick={() => {navigate(`register-store/${userInfo?.id}`)}}
+								onClick={() => {navigate(`register-store`)}}
 								className="btn btn-sm btn-secondary d-block mt-2"
 								>
 									{userInfo?.is_seller?'Add Another Store':'Become a Seller'}
