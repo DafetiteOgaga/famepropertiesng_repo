@@ -238,7 +238,7 @@ function Detail() {
 	const index = isNaN(parsedId)? -1
 	: inputValue?.findIndex(item => item?.prdId === parsedId);
 	const inputValToRender = inputValue?.[index]?.nop ?? "1";
-	console.log({productItem, userInfo})
+	// console.log({productItem, userInfo})
 
 	return (
 		<>
