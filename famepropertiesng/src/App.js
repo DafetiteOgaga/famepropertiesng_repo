@@ -17,7 +17,7 @@ function App() {
   const pspk = usePSPK()
   useFetchCategories()
   // useRequestForFCMToken();
-  console.log({pspk})
+  // console.log({pspk})
   const getTotalUsers = useGetTotalUsers();
   const totalU = sessionStorage.getItem('fpng-tot');
   useEffect(() => {
