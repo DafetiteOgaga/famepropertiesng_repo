@@ -83,7 +83,7 @@ function LogIn() {
 				setFormData(initialFormData);
 				toast.success('Login Successful!');
 				navigate('/')
-				// window.location.replace('/');
+				// window.location.replace('#/');
 			}
 			if (!data) return
 
