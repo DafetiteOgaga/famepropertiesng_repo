@@ -1,20 +1,15 @@
 import React, { useEffect, useState, useRef, Fragment } from "react";
 import { useLocation, useNavigate } from 'react-router-dom'
-import { onMessage } from "firebase/messaging";
-import { messaging, useRequestForFCMToken } from "../firebaseSetup/firebase-config";
 import { Breadcrumb } from "../sections/breadcrumb";
 import { useDeviceType } from "../../hooks/deviceType";
 import { useCreateStorage } from "../../hooks/setupLocalStorage";
 import { BouncingDots } from "../../spinners/spinner";
 import { digitSeparator, sentenceCase, titleCase } from "../../hooks/changeCase";
 import { toast } from "react-toastify";
-import { getBaseURL } from "../../hooks/fetchAPIs";
-import { onlyNumbers, usePSPK } from "../../hooks/formMethods/formMethods";
-import { Listbox } from "@headlessui/react";
+import { usePSPK } from "../../hooks/formMethods/formMethods";
 import { HeadlessSelectBtn, ToggleButton } from "../../hooks/buttons";
 import { useAuthFetch } from "../loginSignUpProfile/authFetch";
-import { useAllNotifications, getNotificationsFromIndexedDB,
-	markNotificationsAsSeen,} from "../firebaseSetup/indexDBMethods";
+import { getNotificationsFromIndexedDB, markNotificationsAsSeen,} from "../firebaseSetup/indexDBMethods";
 import { useAuth } from "../../hooks/allAuth/authContext";
 
 const tableHeadArr_details = [
@@ -140,6 +135,8 @@ function StaffDashboard() {
 	const [loading, setLoading] = useState(false);
 	// const [typedInstallAmount, setTypedInstallAmount] = useState(0);
 	const [isFetchCheckout, setIsFetchCheckout] = useState(false);
+	const fetchIncompleteCheckoutsRef = useRef(true) // false);
+	const [unfulfilledCheckoutIds, setUnfulfilledCheckoutIds] = useState(null);
 	const [selectedCheckoutID, setSelectedCheckoutID] = useState('');
 	const [dataFromCheckoutID, setDataFromCheckoutID] = useState(null);
 	const [dataToRender, setDataToRender] = useState(null);
@@ -280,6 +277,40 @@ function StaffDashboard() {
 	}, [isFetchCheckout])
 
 	useEffect(() => {
+		console.log('fetchIncompleteCheckoutsRef changed:', fetchIncompleteCheckoutsRef.current)
+		if (fetchIncompleteCheckoutsRef.current) {
+			fetchIncompleteCheckoutsRef.current = false
+			console.log('fetchIncompleteCheckoutsRef effect triggered')
+			let url = `all-unfulfilled-checkouts/${userInfo?.id}/`
+			const fetchIncompleteCheckoutsFrmServer = async () => {
+				console.log('fetchIncompleteCheckoutsFrmServer called with argument:')
+				setLoading(true);
+				try {
+					// console.log('fetching...')
+					const response = await authFetch(url);
+
+					// console.log('response ok. waiting for data...')
+					const data = await response // .json();
+					if (!data) return
+					console.log('Response data from server',data)
+					setUnfulfilledCheckoutIds(data);
+					setLoading(false);
+					return data;
+				} catch (error) {
+					console.log('error caught')
+					console.error("catch error:", error);
+					toast.error('Ecatch eror! Failed. Please try again.');
+					return null;
+				} finally {
+					console.log('finally block')
+					setLoading(false);
+				}
+			}
+			fetchIncompleteCheckoutsFrmServer()
+		}
+	}, [fetchIncompleteCheckoutsRef.current])
+
+	useEffect(() => {
 		console.log('isOperationInProgress changed:', isOperationInProgress)
 		if (!isOperationInProgress) {return}
 		console.log('isOperationInProgress effect triggered')
@@ -341,6 +372,11 @@ function StaffDashboard() {
 
 	const allEmpty = isSearchEmpty(searchResponse?.results)
 
+	// not exactly needed nor used
+	const needToRefetch = unfulfilledCheckoutIds?.checkoutID && selectedCheckoutID
+		? unfulfilledCheckoutIds.checkoutID !== selectedCheckoutID
+		: false;
+
 	// console.log({
 	// 	loadingNotification,
 	// 	freshNotifications,
@@ -390,9 +426,12 @@ function StaffDashboard() {
 							>
 								<div style={{
 									position: 'unset',
-									overflow: 'hidden'
+									overflow: 'hidden',
+									// display: 'flex',
+									// flexDirection: 'column',
 								}}
 								className={`front ${isSummary?'d-none':''}`}>
+									{/* notifications */}
 									<table className={`table table-light table-borderless table-hover text-center mb-0`}>
 										<thead className="thead-dark">
 											<tr>
@@ -639,7 +678,36 @@ function StaffDashboard() {
 					<div className="col-lg-4">
 
 
-						{/* pending checkouts */}
+						{/* pending checkout */}
+						<h5 className="section-title position-relative text-uppercase mb-3">
+							<span className="bg-secondary pr-3"
+							style={{color: '#475569'}}>
+								Pending checkouts
+							</span>
+						</h5>
+
+						<div className="bg-light p-30 mb-3"
+						style={{borderRadius: '10px'}}>
+							<HeadlessSelectBtn
+								onChangeLB={[setSelectedCheckoutID]}
+								lbStateVal={selectedCheckoutID}
+								lbArr={unfulfilledCheckoutIds}
+								lbInitialVal={selectedCheckoutID || "Select a Checkout ID"}/>
+							{/* :
+							<BouncingDots size={"sm"} color="#475569" p={"2"} />} */}
+							<div className="pt-2">
+								<button
+								// className={`btn btn-block font-weight-bold py-3 ${needToRefetch?'zoomAnimation1Btn':'btn-primary'}`}
+								className={`btn btn-block font-weight-bold py-3 ${needToRefetch?'zoomAnimation1Btn':'btn-primary'}`}
+								onClick={() => setIsFetchCheckout(true)}
+								disabled={(selectedCheckoutID===''||!selectedCheckoutID)}
+								>
+									{needToRefetch?'Fetch New Checkout':'Get Details'}
+								</button>
+							</div>
+						</div>
+
+						{/* search */}
 						<h5 className="section-title position-relative text-uppercase mb-3">
 							<span className="bg-secondary pr-3"
 							style={{color: '#475569'}}>
@@ -649,7 +717,6 @@ function StaffDashboard() {
 
 						<div className="bg-light p-30 mb-3"
 						style={{borderRadius: '10px'}}>
-							{/* {(unfulfilledCheckoutIds?.has_unfulfilled_installments) ? */}
 							<div className="border-bottom pb-2">
 								<label
 								htmlFor={'searchTxt'}>Enter Query<span>*</span></label>
@@ -698,7 +765,6 @@ function StaffDashboard() {
 							</h5>
 							<div className="bg-light p-30 mb-3"
 							style={{borderRadius: '10px'}}>
-								{/* {(unfulfilledCheckoutIds?.has_unfulfilled_installments) ? */}
 								<div className={`border-bottom pb-2 ${allEmpty?'text-center':''}`}>
 
 									{allEmpty ?
@@ -855,50 +921,6 @@ function OperationButtons ({info, device, setIsOperationInProgress, setUpdateDat
 				</>}
 		</div>
 	)
-}
-
-const styles = {
-	recursiveStyle: {
-		display: 'flex',
-		alignItems: 'flex-start',
-		marginBottom: 6,
-		marginLeft: 10,
-		wordBreak: 'break-word'
-		},
-	VerticalLine: {
-		width: '2px',
-		background: '#47556987',
-		marginRight: '10px',
-		marginLeft: '5px',
-		borderRadius: '2px',
-		minHeight: '18px', // ensures visible vertical line
-		alignSelf: 'stretch', // makes it span the full height of its row
-	},
-	smallDot: {
-		width: 6,
-		height: 6,
-		background: '#47556980',
-		borderRadius: '50%',
-		display: 'inline-block',
-		marginBottom: '3px',
-		marginRight: '8px',
-	},
-	mobilePadding: {
-		padding: '0.8rem 0.2rem'
-	},
-	mobileFontSize: {
-		fontSize: '14px',
-		padding: '10px 4px', // increase tap area
-	},
-	mobileQtyWidth: {
-		display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "1px",
-	},
-	pCQtyWidth: {
-		width: '50%',
-	}
 }
 
 function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, maxLevel = 2, setSelected=null }) {
@@ -1077,6 +1099,50 @@ function recursivelyExpandAndRenderObjects(obj) {
 			);
 		}
 	});
+}
+
+const styles = {
+	recursiveStyle: {
+		display: 'flex',
+		alignItems: 'flex-start',
+		marginBottom: 6,
+		marginLeft: 10,
+		wordBreak: 'break-word'
+		},
+	VerticalLine: {
+		width: '2px',
+		background: '#47556987',
+		marginRight: '10px',
+		marginLeft: '5px',
+		borderRadius: '2px',
+		minHeight: '18px', // ensures visible vertical line
+		alignSelf: 'stretch', // makes it span the full height of its row
+	},
+	smallDot: {
+		width: 6,
+		height: 6,
+		background: '#47556980',
+		borderRadius: '50%',
+		display: 'inline-block',
+		marginBottom: '3px',
+		marginRight: '8px',
+	},
+	mobilePadding: {
+		padding: '0.8rem 0.2rem'
+	},
+	mobileFontSize: {
+		fontSize: '14px',
+		padding: '10px 4px', // increase tap area
+	},
+	mobileQtyWidth: {
+		display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "1px",
+	},
+	pCQtyWidth: {
+		width: '50%',
+	}
 }
 
 export { StaffDashboard };

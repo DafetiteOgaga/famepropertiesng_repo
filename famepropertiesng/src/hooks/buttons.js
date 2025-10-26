@@ -29,7 +29,7 @@ function ToggleButton({onClick, checked, onChange, disabled, miniStyle, heights}
 
 function HeadlessSelectBtn({onChangeLB, lbStateVal, lbArr, lbInitialVal, input=null}) {
 	const txtLength = 29
-	// console.log({lbStateVal, lbInitialVal, lbArr, input});
+	console.log({lbStateVal, lbInitialVal, lbArr, input});
 	return (
 		<>
 			<div style={{
@@ -87,15 +87,15 @@ function HeadlessSelectBtn({onChangeLB, lbStateVal, lbArr, lbInitialVal, input=n
 							{lbArr?.map((s) => {
 								// const isStore = input?.name === 'storeID'
 								// console.log({s})
-								let dropDownVal = s?.name || s?.store_name || s?.id || s
+								let dropDownVal = s?.name || s?.store_name || s?.id || s.checkoutID || s
 								dropDownVal = dropDownVal.length>txtLength ?
 												dropDownVal.slice(0,(txtLength-1))+'...' :
 												dropDownVal
 								// console.log('===', {dropDownVal, len: dropDownVal.length})
 								return (
 									<Listbox.Option
-									key={(s?.name+s?.code)||(s?.store_name)||(s?.id)||s}
-									value={s?.code||s?.id||s?.id||s}>
+									key={(s?.name+s?.code)||(s?.store_name)||(s?.id)||s.checkoutID||s}
+									value={s?.code||s?.id||s?.id||s.checkoutID||s}>
 										{/* automatic active and selected props for styling */}
 										{({ active, selected }) => (
 											<div

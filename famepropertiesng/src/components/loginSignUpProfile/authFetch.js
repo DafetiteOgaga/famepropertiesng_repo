@@ -172,7 +172,10 @@ function useAuthFetch() {
 			const access = await refreshingPromiseRef.current;
 
 			if (access) {
-				options.headers["Authorization"] = `Bearer ${access}`;
+				options.headers = {
+					...options.headers,
+					Authorization: `Bearer ${access}`,
+				};
 				response = await fetch(isAPIKeysEndpoint(url)?url:`${baseURL}/${url}`, options); // retry
 				console.log("Re-try status:", response.status);
 			} else {
