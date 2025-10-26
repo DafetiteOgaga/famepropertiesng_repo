@@ -56,6 +56,7 @@ function convertToAmount(amount) {
 		amount.toLowerCase().includes('total_amount')||
 		amount.toLowerCase().includes('amount_paid')||
 		amount.toLowerCase().includes('price')||
+		amount.toLowerCase().includes('total_installment_paid')||
 		amount.toLowerCase().includes('shipping_fee')) {
 		return true
 	}
