@@ -7361,3 +7361,22 @@ a:focus-visible {
 .processing-color {
   color: #eab308;
 }
+
+.expandable-container {
+  position: relative;
+  margin-left: 12px;
+  padding-left: 10px;
+  border-left: 2px solid rgba(200, 200, 200, 0.4);
+}
+
+.expandable-container:hover {
+  border-left-color: rgba(150, 150, 150, 0.8);
+}
+
+.expandable-label {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
