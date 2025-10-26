@@ -35,7 +35,7 @@ function isArrayIndexString(value) {
 }
 
 const faIcon = (status) => {
-	console.log('===', {status});
+	// console.log('===', {status});
 	const fa = 'fa';
 	switch (status?.toLowerCase()) {
 		case 'processing':
@@ -254,11 +254,19 @@ function StaffDashboard() {
 		const updateCheckout = async () => {
 			console.log('isOperationInProgress changed to true, refetching data...')
 			console.log('sending updateData:', updateData)
+			const isStaff = 'is_staff' in updateData
+			console.log('isStaff update:', isStaff)
+			let url
+			if (isStaff) {
+				url = `users/update-profile/${updateData?.id}/`
+			} else {
+				url = `update-checkout/${userInfo?.id}/${dataToRender?.checkoutID}/`
+			}
 			setLoading(true);
 			try {
 				console.log('updating...')
 				// or use dataFromCheckoutID instead of dataToRender
-				const response = await authFetch(`update-checkout/${userInfo?.id}/${dataToRender?.checkoutID}/`, {
+				const response = await authFetch(url, {
 					method: "POST",
 					body: updateData,
 				});
@@ -551,13 +559,15 @@ function StaffDashboard() {
 																	)
 																})}
 															</div>
-															{dataToRender?.checkoutID &&
+															{(dataToRender?.id||dataToRender?.checkoutID) &&
 																<OperationButtons
 																info={{
 																	paymentStatus: dataToRender?.payment_status,
 																	paymentMethod: dataToRender?.payment_method,
 																	shippingStatus: dataToRender?.shipping_status,
 																}}
+																userInfo={userInfo}
+																dataToRender={dataToRender}
 																setIsOperationInProgress={setIsOperationInProgress}
 																setUpdateData={setUpdateData}
 																device={deviceType}/>}
@@ -672,11 +682,12 @@ function StaffDashboard() {
 	)
 }
 
-function OperationButtons ({info, device, setIsOperationInProgress, setUpdateData}) {
-	console.log({info})
-	const paymentMethod = info.paymentMethod.toLowerCase();
-	const paymentStatus = info.paymentStatus.toLowerCase();
-	const shippingStatus = info.shippingStatus.toLowerCase();
+function OperationButtons ({info, device, setIsOperationInProgress, setUpdateData,
+	userInfo, dataToRender}) {
+	console.log({info, dataToRender})
+	const paymentMethod = info?.paymentMethod?.toLowerCase();
+	const paymentStatus = info?.paymentStatus?.toLowerCase();
+	const shippingStatus = info?.shippingStatus?.toLowerCase();
 
   	// Keep track of which buttons to show
 	let showShipped = false;
@@ -721,56 +732,81 @@ function OperationButtons ({info, device, setIsOperationInProgress, setUpdateDat
 	return (
 		<div style={device?{gap: '15px'}:{}}
 		className={`d-flex ${device?'flex-row justify-content-center':'flex-column align-items-end'}`}>
-			{/* delivered */}
-			{
-			showDelivered&&
-			<button
-			style={{textWrap: 'nowrap'}}
-			type="button"
-			className="btn btn-sm btn-secondary d-block mt-2"
-			onClick={() => {
-				setIsOperationInProgress(true);
-				setUpdateData({
-					shipping_status: 'delivered'
-				})
-			}}
-			>
-				Delivered
-			</button>}
+			{dataToRender?.checkoutID &&
+				<>
+					{/* delivered */}
+					{
+					showDelivered&&
+					<button
+					style={{textWrap: 'nowrap'}}
+					type="button"
+					className="btn btn-sm btn-secondary d-block mt-2"
+					onClick={() => {
+						setIsOperationInProgress(true);
+						setUpdateData({
+							shipping_status: 'delivered'
+						})
+					}}
+					>
+						Delivered
+					</button>}
 
-			{/* shipped */}
-			{
-			showShipped&&
-			<button
-			style={{textWrap: 'nowrap'}}
-			type="button"
-			className="btn btn-sm btn-secondary d-block mt-2"
-			onClick={() => {
-				setIsOperationInProgress(true);
-				setUpdateData({
-					shipping_status: 'shipped'
-				})
-			}}
-			>
-				Shipped
-			</button>}
+					{/* shipped */}
+					{
+					showShipped&&
+					<button
+					style={{textWrap: 'nowrap'}}
+					type="button"
+					className="btn btn-sm btn-secondary d-block mt-2"
+					onClick={() => {
+						setIsOperationInProgress(true);
+						setUpdateData({
+							shipping_status: 'shipped'
+						})
+					}}
+					>
+						Shipped
+					</button>}
 
-			{/* cancel order */}
-			{
-			showCancel&&
-			<button
-			style={{textWrap: 'nowrap'}}
-			type="button"
-			className="btn btn-sm btn-danger d-block mt-2"
-			// onClick={() => {
-			// 	setIsOperationInProgress(true);
-			// 	setUpdateData({
-			// 		shipping_status: 'cancelled'
-			// 	})
-			// }}
-			>
-				Cancel Order
-			</button>}
+					{/* cancel order */}
+					{
+					showCancel&&
+					<button
+					style={{textWrap: 'nowrap'}}
+					type="button"
+					className="btn btn-sm btn-danger d-block mt-2"
+					// onClick={() => {
+					// 	setIsOperationInProgress(true);
+					// 	setUpdateData({
+					// 		shipping_status: 'cancelled'
+					// 	})
+					// }}
+					>
+						Cancel Order
+					</button>}
+				</>}
+
+			{(('is_staff' in (dataToRender||{}))&&userInfo?.is_superuser) &&
+				<>
+					{/* make staff */}
+					{console.log({staff: dataToRender?.is_staff})}
+					{
+					// !dataToRender?.is_staff &&
+					<button
+					style={{textWrap: 'nowrap'}}
+					type="button"
+					className="btn btn-sm btn-secondary d-block mt-2"
+					onClick={() => {
+						setIsOperationInProgress(true);
+						setUpdateData({
+							is_staff: !dataToRender?.is_staff,
+							id: dataToRender?.id,
+						})
+					}}
+					>
+						{dataToRender?.is_staff ? 'Revoke Staff Privilege' : 'Grant Staff Privilege'}
+					</button>}
+				</>}
 		</div>
 	)
 }
@@ -815,7 +851,7 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
   
 	// Handle arrays
 	if (Array.isArray(data)) {
-		console.log({dataHasNoVal: data?.length, label, data})
+		// console.log({dataHasNoVal: data?.length, label, data})
 		if (!data?.length) {return null} // skip empty arrays
 		return (
 			<div style={{ marginLeft: level * 14 }}>
@@ -842,7 +878,7 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
 			{isExpanded && data.length > 0 && (
 				<div style={{ marginLeft: 16 }}>
 				{data.map((item, idx) => {
-					console.log('z'.repeat(20))
+					// console.log('z'.repeat(20))
 					
 					// console.log({item: item?.name})
 					const label = item?.store_name||
@@ -850,7 +886,7 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
 								item?.reference||
 								item?.name||
 								item?.email
-					console.log({level, label})
+					// console.log({level, label})
 					return (
 						<ExpandableAndCollapsibleSearchResults
 						key={idx}
@@ -896,7 +932,7 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
 					:
 					<span
 					className="mr-1">⦁</span>}
-					{console.log('c'.repeat(29), {label})}
+					{/* {console.log('c'.repeat(29), {label})} */}
 					<span>
 						{(label.includes('@'))?label:titleCase(label)}
 					</span>
