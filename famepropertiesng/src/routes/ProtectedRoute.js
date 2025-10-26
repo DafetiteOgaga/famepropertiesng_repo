@@ -9,13 +9,13 @@ export function ProtectedRoute({ children, requireMatch = false }) {
 
 	// Retrieve user info
 	const currentUser = createLocal.getItem('fpng-user');
-	console.log("ProtectedRoute: currentUser =", currentUser);
-	console.log("ProtectedRoute: params =", params);
-	console.log("ProtectedRoute: requireMatch =", requireMatch);
-	console.log("ProtectedRoute: location =", location);
-	console.log("ProtectedRoute: children =", children);
-	console.log("ProtectedRoute: currentUser.id =", currentUser?.id);
-	console.log("ProtectedRoute: type of currentUser.id =", typeof currentUser?.id);
+	// console.log("ProtectedRoute: currentUser =", currentUser);
+	// console.log("ProtectedRoute: params =", params);
+	// console.log("ProtectedRoute: requireMatch =", requireMatch);
+	// console.log("ProtectedRoute: location =", location);
+	// console.log("ProtectedRoute: children =", children);
+	// console.log("ProtectedRoute: currentUser.id =", currentUser?.id);
+	// console.log("ProtectedRoute: type of currentUser.id =", typeof currentUser?.id);
 
 	// Not logged in — redirect to login
 	if (!currentUser) {
@@ -32,13 +32,13 @@ export function ProtectedRoute({ children, requireMatch = false }) {
 		const userStoreID = currentUser?.store?.find(store => String(store.id) === String(routeStoreId))?.id;
 
 		if (loggedUserId !== routeUserId) {
-		console.log("ProtectedRoute: User ID mismatch, redirecting to /unauthorized");
+		// console.log("ProtectedRoute: User ID mismatch, redirecting to /unauthorized");
 		console.warn("Unauthorized access attempt: masking detected!");
 		return <Navigate to="/unauthorised" replace />;
 		}
 
 		if (routeStoreId && String(userStoreID) !== routeStoreId) {
-			console.log("ProtectedRoute: Store ID mismatch, redirecting to /unauthorized");
+			// console.log("ProtectedRoute: Store ID mismatch, redirecting to /unauthorized");
 			console.warn("Unauthorized access attempt: store masking detected!");
 			return <Navigate to="/unauthorised" replace />;
 		}

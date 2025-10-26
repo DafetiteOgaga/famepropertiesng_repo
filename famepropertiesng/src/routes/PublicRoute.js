@@ -4,13 +4,13 @@ import { useCreateStorage } from "../hooks/setupLocalStorage";
 
 export function PublicRoute({ children }) {
 	const location = useLocation()
-	const pathname = useLocation().pathname
+	const pathname = location.pathname
 	const { createLocal } = useCreateStorage();
 
 	// Retrieve user and location info
 	const currentUser = createLocal.getItem('fpng-user');
-	console.log("PublicRoute: location =", location);
-	console.log("PublicRoute: currentUser.id =", currentUser?.id);
+	// console.log("PublicRoute: location =", location);
+	// console.log("PublicRoute: currentUser.id =", currentUser?.id);
 
 	// Logged in and location is login/signup — redirect to home
 	if (currentUser?.id && (pathname === "/login" || pathname === "/signup")) {
