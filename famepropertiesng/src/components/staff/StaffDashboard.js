@@ -76,6 +76,18 @@ function isSearchEmpty(obj) {
 	return resultArrLength===numberEmpty
 }
 
+function VerticalLine() {
+	return (
+		<div style={styles.VerticalLine} />
+	)
+}
+
+function SmallDot() {
+	return (
+		<span style={styles.smallDot} />
+	)
+}
+
 const datePattern = /^\d{4}[-\s]?\d{1,2}[-\s]?\d{1,2}[tT]\d{1,2}:\d{1,2}:\d{1,2}(?:\.\d+)?[zZ]$/;
 
 function formatDateTime(str) {
@@ -540,44 +552,52 @@ function StaffDashboard() {
 																	}
 																	return (
 																		<div key={key+kIdx}
-																		className="py-1">
-																			<strong>{titleCase(key)}: </strong>
-																			<span style={{
-																				wordBreak: 'break-word',
-																				fontStyle: 'italic',
-																				backgroundColor: pStatus===1?'#475569':'',
-																				color: pStatus===1?'#fff':'',
-																				borderRadius: (pStatus===1||pStatus===-1)?'4px':'',
-																				border: pStatus===-1?'1px solid #475569':'',
-																				padding: (pStatus===1||pStatus===-1)?'3px 6px':'',
-																				}}>
-																				{(value === null||
-																					value === undefined||
-																					(Array.isArray(value) && !value.length)|| value==='') ?
-																						'N/A' // if null
-																						// : (dataToRender?.checkoutID && key?.toLowerCase()==='payment_status')?
-																						// value+'kkk'
-																						: (datePattern.test(value)) ?
-																						formatDateTime(value)
-																						: (typeof(value) === 'number' && value === 0) ?
-																						'0' // if zero number
-																						: (typeof(value) === 'object' && Array.isArray(value)) ?
-																						recursivelyExpandAndRenderObjects(value) // if array
-																						: (typeof(value) === 'object') ?
-																						recursivelyExpandAndRenderObjects(value) // if object
-																						: typeof(value) === 'boolean' ?
-																						value ? 'True' : 'False'  // if boolean
-																						: convertToAmount(key) ?
-																						digitSeparator(value) // if number
-																						: typeof(value) === 'string'&&value.includes('@') ?
-																						value // if email
-																						:
-																						sentenceCase(String(value)) // if primitive
-																				} {key.toLowerCase() === 'shipping_status' && typeof value === 'string' && (
-																					<span className={faIcon(value)} />
-																				)}
-																			</span>
-																			<br />
+																		className="py-1 position-relative d-flex align-items-start">
+																			{/* Vertical indentation line */}
+																			<VerticalLine />
+
+																			{/* Wrap the text and label inside another div */}
+																			<div style={{ flex: 1 }} className="">
+
+																				<SmallDot />
+																				<strong>{titleCase(key)}: </strong>
+																				<span style={{
+																					wordBreak: 'break-word',
+																					fontStyle: 'italic',
+																					backgroundColor: pStatus===1?'#475569':'',
+																					color: pStatus===1?'#fff':'',
+																					borderRadius: (pStatus===1||pStatus===-1)?'4px':'',
+																					border: pStatus===-1?'1px solid #475569':'',
+																					padding: (pStatus===1||pStatus===-1)?'3px 6px':'',
+																					}}>
+																					{(value === null||
+																						value === undefined||
+																						(Array.isArray(value) && !value.length)|| value==='') ?
+																							'N/A' // if null
+																							// : (dataToRender?.checkoutID && key?.toLowerCase()==='payment_status')?
+																							// value+'kkk'
+																							: (datePattern.test(value)) ?
+																							formatDateTime(value)
+																							: (typeof(value) === 'number' && value === 0) ?
+																							'0' // if zero number
+																							: (typeof(value) === 'object' && Array.isArray(value)) ?
+																							recursivelyExpandAndRenderObjects(value) // if array
+																							: (typeof(value) === 'object') ?
+																							recursivelyExpandAndRenderObjects(value) // if object
+																							: typeof(value) === 'boolean' ?
+																							value ? 'True' : 'False'  // if boolean
+																							: convertToAmount(key) ?
+																							digitSeparator(value) // if number
+																							: typeof(value) === 'string'&&value.includes('@') ?
+																							value // if email
+																							:
+																							sentenceCase(String(value)) // if primitive
+																					} {key.toLowerCase() === 'shipping_status' && typeof value === 'string' && (
+																						<span className={faIcon(value)} />
+																					)}
+																				</span>
+																				<br />
+																			</div>
 																		</div>
 																	)
 																})}
@@ -838,6 +858,31 @@ function OperationButtons ({info, device, setIsOperationInProgress, setUpdateDat
 }
 
 const styles = {
+	recursiveStyle: {
+		display: 'flex',
+		alignItems: 'flex-start',
+		marginBottom: 6,
+		marginLeft: 10,
+		wordBreak: 'break-word'
+		},
+	VerticalLine: {
+		width: '2px',
+		background: '#47556987',
+		marginRight: '10px',
+		marginLeft: '5px',
+		borderRadius: '2px',
+		minHeight: '18px', // ensures visible vertical line
+		alignSelf: 'stretch', // makes it span the full height of its row
+	},
+	smallDot: {
+		width: 6,
+		height: 6,
+		background: '#47556980',
+		borderRadius: '50%',
+		display: 'inline-block',
+		marginBottom: '3px',
+		marginRight: '8px',
+	},
 	mobilePadding: {
 		padding: '0.8rem 0.2rem'
 	},
@@ -868,7 +913,9 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
 	// Handle primitive values (string, number, boolean)
 	// if (typeof data !== "object") {
 	//   return (
-	// 	<div style={{ marginLeft: level * 14 }}>
+	// 	<div style={{ marginLeft: level * 14 }}
+	// 	className="expandable-container" add vertical line
+	//   >
 	// 	  {label && <strong>{label}: </strong>}
 	// 	  <span style={{ color: "#ccc" }}>{String(data)}</span>
 	// 	</div>
@@ -880,7 +927,9 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
 		// console.log({dataHasNoVal: data?.length, label, data})
 		if (!data?.length) {return null} // skip empty arrays
 		return (
-			<div style={{ marginLeft: level * 14 }}>
+			<div style={{ marginLeft: level * 14 }}
+			// className="expandable-container" // add vertical line
+			>
 			{label && (
 				<div className="py-1"
 				onClick={() => setIsExpanded(!isExpanded)}
@@ -932,7 +981,9 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
 
 	// Handle objects
 	return (
-		<div style={{ marginLeft: level * 14 }}>
+		<div style={{ marginLeft: level * 14 }}
+		// className="expandable-container" // add vertical line
+		>
 			{label && (
 				<div className="py-1"
 					onClick={() => {
@@ -985,26 +1036,43 @@ function ExpandableAndCollapsibleSearchResults({ data, label = null, level = 0, 
 function recursivelyExpandAndRenderObjects(obj) {
 	return Object.entries(obj).map(([key, value]) => {
 		if (typeof value === 'object' && value !== null) {
+			// If it's an object/array -> recurse (keep original behavior)
 			return (
-				<div key={key} style={{ marginLeft: 20, wordBreak: 'break-word' }}>
-					<strong>{titleCase(key)}:</strong>
-					{recursivelyExpandAndRenderObjects(value)}
+				<div key={key}
+				style={styles.recursiveStyle}>
+						{/* Vertical indentation line */}
+						<VerticalLine />
+
+					{/* original content area */}
+					<div style={{ marginLeft: 0, flex: 1 }}>
+						<SmallDot />
+						<strong>{titleCase(key)}:</strong>
+						{recursivelyExpandAndRenderObjects(value)}
+					</div>
 				</div>
 			);
 		} else {
+			// Primitive / final value case (unchanged logic, only wrapped to align with the line)
 			return (
-				<div key={key} style={{ marginLeft: 20 }}
+				<div key={key}
+				style={styles.recursiveStyle}
 				className="py-1">
-					<strong>{titleCase(key)}:</strong> {(value === null||
-														value === undefined||
-														(Array.isArray(value) && !value.length)||
-														value==='') ?
-															'N/A' // if null
-															: isArrayIndexString(key) ? value // if number key
-															: (datePattern.test(value)) ? formatDateTime(value)
-															: convertToAmount(key) ? digitSeparator(value) // if number
-															:sentenceCase(String(value)) // if primitive
-														}
+					{/* Vertical indentation line */}
+					<VerticalLine />
+
+					<div style={{ marginLeft: 0, flex: 1 }}>
+						<SmallDot />
+						<strong>{titleCase(key)}:</strong> {(value === null||
+															value === undefined||
+															(Array.isArray(value) && !value.length)||
+															value==='') ?
+																'N/A' // if null
+																: isArrayIndexString(key) ? value // if number key
+																: (datePattern.test(value)) ? formatDateTime(value)
+																: convertToAmount(key) ? digitSeparator(value) // if number
+																:sentenceCase(String(value)) // if primitive
+															}
+					</div>
 				</div>
 			);
 		}
