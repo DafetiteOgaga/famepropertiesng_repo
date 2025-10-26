@@ -42,7 +42,7 @@ function Unauthorised() {
 				justifyContent: 'center',
 				}}>
 				<h2
-				className=""
+				className="text-center"
 				style={{color: '#475569',}}>You do not have the permission to view this page</h2>
 			</div>
 
