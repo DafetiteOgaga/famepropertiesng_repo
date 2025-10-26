@@ -328,21 +328,21 @@ function StaffDashboard() {
 
 	const allEmpty = isSearchEmpty(searchResponse?.results)
 
-	console.log({
-		loadingNotification,
-		freshNotifications,
-		nId, notifications,
-		selectedCheckoutID,
-		dataFromCheckoutID,
-		searchResponse,
-		isSummary,
-		selectedSearchResult,
-		dataToRender, titleOrHead,
-		isOperationInProgress,
-		updateData,
-		updateFromServer,
-		searchText,
-	})
+	// console.log({
+	// 	loadingNotification,
+	// 	freshNotifications,
+	// 	nId, notifications,
+	// 	selectedCheckoutID,
+	// 	dataFromCheckoutID,
+	// 	searchResponse,
+	// 	isSummary,
+	// 	selectedSearchResult,
+	// 	dataToRender, titleOrHead,
+	// 	isOperationInProgress,
+	// 	updateData,
+	// 	updateFromServer,
+	// 	searchText,
+	// })
 	// console.log({searchText})
 	return (
 		<>
