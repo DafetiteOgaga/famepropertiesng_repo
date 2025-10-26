@@ -62,6 +62,19 @@ function convertToAmount(amount) {
 	return false
 }
 
+function isSearchEmpty(obj) {
+	const resultArrKeys = Object.keys(obj||{})
+	const resultArrLength = resultArrKeys.length
+	const numberEmpty = resultArrKeys?.reduce((acc, key) => {
+		const val = obj[key];
+		if (val.length === 0) {
+			return acc + 1;
+		}
+		return acc;
+	}, 0);
+	return resultArrLength===numberEmpty
+}
+
 const datePattern = /^\d{4}[-\s]?\d{1,2}[-\s]?\d{1,2}[tT]\d{1,2}:\d{1,2}:\d{1,2}(?:\.\d+)?[zZ]$/;
 
 function formatDateTime(str) {
@@ -183,43 +196,49 @@ function StaffDashboard() {
 	}, []);
 
 	useEffect(() => {
+		// console.log('isFetchCheckout changed:', isFetchCheckout)
 		if (isFetchCheckout) {
+			// console.log('isFetchCheckout effect triggered')
 			if ((searchText===''||!searchText)&&
 				(selectedCheckoutID===''||!selectedCheckoutID)) {
+					// console.log('No searchText or selectedCheckoutID to fetch')
 					return;
 				}
 			let url
 			let argument
 			if (!fetchSearchRef.current) {
+				// console.log('fetching by checkout ID:', selectedCheckoutID)
 				url = `checkout/${selectedCheckoutID}/`
 				argument = selectedCheckoutID
 			} else {
+				// console.log('fetching by search text:', searchText)
 				url = `search/${userInfo?.id}/${searchText}/`
 				argument = searchText
 			}
-			console.log('fetching search result for:', argument)
+			// console.log('fetching search result for:', argument)
 			const fetchDataFromServer = async () => {
+				// console.log('fetchDataFromServer called with argument:', argument)
 				setDataFromCheckoutID(null);
 				setSearchResponse(null);
-				console.log('using fetchDataFromServer to fetch details for:', searchText)
+				// console.log('using fetchDataFromServer to fetch details for:', searchText)
 				setLoading(true);
 				try {
-					console.log('fetching...')
+					// console.log('fetching...')
 					const response = await authFetch(url);
 
-					console.log('response ok. waiting for data...')
+					// console.log('response ok. waiting for data...')
 					const data = await response // .json();
 					if (!data) return
-					console.log('Response data from server',data)
+					// console.log('Response data from server',data)
 					console.log({fetchSearchRef: fetchSearchRef.current})
 					if (!fetchSearchRef.current) {
-						console.log('setting data from checkout ID')
+						// console.log('setting data from checkout ID')
 						setDataFromCheckoutID(data);
 						setIsSummary(true);
 						setSelectedSearchResult(null);
 						setDataToRender(data)
 					} else {
-						console.log('setting search response')
+						// console.log('setting search response')
 						setSearchResponse(data);
 						// setIsSummary(false);
 					}
@@ -307,20 +326,23 @@ function StaffDashboard() {
 						dataToRender?.name||
 						dataToRender?.email;
 
-	console.log({
-		loadingNotification,
-		freshNotifications,
-		nId, notifications,
-		selectedCheckoutID,
-		dataFromCheckoutID,
-		searchResponse,
-		isSummary,
-		selectedSearchResult,
-		dataToRender, titleOrHead,
-		isOperationInProgress,
-		updateData,
-		updateFromServer
-	})
+	const allEmpty = isSearchEmpty(searchResponse?.results)
+
+	// console.log({
+	// 	loadingNotification,
+	// 	freshNotifications,
+	// 	nId, notifications,
+	// 	selectedCheckoutID,
+	// 	dataFromCheckoutID,
+	// 	searchResponse,
+	// 	isSummary,
+	// 	selectedSearchResult,
+	// 	dataToRender, titleOrHead,
+	// 	isOperationInProgress,
+	// 	updateData,
+	// 	updateFromServer,
+	// 	searchText,
+	// })
 	// console.log({searchText})
 	return (
 		<>
@@ -656,9 +678,12 @@ function StaffDashboard() {
 							<div className="bg-light p-30 mb-3"
 							style={{borderRadius: '10px'}}>
 								{/* {(unfulfilledCheckoutIds?.has_unfulfilled_installments) ? */}
-								<div className="border-bottom pb-2">
+								<div className={`border-bottom pb-2 ${allEmpty?'text-center':''}`}>
 
-									{Object.entries(searchResponse?.results||{}).map(([resultKey, resultValue], rIdx) => {
+									{allEmpty ?
+									<span className="font-italic">No match found.</span>
+									:
+									Object.entries(searchResponse?.results||{}).map(([resultKey, resultValue], rIdx) => {
 										return (
 											<div key={resultKey+rIdx} className="d-flex flex-row align-items-baseline">
 												<ExpandableAndCollapsibleSearchResults
