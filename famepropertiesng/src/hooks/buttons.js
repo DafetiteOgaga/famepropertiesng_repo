@@ -29,7 +29,7 @@ function ToggleButton({onClick, checked, onChange, disabled, miniStyle, heights}
 
 function HeadlessSelectBtn({onChangeLB, lbStateVal, lbArr, lbInitialVal, input=null}) {
 	const txtLength = 29
-	console.log({lbStateVal, lbInitialVal, lbArr, input});
+	// console.log({lbStateVal, lbInitialVal, lbArr, input});
 	return (
 		<>
 			<div style={{
