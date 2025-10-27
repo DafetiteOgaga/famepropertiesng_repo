@@ -2,8 +2,14 @@ import { Listbox } from "@headlessui/react";
 import { titleCase } from "./changeCase";
 
 function ToggleButton({onClick, checked, onChange, disabled, miniStyle, heights}) {
-	// console.log('toggling button')
-	// console.log({checked})
+	// console.log({
+	// 	onClick,
+	// 	checked,
+	// 	onChange,
+	// 	disabled,
+	// 	miniStyle,
+	// 	heights
+	// })
 	return (
 		<>
 			<span className={`d-flex align-items-center ${miniStyle}`}>
