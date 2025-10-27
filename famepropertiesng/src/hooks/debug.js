@@ -3,7 +3,7 @@ function toggleDebugOutlines() {
 }
 
 document.addEventListener('keydown', (e) => {
-	if (e.altKey && e.key.toLowerCase() === 'o') { // Alt + O
+	if (e.ctrlKey && e.key.toLowerCase() === '.') { // Alt + O
 		toggleDebugOutlines();
 	}
 });
