@@ -1,10 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDeviceInfo } from '../hooks/deviceType';
 import { useCheckLoginValidity } from '../hooks/checkLoginValidity';
+import { ToggleButton } from '../hooks/buttons';
+
+// function toggleDebugOutlines() {
+// 	document.body.classList.toggle('debug-outline');
+// }
+
+// document.addEventListener('keydown', (e) => {
+// 	if (e.ctrlKey && e.key.toLowerCase() === '.') { // Alt + O
+// 		toggleDebugOutlines();
+// 	}
+// });
 
 function PageNotFound() {
+	const [debugMode, setDebugMode] = useState(false)
 	const deviceInfo = useDeviceInfo()
 	const checkLoginValidity = useCheckLoginValidity()
+	useEffect(() => {
+		if (debugMode) {
+			document.body.classList.add('debug-outline');
+		} else {
+			document.body.classList.remove('debug-outline');
+		}
+	}, [debugMode])
+	console.log({debugMode})
 	return (
 		<>
 			{/* Breadcrumb Start */}
@@ -58,6 +79,19 @@ function PageNotFound() {
 				flexDirection: 'column',
 				}}>
 				<h3 style={{color: '#475569', fontSize: 16, textAlign: 'center'}}>{checkLoginValidity}</h3>
+			</div>
+
+			<div className="container-fluid d-flex align-items-center justify-content-center my-3"
+			>
+				<h6
+				className="mr-2"
+				style={{color: '#475569',}}>Toggle Debug Mode</h6>
+				<div className='d-flex align-self-baseline'>
+					<ToggleButton
+					onChange={(e)=>setDebugMode(e.target.checked)}
+					checked={debugMode}
+					/>
+				</div>
 			</div>
 		</>
 	)
