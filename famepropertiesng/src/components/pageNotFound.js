@@ -25,7 +25,7 @@ function PageNotFound() {
 			document.body.classList.remove('debug-outline');
 		}
 	}, [debugMode])
-	console.log({debugMode})
+	// console.log({debugMode})
 	return (
 		<>
 			{/* Breadcrumb Start */}
