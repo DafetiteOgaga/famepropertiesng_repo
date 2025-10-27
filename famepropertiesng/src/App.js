@@ -11,6 +11,7 @@ import { useDeviceType } from './hooks/deviceType';
 import { useGetTotalUsers } from './hooks/getTotalUsers';
 import { Toaster } from 'react-hot-toast';
 import { usePSPK, useFetchCategories } from './hooks/formMethods/formMethods';
+import './hooks/debug.js';
 // import { useRequestForFCMToken } from './components/firebaseSetup/firebase-config';
 
 function App() {
