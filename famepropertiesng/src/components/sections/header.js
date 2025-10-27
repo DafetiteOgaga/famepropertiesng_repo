@@ -17,17 +17,17 @@ import { useAuth } from '../../hooks/allAuth/authContext';
 
 const headerMenuArr = [
 	{
-		menu: "Dashboard",
-		link: "/staff-dashboard/id",
-		type: "link",
-	},
-	{
 		menu: "Logout",
 		type: "button",
 	},
 	{
 		menu: "Login",
 		link: "/login",
+		type: "link",
+	},
+	{
+		menu: "Dashboard",
+		link: "/staff-dashboard/id",
 		type: "link",
 	},
 	{
