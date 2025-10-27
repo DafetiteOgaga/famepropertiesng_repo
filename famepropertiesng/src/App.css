@@ -4,10 +4,6 @@
 	outline: 1px solid red !important;
 } */
 
-.debug-outline * {
-  outline: 1px solid red !important;
-}
-
 .App {
   text-align: center;
 }
