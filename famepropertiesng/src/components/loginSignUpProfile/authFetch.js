@@ -201,9 +201,11 @@ function useAuthFetch() {
 		}
 		console.log("Final response status:", response.status);
 		if (!response.ok && response.status !== 401) {
+			const errorText = await response.json();
+			console.log("Error response data:", errorText);
 			console.warn("Network response was not ok", response.status);
 			console.warn(response)
-			toast.error(`Error: ${response.status} ${response.statusText}`);
+			toast.error(`${response.status} Error: ${errorText?.error||errorText?.message||response.statusText}`);
 			return null;
 		}
 		const data = await response.json()

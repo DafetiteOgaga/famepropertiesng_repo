@@ -356,10 +356,10 @@ const useCountryStateCity = () => {
 
 // Reorder fields based on a predefined order array
 const reOrderFields = (entries, reOrderFieldsArr) => {
-	console.log({
-		entries,
-		reOrderFieldsArr
-	})
+	// console.log({
+	// 	entries,
+	// 	reOrderFieldsArr
+	// })
 	// Create a mapping of index for location keys
 	const orderMap = Object.fromEntries(
 		reOrderFieldsArr.map((key, i) => [key, i])

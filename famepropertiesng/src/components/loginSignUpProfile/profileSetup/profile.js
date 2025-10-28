@@ -15,8 +15,6 @@ import { ToggleButton } from "../../../hooks/buttons";
 import { useAuthFetch } from "../authFetch";
 import { useUploadToImagekit } from "../../imageServer/uploadToImageKit";
 
-const baseURL = getBaseURL();
-
 const initialFormData = {
 	first_name: '',
 	last_name: '',
@@ -45,6 +43,15 @@ function Profile() {
 	// 	cty: null,
 	// 	curr: true,
 	// });
+	const {
+		passwordButton,
+		passwordForm,
+		// FormDataForPassword,
+		setFormDataForPassword,
+		setOpenForm,
+		// openForm,
+		passwordsData,
+		setPasswordsData } = useChangePassword()
 	const nigRef = useRef(false);
 	const [resetEditFieldsState, setResetEditFieldsState] = useState(false);
 	const firstStoreRef = useRef(true);
@@ -332,15 +339,7 @@ function Profile() {
 		if (userInfo) {
 			populateFormWReset();
 		}
-
 	}, [])
-
-	// validate password on change
-	useEffect(() => {
-		validatePassword({formData, setPasswordErrorMessage})
-	}, [formData.password, formData.password_confirmation,
-		formData.username, formData.first_name,
-		formData.last_name,])
 
 	// handle input changes
 	const onChangeHandler = (e) => {
@@ -459,134 +458,143 @@ function Profile() {
 			return;
 		}
 
-		const exemptArr = [
-			'fileId',
-			'image_url',
-			'stateCode',
-			'phoneCode',
-			'currency',
-			'currencyName',
-			'currencySymbol',
-			'countryEmoji',
-			'password',
-			'cityId',
-			'stateId',
-			'countryId',
-			'id',
-			'is_staff',
-			'hasStates',
-			'hasCities',
-			// 'country',
-			// 'state',
-			// 'city',
-			'store_phone_number'
-		]
-
 		// let finalFormData
 		let cleanedData = {};
 		let isImage
 		let url
-		if (!store) {
+
+		if (passwordsData?.password) {
+			console.log('changing password')
 			url = 'users/update-profile'
-			isImage = updatedFieldRef.current.includes('image_url')
-
-			if (isImage) {
-				updatedFieldRef.current.push('fileId');
-			}
-
-			// check that there is an actual update before proceeding
-			// to submit the form to the server
-			const len = updatedFieldRef.current.length
-
-			if (!isImage) {
-				if (len===1) {
-					const field = updatedFieldRef.current[0]
-					const update = formData[field]?.trim()
-					const original = userInfo?.[field]
-					const isUpdated = update!==original
-					if (!isUpdated||!update) {
-						const errorText = `No changes made to the ${titleCase(field)} field`;
-						console.warn(errorText);
-						toast.error(errorText);
-						setLoading(false);
-						return;
-					}
-				} else if (len>1) {
-					const updates = updatedFieldRef.current.map(field => {
-						if (countryStateCityArr.includes(field)) return null
-						return ({
-						field,
-						update: (typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim(),
-						original: userInfo?.[field],
-						isUpdated: ((typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim())!==userInfo?.[field],
-					})}).filter(item => item)
-					console.log({updates})
-					const changedFields = updates.filter(item => item?.isUpdated)
-					console.log({updates, changedFields})
-					if (updates.some(item => (!item?.isUpdated||!item?.update))) {
-						const errorText = `Some of the selected fields were not changed`;
-						console.warn(errorText);
-						toast.error(errorText);
-						setLoading(false);
-						return;
-					}
-				}
-			} else {
-				if (uploadedImage.current) {
-					const newFileID = uploadedImage.current?.fileId
-					const newUrl = uploadedImage.current?.url
-					const oldFileID = userInfo?.fileId
-					const oldUrl = userInfo?.image_url
-					cleanedData['old_image_url'] = oldUrl
-					cleanedData['old_fileId'] = oldFileID
-					cleanedData['image_url'] = newUrl
-					cleanedData['fileId'] = newFileID
-				}
-			}
-
-			// add more metadata to country, state, city if they are being updated
-			if (updatedFieldRef.current.includes('country')) {
-				updatedFieldRef.current.push(
-					'countryId', 'phoneCode', 'currency',
-					'currencyName', 'currencySymbol', 'countryEmoji'
-				);
-			}
-			if (updatedFieldRef.current.includes('state')) {
-				updatedFieldRef.current.push('stateId', 'stateCode',
-					'hasStates',
-				);
-			}
-			if (updatedFieldRef.current.includes('city')) {
-				updatedFieldRef.current.push('cityId', 'hasCities');
-			}
-
-			if (!isImage) {
-				Object.entries(formData).forEach(([key, value]) => {
-				if (!updatedFieldRef.current.includes(key)) return; // only submit updated fields
-				if (key==='password_confirmation') return; // skip password_confirmation from submission
-					cleanedData[key] = (exemptArr.includes(key))?value:value?.trim()?.toLowerCase();
-				})
-			}
-
+			cleanedData = passwordsData
 		} else {
-			url = 'store/update-store'
-			const storeID = updatedStoreFieldRef.current?.id
-			const storeField = updatedStoreFieldRef.current?.field
-			let prevVal = userInfo?.store?.find(store => store.id.toString() === storeID.toString())
-			prevVal = storeField==='store_phone_number'?prevVal?.[storeField] : prevVal?.[storeField].trim()
-			let newVal = storeFormData?.[storeID]?.[storeField]?.trim()
-			newVal = storeField==='store_phone_number'?newVal : newVal?.trim()
-			console.log({storeID, storeField, prevVal, newVal})
-			if (prevVal === newVal || !newVal) {
-				const errorText = `No changes detected in ${titleCase(storeField)} Field`;
-				console.warn(errorText);
-				toast.error(errorText);
-				setLoading(false);
-				return;
+
+			const exemptArr = [
+				'fileId',
+				'image_url',
+				'stateCode',
+				'phoneCode',
+				'currency',
+				'currencyName',
+				'currencySymbol',
+				'countryEmoji',
+				'password',
+				'cityId',
+				'stateId',
+				'countryId',
+				'id',
+				'is_staff',
+				'hasStates',
+				'hasCities',
+				// 'country',
+				// 'state',
+				// 'city',
+				'store_phone_number'
+			]
+
+			if (!store) {
+				url = 'users/update-profile'
+				isImage = updatedFieldRef.current.includes('image_url')
+
+				if (isImage) {
+					updatedFieldRef.current.push('fileId');
+				}
+
+				// check that there is an actual update before proceeding
+				// to submit the form to the server
+				const len = updatedFieldRef.current.length
+
+				if (!isImage) {
+					if (len===1) {
+						const field = updatedFieldRef.current[0]
+						const update = formData[field]?.trim()
+						const original = userInfo?.[field]
+						const isUpdated = update!==original
+						if (!isUpdated||!update) {
+							const errorText = `No changes made to the ${titleCase(field)} field`;
+							console.warn(errorText);
+							toast.error(errorText);
+							setLoading(false);
+							return;
+						}
+					} else if (len>1) {
+						const updates = updatedFieldRef.current.map(field => {
+							if (countryStateCityArr.includes(field)) return null
+							return ({
+							field,
+							update: (typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim(),
+							original: userInfo?.[field],
+							isUpdated: ((typeof formData[field]==='number'||typeof formData[field]==='boolean')?formData[field]:formData[field]?.trim())!==userInfo?.[field],
+						})}).filter(item => item)
+						console.log({updates})
+						const changedFields = updates.filter(item => item?.isUpdated)
+						console.log({updates, changedFields})
+						if (updates.some(item => (!item?.isUpdated||!item?.update))) {
+							const errorText = `Some of the selected fields were not changed`;
+							console.warn(errorText);
+							toast.error(errorText);
+							setLoading(false);
+							return;
+						}
+					}
+				} else {
+					if (uploadedImage.current) {
+						const newFileID = uploadedImage.current?.fileId
+						const newUrl = uploadedImage.current?.url
+						const oldFileID = userInfo?.fileId
+						const oldUrl = userInfo?.image_url
+						cleanedData['old_image_url'] = oldUrl
+						cleanedData['old_fileId'] = oldFileID
+						cleanedData['image_url'] = newUrl
+						cleanedData['fileId'] = newFileID
+					}
+				}
+
+				// add more metadata to country, state, city if they are being updated
+				if (updatedFieldRef.current.includes('country')) {
+					updatedFieldRef.current.push(
+						'countryId', 'phoneCode', 'currency',
+						'currencyName', 'currencySymbol', 'countryEmoji'
+					);
+				}
+				if (updatedFieldRef.current.includes('state')) {
+					updatedFieldRef.current.push('stateId', 'stateCode',
+						'hasStates',
+					);
+				}
+				if (updatedFieldRef.current.includes('city')) {
+					updatedFieldRef.current.push('cityId', 'hasCities');
+				}
+
+				if (!isImage) {
+					Object.entries(formData).forEach(([key, value]) => {
+					if (!updatedFieldRef.current.includes(key)) return; // only submit updated fields
+					if (key==='password_confirmation') return; // skip password_confirmation from submission
+						cleanedData[key] = (exemptArr.includes(key))?value:value?.trim()?.toLowerCase();
+					})
+				}
+
+			} else {
+				url = 'store/update-store'
+				const storeID = updatedStoreFieldRef.current?.id
+				const storeField = updatedStoreFieldRef.current?.field
+				let prevVal = userInfo?.store?.find(store => store.id.toString() === storeID.toString())
+				prevVal = storeField==='store_phone_number'?prevVal?.[storeField] : prevVal?.[storeField].trim()
+				let newVal = storeFormData?.[storeID]?.[storeField]?.trim()
+				newVal = storeField==='store_phone_number'?newVal : newVal?.trim()
+				console.log({storeID, storeField, prevVal, newVal})
+				if (prevVal === newVal || !newVal) {
+					const errorText = `No changes detected in ${titleCase(storeField)} Field`;
+					console.warn(errorText);
+					toast.error(errorText);
+					setLoading(false);
+					return;
+				}
+				cleanedData = { storeID: storeID, [storeField]: newVal }
 			}
-			cleanedData = { storeID: storeID, [storeField]: newVal }
 		}
 		console.log('submitting form:', cleanedData);
+		// return
 		try {
 			const response = await authFetch(`${url}/${userInfo.id}/`, {
 				method: "POST",
@@ -595,7 +603,19 @@ function Profile() {
 
 			const data = await response // .json();
 			if (!data) return
-			if (!store) {
+			// console.log('Update response data from server',data)
+			// toast.success('Update successful!')
+			// return
+			if (passwordsData?.password) {
+				setPasswordsData(null)
+				setFormDataForPassword({
+					old_password: "",
+					password: "",
+					password_confirmation: ""
+				})
+				setOpenForm(false)
+				toast.success('Password Update Successful!');
+			} else if (!store) {
 				createLocal.setItem("fpng-user", data);
 				uploadedImage.current = null; // reset uploaded image
 				toast.success('Account Update Successful!');
@@ -618,9 +638,16 @@ function Profile() {
 			toast.error('Error! Update Failed. Please try again.');
 			return null;
 		} finally {
+			cleanedData = {} // reset cleanedData
 			setLoading(false);
 		}
 	}
+
+	useEffect(() => {
+		if (passwordsData?.password) {
+			onSubmitHandler()
+		}
+	}, [passwordsData])
 
 	// auto upload when selectedFile changes (i.e when image has been processed)
 	useEffect(() => {
@@ -676,7 +703,7 @@ function Profile() {
 		"nearest_bus_stop"
 	]
 	reOrderFieldsArr = reOrderFieldsArr.filter(field=>field!=='')
-	console.log({reOrderFieldsArr})
+	// console.log({reOrderFieldsArr})
 	// array of fields that should be text areas instead of input fields
 	const textAreaFieldsArr = [
 		'address', 'nearest_bus_stop',
@@ -720,20 +747,20 @@ function Profile() {
 		setIsMounting(false);
 	}, []);
 	const reOrderedArrToUse = reOrderFields(Object.entries(userInfo), reOrderFieldsArr)
-	console.log({
-		country,
-		reOrderedArrToUse,
-		acceptedRenderFields,
-		editFields
-	})
-	console.log({
-		country,
-		state,
-		city,
-		hasStates,
-		hasCities,
-		countryPhoneCode,
-	})
+	// console.log({
+	// 	country,
+	// 	reOrderedArrToUse,
+	// 	acceptedRenderFields,
+	// 	editFields
+	// })
+	// console.log({
+	// 	country,
+	// 	state,
+	// 	city,
+	// 	hasStates,
+	// 	hasCities,
+	// 	countryPhoneCode,
+	// })
 	return (
 		<>
 			<Breadcrumb page={titleCase(userInfo?.first_name||'')} />
@@ -972,14 +999,14 @@ function Profile() {
 								// 	showNGstate,
 								// 	showSubArea
 								// })
-								if (userKey==='city') {
-									// stateHasCities = true
-									console.log('city passed!\n', {
-									userKey,
-									stateHasStates,
-									stateHasCities,
-									editcity: editFields?.city,
-								})}
+								// if (userKey==='city') {
+								// 	// stateHasCities = true
+								// 	console.log('city passed!\n', {
+								// 	userKey,
+								// 	stateHasStates,
+								// 	stateHasCities,
+								// 	editcity: editFields?.city,
+								// })}
 								return (
 									<Fragment key={index}>
 										{(userKey==='state'&&!stateHasStates&&editFields["state"])?undefined:
@@ -1478,6 +1505,9 @@ function Profile() {
 						<BouncingDots size="lg" color="#475569" p="8" />}
 					</div>
 					<>
+						{/* change password form */}
+						{passwordForm}
+
 						<hr
 						style={{
 							marginTop: '0.5rem',
@@ -1512,6 +1542,9 @@ function Profile() {
 								>
 									Settle Delivery Payment
 								</button>}
+
+								{/* change password button */}
+								{passwordButton}
 
 								{/* delete account button */}
 								<button
@@ -1725,6 +1758,180 @@ function useResetFields(cbFxn=null, reset=false, resetCB=null) {
 		...setDefaults
 	}));
 	resetCB(false)
+}
+
+function useChangePassword() {
+	const [showOldPassword, setShowOldPassword] = useState(false);
+	const [showPassword, setShowPassword] = useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [oldPasswordErrorMessage, setOldPasswordErrorMessage] = useState(null);
+	const [passwordErrorMessage, setPasswordErrorMessage] = useState(null);
+	const [FormDataForPassword, setFormDataForPassword] = useState({
+										old_password: "",
+										password: "",
+										password_confirmation: ""
+									});
+	const [openForm, setOpenForm] = useState(false)
+	const [passwordsData, setPasswordsData] = useState(null)
+	const inputNames = [
+		{
+			name: "old_password",
+			hook: setShowOldPassword,
+			hookState: showOldPassword
+		},
+		{
+			name: "password",
+			hook: setShowPassword,
+			hookState: showPassword
+		},
+		{
+			name: "password_confirmation",
+			hook: setShowConfirmPassword,
+			hookState: showConfirmPassword
+		}
+	]
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setFormDataForPassword(prev => ({ ...prev, [name]: value }));
+	};
+
+	const dataNotValid = oldPasswordErrorMessage||passwordErrorMessage||
+						FormDataForPassword?.password_confirmation?.trim()===''||
+						FormDataForPassword?.old_password?.trim()===''||
+						FormDataForPassword?.password?.trim()===''
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		// console.log({FormDataForPassword})
+		// console.log({passwordErrorMessage, oldPasswordErrorMessage})
+		
+		if (dataNotValid) {
+			setPasswordsData(null)
+			console.warn('passwords not good!')
+			toast.error("Passwords error!");
+			return;
+		}
+		// bubble data up to parent
+		setPasswordsData({
+			password: FormDataForPassword?.password,
+			old_password: FormDataForPassword?.old_password
+		})
+		// or implement logic to send data to server here
+	};
+
+	// validate password on change
+	useEffect(() => {
+		validatePassword({formData: FormDataForPassword, setPasswordErrorMessage})
+		validatePassword({formData: FormDataForPassword, setOldPasswordErrorMessage})
+	}, [FormDataForPassword.password, FormDataForPassword.password_confirmation,
+		FormDataForPassword.old_password])
+
+	const passwordButton = (
+		<button
+		type="button"
+		onClick={() => setOpenForm(prev => !prev)}
+		className="btn btn-sm btn-secondary d-block mt-2"
+		>
+			{openForm ? "Close Form" : "Change Password"}
+		</button>
+	);
+
+	const passwordForm = (
+		<form
+		onSubmit={handleSubmit}
+		className={`password-change-container ${openForm?'slideUpToOpen':'slideDownToClose'} d-flex justify-content-center`}>
+			<div
+			className={`mt-3 col-md-6 form-group`}>
+				<div
+				style={{
+					display: 'flex',
+					flexDirection: 'column',
+					alignItems: 'baseline',
+					position: 'relative',
+					width: '100%',
+				}}>
+					{inputNames?.map((formObject, nIdx) => {
+						// console.log({
+						// 	formObject,
+						// 	name: formObject?.name,
+						// 	state: formObject?.hookState,
+						// 	nIdx,
+						// })
+						return (
+							<div key={formObject?.name+nIdx}
+							className="w-100">
+								<div className="d-flex flex-row position-relative">
+									<input
+									type={(formObject?.hookState)?"text":"password"}
+									name={formObject?.name}
+									placeholder={titleCase(formObject?.name==='password'?'new_password':formObject?.name)}
+									onChange={handleChange}
+									value={FormDataForPassword[formObject?.name]||''}
+									style={{borderRadius: '5px'}}
+									className={`form-control ${formObject?.name==="password"?'my-2':''}`}
+									required
+									autoComplete
+									/>
+									<span
+									className={`far ${formObject.hookState ? "fa-eye" : "fa-eye-slash"}`}
+									onClick={() => formObject.hook((prev) => !prev)} // toggle state
+									style={{
+										position: "absolute",
+										top: '50%', // formObject?.name==="old_password"?"50%":
+											// formObject?.name==="password"?"50%":
+											// "50%",
+										right: "10px",
+										transform: "translateY(-50%)",
+										cursor: "pointer",
+									}}
+									/>
+								</div>
+								<div className="">
+								{(formObject?.name==='old_password'||
+								formObject?.name==='password_confirmation')&&
+								<PasswordErrorMessage
+								passwordErrorMessage={
+									formObject?.name==='old_password'?
+									oldPasswordErrorMessage:
+									passwordErrorMessage} />}
+								</div>
+							</div>
+						)
+					})}
+				</div>
+				<button
+				type="submit"
+				disabled={dataNotValid}
+				className="btn btn-block btn-primary font-weight-bold mt-2">
+					Submit
+				</button>
+			</div>
+		</form>
+	);
+	// console.log({openForm, FormDataForPassword})
+	return {
+		passwordButton,
+		passwordForm,
+		FormDataForPassword,
+		setFormDataForPassword,
+		setOpenForm,
+		// openForm,
+		passwordsData,
+		setPasswordsData,
+	};
+}
+
+function PasswordErrorMessage({passwordErrorMessage}) {
+	// console.log({passwordErrorMessage})
+	return (
+		<>
+			<span
+			style={{
+				color: '#BC4B51',
+				fontSize: '0.75rem',
+				fontStyle: 'italic',
+			}}>{passwordErrorMessage}</span>
+		</>
+	)
 }
 
 export { Profile }

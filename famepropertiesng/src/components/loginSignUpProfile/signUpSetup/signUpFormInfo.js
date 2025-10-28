@@ -100,9 +100,13 @@ const inputArr = [
 ]
 
 // check passwords
-const validatePassword = ({formData, setPasswordErrorMessage}) => {
+const validatePassword = ({formData,
+							setPasswordErrorMessage,
+							setOldPasswordErrorMessage,
+						}={}) => {
+	// console.log("Validating password...", formData.password, formData.password_confirmation);
 	// validate password field whenever it or confirmation changes
-	if (formData.password_confirmation) {
+	if (formData.password_confirmation && typeof setPasswordErrorMessage === "function") {
 		if (formData.password !== formData.password_confirmation) {
 			setPasswordErrorMessage('Passwords do not match')
 		} else if (formData.password.length < 8) {
@@ -134,6 +138,28 @@ const validatePassword = ({formData, setPasswordErrorMessage}) => {
 			setPasswordErrorMessage('Password must not contain the word "password"')
 		} else {
 			setPasswordErrorMessage(null)
+		}
+	}
+
+	if (formData.old_password && typeof setOldPasswordErrorMessage === "function") {
+		if (formData.old_password.length < 8) {
+			setOldPasswordErrorMessage('Password is at least 8 characters long')
+		} else if (!/[A-Z]/.test(formData.old_password)) {
+			setOldPasswordErrorMessage('Password has at least one uppercase letter')
+		} else if (!/[a-z]/.test(formData.old_password)) {
+			setOldPasswordErrorMessage('Password has at least one lowercase letter')
+		} else if (!/[0-9]/.test(formData.old_password)) {
+			setOldPasswordErrorMessage('Password has at least one number')
+		}
+		// else if (!/[!@#$%^&*(),.?":{}|<>]/.test(formData.password)) {
+		// 	setOldPasswordErrorMessage('Password must contain at least one special character')
+		// }
+		else if (formData.old_password.length > 64) {
+			setOldPasswordErrorMessage('Password is less than 64 characters long')
+		} else if (formData.old_password.includes(' ')) {
+			setOldPasswordErrorMessage('Password has no spaces')
+		} else {
+			setOldPasswordErrorMessage(null)
 		}
 	}
 }
