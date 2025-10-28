@@ -1838,9 +1838,13 @@ function useChangePassword() {
 	const passwordForm = (
 		<form
 		onSubmit={handleSubmit}
-		className={`password-change-container ${openForm?'slideUpToOpen':'slideDownToClose'} d-flex justify-content-center`}>
+		className={`password-change-container ${openForm?'slideUpToOpen':'slideDownToClose'} d-flex flex-column justify-content-center`}>
+			<span className="bold-text text-center font-underline"
+			style={{color: '#495057'}}>
+				Change Password
+			</span>
 			<div
-			className={`mt-3 col-md-6 form-group`}>
+			className={`mt-3 col-md-6 form-group d-flex flex-column align-self-center`}>
 				<div
 				style={{
 					display: 'flex',
