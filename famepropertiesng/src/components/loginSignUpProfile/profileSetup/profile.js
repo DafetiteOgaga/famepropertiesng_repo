@@ -230,8 +230,8 @@ function Profile() {
 	useResetFields(setEditFields, resetEditFieldsState, setResetEditFieldsState)
 	useEffect(() => {
 		if (userInfo&&!userInfoRef.current) {
-			console.log('a'.repeat(50))
-			console.log('Populating editFields and editStore states based on userInfo...');
+			// console.log('a'.repeat(50))
+			// console.log('Populating editFields and editStore states based on userInfo...');
 			setResetEditFieldsState(true)
 			// const SetDefaultEdits = () => ;
 			// SetDefaultEdits();
@@ -260,7 +260,7 @@ function Profile() {
 
 		if (userInfo?.country?.toLowerCase()==='nigeria' && NGStates && !nigRef.current) {
 			// // preload the fields (momentarily)
-			console.log('Setting Nigeria state, lga and area fields to user values...')
+			// console.log('Setting Nigeria state, lga and area fields to user values...')
 			NGStates.setSelectedNGState(userInfo?.stateCode)
 			NGStates.setSelectedNGLGA(userInfo?.lga?.toUpperCase()||'')
 			NGStates.setSelectedNGArea(userInfo?.subArea?.toUpperCase()||'')
@@ -275,18 +275,18 @@ function Profile() {
 	});
 
 	useEffect(() => {
-		console.log(
-			'c'.repeat(50) + '\n', {
-			country,
-			editFieldsRef: editFieldsRef?.current,
-		})
+		// console.log(
+		// 	'c'.repeat(50) + '\n', {
+		// 	country,
+		// 	editFieldsRef: editFieldsRef?.current,
+		// })
 		if (editFieldsRef.current.cty===null&&userInfo?.country?.toLowerCase()===country?.toLowerCase()) {
-			console.log('First run - skipping country change effect');
+			// console.log('First run - skipping country change effect');
 			// editFieldsRef.current.cty = country;
 			return; // ⛔ Skip first run
 		}
-		console.log('b'.repeat(50))
-		console.log('in useeffect - Country changed to:', country);
+		// console.log('b'.repeat(50))
+		// console.log('in useeffect - Country changed to:', country);
 		
 		if (country && editFieldsRef?.current?.cty!==country) {
 			console.log('country changes detected')
@@ -1873,7 +1873,7 @@ function useChangePassword() {
 									style={{borderRadius: '5px'}}
 									className={`form-control ${formObject?.name==="password"?'my-2':''}`}
 									required
-									autoComplete
+									autoComplete="on"
 									/>
 									<span
 									className={`far ${formObject.hookState ? "fa-eye" : "fa-eye-slash"}`}
