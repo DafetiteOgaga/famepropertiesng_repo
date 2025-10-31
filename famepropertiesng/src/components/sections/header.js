@@ -309,26 +309,26 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 	// console.log({isNewNotification, notificationsCount})
 
 	useEffect(() => {
-		if (loggedIn) {
-			let updatedMenuArr
-			if (!userInfo?.is_seller) {
-				updatedMenuArr = headerMenuArr.filter(header => {
-					const hMenu = header?.menu?.toLowerCase()!=="post products";
-					return hMenu
-				})
-			} else {
-				updatedMenuArr = headerMenuArr
-			}
-			if (!userInfo?.is_staff) {
-				updatedMenuArr = updatedMenuArr.filter(header => {
-					return header?.menu.toLowerCase()!=='dashboard'
-				})
-			}
-			setStateHeaderMenu(updatedMenuArr)
-			setLoggedIn(false)
+		// if (loggedIn) {
+		let updatedMenuArr
+		if (!userInfo?.is_seller) {
+			// console.log({is_seller: !!userInfo?.is_seller})
+			updatedMenuArr = headerMenuArr.filter(header => {
+				const hMenu = header?.menu?.toLowerCase()!=="post products";
+				return hMenu
+			})
+		} else {
+			// console.log({is_seller: !!userInfo?.is_seller})
+			updatedMenuArr = headerMenuArr
 		}
-		// else {
-		// 	setStateHeaderMenu(headerMenuArr)
+		// console.log({is_staff: !!userInfo?.is_staff})
+		if (!userInfo?.is_staff) {
+			updatedMenuArr = updatedMenuArr.filter(header => {
+				return header?.menu.toLowerCase()!=='dashboard'
+			})
+		}
+		setStateHeaderMenu(updatedMenuArr)
+		setLoggedIn(false)
 		// }
 		setIsUserDetected(!!userInfo)
 	}, [loggedIn])
@@ -653,7 +653,6 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 						alignItems: 'center',
 						}}>
 
-						{/* {console.log('|*+-@'.repeat(40)+'\n', {notificationsCount})} */}
 						<Notification
 						propStyle='mr-2'
 						numberOfNotifications={isSeeenNotificationCount}
@@ -694,7 +693,7 @@ function MenuItems({mTop, isMenuOpen, overlayRef,
 								<span
 								className='profile-name-text'>{titleCase(userInfo.first_name)}</span>
 						</Link>}
-						<div className="d-inline-flex align-items-center h-100">
+						<div className="d-inline-flex align-items-center h-100 mr-2">
 							{resortedPc.map((menu, index) => {
 								if (menu?.menu?.toLowerCase() === "cart") return null;
 								if (menu?.menu?.toLowerCase() === "categories") return null;
