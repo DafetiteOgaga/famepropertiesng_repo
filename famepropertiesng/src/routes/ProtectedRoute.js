@@ -12,7 +12,7 @@ export function ProtectedRoute({ children, requireMatch = false }) {
 	// console.log("ProtectedRoute: currentUser =", currentUser);
 	// console.log("ProtectedRoute: params =", params);
 	// console.log("ProtectedRoute: requireMatch =", requireMatch);
-	// console.log("ProtectedRoute: location =", location);
+	// console.log("ProtectedRoute: location =", location.pathname);
 	// console.log("ProtectedRoute: children =", children);
 	// console.log("ProtectedRoute: currentUser.id =", currentUser?.id);
 	// console.log("ProtectedRoute: type of currentUser.id =", typeof currentUser?.id);
@@ -40,6 +40,28 @@ export function ProtectedRoute({ children, requireMatch = false }) {
 		if (routeStoreId && String(userStoreID) !== routeStoreId) {
 			// console.log("ProtectedRoute: Store ID mismatch, redirecting to /unauthorized");
 			console.warn("Unauthorized access attempt: store masking detected!");
+			return <Navigate to="/unauthorised" replace />;
+		}
+	}
+
+	// Role-based access control (RBAC)
+	if (location?.pathname?.toLowerCase()?.includes("post-products")) {
+		console.log("ProtectedRoute: Checking RBAC for post-products route");
+		if (!currentUser?.is_seller) {
+			console.warn(`Unauthorized access attempt by non-seller role: ${currentUser.role}`);
+			return <Navigate to="/unauthorised" replace />;
+		}
+	}
+	if (location?.pathname?.toLowerCase()?.includes("staff-dashboard")||
+		location?.pathname?.toLowerCase()?.includes("notifications")) {
+		console.log("ProtectedRoute: Checking RBAC for notifications/staff-dashboard route");
+		// const allowedRoles = ["admin", "editor"];
+		// if (!allowedRoles.includes(currentUser.role.toLowerCase())) {
+		// 	console.warn(`Unauthorized access attempt by role: ${currentUser.role}`);
+		// 	return <Navigate to="/unauthorised" replace />;
+		// }
+		if (!currentUser?.is_staff) {
+			console.warn(`Unauthorized access attempt by non-staff role: ${currentUser.role}`);
 			return <Navigate to="/unauthorised" replace />;
 		}
 	}
