@@ -164,9 +164,11 @@ function Checkout() {
 			stateCode: userInfo?.stateCode||null,
 			hasCities: userInfo?.hasCities||false,
 
-			// city
+			// city/lga/subArea
 			city: userInfo?.city||null,
 			cityId: userInfo?.cityId||null,
+			lga: userInfo?.lga||null,
+			subArea: userInfo?.subArea||null,
 
 			// order details
 			cartDetails: cartItems?.map(item => ({
